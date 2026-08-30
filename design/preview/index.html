@@ -1,0 +1,1440 @@
+<title>Pathway Design Language</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700&family=Archivo:wght@400;500;600;700&display=swap">
+<style>
+/* ============================================================================
+   Park Day Companion — Design Tokens
+   ----------------------------------------------------------------------------
+   מקור אמת יחיד לשפה העיצובית. סעיף 4.2 בבריף: קומפוננטה צורכת רק tokens,
+   לעולם לא ערך צבע קשיח.
+
+   הכיוון (מהבריף העיצובי של נטע):
+     60% Apple / premium travel-tech · 20% Google Maps / ניווט
+     10% קסם · 10% אנרגיה קולנועית
+   הממשק שקט. הצילום, המצב הנבחר והאקצנט מביאים את הצבע.
+
+   RTL: אין כאן ערכי left/right. רק logical properties (סעיף 8).
+   ========================================================================== */
+
+:root {
+  /* ---- ground -------------------------------------------------------------
+     נייטרלים עם הטיה כחולה קלה — לא אפור טהור. */
+  --pw-canvas:          #F2F5FA;
+  --pw-surface:         #FFFFFF;
+  --pw-surface-2:       #F7F9FD;
+  --pw-sunken:          #E9EEF7;
+  --pw-hairline:        #E1E8F3;
+  --pw-hairline-strong: #CBD6E8;
+  --pw-scrim:           rgba(8, 16, 30, .62);
+
+  /* ---- ink --------------------------------------------------------------- */
+  --pw-ink:             #0C1524;
+  --pw-ink-2:           #495871;
+  --pw-ink-3:           #7C8BA4;
+  --pw-ink-on-dark:     #FFFFFF;
+  --pw-ink-on-dark-2:   rgba(255, 255, 255, .74);
+
+  /* ---- wayfinding blue — ניווט, מפה, מצב נבחר, פעולה ראשית, אמון ------- */
+  --pw-way-50:          #EDF3FE;
+  --pw-way-100:         #DAE6FD;
+  --pw-way-200:         #B4CAFA;
+  --pw-way-400:         #4A7CE8;
+  --pw-way-500:         #2360E0;
+  --pw-way-600:         #1A4CBC;
+  --pw-way-700:         #143A92;
+
+  /* ---- magic violet — טים, AI, תובנה אישית, פרימיום -------------------- */
+  --pw-magic-50:        #F2EEFE;
+  --pw-magic-100:       #E5DEFC;
+  --pw-magic-300:       #A98FF2;
+  --pw-magic-500:       #6B45E4;
+  --pw-magic-600:       #5733C4;
+  --pw-magic-line:      linear-gradient(90deg, var(--pw-way-500) 0%, var(--pw-magic-500) 100%);
+  --pw-magic-orb:       radial-gradient(circle at 32% 28%, #9C7BFF 0%, #6B45E4 46%, #2360E0 100%);
+
+  /* ---- signal — במשורה בלבד -------------------------------------------- */
+  --pw-urgent-50:       #FDEFE9;
+  --pw-urgent-500:      #E2592C;
+  --pw-urgent-600:      #B94320;
+  --pw-clear-50:        #E7F5EF;
+  --pw-clear-500:       #0E8A5F;
+  --pw-clear-600:       #0A6746;
+
+  /* ---- missing data — חוסר הוא מצב מעוצב, לא תקלה --------------------- */
+  --pw-missing-bg:      #F5F2EC;
+  --pw-missing-line:    #E0D8C9;
+  --pw-missing-ink:     #8A7C63;
+
+  /* ---- radius ------------------------------------------------------------ */
+  --pw-r-xs:  8px;
+  --pw-r-sm:  12px;
+  --pw-r-md:  16px;
+  --pw-r-lg:  22px;
+  --pw-r-xl:  30px;
+  --pw-r-pill: 999px;
+
+  /* ---- elevation — שתי רמות בלבד. הבריף: "לא יותר מדי צללים" ---------- */
+  --pw-e1: 0 1px 2px rgba(12, 21, 36, .05), 0 1px 3px rgba(12, 21, 36, .04);
+  --pw-e2: 0 2px 5px rgba(12, 21, 36, .04), 0 14px 32px -16px rgba(12, 21, 36, .22);
+  --pw-e-magic: 0 6px 22px -8px rgba(107, 69, 228, .48);
+
+  /* ---- space — בסיס 4px -------------------------------------------------- */
+  --pw-s1: 4px;  --pw-s2: 8px;  --pw-s3: 12px; --pw-s4: 16px;
+  --pw-s5: 20px; --pw-s6: 24px; --pw-s7: 32px; --pw-s8: 40px;
+  --pw-s9: 56px; --pw-s10: 72px;
+
+  /* ---- type --------------------------------------------------------------
+     Assistant  — עברית וממשק. גיאומטרי, נקי, לא משחקי.
+     Archivo    — שמות מתקנים באנגלית ומספרים. אופי של שילוט ניווט.
+     ההפרדה מכוונת: קול עברי מול שם קנוני אנגלי (סעיף 8, <bdi>). */
+  --pw-font-ui:   "Assistant", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --pw-font-name: "Archivo", "Assistant", -apple-system, sans-serif;
+
+  --pw-t-display: 700 30px/1.16 var(--pw-font-ui);
+  --pw-t-h1:      700 23px/1.24 var(--pw-font-ui);
+  --pw-t-h2:      600 18px/1.32 var(--pw-font-ui);
+  --pw-t-h3:      600 15.5px/1.4 var(--pw-font-ui);
+  --pw-t-body:    400 15px/1.62 var(--pw-font-ui);
+  --pw-t-small:   400 13.5px/1.55 var(--pw-font-ui);
+  --pw-t-micro:   600 11px/1.3 var(--pw-font-ui);
+  --pw-track-micro: .07em;
+
+  /* ---- motion ------------------------------------------------------------ */
+  --pw-ease: cubic-bezier(.32, .72, .28, 1);
+  --pw-fast: 140ms;
+  --pw-base: 240ms;
+
+  /* ---- layout ------------------------------------------------------------ */
+  --pw-tap: 44px;
+  --pw-gutter: 20px;
+  --pw-phone: 390px;
+}
+
+/* ---- dark ----------------------------------------------------------------
+   הממשק הראשי מעוצב בהיר בכוונה. הכהה שומר על אותם תפקידים,
+   עם ניגודיות נבדקת ולא היפוך נאיבי. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --pw-canvas:          #0B1220;
+    --pw-surface:         #141D2E;
+    --pw-surface-2:       #1A2437;
+    --pw-sunken:          #0F1826;
+    --pw-hairline:        #253148;
+    --pw-hairline-strong: #35455F;
+    --pw-scrim:           rgba(4, 8, 16, .7);
+
+    --pw-ink:             #EEF3FB;
+    --pw-ink-2:           #A8B6CD;
+    --pw-ink-3:           #7A89A3;
+
+    --pw-way-50:          #16233C;
+    --pw-way-100:         #1D2F4F;
+    --pw-way-200:         #2B4470;
+    --pw-way-400:         #6E9BF5;
+    --pw-way-500:         #74A0F7;
+    --pw-way-600:         #9CBCFA;
+    --pw-way-700:         #C2D6FC;
+
+    --pw-magic-50:        #1E1A38;
+    --pw-magic-100:       #29224C;
+    --pw-magic-300:       #8E71EE;
+    --pw-magic-500:       #A98FF2;
+    --pw-magic-600:       #C4B2F7;
+
+    --pw-urgent-50:       #33190F;
+    --pw-urgent-500:      #FF9068;
+    --pw-urgent-600:      #FFB294;
+    --pw-clear-50:        #0D2A21;
+    --pw-clear-500:       #4FCB9B;
+    --pw-clear-600:       #7EDCB7;
+
+    --pw-missing-bg:      #23201A;
+    --pw-missing-line:    #3B3527;
+    --pw-missing-ink:     #C4B695;
+
+    --pw-e1: 0 1px 2px rgba(0, 0, 0, .4), 0 1px 3px rgba(0, 0, 0, .3);
+    --pw-e2: 0 2px 5px rgba(0, 0, 0, .35), 0 14px 32px -16px rgba(0, 0, 0, .7);
+    --pw-e-magic: 0 6px 22px -8px rgba(169, 143, 242, .4);
+  }
+}
+
+:root[data-theme="dark"] {
+  --pw-canvas:          #0B1220;
+  --pw-surface:         #141D2E;
+  --pw-surface-2:       #1A2437;
+  --pw-sunken:          #0F1826;
+  --pw-hairline:        #253148;
+  --pw-hairline-strong: #35455F;
+  --pw-scrim:           rgba(4, 8, 16, .7);
+
+  --pw-ink:             #EEF3FB;
+  --pw-ink-2:           #A8B6CD;
+  --pw-ink-3:           #7A89A3;
+
+  --pw-way-50:          #16233C;
+  --pw-way-100:         #1D2F4F;
+  --pw-way-200:         #2B4470;
+  --pw-way-400:         #6E9BF5;
+  --pw-way-500:         #74A0F7;
+  --pw-way-600:         #9CBCFA;
+  --pw-way-700:         #C2D6FC;
+
+  --pw-magic-50:        #1E1A38;
+  --pw-magic-100:       #29224C;
+  --pw-magic-300:       #8E71EE;
+  --pw-magic-500:       #A98FF2;
+  --pw-magic-600:       #C4B2F7;
+
+  --pw-urgent-50:       #33190F;
+  --pw-urgent-500:      #FF9068;
+  --pw-urgent-600:      #FFB294;
+  --pw-clear-50:        #0D2A21;
+  --pw-clear-500:       #4FCB9B;
+  --pw-clear-600:       #7EDCB7;
+
+  --pw-missing-bg:      #23201A;
+  --pw-missing-line:    #3B3527;
+  --pw-missing-ink:     #C4B695;
+
+  --pw-e1: 0 1px 2px rgba(0, 0, 0, .4), 0 1px 3px rgba(0, 0, 0, .3);
+  --pw-e2: 0 2px 5px rgba(0, 0, 0, .35), 0 14px 32px -16px rgba(0, 0, 0, .7);
+  --pw-e-magic: 0 6px 22px -8px rgba(169, 143, 242, .4);
+}
+
+/* ==========================================================================
+   Preview chrome — קיים רק בדף האישור הזה, לא במוצר
+   ========================================================================== */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { direction: rtl; }
+
+body {
+  direction: rtl;
+  text-align: start;
+  margin: 0;
+  background: var(--pw-canvas);
+  color: var(--pw-ink);
+  font: var(--pw-t-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap { max-width: 1180px; margin-inline: auto; padding-inline: var(--pw-s5); }
+
+h1, h2, h3, h4, p, ul, ol, figure { margin: 0; }
+ul { padding-inline-start: 0; list-style: none; }
+a { color: var(--pw-way-500); }
+
+:focus-visible {
+  outline: 2px solid var(--pw-way-500);
+  outline-offset: 2px;
+  border-radius: var(--pw-r-xs);
+}
+
+.eyebrow {
+  font: var(--pw-t-micro);
+  letter-spacing: var(--pw-track-micro);
+  text-transform: uppercase;
+  color: var(--pw-ink-3);
+}
+
+.en, code, .num { font-family: var(--pw-font-name); direction: ltr; unicode-bidi: isolate; }
+.en { font-feature-settings: "tnum" 1; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* ---- הכותרת -------------------------------------------------------------- */
+.masthead {
+  position: relative;
+  overflow: hidden;
+  background: #0A1020;
+  color: var(--pw-ink-on-dark);
+  padding-block: var(--pw-s10) var(--pw-s9);
+  border-end-start-radius: var(--pw-r-xl);
+  border-end-end-radius: var(--pw-r-xl);
+}
+.masthead__sky {
+  position: absolute; inset: -8%; inline-size: 116%; block-size: 116%;
+  filter: blur(26px) saturate(1.2);
+  opacity: .92;
+}
+.masthead::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(to bottom, rgba(8,13,28,.5), rgba(8,13,28,.72));
+}
+.masthead__inner { position: relative; }
+.masthead h1 {
+  font: var(--pw-t-display);
+  font-size: clamp(30px, 5.4vw, 50px);
+  letter-spacing: -.015em;
+  text-wrap: balance;
+  max-width: 19ch;
+  margin-block-start: var(--pw-s4);
+}
+.masthead p {
+  color: var(--pw-ink-on-dark-2);
+  max-width: 58ch;
+  margin-block-start: var(--pw-s4);
+  font-size: 16px;
+}
+.masthead .eyebrow { color: rgba(255,255,255,.6); }
+
+.mix { display: flex; flex-wrap: wrap; gap: var(--pw-s2); margin-block-start: var(--pw-s6); }
+.mix span {
+  font: var(--pw-t-micro);
+  letter-spacing: var(--pw-track-micro);
+  text-transform: uppercase;
+  padding: 7px 12px;
+  border-radius: var(--pw-r-pill);
+  border: 1px solid rgba(255,255,255,.22);
+  color: rgba(255,255,255,.86);
+  background: rgba(255,255,255,.06);
+}
+
+/* ---- מקטעים -------------------------------------------------------------- */
+.section { padding-block: var(--pw-s9); }
+.section__head { max-width: 66ch; margin-block-end: var(--pw-s7); }
+.section__head h2 {
+  font: var(--pw-t-h1);
+  font-size: clamp(22px, 3vw, 30px);
+  letter-spacing: -.01em;
+  text-wrap: balance;
+  margin-block-start: var(--pw-s2);
+}
+.section__head p { color: var(--pw-ink-2); margin-block-start: var(--pw-s3); }
+
+/* מוטיב הדרך — מפריד מקטעים */
+.path-rule { position: relative; display: block; inline-size: 100%; block-size: 22px; }
+.path-rule::before {
+  content: ""; position: absolute; inset-block-start: 10px; inset-inline: 5px;
+  block-size: 1.5px; border-radius: 2px;
+  background: linear-gradient(to left, var(--pw-way-500), var(--pw-magic-500));
+  opacity: .55;
+}
+.path-rule i {
+  position: absolute; inset-block-start: 4px;
+  inline-size: 11px; block-size: 11px; border-radius: var(--pw-r-pill);
+  background: var(--pw-canvas); border: 1.5px solid var(--pw-way-500);
+}
+.panel .path-rule i { background: var(--pw-surface); }
+
+/* ---- מסגרת טלפון --------------------------------------------------------- */
+.stage {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--pw-s8) var(--pw-s7);
+  align-items: start;
+}
+.spec { display: flex; flex-direction: column; gap: var(--pw-s4); }
+.spec > h3 { font: var(--pw-t-h2); }
+.spec p { color: var(--pw-ink-2); font: var(--pw-t-small); }
+
+.phone {
+  inline-size: var(--pw-phone);
+  max-inline-size: 100%;
+  margin-inline: auto;
+  background: var(--pw-surface);
+  border: 1px solid var(--pw-hairline);
+  border-radius: var(--pw-r-xl);
+  box-shadow: var(--pw-e2);
+  overflow: hidden;
+  isolation: isolate;
+}
+.phone__scroll { block-size: auto; }
+
+@media (min-width: 900px) {
+  .spec { position: sticky; inset-block-start: var(--pw-s5); }
+}
+
+.statusbar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px var(--pw-s5) 4px;
+  font: var(--pw-t-micro);
+  color: var(--pw-ink-3);
+  background: var(--pw-surface);
+}
+.statusbar--onphoto { position: absolute; inset-block-start: 0; inset-inline: 0; background: none; color: #fff; z-index: 3; }
+
+/* ==========================================================================
+   קומפוננטות המוצר
+   ========================================================================== */
+
+/* ---- באר הצילום ---------------------------------------------------------- */
+.photo { position: relative; overflow: hidden; background: #0A1020; }
+.photo svg { display: block; inline-size: 100%; block-size: 100%; }
+.photo--hero { aspect-ratio: 390 / 300; }
+.photo--band { aspect-ratio: 390 / 168; }
+.photo__scrim {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(6,11,22,.9) 0%, rgba(6,11,22,.32) 46%, rgba(6,11,22,.5) 100%);
+}
+.photo__body { position: absolute; inset-block-end: 0; inset-inline: 0; padding: var(--pw-s5); color: #fff; }
+.photo__tag {
+  position: absolute; inset-block-start: 52px; inset-inline-end: var(--pw-s4);
+  font: var(--pw-t-micro); letter-spacing: var(--pw-track-micro); text-transform: uppercase;
+  background: rgba(10,16,32,.6); color: rgba(255,255,255,.82);
+  border: 1px solid rgba(255,255,255,.24);
+  padding: 5px 9px; border-radius: var(--pw-r-pill);
+  backdrop-filter: blur(6px);
+}
+.navbtn {
+  position: absolute; inset-block-start: 44px; z-index: 3;
+  inline-size: 38px; block-size: 38px; border-radius: var(--pw-r-pill);
+  display: grid; place-items: center;
+  background: rgba(12,21,36,.45); border: 1px solid rgba(255,255,255,.24);
+  color: #fff; cursor: pointer;
+  backdrop-filter: blur(8px);
+}
+.navbtn--back { inset-inline-start: var(--pw-s4); }
+.navbtn--fav  { inset-inline-end: var(--pw-s4); }
+
+/* ---- שבבים --------------------------------------------------------------- */
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  font: var(--pw-t-micro); letter-spacing: .02em;
+  padding: 6px 11px; border-radius: var(--pw-r-pill);
+  border: 1px solid var(--pw-hairline-strong);
+  background: var(--pw-surface); color: var(--pw-ink-2);
+  white-space: nowrap;
+}
+.chip--onphoto { background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.3); color: #fff; backdrop-filter: blur(6px); }
+.chip--open { background: var(--pw-clear-50); border-color: transparent; color: var(--pw-clear-600); }
+.chip--warn { background: var(--pw-urgent-50); border-color: transparent; color: var(--pw-urgent-600); }
+.chip--way  { background: var(--pw-way-50);  border-color: transparent; color: var(--pw-way-600); }
+.chip--magic{ background: var(--pw-magic-50); border-color: transparent; color: var(--pw-magic-600); }
+.chip--on   { background: var(--pw-way-500); border-color: transparent; color: #fff; }
+.chip--off  { background: var(--pw-missing-bg); border-color: var(--pw-missing-line); color: var(--pw-missing-ink); }
+
+/* ---- מסך ---------------------------------------------------------------- */
+.screen { background: var(--pw-canvas); padding-block-end: var(--pw-s8); }
+.screen > * + * { margin-block-start: var(--pw-s3); }
+.pad { padding-inline: var(--pw-s5); }
+
+.card {
+  background: var(--pw-surface);
+  border: 1px solid var(--pw-hairline);
+  border-radius: var(--pw-r-lg);
+  box-shadow: var(--pw-e1);
+  padding: var(--pw-s5);
+  margin-inline: var(--pw-s4);
+}
+.card__title { font: var(--pw-t-h3); display: flex; align-items: center; gap: var(--pw-s2); }
+.card__lead { font: var(--pw-t-micro); letter-spacing: var(--pw-track-micro); text-transform: uppercase; color: var(--pw-ink-3); margin-block-end: var(--pw-s3); }
+
+.title-row { padding-inline: var(--pw-s5); padding-block-start: var(--pw-s4); }
+.title-row h2 { font: 700 26px/1.18 var(--pw-font-name); letter-spacing: -.015em; }
+.title-row .he-name { display: flex; align-items: center; gap: var(--pw-s2); margin-block-start: 6px; }
+.title-row .meta { display: flex; flex-wrap: wrap; gap: var(--pw-s2); margin-block-start: var(--pw-s3); }
+
+/* ---- מדד שלמות ---------------------------------------------------------- */
+.completeness {
+  display: flex; align-items: center; gap: var(--pw-s3);
+  margin-inline: var(--pw-s4); padding: var(--pw-s3) var(--pw-s4);
+  background: var(--pw-missing-bg); border: 1px solid var(--pw-missing-line);
+  border-radius: var(--pw-r-md); color: var(--pw-missing-ink);
+  font: var(--pw-t-small);
+}
+.meter { flex: 0 0 68px; block-size: 6px; border-radius: var(--pw-r-pill); background: var(--pw-missing-line); overflow: hidden; }
+.meter i { display: block; block-size: 100%; background: var(--pw-missing-ink); border-radius: inherit; }
+
+/* ---- שורות עובדה --------------------------------------------------------- */
+.facts { display: flex; flex-direction: column; }
+.fact {
+  display: grid; grid-template-columns: 22px 1fr auto; align-items: center;
+  gap: var(--pw-s3);
+  padding-block: var(--pw-s3);
+  border-block-end: 1px solid var(--pw-hairline);
+}
+.fact:last-child { border-block-end: 0; padding-block-end: 0; }
+.fact:first-child { padding-block-start: 0; }
+.fact__ico { color: var(--pw-ink-3); display: grid; place-items: center; }
+.fact__k { color: var(--pw-ink-2); font-size: 14px; }
+.fact__v { font-weight: 600; font-size: 14px; text-align: end; }
+.fact--missing .fact__v { font-weight: 500; color: var(--pw-missing-ink); }
+.fact--missing .fact__ico { color: var(--pw-missing-line); }
+.fact__note { grid-column: 2 / -1; font: var(--pw-t-small); color: var(--pw-ink-3); margin-block-start: 2px; }
+
+/* מדרג אינטנסיביות */
+.intensity { display: inline-flex; gap: 3px; vertical-align: -1px; margin-inline-end: 7px; }
+.intensity i { inline-size: 5px; block-size: 13px; border-radius: 2px; background: var(--pw-hairline-strong); }
+.intensity i.on { background: var(--pw-way-500); }
+.intensity--3 i.on { background: var(--pw-urgent-500); }
+.intensity--4 i.on { background: var(--pw-urgent-500); }
+
+/* ---- כרטיס הכרטוס — הנכס החזק בקובץ ------------------------------------ */
+.ticket { display: flex; flex-direction: column; gap: var(--pw-s3); }
+.ticket__row { display: flex; align-items: flex-start; gap: var(--pw-s3); }
+.ticket__row svg { flex: none; margin-block-start: 2px; }
+.ticket__k { font-size: 13px; color: var(--pw-ink-3); }
+.ticket__v { font-size: 14px; font-weight: 600; }
+.ticket__v small { display: block; font-weight: 400; font-size: 13px; color: var(--pw-ink-2); line-height: 1.5; margin-block-start: 3px; }
+.ticket__flag {
+  display: flex; gap: var(--pw-s2); align-items: flex-start;
+  background: var(--pw-urgent-50); color: var(--pw-urgent-600);
+  border-radius: var(--pw-r-sm); padding: var(--pw-s3);
+  font-size: 13px; line-height: 1.5; font-weight: 500;
+}
+
+/* ---- בלוק הדעה ----------------------------------------------------------- */
+.opinion { border-inline-start: 3px solid var(--pw-magic-300); }
+.slot {
+  border: 1px dashed var(--pw-missing-line);
+  background: var(--pw-missing-bg);
+  border-radius: var(--pw-r-sm);
+  padding: var(--pw-s3) var(--pw-s4);
+  color: var(--pw-missing-ink);
+  font: var(--pw-t-small);
+}
+.slot b { display: block; font: var(--pw-t-micro); letter-spacing: var(--pw-track-micro); text-transform: uppercase; margin-block-end: 4px; }
+.slot-grid { display: flex; flex-direction: column; gap: var(--pw-s2); }
+
+/* ---- וידאו facade -------------------------------------------------------- */
+.video { position: relative; border-radius: var(--pw-r-md); overflow: hidden; aspect-ratio: 16/9; background: #0A1020; }
+.video__play {
+  position: absolute; inset: 0; margin: auto;
+  inline-size: 58px; block-size: 40px; border-radius: 11px;
+  background: rgba(10,16,32,.72); border: 1px solid rgba(255,255,255,.3);
+  display: grid; place-items: center; color: #fff; cursor: pointer;
+}
+.video__empty { position: absolute; inset-block-end: 0; inset-inline: 0; padding: var(--pw-s3) var(--pw-s4); background: linear-gradient(to top, rgba(6,11,22,.92), transparent); color: #fff; font: var(--pw-t-small); }
+
+/* ---- פוטר אמון ----------------------------------------------------------- */
+.source { display: flex; gap: var(--pw-s3); align-items: flex-start; padding-block: var(--pw-s3); border-block-end: 1px solid var(--pw-hairline); }
+.source:last-child { border-block-end: 0; }
+.tier {
+  flex: none; font: var(--pw-t-micro); letter-spacing: .04em;
+  padding: 3px 7px; border-radius: 6px; margin-block-start: 1px;
+}
+.tier--t1 { background: var(--pw-way-500); color: #fff; }
+.tier--t4 { background: var(--pw-sunken); color: var(--pw-ink-2); }
+.source__t { font-size: 13.5px; line-height: 1.45; }
+.source__t span { display: block; color: var(--pw-ink-3); font-size: 12.5px; margin-block-start: 2px; word-break: break-all; }
+
+/* ---- טים ----------------------------------------------------------------- */
+.orb {
+  flex: none; inline-size: 26px; block-size: 26px; border-radius: var(--pw-r-pill);
+  background: var(--pw-magic-orb); box-shadow: var(--pw-e-magic);
+  position: relative;
+}
+.orb::after { content: ""; position: absolute; inset: 4px; border-radius: inherit; border: 1px solid rgba(255,255,255,.34); }
+.orb--sm { inline-size: 18px; block-size: 18px; }
+.orb--lg { inline-size: 46px; block-size: 46px; }
+
+.bubble { border-radius: var(--pw-r-lg); padding: var(--pw-s4); font-size: 14.5px; line-height: 1.6; }
+.bubble--me { background: var(--pw-way-500); color: #fff; border-end-end-radius: var(--pw-r-xs); margin-inline-start: var(--pw-s8); }
+.bubble--tim { background: var(--pw-surface); border: 1px solid var(--pw-hairline); box-shadow: var(--pw-e1); border-end-start-radius: var(--pw-r-xs); }
+.msg { display: flex; gap: var(--pw-s2); align-items: flex-start; padding-inline: var(--pw-s4); }
+.msg--me { justify-content: flex-end; }
+.msg > .bubble { min-inline-size: 0; }
+
+.cite {
+  display: flex; align-items: center; gap: var(--pw-s2);
+  margin-block-start: var(--pw-s3); padding-block-start: var(--pw-s3);
+  border-block-start: 1px solid var(--pw-hairline);
+  font: var(--pw-t-small); color: var(--pw-ink-3);
+}
+.deeplink {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--pw-s2);
+  margin-block-start: var(--pw-s3); padding: var(--pw-s3) var(--pw-s4);
+  background: var(--pw-way-50); color: var(--pw-way-600);
+  border-radius: var(--pw-r-sm); font-size: 13.5px; font-weight: 600;
+}
+.composer {
+  display: flex; align-items: center; gap: var(--pw-s3);
+  margin: var(--pw-s4); padding: var(--pw-s3) var(--pw-s4);
+  background: var(--pw-surface); border: 1px solid var(--pw-hairline-strong);
+  border-radius: var(--pw-r-pill); box-shadow: var(--pw-e1);
+  color: var(--pw-ink-3); font-size: 14px;
+}
+.send { margin-inline-start: auto; inline-size: 30px; block-size: 30px; border-radius: var(--pw-r-pill); background: var(--pw-magic-orb); display: grid; place-items: center; color: #fff; flex: none; }
+
+/* ---- סרגל סינון ---------------------------------------------------------- */
+.filterbar { padding-block: var(--pw-s3); }
+.filterbar__scroll { display: flex; gap: var(--pw-s2); overflow-x: auto; padding-inline: var(--pw-s5); padding-block-end: var(--pw-s2); scrollbar-width: none; }
+.filterbar__scroll::-webkit-scrollbar { display: none; }
+.sortrow { display: flex; align-items: center; justify-content: space-between; padding-inline: var(--pw-s5); color: var(--pw-ink-3); font: var(--pw-t-small); }
+
+.result {
+  display: grid; grid-template-columns: 62px 1fr; gap: var(--pw-s4);
+  align-items: center;
+  background: var(--pw-surface); border: 1px solid var(--pw-hairline);
+  border-radius: var(--pw-r-md); box-shadow: var(--pw-e1);
+  padding: var(--pw-s3); margin-inline: var(--pw-s4);
+}
+.result__thumb { inline-size: 62px; block-size: 62px; border-radius: var(--pw-r-sm); overflow: hidden; background: #0A1020; }
+.result__n { font: 600 15.5px/1.25 var(--pw-font-name); }
+.result__sub { font: var(--pw-t-small); color: var(--pw-ink-3); margin-block-start: 2px; }
+.result__tags { display: flex; flex-wrap: wrap; gap: 6px; margin-block-start: var(--pw-s2); }
+
+/* ---- טאב בר -------------------------------------------------------------- */
+.tabbar {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  border-block-start: 1px solid var(--pw-hairline);
+  background: var(--pw-surface); padding-block: var(--pw-s2) var(--pw-s4);
+}
+.tabbar div { display: grid; justify-items: center; gap: 3px; font: var(--pw-t-micro); color: var(--pw-ink-3); }
+.tabbar div.on { color: var(--pw-way-500); }
+
+/* ---- מתג הסדר ------------------------------------------------------------ */
+.segmented {
+  display: flex; gap: 3px; padding: 3px;
+  background: var(--pw-sunken); border-radius: var(--pw-r-pill);
+  margin-inline: var(--pw-s4);
+}
+.segmented button {
+  flex: 1; appearance: none; border: 0; cursor: pointer;
+  padding: 9px 10px; border-radius: var(--pw-r-pill);
+  background: transparent; color: var(--pw-ink-2);
+  font: 600 13px var(--pw-font-ui);
+  transition: background var(--pw-fast) var(--pw-ease), color var(--pw-fast) var(--pw-ease);
+}
+.segmented button[aria-pressed="true"] { background: var(--pw-surface); color: var(--pw-ink); box-shadow: var(--pw-e1); }
+
+/* ==========================================================================
+   גיליון הטוקנים
+   ========================================================================== */
+.swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: var(--pw-s3); }
+.sw { border: 1px solid var(--pw-hairline); border-radius: var(--pw-r-md); overflow: hidden; background: var(--pw-surface); }
+.sw__chip { block-size: 62px; }
+.sw__meta { padding: var(--pw-s3); }
+.sw__meta b { display: block; font-size: 13px; }
+.sw__meta code { font: 11.5px/1.4 var(--pw-font-name); color: var(--pw-ink-3); display: block; margin-block-start: 3px; }
+.sw__meta span { display: block; font-size: 12px; color: var(--pw-ink-3); margin-block-start: 4px; }
+
+.panel {
+  background: var(--pw-surface); border: 1px solid var(--pw-hairline);
+  border-radius: var(--pw-r-lg); box-shadow: var(--pw-e1); padding: var(--pw-s6);
+}
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--pw-s5); }
+
+.typerow { padding-block: var(--pw-s4); border-block-end: 1px solid var(--pw-hairline); display: flex; align-items: baseline; justify-content: space-between; gap: var(--pw-s4); flex-wrap: wrap; }
+.typerow:last-child { border-block-end: 0; }
+.typerow code { font: 11.5px var(--pw-font-name); color: var(--pw-ink-3); }
+
+.icons { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: var(--pw-s4); }
+.icons figure { display: grid; justify-items: center; gap: var(--pw-s2); color: var(--pw-ink); }
+.icons figcaption { font: var(--pw-t-small); color: var(--pw-ink-3); text-align: center; }
+
+table.data { inline-size: 100%; border-collapse: collapse; font-size: 14px; }
+table.data th, table.data td { text-align: start; padding: var(--pw-s3); border-block-end: 1px solid var(--pw-hairline); vertical-align: top; }
+table.data th { font: var(--pw-t-micro); letter-spacing: var(--pw-track-micro); text-transform: uppercase; color: var(--pw-ink-3); }
+.tablewrap { overflow-x: auto; }
+
+.asks { display: flex; flex-direction: column; gap: var(--pw-s3); counter-reset: ask; }
+.ask { display: grid; grid-template-columns: 30px 1fr; gap: var(--pw-s4); align-items: start; padding: var(--pw-s4); border: 1px solid var(--pw-hairline); border-radius: var(--pw-r-md); background: var(--pw-surface); }
+.ask::before {
+  counter-increment: ask; content: counter(ask);
+  inline-size: 30px; block-size: 30px; border-radius: var(--pw-r-pill);
+  display: grid; place-items: center;
+  background: var(--pw-way-50); color: var(--pw-way-600);
+  font: 600 13px var(--pw-font-name);
+}
+.ask b { display: block; margin-block-end: 3px; }
+.ask p { color: var(--pw-ink-2); font: var(--pw-t-small); }
+
+.foot { padding-block: var(--pw-s8); color: var(--pw-ink-3); font: var(--pw-t-small); border-block-start: 1px solid var(--pw-hairline); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#111A38"/>
+      <stop offset=".42" stop-color="#3B2A63"/>
+      <stop offset=".72" stop-color="#7A3F6B"/>
+      <stop offset="1" stop-color="#C4693F"/>
+    </linearGradient>
+    <radialGradient id="glow"><stop offset="0" stop-color="#FFC98A" stop-opacity=".85"/><stop offset="1" stop-color="#FFC98A" stop-opacity="0"/></radialGradient>
+    <radialGradient id="glow2"><stop offset="0" stop-color="#8FB6FF" stop-opacity=".7"/><stop offset="1" stop-color="#8FB6FF" stop-opacity="0"/></radialGradient>
+    <linearGradient id="pathline" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#2360E0"/><stop offset="1" stop-color="#6B45E4"/>
+    </linearGradient>
+
+    <!-- באר צילום: שקיעה בפארק, מופשט בכוונה. אין כאן קניין רוחני של אף מותג. -->
+    <symbol id="scene" viewBox="0 0 390 300" preserveAspectRatio="xMidYMid slice">
+      <rect width="390" height="300" fill="url(#sky)"/>
+      <circle cx="300" cy="72" r="64" fill="url(#glow2)"/>
+      <circle cx="88" cy="150" r="70" fill="url(#glow)" opacity=".55"/>
+      <circle cx="336" cy="196" r="46" fill="url(#glow)" opacity=".5"/>
+      <circle cx="42" cy="60" r="30" fill="url(#glow2)" opacity=".5"/>
+      <g fill="#0A0F1E">
+        <path d="M0 300V236c26-4 40-22 64-22 20 0 28 12 46 12s26-16 48-16 32 18 54 18 34-22 58-22c20 0 32 14 52 14 24 0 44-16 68-20v100Z"/>
+        <path d="M118 244c0-38 24-66 56-66s56 28 56 66h-14c0-30-18-52-42-52s-42 22-42 52Z"/>
+        <circle cx="174" cy="196" r="7"/>
+        <path d="M262 244V150l10-22 10 22v94Z"/>
+        <path d="M18 244c0-24 10-40 26-40s26 16 26 40Z"/>
+        <path d="M300 244c0-30 12-48 30-48s30 18 30 48Z"/>
+      </g>
+      <g fill="none" stroke="#0A0F1E" stroke-width="5" stroke-linecap="round">
+        <path d="M36 226c30-52 58 6 84-30s44 34 70 6 40 22 66-8 42 18 70-8"/>
+      </g>
+      <g opacity=".95">
+        <path d="M14 268c52-16 96 14 148-2s84-28 132-10 58 8 82 2" fill="none" stroke="url(#pathline)" stroke-width="2" stroke-linecap="round"/>
+        <g fill="#0A0F1E" stroke="#B9CCFF" stroke-width="2">
+          <circle cx="46" cy="262" r="4.5"/><circle cx="162" cy="266" r="4.5"/><circle cx="294" cy="257" r="4.5"/><circle cx="360" cy="259" r="4.5"/>
+        </g>
+      </g>
+    </symbol>
+
+    <!-- שפת האייקונים: קו 1.7, קצוות מעוגלים, ריבוע 20. -->
+    <g id="i-attraction" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2.5 15.5c3-9 6-10.5 8-4s5 3.5 7-5"/><circle cx="4.5" cy="17.5" r="1.6"/><circle cx="15.5" cy="17.5" r="1.6"/></g>
+    <g id="i-show" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10 3.2 12 8l5.2.5-4 3.4 1.3 5.1L10 14.2 5.5 17l1.3-5.1-4-3.4L8 8Z"/></g>
+    <g id="i-dining" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 2.5v6.5a2 2 0 0 0 4 0V2.5M7 9v8.5M15 2.5c-1.6 1-2.4 3-2.4 5.2 0 1.4.8 2.3 2.4 2.3v7.5"/></g>
+    <g id="i-clock" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="10" cy="10" r="7.4"/><path d="M10 5.8V10l2.8 1.8"/></g>
+    <g id="i-year" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2.8" y="4.2" width="14.4" height="13" rx="2.6"/><path d="M2.8 8.4h14.4M6.6 2.6v3.2M13.4 2.6v3.2"/></g>
+    <g id="i-intensity" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3.5 15.5v-3M7.8 15.5v-6M12.2 15.5v-9M16.5 15.5v-12"/></g>
+    <g id="i-height" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10 3v14M6.4 5.6 10 2.4l3.6 3.2M6.4 14.4 10 17.6l3.6-3.2M3 10h2.6M14.4 10H17"/></g>
+    <g id="i-motion" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2.6 12.6c1.8-2.4 3.6-2.4 5.4 0s3.6 2.4 5.4 0 3.6-2.4 4.4-1.2M2.6 7.2c1.8-2.4 3.6-2.4 5.4 0s3.6 2.4 5.4 0 3.6-2.4 4.4-1.2"/></g>
+    <g id="i-dark" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 17.4V9.6a6 6 0 0 1 12 0v7.8"/><path d="M8 17.4v-7.4a2 2 0 0 1 4 0v7.4"/></g>
+    <g id="i-loud" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 7.6h2.8L10.6 4v12L6.8 12.4H4Z"/><path d="M13.6 7.4a3.6 3.6 0 0 1 0 5.2M16 5a7 7 0 0 1 0 10"/></g>
+    <g id="i-wet" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10 2.6c3 3.8 5.4 6.6 5.4 9.2A5.4 5.4 0 0 1 4.6 11.8c0-2.6 2.4-5.4 5.4-9.2Z"/></g>
+    <g id="i-ac" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10 2.6v14.8M3.6 6.2l12.8 7.6M3.6 13.8l12.8-7.6"/></g>
+    <g id="i-access" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11.4" cy="4.2" r="1.8"/><path d="M8 8h5.6M9.6 8v4.6h4.2l2 4.4M9.6 12.6a3.8 3.8 0 1 0 3.4 4.6"/></g>
+    <g id="i-lightning" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M11.4 2.4 4.6 11.2h4.2l-.6 6.4 6.8-8.8h-4.2Z"/></g>
+    <g id="i-star" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10 2.6 12.3 7l4.9.7-3.6 3.4.9 4.8L10 13.6l-4.5 2.3.9-4.8L2.8 7.7 7.7 7Z"/></g>
+    <g id="i-walk" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="3.6" r="1.7"/><path d="M11.6 7 8.8 8.6l-1.4 4M11.6 7l2.4 1.8.9 3M11.6 7l-.4 4.6 2 2.2.6 3.6M11.2 11.6 8 14l-1.6 3.4"/></g>
+    <g id="i-pin" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10 17.6s5.8-5 5.8-9.4a5.8 5.8 0 1 0-11.6 0c0 4.4 5.8 9.4 5.8 9.4Z"/><circle cx="10" cy="8.2" r="2.2"/></g>
+    <g id="i-shield" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10 2.4 3.8 5v5.2c0 3.8 2.6 6.4 6.2 7.4 3.6-1 6.2-3.6 6.2-7.4V5Z"/><path d="m7.2 9.8 2 2 3.6-3.8"/></g>
+    <g id="i-link" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8.4 11.6a3.4 3.4 0 0 0 5 .3l2.4-2.4a3.4 3.4 0 0 0-4.8-4.8l-1.4 1.4"/><path d="M11.6 8.4a3.4 3.4 0 0 0-5-.3L4.2 10.5a3.4 3.4 0 0 0 4.8 4.8l1.4-1.4"/></g>
+    <g id="i-filter" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 5h14M5.6 10h8.8M8.4 15h3.2"/></g>
+    <g id="i-search" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="9" cy="9" r="5.6"/><path d="m13.2 13.2 3.4 3.4"/></g>
+    <g id="i-home" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3.4 8.6 10 3.2l6.6 5.4v7.6a1.4 1.4 0 0 1-1.4 1.4H4.8a1.4 1.4 0 0 1-1.4-1.4Z"/></g>
+    <g id="i-heart" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10 16.6S3.2 12.4 3.2 7.8A3.6 3.6 0 0 1 10 6a3.6 3.6 0 0 1 6.8 1.8c0 4.6-6.8 8.8-6.8 8.8Z"/></g>
+    <g id="i-back" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M7.4 4.4 13 10l-5.6 5.6"/></g>
+    <g id="i-chev" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 4.4 6.4 10 12 15.6"/></g>
+    <g id="i-money" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="10" cy="10" r="7.4"/><path d="M12.4 7.4a2.8 2.8 0 0 0-2.4-1.2c-1.6 0-2.6.9-2.6 2s1 1.8 2.6 2 2.6.9 2.6 2-1 2-2.6 2a2.8 2.8 0 0 1-2.4-1.2M10 4.4v11.2"/></g>
+    <g id="i-ticket" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2.8 7.4V5.6A1.4 1.4 0 0 1 4.2 4.2h11.6a1.4 1.4 0 0 1 1.4 1.4v1.8a2.6 2.6 0 0 0 0 5.2v1.8a1.4 1.4 0 0 1-1.4 1.4H4.2a1.4 1.4 0 0 1-1.4-1.4v-1.8a2.6 2.6 0 0 0 0-5.2Z"/><path d="M11.6 7v6" stroke-dasharray="1.6 2"/></g>
+  </defs>
+</svg>
+
+<header class="masthead">
+  <svg class="masthead__sky" viewBox="0 0 390 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href="#scene"/></svg>
+  <div class="wrap masthead__inner">
+    <p class="eyebrow">Park Day Companion · אבן דרך M1 · לאישור</p>
+    <h1>Pathway — שפה עיצובית למדריך ולטים</h1>
+    <p>
+      טוקנים, מערכת אייקונים ושלושה מסכים בנויים מהנתונים האמיתיים שהעברת.
+      כל שדה שאין לו מקור בקובץ מסומן כחסר ולא מולא בהמצאה.
+      אחרי אישור השפה כאן, הטוקנים עוברים כמו שהם ל־<code class="en">src/styles/tokens.css</code>.
+    </p>
+    <div class="mix">
+      <span>60% premium travel-tech</span>
+      <span>20% ניווט</span>
+      <span>10% קסם</span>
+      <span>10% אנרגיה קולנועית</span>
+    </div>
+  </div>
+</header>
+
+<main>
+<section class="section wrap">
+  <div class="section__head">
+    <p class="eyebrow">שלוש ההחלטות שמחזיקות את השפה</p>
+    <h2>ממשק שקט. הצילום והאקצנט מביאים את הצבע.</h2>
+    <p>
+      הכיוון שביקשת מתמצה בשלוש הכרעות. כל השאר נגזר מהן, וכל קומפוננטה
+      במוצר צורכת רק טוקנים — אין ערך צבע קשיח בשום מקום.
+    </p>
+  </div>
+
+  <div class="grid2">
+    <div class="panel">
+      <p class="eyebrow">01 · שני כחולים, לא פלטה</p>
+      <h3 style="font:var(--pw-t-h2); margin-block:var(--pw-s2) var(--pw-s3)">כחול ניווט מול סגול קסם</h3>
+      <p style="color:var(--pw-ink-2); font:var(--pw-t-small)">
+        כחול הוא כל מה שפונקציונלי: ניווט, מצב נבחר, פעולה ראשית, אמון.
+        הסגול־כחול שמור אך ורק לטים ולתובנה אישית. ההפרדה הזאת היא מה שגורם
+        לטים להיראות כנוכחות ולא ככפתור נוסף. כתום וירוק קיימים לאות בלבד —
+        עלות נוספת, סטטוס — ולעולם לא כרקע גדול.
+      </p>
+    </div>
+    <div class="panel">
+      <p class="eyebrow">02 · טיפוגרפיה דו־לשונית</p>
+      <h3 style="font:var(--pw-t-h2); margin-block:var(--pw-s2) var(--pw-s3)">
+        <span>קול עברי,</span> <span class="en">canonical English</span>
+      </h3>
+      <p style="color:var(--pw-ink-2); font:var(--pw-t-small)">
+        שם אנגלי בתוך משפט עברי הוא המצב הנפוץ כאן, לא מקרה קצה (סעיף 8).
+        לכן שתי גופנים בתפקידים נבדלים: <b>Assistant</b> לעברית ולממשק,
+        <b class="en">Archivo</b> לשמות הקנוניים ולמספרים — אופי של שילוט ניווט.
+        כל שם עטוף ב־<code class="en">&lt;bdi&gt;</code>.
+      </p>
+    </div>
+    <div class="panel">
+      <p class="eyebrow">03 · המוטיב</p>
+      <h3 style="font:var(--pw-t-h2); margin-block:var(--pw-s2) var(--pw-s3)">הדרך</h3>
+      <p style="color:var(--pw-ink-2); font:var(--pw-t-small)">
+        קו דק עם נקודות עצירה, בגרדיאנט כחול־סגול. הוא מפריד מקטעים, מחזיק
+        את ציר היום, ומופיע בתוך הצילום. אלגנטי ולא דקורטיבי — ורק בעובי אחד,
+        כדי שלא יהפוך לקישוט.
+      </p>
+      <span class="path-rule" aria-hidden="true"><i style="inset-inline-start:0"></i><i style="inset-inline-start:calc(50% - 5px)"></i><i style="inset-inline-end:0"></i></span>
+    </div>
+  </div>
+</section>
+
+<section class="section wrap" id="ride">
+  <div class="section__head">
+    <p class="eyebrow">מסך 1 מתוך 3 · הליבה</p>
+    <h2>דף מתקן</h2>
+    <p>
+      <b class="en">Seven Dwarfs Mine Train</b> — שורה אמיתית מהקובץ שהעברת.
+      בחרתי אותה כי היא מציגה את הנכס החזק ביותר בנתונים: זה אחד מחמשת המתקנים
+      שדורשים <b class="en">Single Pass</b> בתשלום נפרד שאינו כלול ב־<b class="en">Multi Pass</b>.
+      בדיוק סוג הבלבול היקר שהמוצר קיים כדי למנוע.
+    </p>
+  </div>
+
+  <div class="stage">
+    <div class="phone phone--tall">
+      <div class="phone__scroll">
+        <div class="screen">
+
+          <div class="photo photo--hero">
+            <svg viewBox="0 0 390 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href="#scene"/></svg>
+            <div class="photo__scrim"></div>
+            <div class="statusbar statusbar--onphoto"><span class="num">9:41</span><span>●●● ▮</span></div>
+            <button class="navbtn navbtn--back" aria-label="חזרה"><svg width="20" height="20" viewBox="0 0 20 20"><use href="#i-back"/></svg></button>
+            <button class="navbtn navbtn--fav" aria-label="הוספה למועדפים"><svg width="20" height="20" viewBox="0 0 20 20"><use href="#i-heart"/></svg></button>
+            <span class="photo__tag">מקום לצילום</span>
+            <div class="photo__body">
+              <span class="chip chip--onphoto"><svg width="14" height="14" viewBox="0 0 20 20"><use href="#i-pin"/></svg> Magic Kingdom · <bdi class="en">Fantasyland</bdi></span>
+            </div>
+          </div>
+
+          <div class="title-row">
+            <h2><bdi class="en">Seven Dwarfs Mine Train</bdi></h2>
+            <div class="he-name">
+              <span class="chip chip--off">שם בעברית — ממתין לתוכן</span>
+            </div>
+            <div class="meta">
+              <span class="chip chip--open">● פתוח</span>
+              <span class="chip">רכבת הרים משפחתית</span>
+              <span class="chip chip--warn"><svg width="13" height="13" viewBox="0 0 20 20"><use href="#i-money"/></svg> תשלום נוסף ל־Lightning Lane</span>
+            </div>
+          </div>
+
+          <div class="completeness">
+            <span class="meter"><i style="inline-size:20%"></i></span>
+            <span><b>2 מתוך 10</b> שדות עובדה · אין סרטון · אין תוכן עריכתי</span>
+          </div>
+
+          <div class="segmented" role="group" aria-label="סדר הבלוקים">
+            <button type="button" data-order="facts" aria-pressed="true">עובדה קודם</button>
+            <button type="button" data-order="opinion" aria-pressed="false">דעה קודם</button>
+          </div>
+
+          <div id="blocks" style="display:flex; flex-direction:column; gap:var(--pw-s3)">
+
+            <div id="grp-facts" style="display:flex; flex-direction:column; gap:var(--pw-s3); order:1">
+              <div class="card">
+                <p class="card__lead">עובדות</p>
+                <div class="facts">
+                  <div class="fact">
+                    <span class="fact__ico"><svg width="19" height="19" viewBox="0 0 20 20"><use href="#i-intensity"/></svg></span>
+                    <span class="fact__k">אינטנסיביות</span>
+                    <span class="fact__v"><span class="intensity"><i class="on"></i><i class="on"></i><i></i><i></i></span><span class="num">2 / 4</span></span>
+                    <span class="fact__note">דירוג מפורש של DisneyGirlBlog · שכבת סמכות T4</span>
+                  </div>
+                  <div class="fact fact--missing">
+                    <span class="fact__ico"><svg width="19" height="19" viewBox="0 0 20 20"><use href="#i-height"/></svg></span>
+                    <span class="fact__k">מגבלת גובה</span>
+                    <span class="fact__v">אין נתון</span>
+                    <span class="fact__note">שדה T1 בלבד. לא יוצג עד שיגיע ממקור רשמי.</span>
+                  </div>
+                  <div class="fact fact--missing">
+                    <span class="fact__ico"><svg width="19" height="19" viewBox="0 0 20 20"><use href="#i-motion"/></svg></span>
+                    <span class="fact__k">רגישויות</span>
+                    <span class="fact__v">אין נתון</span>
+                    <span class="fact__note">בחילה · מקום סגור וחושך · גבהים · רעש פתאומי</span>
+                  </div>
+                  <div class="fact fact--missing">
+                    <span class="fact__ico"><svg width="19" height="19" viewBox="0 0 20 20"><use href="#i-clock"/></svg></span>
+                    <span class="fact__k">משך</span><span class="fact__v">אין נתון</span>
+                  </div>
+                  <div class="fact fact--missing">
+                    <span class="fact__ico"><svg width="19" height="19" viewBox="0 0 20 20"><use href="#i-year"/></svg></span>
+                    <span class="fact__k">שנה</span><span class="fact__v">אין נתון</span>
+                  </div>
+                  <div class="fact fact--missing">
+                    <span class="fact__ico"><svg width="19" height="19" viewBox="0 0 20 20"><use href="#i-wet"/></svg></span>
+                    <span class="fact__k">הרטבה</span><span class="fact__v">אין נתון</span>
+                  </div>
+                  <div class="fact fact--missing">
+                    <span class="fact__ico"><svg width="19" height="19" viewBox="0 0 20 20"><use href="#i-ac"/></svg></span>
+                    <span class="fact__k">ממוזג</span><span class="fact__v">אין נתון</span>
+                  </div>
+                  <div class="fact fact--missing">
+                    <span class="fact__ico"><svg width="19" height="19" viewBox="0 0 20 20"><use href="#i-access"/></svg></span>
+                    <span class="fact__k">נגישות</span><span class="fact__v">אין נתון</span>
+                  </div>
+                  <div class="fact fact--missing">
+                    <span class="fact__ico"><svg width="19" height="19" viewBox="0 0 20 20"><use href="#i-star"/></svg></span>
+                    <span class="fact__k">פופולריות</span><span class="fact__v">אין נתון</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <p class="card__lead">כרטיס וגישה</p>
+                <div class="ticket">
+                  <div class="ticket__row">
+                    <svg width="19" height="19" viewBox="0 0 20 20" style="color:var(--pw-ink-3)"><use href="#i-ticket"/></svg>
+                    <div>
+                      <div class="ticket__k">כניסה נדרשת</div>
+                      <div class="ticket__v">כרטיס תקף ל־<bdi class="en">Magic Kingdom</bdi>
+                        <small><bdi class="en">Park Hopper</bdi> אינו נדרש, אלא אם מתכננים לבקר בפארק דיסני נוסף באותו יום.</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ticket__row">
+                    <svg width="19" height="19" viewBox="0 0 20 20" style="color:var(--pw-ink-3)"><use href="#i-lightning"/></svg>
+                    <div>
+                      <div class="ticket__k">דילוג בתור</div>
+                      <div class="ticket__v"><bdi class="en">Lightning Lane Single Pass</bdi>
+                        <small>כלול ב־<bdi class="en">Premier Pass</bdi>. אפשר לרכוש עד שני <bdi class="en">Single Pass</bdi> ביום, בכפוף לזמינות.</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ticket__flag">
+                    <svg width="18" height="18" viewBox="0 0 20 20" style="flex:none"><use href="#i-money"/></svg>
+                    <span><b>לא כלול ב־<bdi class="en">Multi Pass</bdi>.</b> נדרשת רכישה נפרדת בתשלום; המחיר משתנה לפי מתקן ותאריך.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="grp-opinion" style="order:2">
+              <div class="card opinion">
+                <p class="card__lead">דעה · הקול של הכותבת</p>
+                <div class="slot-grid">
+                  <div class="slot"><b>תיאור</b>ממתין לתוכן מנטע. לא נכתב על ידי מודל.</div>
+                  <div class="slot"><b>שורה תחתונה</b>ממתין לתוכן</div>
+                  <div class="slot"><b>המלצה · שעה מומלצת</b>ממתין לתוכן</div>
+                  <div class="slot"><b>מתאים ל · דלג אם</b>ממתין לתוכן</div>
+                  <div class="slot"><b>טיפים</b>ממתין לתוכן</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="card" style="order:3">
+            <p class="card__lead">וידאו</p>
+            <div class="video">
+              <svg viewBox="0 0 390 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true" style="inline-size:100%;block-size:100%"><use href="#scene"/></svg>
+              <div class="photo__scrim"></div>
+              <div class="video__empty">אין עדיין סרטון · מוצגת התמונה הראשית. המתקן מסומן באדמין כחסר וידאו.</div>
+            </div>
+            <p style="font:var(--pw-t-small); color:var(--pw-ink-3); margin-block-start:var(--pw-s3)">
+              כשיהיה <code class="en">youtube_id</code>: תמונת תצוגה מיוטיוב, כפתור נגן, וה־<code class="en">iframe</code> נטען רק בלחיצה. קרדיט ליוצר מוצג לצד הנגן.
+            </p>
+          </div>
+
+          <div class="card">
+            <p class="card__lead">מקורות ואמון</p>
+            <div class="source">
+              <span class="tier tier--t1">T1</span>
+              <span class="source__t">Walt Disney World — עמוד המתקנים הרשמי<span class="en">disneyworld.disney.go.com/attractions/magic-kingdom/</span></span>
+            </div>
+            <div class="source">
+              <span class="tier tier--t1">T1</span>
+              <span class="source__t">Walt Disney World — <bdi class="en">Lightning Lane</bdi> הרשמי<span class="en">disneyworld.disney.go.com/lightning-lane-passes/</span></span>
+            </div>
+            <div class="source">
+              <span class="tier tier--t4">T4</span>
+              <span class="source__t">DisneyGirlBlog — דירוג אינטנסיביות בלבד<span class="en">disneygirlblog.com/attraction-guide-magic-kingdom/</span></span>
+            </div>
+            <div class="cite" style="border-block-start:0; padding-block-start:var(--pw-s3)">
+              <svg width="16" height="16" viewBox="0 0 20 20"><use href="#i-shield"/></svg>
+              <span>אומת במקור: <b class="num">24.08.2026</b> · טרם אומת אצלנו · נכתב על ידי —</span>
+            </div>
+          </div>
+
+          <div class="card" style="background:var(--pw-magic-50); border-color:transparent">
+            <div style="display:flex; align-items:center; gap:var(--pw-s3)">
+              <span class="orb"></span>
+              <div style="flex:1">
+                <div style="font-weight:600; font-size:14.5px">לשאול את טים על המתקן הזה</div>
+                <div style="font:var(--pw-t-small); color:var(--pw-ink-2)">גובה, תורים, מה מתאים לחבורה שלכם</div>
+              </div>
+              <svg width="18" height="18" viewBox="0 0 20 20" style="color:var(--pw-magic-600)"><use href="#i-chev"/></svg>
+            </div>
+          </div>
+
+        </div>
+        <div class="tabbar">
+          <div class="on"><svg width="20" height="20" viewBox="0 0 20 20"><use href="#i-home"/></svg>בית</div>
+          <div><svg width="20" height="20" viewBox="0 0 20 20"><use href="#i-search"/></svg>עיון</div>
+          <div><svg width="20" height="20" viewBox="0 0 20 20"><use href="#i-heart"/></svg>מועדפים</div>
+          <div><span class="orb orb--sm"></span>טים</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="spec">
+      <h3>מה בכוונה כאן</h3>
+      <p>
+        <b>הסדר לא הוכרע — אז הוא מתג.</b> סעיף 3.3 השאיר פתוח אם עובדה קודמת לדעה.
+        לחצי על המתג במסך והבלוקים מתחלפים. שתי קומפוננטות נפרדות, בחירה בקונפיגורציה,
+        לא בקוד. תחליטי מתוך הסתכלות ואני אקבע ברירת מחדל.
+      </p>
+      <p>
+        <b>החוסר מעוצב, לא מוסתר.</b> תשעה מתוך אחד־עשר שדות החובה בדף הזה אין להם
+        מקור בקובץ. במקום להשאיר דף שנראה שבור, יש מצב "אין נתון" בגוון חול נבדל
+        מהממשק, ורצועת שלמות שמזינה גם את עמודת השלמות באדמין (סעיף 3.8).
+        אותו רכיב משרת את המשתמשת ואת דוח הפערים.
+      </p>
+      <p>
+        <b>מגבלת גובה מסומנת T1 בלבד.</b> החרגת הבטיחות של סעיף 7 גלויה בממשק
+        ולא רק בקוד — כדי שברור למה השדה ריק ולא נמלא בהערכה.
+      </p>
+      <p>
+        <b>כרטיס הכרטוס קיבל כרטיס משלו.</b> תשע עמודות בקובץ מתארות את מודל
+        ה־Lightning Lane. הן לא נדחסות לשורה אחת. הדגל הכתום הוא המקום היחיד
+        בדף שמשתמש בצבע אזהרה.
+      </p>
+      <p>
+        <b>הבלוק העריכתי ריק ומסומן.</b> לא כתבתי תיאור, לא שורה תחתונה ולא טיפים.
+        המבנה מוצג, התוכן ממתין לך.
+      </p>
+    </div>
+  </div>
+</section>
+
+<div class="wrap"><span class="path-rule" aria-hidden="true"><i style="inset-inline-start:0"></i><i style="inset-inline-start:calc(50% - 5px)"></i><i style="inset-inline-end:0"></i></span></div>
+
+<section class="section wrap">
+  <div class="section__head">
+    <p class="eyebrow">מסך 2 מתוך 3</p>
+    <h2>דף פארק וסרגל הסינון</h2>
+    <p>
+      סעיף 3.2 קובע שהסינון גלוי ולא מוסתר בתפריט, כי הוא הפיצ'ר המבחין.
+      אז הוא הדבר הראשון מתחת לכותרת. הפילטרים שאין להם נתונים בקובץ
+      מוצגים כבויים ומסבירים למה — עדיף על תפריט שמחזיר אפס תוצאות בלי הסבר.
+    </p>
+  </div>
+
+  <div class="stage">
+    <div class="phone">
+      <div class="phone__scroll">
+        <div class="screen">
+          <div class="photo photo--band">
+            <svg viewBox="0 0 390 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href="#scene"/></svg>
+            <div class="photo__scrim"></div>
+            <div class="statusbar statusbar--onphoto"><span class="num">9:41</span><span>●●● ▮</span></div>
+            <span class="photo__tag">מקום לצילום</span>
+            <div class="photo__body">
+              <div style="font:700 24px/1.2 var(--pw-font-name)"><bdi class="en">Magic Kingdom</bdi></div>
+              <div style="font:var(--pw-t-small); color:rgba(255,255,255,.8); margin-block-start:3px">
+                <bdi class="en">Walt Disney World</bdi> · 70 פעילויות · דילוג בתור: <bdi class="en">Lightning Lane</bdi>
+              </div>
+            </div>
+          </div>
+
+          <div class="filterbar">
+            <div class="filterbar__scroll">
+              <span class="chip chip--way"><svg width="14" height="14" viewBox="0 0 20 20"><use href="#i-filter"/></svg> סינון</span>
+              <span class="chip chip--on">אינטנסיביות 3–4</span>
+              <span class="chip">אזור</span>
+              <span class="chip">סוג</span>
+              <span class="chip">תשלום נוסף</span>
+              <span class="chip chip--off">מגבלת גובה · אין נתונים</span>
+              <span class="chip chip--off">רגישויות · אין נתונים</span>
+              <span class="chip chip--off">הרטבה · אין נתונים</span>
+              <span class="chip chip--off">ממוזג · אין נתונים</span>
+            </div>
+            <div class="sortrow">
+              <span>3 תוצאות</span>
+              <span>מיון: אזור ▾</span>
+            </div>
+          </div>
+
+          <div class="completeness" style="margin-block-start:var(--pw-s2)">
+            <svg width="18" height="18" viewBox="0 0 20 20" style="flex:none"><use href="#i-intensity"/></svg>
+            <span>7 מתקנים ב־<bdi class="en">Magic Kingdom</bdi> ללא דירוג אינטנסיביות אינם מוצגים בסינון הזה.</span>
+          </div>
+
+          <div class="result">
+            <span class="result__thumb"><svg viewBox="0 0 390 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true" style="inline-size:100%;block-size:100%"><use href="#scene"/></svg></span>
+            <div>
+              <div class="result__n"><bdi class="en">TRON Lightcycle / Run</bdi></div>
+              <div class="result__sub"><bdi class="en">Tomorrowland</bdi> · רכבת הרים מקורה</div>
+              <div class="result__tags">
+                <span class="chip"><span class="intensity intensity--4"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span><span class="num">4 / 4</span></span>
+                <span class="chip chip--warn"><svg width="12" height="12" viewBox="0 0 20 20"><use href="#i-money"/></svg> Single Pass</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="result">
+            <span class="result__thumb"><svg viewBox="0 0 390 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true" style="inline-size:100%;block-size:100%"><use href="#scene"/></svg></span>
+            <div>
+              <div class="result__n"><bdi class="en">Space Mountain</bdi></div>
+              <div class="result__sub"><bdi class="en">Tomorrowland</bdi> · רכבת הרים מקורה</div>
+              <div class="result__tags">
+                <span class="chip"><span class="intensity intensity--3"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span><span class="num">3 / 4</span></span>
+                <span class="chip chip--way"><svg width="12" height="12" viewBox="0 0 20 20"><use href="#i-lightning"/></svg> Multi Pass</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="result">
+            <span class="result__thumb"><svg viewBox="0 0 390 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true" style="inline-size:100%;block-size:100%"><use href="#scene"/></svg></span>
+            <div>
+              <div class="result__n"><bdi class="en">Tiana's Bayou Adventure</bdi></div>
+              <div class="result__sub"><bdi class="en">Frontierland</bdi> · רכבת מים</div>
+              <div class="result__tags">
+                <span class="chip"><span class="intensity intensity--3"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span><span class="num">3 / 4</span></span>
+                <span class="chip chip--way"><svg width="12" height="12" viewBox="0 0 20 20"><use href="#i-lightning"/></svg> Multi Pass</span>
+                <span class="chip chip--off">הרטבה · אין נתון</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div><svg width="20" height="20" viewBox="0 0 20 20"><use href="#i-home"/></svg>בית</div>
+          <div class="on"><svg width="20" height="20" viewBox="0 0 20 20"><use href="#i-search"/></svg>עיון</div>
+          <div><svg width="20" height="20" viewBox="0 0 20 20"><use href="#i-heart"/></svg>מועדפים</div>
+          <div><span class="orb orb--sm"></span>טים</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="spec">
+      <h3>מה בכוונה כאן</h3>
+      <p>
+        <b>פילטר כבוי מסביר את עצמו.</b> ארבעה מתוך תשעת הפילטרים שהבריף מונה
+        אין להם נתון בקובץ. הם נשארים במקומם בגוון החול, ולא נעלמים — כך המבנה
+        המלא ברור, והחוסר לא מתחבא.
+      </p>
+      <p>
+        <b>ההודעה על מתקנים ללא דירוג היא לא קישוט.</b> 54% מהמתקנים בקובץ הם
+        <code class="en">Unknown</code> באינטנסיביות. סינון לפי אינטנסיביות מסתיר אותם בשקט,
+        וזאת תקלה חמורה באמון. אז אומרים כמה הוסתרו. באפיק יוניברסל והפארקים החדשים
+        זה קריטי — שם הכיסוי הוא אפס.
+      </p>
+      <p>
+        <b>מיון ברירת מחדל לפי אזור</b>, כי אזור הוא מה שקובע הליכה בפועל.
+        פופולריות והמלצה יופיעו כשיהיו להן נתונים.
+      </p>
+      <p>
+        <b>כרטיס תוצאה נושא שלוש עובדות לכל היותר.</b> אינטנסיביות, סוג גישה,
+        ואזהרה אחת אם יש. הבריף העיצובי מבקש במפורש לא להעמיס.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="section wrap">
+  <div class="section__head">
+    <p class="eyebrow">מסך 3 מתוך 3</p>
+    <h2>טים</h2>
+    <p>
+      אותם נתונים, ממשק שני. הכדור הסגול־כחול הוא כל החתימה הוויזואלית שלטים יש —
+      בלי דמות, בלי קמע. השיחה כאן מדגימה את שני המצבים שקובעים אם המוצר אמין:
+      תשובה עובדתית עם מקור וקישור, וסירוב כשהמידע לא במאגר.
+    </p>
+  </div>
+
+  <div class="stage">
+    <div class="phone phone--tall">
+      <div class="phone__scroll">
+        <div class="screen" style="background:var(--pw-surface-2)">
+          <div class="statusbar"><span class="num">9:41</span><span>●●● ▮</span></div>
+
+          <div style="display:flex; align-items:center; gap:var(--pw-s3); padding:var(--pw-s2) var(--pw-s5) var(--pw-s4)">
+            <span class="orb orb--lg"></span>
+            <div>
+              <div style="font:var(--pw-t-h2)">טים</div>
+              <div style="font:var(--pw-t-small); color:var(--pw-ink-3)">עונה רק ממה שיש במאגר</div>
+            </div>
+          </div>
+
+          <div class="msg">
+            <span class="orb" style="margin-block-start:var(--pw-s3)"></span>
+            <div class="bubble bubble--tim">
+              לפני שנתחיל, שלוש שאלות קצרות: אתם מסוג המתכננים שאוהבים סדר יום מראש, או מעדיפים לזרום?
+              מי בחבורה — מבוגרים בלבד או גם ילדים? ויש רגישויות שכדאי שאדע עליהן?
+            </div>
+          </div>
+
+          <div style="display:flex; gap:var(--pw-s2); flex-wrap:wrap; padding:var(--pw-s2) var(--pw-s5) var(--pw-s3)">
+            <span class="chip chip--magic">אנחנו זורמים</span>
+            <span class="chip chip--magic">רוצים תוכנית</span>
+            <span class="chip chip--magic">משפחה עם ילדים</span>
+          </div>
+
+          <div class="msg msg--me">
+            <div class="bubble bubble--me">אילו מתקנים ב־Magic Kingdom דורשים תשלום נוסף מעבר ל־Multi Pass?</div>
+          </div>
+
+          <div class="msg">
+            <span class="orb" style="margin-block-start:var(--pw-s3)"></span>
+            <div class="bubble bubble--tim">
+              שניים. שניהם <bdi class="en">Lightning Lane Single Pass</bdi>, שאינו כלול ב־<bdi class="en">Multi Pass</bdi>
+              ודורש רכישה נפרדת שמחירה משתנה לפי מתקן ותאריך:
+              <div style="display:flex; flex-direction:column; gap:6px; margin-block-start:var(--pw-s3)">
+                <span><b><bdi class="en">Seven Dwarfs Mine Train</bdi></b> — <bdi class="en">Fantasyland</bdi>, אינטנסיביות <span class="num">2/4</span></span>
+                <span><b><bdi class="en">TRON Lightcycle / Run</bdi></b> — <bdi class="en">Tomorrowland</bdi>, אינטנסיביות <span class="num">4/4</span></span>
+              </div>
+              <div style="margin-block-start:var(--pw-s3); font-size:13.5px; color:var(--pw-ink-2)">
+                אפשר לרכוש עד שני <bdi class="en">Single Pass</bdi> ביום, בכפוף לזמינות.
+              </div>
+              <div class="cite">
+                <svg width="15" height="15" viewBox="0 0 20 20"><use href="#i-shield"/></svg>
+                <span>מקור T1: <bdi class="en">Disney Lightning Lane</bdi> הרשמי · אומת <b class="num">24.08.2026</b></span>
+              </div>
+              <div class="deeplink">
+                <span>לדף המתקן <bdi class="en">Seven Dwarfs Mine Train</bdi></span>
+                <svg width="16" height="16" viewBox="0 0 20 20"><use href="#i-chev"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <div class="msg msg--me">
+            <div class="bubble bubble--me">מה מגבלת הגובה ב־TRON?</div>
+          </div>
+
+          <div class="msg">
+            <span class="orb" style="margin-block-start:var(--pw-s3)"></span>
+            <div class="bubble bubble--tim">
+              מגבלת הגובה לא נמצאת אצלי במאגר, ולכן לא אענה עליה.
+              זה שדה בטיחות ואני מציג אותו רק ממקור רשמי — לא מהערכה ולא מהידע הכללי שלי.
+              <div style="margin-block-start:var(--pw-s3); font-size:13.5px; color:var(--pw-ink-2)">
+                מה שכן יש לי על <bdi class="en">TRON</bdi>: אינטנסיביות <span class="num">4/4</span>,
+                <bdi class="en">Tomorrowland</bdi>, ונדרש <bdi class="en">Single Pass</bdi> בתשלום נפרד.
+              </div>
+              <div class="cite">
+                <svg width="15" height="15" viewBox="0 0 20 20"><use href="#i-shield"/></svg>
+                <span>סירוב מכוון · כלל הברזל הראשון: מה שלא במאגר, לא נענה</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="composer">
+            <span>שאלו את טים…</span>
+            <span class="send"><svg width="15" height="15" viewBox="0 0 20 20" style="transform:scaleX(-1)"><use href="#i-back"/></svg></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="spec">
+      <h3>מה בכוונה כאן</h3>
+      <p>
+        <b>הסירוב מעוצב כמו תשובה, לא כמו שגיאה.</b> זה מקרה החובה השישי ב־evals
+        (סעיף 11), וגם רגע האמון החשוב ביותר במוצר. טים מסביר <i>למה</i> הוא לא עונה,
+        ואז נותן את מה שכן יש — כך שהסירוב מרגיש מקצועי ולא מקולקל.
+      </p>
+      <p>
+        <b>שכבת הסמכות גלויה.</b> "מקור T1" ותאריך האימות מופיעים בכל תשובה עובדתית,
+        באותו רכיב בדיוק שמופיע בפוטר האמון בדף המתקן. אותו סימן ויזואלי לאותה הבטחה.
+      </p>
+      <p>
+        <b>הקישור לדף המתקן הוא סוף כל תשובה.</b> זה מה שהופך את שני החלקים למוצר אחד:
+        טים עונה בקצרה ומפנה לעומק.
+      </p>
+      <p>
+        <b>לטים אין פנים.</b> כדור עם גרדיאנט וטבעת פנימית דקה. הוא מופיע בטאב־בר,
+        לצד כל תשובה, ובכניסה מדף המתקן — נוכחות עקבית בלי קמע.
+      </p>
+      <p>
+        <b>שאלות הפתיחה מגיעות מקובץ קונפיגורציה</b> (סעיף 3.7), ושלוש שאלות החובה —
+        סוג מתכנן, הרכב חבורה, רגישויות — הן ההודעה הראשונה. גילאים וגבהים לא נשמרים (סעיף 9.4).
+      </p>
+    </div>
+  </div>
+</section>
+
+<div class="wrap"><span class="path-rule" aria-hidden="true"><i style="inset-inline-start:0"></i><i style="inset-inline-start:calc(50% - 5px)"></i><i style="inset-inline-end:0"></i></span></div>
+
+<section class="section wrap">
+  <div class="section__head">
+    <p class="eyebrow">המערכת</p>
+    <h2>טוקנים</h2>
+    <p>
+      הקובץ המלא נמצא ב־<code class="en">design/tokens.css</code> ב־repo, וזה הקובץ היחיד
+      שמכיל ערכי צבע. אחרי אישור הוא עובר כמו שהוא ל־<code class="en">src/styles/tokens.css</code>.
+    </p>
+  </div>
+
+  <div class="grid2" style="align-items:start">
+    <div class="panel">
+      <p class="eyebrow" style="margin-block-end:var(--pw-s4)">צבע</p>
+      <div class="swatches">
+        <div class="sw"><div class="sw__chip" style="background:var(--pw-way-500)"></div><div class="sw__meta"><b>כחול ניווט</b><code>--pw-way-500 · #2360E0</code><span>פעולה ראשית, מצב נבחר, אמון</span></div></div>
+        <div class="sw"><div class="sw__chip" style="background:var(--pw-magic-orb)"></div><div class="sw__meta"><b>סגול קסם</b><code>--pw-magic-500 · #6B45E4</code><span>טים, תובנה אישית — ותו לא</span></div></div>
+        <div class="sw"><div class="sw__chip" style="background:var(--pw-urgent-500)"></div><div class="sw__meta"><b>כתום אזהרה</b><code>--pw-urgent-500 · #E2592C</code><span>עלות נוספת, המתנה ארוכה</span></div></div>
+        <div class="sw"><div class="sw__chip" style="background:var(--pw-clear-500)"></div><div class="sw__meta"><b>ירוק מצב טוב</b><code>--pw-clear-500 · #0E8A5F</code><span>פתוח, המתנה קצרה</span></div></div>
+        <div class="sw"><div class="sw__chip" style="background:var(--pw-canvas); border-block-end:1px solid var(--pw-hairline)"></div><div class="sw__meta"><b>רקע</b><code>--pw-canvas · #F2F5FA</code><span>אפור־כחלחל, לא אפור טהור</span></div></div>
+        <div class="sw"><div class="sw__chip" style="background:var(--pw-ink)"></div><div class="sw__meta"><b>דיו</b><code>--pw-ink · #0C1524</code><span>שחור עם הטיה כחולה</span></div></div>
+        <div class="sw"><div class="sw__chip" style="background:var(--pw-missing-bg); border-block-end:1px solid var(--pw-missing-line)"></div><div class="sw__meta"><b>חסר נתון</b><code>--pw-missing-bg · #F5F2EC</code><span>גוון חול — נבדל מכל צבע ממשק</span></div></div>
+        <div class="sw"><div class="sw__chip" style="background:#0A1020"></div><div class="sw__meta"><b>רקע קולנועי</b><code>#0A1020</code><span>מאחורי צילום בלבד</span></div></div>
+      </div>
+      <p style="font:var(--pw-t-small); color:var(--pw-ink-2); margin-block-start:var(--pw-s5)">
+        גוון החול ל"אין נתון" הוא הכרעה: אפור נקרא כ"מושבת", אדום כ"שגיאה".
+        חסר תוכן הוא לא אף אחד מהם — הוא מצב לגיטימי שממתין למילוי.
+      </p>
+    </div>
+
+    <div class="panel">
+      <p class="eyebrow" style="margin-block-end:var(--pw-s2)">טיפוגרפיה</p>
+      <div class="typerow"><span style="font:var(--pw-t-display)">מדריך הפארקים</span><code>display · Assistant 700/30</code></div>
+      <div class="typerow"><span style="font:700 26px/1.2 var(--pw-font-name)">Seven Dwarfs</span><code>שם מתקן · Archivo 700/26</code></div>
+      <div class="typerow"><span style="font:var(--pw-t-h2)">כותרת מקטע</span><code>h2 · Assistant 600/18</code></div>
+      <div class="typerow"><span style="font:var(--pw-t-body)">טקסט גוף בעברית עם <bdi class="en">English name</bdi> בתוכו</span><code>body · Assistant 400/15</code></div>
+      <div class="typerow"><span class="num" style="font-size:15px; font-weight:600">2 / 4 · 24.08.2026</span><code>מספרים · Archivo tabular</code></div>
+      <div class="typerow"><span class="eyebrow">תווית מיקרו</span><code>micro · 600/11 · tracking .07em</code></div>
+
+      <p class="eyebrow" style="margin-block:var(--pw-s6) var(--pw-s3)">רדיוס והגבהה</p>
+      <div style="display:flex; gap:var(--pw-s3); flex-wrap:wrap; align-items:flex-end">
+        <span style="inline-size:56px; block-size:44px; border-radius:var(--pw-r-sm); background:var(--pw-sunken)"></span>
+        <span style="inline-size:56px; block-size:44px; border-radius:var(--pw-r-md); background:var(--pw-sunken)"></span>
+        <span style="inline-size:56px; block-size:44px; border-radius:var(--pw-r-lg); background:var(--pw-sunken)"></span>
+        <span style="inline-size:56px; block-size:44px; border-radius:var(--pw-r-xl); background:var(--pw-sunken)"></span>
+        <span style="inline-size:70px; block-size:44px; border-radius:var(--pw-r-lg); background:var(--pw-surface); box-shadow:var(--pw-e1); display:grid; place-items:center; font:var(--pw-t-micro); color:var(--pw-ink-3)">e1</span>
+        <span style="inline-size:70px; block-size:44px; border-radius:var(--pw-r-lg); background:var(--pw-surface); box-shadow:var(--pw-e2); display:grid; place-items:center; font:var(--pw-t-micro); color:var(--pw-ink-3)">e2</span>
+      </div>
+      <p style="font:var(--pw-t-small); color:var(--pw-ink-2); margin-block-start:var(--pw-s4)">
+        שתי רמות הגבהה בלבד. הבריף מזהיר במפורש מפני יותר מדי צללים, ושתיים מספיקות:
+        כרטיס נח על הרקע, ומשהו שצף מעליו.
+      </p>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-block-start:var(--pw-s5)">
+    <p class="eyebrow" style="margin-block-end:var(--pw-s5)">אייקונים · קו 1.7, קצוות מעוגלים, ריבוע 20</p>
+    <div class="icons">
+      <figure><svg width="26" height="26" viewBox="0 0 20 20"><use href="#i-attraction"/></svg><figcaption>מתקן</figcaption></figure>
+      <figure><svg width="26" height="26" viewBox="0 0 20 20"><use href="#i-show"/></svg><figcaption>הופעה</figcaption></figure>
+      <figure><svg width="26" height="26" viewBox="0 0 20 20"><use href="#i-dining"/></svg><figcaption>אוכל</figcaption></figure>
+      <figure><svg width="26" height="26" viewBox="0 0 20 20"><use href="#i-year"/></svg><figcaption>אירוע · שנה</figcaption></figure>
+      <figure><svg width="26" height="26" viewBox="0 0 20 20"><use href="#i-clock"/></svg><figcaption>המתנה · משך</figcaption></figure>
+      <figure><svg width="26" height="26" viewBox="0 0 20 20"><use href="#i-walk"/></svg><figcaption>הליכה</figcaption></figure>
+      <figure><svg width="26" height="26" viewBox="0 0 20 20"><use href="#i-intensity"/></svg><figcaption>אינטנסיביות</figcaption></figure>
+      <figure><svg width="26" height="26" viewBox="0 0 20 20"><use href="#i-motion"/></svg><figcaption>בחילה</figcaption></figure>
+      <figure><svg width="26" height="26" viewBox="0 0 20 20"><use href="#i-dark"/></svg><figcaption>מקום סגור</figcaption></figure>
+      <figure><svg width="26" height="26" viewBox="0 0 20 20"><use href="#i-loud"/></svg><figcaption>רעש פתאומי</figcaption></figure>
+      <figure><svg width="26" height="26" viewBox="0 0 20 20"><use href="#i-height"/></svg><figcaption>מגבלת גובה</figcaption></figure>
+      <figure><svg width="26" height="26" viewBox="0 0 20 20"><use href="#i-wet"/></svg><figcaption>הרטבה</figcaption></figure>
+      <figure><svg width="26" height="26" viewBox="0 0 20 20"><use href="#i-ac"/></svg><figcaption>ממוזג</figcaption></figure>
+      <figure><svg width="26" height="26" viewBox="0 0 20 20"><use href="#i-access"/></svg><figcaption>נגישות</figcaption></figure>
+      <figure><svg width="26" height="26" viewBox="0 0 20 20"><use href="#i-lightning"/></svg><figcaption>דילוג בתור</figcaption></figure>
+      <figure><svg width="26" height="26" viewBox="0 0 20 20"><use href="#i-ticket"/></svg><figcaption>כרטיס</figcaption></figure>
+      <figure><svg width="26" height="26" viewBox="0 0 20 20"><use href="#i-money"/></svg><figcaption>תשלום נוסף</figcaption></figure>
+      <figure><svg width="26" height="26" viewBox="0 0 20 20"><use href="#i-shield"/></svg><figcaption>מקור מאומת</figcaption></figure>
+      <figure><svg width="26" height="26" viewBox="0 0 20 20"><use href="#i-pin"/></svg><figcaption>אזור</figcaption></figure>
+      <figure><span class="orb" style="inline-size:26px; block-size:26px"></span><figcaption>טים</figcaption></figure>
+    </div>
+    <p style="font:var(--pw-t-small); color:var(--pw-ink-2); margin-block-start:var(--pw-s5); max-width:70ch">
+      אין אימוג'י בממשק, כבקשתך. אייקון הרעש והאייקון של מקום סגור נבנו במיוחד —
+      אין להם מקבילה מוכנה בספריות, והם בדיוק שני הפילטרים שאף מתחרה בעברית לא נותן.
+    </p>
+  </div>
+</section>
+
+<section class="section wrap">
+  <div class="section__head">
+    <p class="eyebrow">מה חוסם</p>
+    <h2>מה שאין לי, ולכן לא המצאתי</h2>
+    <p>
+      הקובץ שהעברת נקי ומדויק — 477 שורות, מפתח ייחודי בכולן, שלושה מקורות מקושרים
+      בכל שורה. הפערים הם פערי <b>ממדים</b>, לא פערי איכות. הדוח המלא נמצא ב־<code class="en">docs/content-file-analysis.md</code>.
+    </p>
+  </div>
+
+  <div class="tablewrap panel">
+    <table class="data">
+      <thead><tr><th>מה שהבריף דורש בדף מתקן</th><th>בקובץ</th><th>משמעות</th></tr></thead>
+      <tbody>
+        <tr><td><b>רגישויות</b> — בחילה, מקום סגור, גבהים, רעש</td><td><span class="chip chip--off num">0 / 477</span></td><td>הפיצ'ר שאין לאף מתחרה בעברית. חוסם M3 ו־M7.</td></tr>
+        <tr><td><b>מגבלת גובה</b></td><td><span class="chip chip--off num">0 / 477</span></td><td>סינון מרכזי ושדה בטיחות T1. חוסם שני מקרי eval חובה.</td></tr>
+        <tr><td>שם בעברית</td><td><span class="chip chip--off num">0 / 477</span></td><td>הקובץ כולו באנגלית.</td></tr>
+        <tr><td>בלוק הדעה — תיאור, שורה תחתונה, המלצה, טיפים</td><td><span class="chip chip--off num">0 / 477</span></td><td>רק את כותבת את זה. לא אכתוב במקומך.</td></tr>
+        <tr><td>סרטון יוטיוב</td><td><span class="chip chip--off num">0 / 477</span></td><td>לפי סעיף 3.3א — 0 דפים "מוכנים" כרגע.</td></tr>
+        <tr><td>משך · שנה · הרטבה · ממוזג · נגישות · פופולריות</td><td><span class="chip chip--off num">0 / 477</span></td><td>שישה שדות בבלוק העובדות בלי מקור.</td></tr>
+        <tr><td>אינטנסיביות</td><td><span class="chip chip--warn num">107 / 232</span></td><td>46%. באפיק יוניברסל, וולקנו ביי ושני פארקי המים של דיסני — <b>אפס</b>.</td></tr>
+        <tr><td>סוג כרטיס נדרש</td><td><span class="chip chip--open num">477 / 477</span></td><td>הבריף ביקש שדה אחד; הקובץ נותן תשע עמודות מדויקות. לא לכווץ.</td></tr>
+        <tr><td>מקורות ותאריך אימות</td><td><span class="chip chip--open num">477 / 477</span></td><td>פוטר האמון יכול להתמלא מיידית.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 style="font:var(--pw-t-h2); margin-block:var(--pw-s7) var(--pw-s4)">מה שאני צריך ממך כדי להמשיך</h3>
+  <div class="asks">
+    <div class="ask"><div><b>מסמכי הרקע ותיקיית <code class="en">db/</code> — לא הגיעו</b><p>ה־repo היה ריק לגמרי. אחד־עשר המסמכים בסעיף 2 ושש המיגרציות אינם בו. בלעדיהם אני לא יכול לכתוב את הסכמה, את <code class="en">content-mapping.json</code> או את <code class="en">import-content.ts</code> — סעיף 1.3 אוסר להמציא מבנה נתונים. <b>זה החוסם הראשון.</b></p></div></div>
+    <div class="ask"><div><b>מאיפה יגיעו רגישויות ומגבלות גובה?</b><p>שלוש אפשרויות: עמודות חדשות בקובץ שלך · מקור T1 נפרד (מדריכי הרוכבים הרשמיים של דיסני ויוניברסל, שם מגבלות הגובה מפורסמות רשמית) · או איסוף ידני. מגבלת גובה חייבת T1 לפי סעיף 7.</p></div></div>
+    <div class="ask"><div><b>שבעה פארקים או עשרה?</b><p>הבריף מדבר על שבע כרטיסיות. הקובץ כולל גם שלושה פארקי מים — 68 שורות. החלטת מוצר, לא שלי.</p></div></div>
+    <div class="ask"><div><b>תבנית דף למסעדות ולאירועים</b><p>230 מסעדות ו־15 אירועים הם 51% מהקובץ, ואין להם תבנית בסעיף 3.3. דף מתקן לא מתאים למסעדה.</p></div></div>
+    <div class="ask"><div><b>אישור השפה העיצובית</b><p>אם הכיוון נכון — הטוקנים עוברים ל־<code class="en">src/styles/tokens.css</code> ואני ממשיך לשאר המסכים. אם משהו לא יושב, נתקן כאן לפני שנבנות קומפוננטות.</p></div></div>
+    <div class="ask"><div><b>סדר הבלוקים בדף המתקן</b><p>המתג במסך הראשון מראה את שתי האפשרויות. תגידי מה נכון ואקבע ברירת מחדל בקונפיגורציה.</p></div></div>
+  </div>
+</section>
+
+<section class="section wrap">
+  <div class="panel" style="background:var(--pw-way-50); border-color:transparent">
+    <p class="eyebrow" style="color:var(--pw-way-600)">הערת היקף</p>
+    <h3 style="font:var(--pw-t-h2); margin-block:var(--pw-s2) var(--pw-s3)">הבריף העיצובי מתאר מוצר רחב מגרסה 1</h3>
+    <p style="color:var(--pw-ink-2); max-width:72ch">
+      המסכים שביקשת בבריף העיצובי — מפה חיה, מסלול יום לפי שעות, זמני המתנה, "עוד 7 דקות הליכה" —
+      הם בדיוק מה שסעיף 0 בבריף הראשי מוציא מגרסה 1: <i>כלי תכנון ימים ויזואלי · מפה או מסלול · זמני המתנה חיים</i>.
+      לא הכרעתי ביניהם. השפה שבניתי כאן מחזיקה את שניהם: מוטיב הדרך הוא כבר ציר של מסלול,
+      כחול הניווט כבר מוגדר למפה, וכרטיס התוצאה יקבל זמן המתנה ומרחק הליכה בלי שינוי מבני —
+      כשיהיה מקור נתונים כזה. <b>גרסה 1 נשארת מדריך התוכן וטים, אלא אם תגידי אחרת.</b>
+    </p>
+  </div>
+</section>
+</main>
+
+<footer class="foot wrap">
+  <p>
+    Park Day Companion · אבן דרך M1 · נבנה מהקובץ <code class="en">Orlando_Parks_Trip_Planner_2026_CURRENT_v5.xlsx</code>
+    (אומת 25.08.2026). כל הנתונים בדף הזה נלקחו משורות אמיתיות בקובץ; שום ערך לא הומצא.
+    הצילומים הם מצייני מקום מופשטים — אין בהם קניין רוחני של אף מותג.
+  </p>
+</footer>
+
+<script>
+(function () {
+  var facts = document.getElementById('grp-facts');
+  var opinion = document.getElementById('grp-opinion');
+  var buttons = document.querySelectorAll('.segmented button');
+  buttons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var factsFirst = btn.dataset.order === 'facts';
+      facts.style.order = factsFirst ? '1' : '2';
+      opinion.style.order = factsFirst ? '2' : '1';
+      buttons.forEach(function (b) { b.setAttribute('aria-pressed', String(b === btn)); });
+    });
+  });
+})();
+</script>

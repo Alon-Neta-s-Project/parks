@@ -1,0 +1,163 @@
+{
+  "README": {
+    "rows": 17,
+    "columns": [
+      "Orlando Parks Trip Planner – Current 2026 Dataset",
+      "col_1"
+    ],
+    "file": "readme.json"
+  },
+  "ACTIVITY_DATABASE": {
+    "rows": 477,
+    "columns": [
+      "Resort",
+      "Park",
+      "Park Type",
+      "Activity Type",
+      "Activity",
+      "Area / Land",
+      "Subtype",
+      "Intensity",
+      "Intensity Source Basis",
+      "Required Admission / Ticket",
+      "Optional Fast Access / Pass",
+      "Reservation / Additional Payment",
+      "Included With Admission?",
+      "Dining Service Type",
+      "Advance Reservation",
+      "Special Event Dates / Season",
+      "Status / Seasonality",
+      "Official Activity Source URL",
+      "Access Source URL",
+      "Intensity Source URL",
+      "Last Verified",
+      "Key",
+      "Event Season",
+      "Event Start Date",
+      "Event End Date",
+      "Separate Event Ticket Required?",
+      "Standard Day Ticket Sufficient?",
+      "Event Access Notes",
+      "Lightning Lane Type",
+      "Premier Pass Included?",
+      "Included in Multi Pass?",
+      "Separate Single Pass Purchase Required?",
+      "Extra Cost Beyond Multi Pass?",
+      "Lightning Lane Purchase Notes"
+    ],
+    "file": "activity_database.json"
+  },
+  "TRIP_PLANNER": {
+    "rows": 8,
+    "columns": [
+      "Date / Day",
+      "Time",
+      "Resort",
+      "Park",
+      "Activity Type",
+      "Activity",
+      "Personal Priority (1–5)",
+      "Intensity (Auto)",
+      "Area / Land (Auto)",
+      "Ticket / Pass Chosen",
+      "Required Admission (Auto)",
+      "Optional Fast Access / Pass (Auto)",
+      "Reservation / Additional Payment (Auto)",
+      "Status / Seasonality (Auto)",
+      "Planner Status",
+      "Notes",
+      "Lightning Lane Type (Auto)",
+      "Premier Pass Included? (Auto)",
+      "Included in Multi Pass? (Auto)",
+      "Separate Single Pass Purchase? (Auto)",
+      "Extra Cost Beyond Multi Pass? (Auto)"
+    ],
+    "file": "trip_planner.json"
+  },
+  "ACCESS_RULES": {
+    "rows": 26,
+    "columns": [
+      "Rule / Product",
+      "Required admission",
+      "Optional add-on",
+      "Key exception / note",
+      "Official source",
+      "col_5",
+      "col_6",
+      "col_7",
+      "col_8",
+      "col_9",
+      "col_10"
+    ],
+    "file": "access_rules.json"
+  },
+  "CHANGE_LOG": {
+    "rows": 13,
+    "columns": [
+      "Change",
+      "Details"
+    ],
+    "file": "change_log.json"
+  },
+  "LISTS": {
+    "rows": 46,
+    "columns": [
+      "Disney World",
+      "Universal Orlando",
+      "Activity Types",
+      "Planner Status",
+      "col_4",
+      "Ticket / Pass choices",
+      "col_6",
+      "Disney's Animal Kingdom|Attraction",
+      "Disney's Animal Kingdom|Dining",
+      "Disney's Animal Kingdom|Entertainment",
+      "Disney's Blizzard Beach|Attraction",
+      "Disney's Blizzard Beach|Dining",
+      "Disney's Hollywood Studios|Attraction",
+      "Disney's Hollywood Studios|Dining",
+      "Disney's Hollywood Studios|Entertainment",
+      "Disney's Hollywood Studios|Special Event",
+      "Disney's Typhoon Lagoon|Attraction",
+      "Disney's Typhoon Lagoon|Dining",
+      "Disney's Typhoon Lagoon|Special Event",
+      "EPCOT|Attraction",
+      "EPCOT|Dining",
+      "EPCOT|Entertainment",
+      "EPCOT|Special Event",
+      "Magic Kingdom|Attraction",
+      "Magic Kingdom|Dining",
+      "Magic Kingdom|Entertainment",
+      "Magic Kingdom|Special Event",
+      "Universal Epic Universe|Attraction",
+      "Universal Epic Universe|Dining",
+      "Universal Epic Universe|Entertainment",
+      "Universal Islands of Adventure|Attraction",
+      "Universal Islands of Adventure|Dining",
+      "Universal Islands of Adventure|Entertainment",
+      "Universal Islands of Adventure|Special Event",
+      "Universal Studios Florida|Attraction",
+      "Universal Studios Florida|Dining",
+      "Universal Studios Florida|Entertainment",
+      "Universal Studios Florida|Special Event",
+      "Universal Volcano Bay|Attraction",
+      "Universal Volcano Bay|Dining",
+      "Universal Volcano Bay|Entertainment",
+      "Universal Volcano Bay|Special Event"
+    ],
+    "file": "lists.json"
+  },
+  "DROPDOWN_HELPER": {
+    "rows": 0,
+    "columns": [
+      "Park 1",
+      "Park 2",
+      "Park 3",
+      "Park 4",
+      "Park 5",
+      "Park 6",
+      "Activities (spill right)"
+    ],
+    "file": "dropdown_helper.json"
+  }
+}

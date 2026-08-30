@@ -1,0 +1,70 @@
+[
+  {
+    "Orlando Parks Trip Planner – Current 2026 Dataset": "Last verified",
+    "col_1": "2026-08-25"
+  },
+  {
+    "Orlando Parks Trip Planner – Current 2026 Dataset": "Coverage",
+    "col_1": "Walt Disney World + Universal Orlando, including Disney water parks and Universal Volcano Bay. Activity Types: Attraction, Entertainment, Dining, Special Event."
+  },
+  {
+    "Orlando Parks Trip Planner – Current 2026 Dataset": "Critical ticket distinction",
+    "col_1": "Required Admission / Ticket = what you MUST hold to enter the park/activity. Optional Fast Access / Pass = Lightning Lane / Universal Express, which do NOT replace park admission."
+  },
+  {
+    "Orlando Parks Trip Planner – Current 2026 Dataset": "Intensity rule",
+    "col_1": "Intensity comes ONLY from DisneyGirlBlog. If an exact current Attraction/Entertainment item has no explicit rating there, use Unknown. Dining and Special Events = N/A."
+  },
+  {
+    "Orlando Parks Trip Planner – Current 2026 Dataset": "Intensity audit",
+    "col_1": "Corrected explicit DisneyGirlBlog ratings that were previously left Unknown, including Tomorrowland Speedway = 1/4 (קליל), plus additional Disney and Universal items."
+  },
+  {
+    "Orlando Parks Trip Planner – Current 2026 Dataset": "Special-event data",
+    "col_1": "Special Events now also have Event Season, Start Date, End Date, Separate Event Ticket Required?, Standard Day Ticket Sufficient?, and Event Access Notes. Exact individual event nights remain a future dynamic-data layer."
+  },
+  {
+    "Orlando Parks Trip Planner – Current 2026 Dataset": "Early Entry",
+    "col_1": "Not included at this stage, by design."
+  },
+  {
+    "Orlando Parks Trip Planner – Current 2026 Dataset": "Planner workflow",
+    "col_1": "Choose Resort → Park → Activity Type → Activity. The Park dropdown depends on Resort; Activity depends on Park + Activity Type."
+  },
+  {
+    "Orlando Parks Trip Planner – Current 2026 Dataset": "Source hierarchy",
+    "col_1": "Official Disney/Universal = current existence, naming, admission/access, dining, events and status. DisneyGirlBlog = intensity ONLY."
+  },
+  {
+    "Orlando Parks Trip Planner – Current 2026 Dataset": "Important",
+    "col_1": "Hours, closures, ticket products, Lightning Lane/Express participation and exact event dates can change. Re-check official sources before purchase and on the visit day."
+  },
+  {
+    "Orlando Parks Trip Planner – Current 2026 Dataset": "Lightning Lane Type",
+    "col_1": "Disney theme-park Attractions/Entertainment are now explicitly classified as Multi Pass, Single Pass, or None. Water parks and non-Disney content use N/A."
+  },
+  {
+    "Orlando Parks Trip Planner – Current 2026 Dataset": "Single Pass meaning",
+    "col_1": "Single Pass is a separate paid Lightning Lane product and is NOT included in Multi Pass. Current Single Pass rides: Seven Dwarfs + TRON (Magic Kingdom), Guardians (EPCOT), Rise of the Resistance (Hollywood Studios), Flight of Passage (Animal Kingdom)."
+  },
+  {
+    "Orlando Parks Trip Planner – Current 2026 Dataset": "Premier Pass",
+    "col_1": "Premier Pass Included? = Yes only for current Disney experiences that have Lightning Lane access; No for Disney experiences with no Lightning Lane; N/A where the field does not apply."
+  },
+  {
+    "Orlando Parks Trip Planner – Current 2026 Dataset": "Lightning Lane payment logic",
+    "col_1": "Multi Pass and Single Pass are separate paid products. A Single Pass attraction is NOT included in Multi Pass and requires a separate paid Single Pass purchase for Lightning Lane access."
+  },
+  {
+    "Orlando Parks Trip Planner – Current 2026 Dataset": "Included in Multi Pass?",
+    "col_1": "Yes = part of the paid Multi Pass product. No = not part of Multi Pass. N/A = Lightning Lane does not apply."
+  },
+  {
+    "Orlando Parks Trip Planner – Current 2026 Dataset": "Separate Single Pass Purchase Required?",
+    "col_1": "Yes = Lightning Lane access requires a separate Single Pass purchase. No = it is either included in Multi Pass or Lightning Lane is not offered."
+  },
+  {
+    "Orlando Parks Trip Planner – Current 2026 Dataset": "Extra Cost Beyond Multi Pass?",
+    "col_1": "Single Pass = Yes, separately priced by attraction/date. Multi Pass = no separate per-attraction charge beyond the Multi Pass purchase."
+  }
+]

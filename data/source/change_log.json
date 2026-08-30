@@ -1,0 +1,54 @@
+[
+  {
+    "Change": "Dependent dropdown fix",
+    "Details": "Rebuilt Park dropdown to depend on Resort using direct helper ranges; removed OFFSET/INDIRECT from data-validation criteria."
+  },
+  {
+    "Change": "Activity dropdown fix",
+    "Details": "Rebuilt Activity dropdown to depend on Park + Activity Type through a helper spill list."
+  },
+  {
+    "Change": "Intensity audit",
+    "Details": "Corrected 29 activities/entertainment items that have an explicit DisneyGirlBlog rating but were previously Unknown. Tomorrowland Speedway is now 1/4 (קליל)."
+  },
+  {
+    "Change": "Special-event schema",
+    "Details": "Added Event Season, Event Start Date, Event End Date, Separate Event Ticket Required?, Standard Day Ticket Sufficient?, and Event Access Notes."
+  },
+  {
+    "Change": "Special-event coverage",
+    "Details": "Added Disney After Hours at Magic Kingdom, Halloween Horror Nights Premium Scream Night and Volcano Bay Under the Stars to the canonical database."
+  },
+  {
+    "Change": "Dynamic-date boundary",
+    "Details": "Exact individual event nights are intentionally not modeled yet; start/end/season are base data and exact-date availability should be a later dynamic service."
+  },
+  {
+    "Change": "Early Entry",
+    "Details": "Not added in this version, by request."
+  },
+  {
+    "Change": "Lightning Lane full audit",
+    "Details": "Audited all Disney theme-park Attraction/Entertainment rows against the current official Lightning Lane classification. No remaining classification mismatches were found after the update."
+  },
+  {
+    "Change": "Lightning Lane schema",
+    "Details": "Added explicit Lightning Lane Type = Multi Pass / Single Pass / None / N/A and Premier Pass Included? = Yes / No / N/A."
+  },
+  {
+    "Change": "Wording cleanup",
+    "Details": "Rewrote Disney Optional Fast Access / Pass text so Single Pass is explicitly marked NOT included in Multi Pass, and no-Lightning-Lane experiences say so directly."
+  },
+  {
+    "Change": "Lightning Lane payment distinction",
+    "Details": "Added Included in Multi Pass?, Separate Single Pass Purchase Required?, Extra Cost Beyond Multi Pass?, and Lightning Lane Purchase Notes."
+  },
+  {
+    "Change": "Single Pass wording",
+    "Details": "Single Pass attractions now explicitly state NOT included in Multi Pass and require a separate paid Single Pass purchase; price varies by attraction and date."
+  },
+  {
+    "Change": "Official audit scope",
+    "Details": "All four Walt Disney World theme parks were cross-checked against Disney's current official Lightning Lane list. Disney water parks are N/A."
+  }
+]
