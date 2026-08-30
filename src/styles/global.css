@@ -162,6 +162,12 @@ button {
   justify-content: flex-end;
 }
 
+.exchange {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pw-s3);
+}
+
 @keyframes rise {
   from {
     opacity: 0;
@@ -315,6 +321,20 @@ button {
   border-block-start: 1px solid var(--pw-hairline);
 }
 
+.exp__main {
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 0;
+  margin: 0;
+  color: inherit;
+  text-align: start;
+  display: flex;
+  flex-direction: column;
+  gap: var(--pw-s2);
+  inline-size: 100%;
+}
+
 .exp__row {
   display: flex;
   align-items: baseline;
@@ -346,6 +366,108 @@ button {
 }
 
 /* ---- intensity ----------------------------------------------------------- */
+/* ---- detail: the trust footer, behind a tap ------------------------------ */
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pw-s4);
+  margin-block-start: var(--pw-s3);
+  padding: var(--pw-s4);
+  background: var(--pw-surface-2);
+  border-radius: var(--pw-r-md);
+  font: var(--pw-t-small);
+  color: var(--pw-ink-2);
+}
+
+.detail dl {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pw-s3);
+  margin: 0;
+}
+
+.detail dt {
+  font: var(--pw-t-micro);
+  letter-spacing: var(--pw-track-micro);
+  color: var(--pw-ink-3);
+  margin-block-end: 3px;
+}
+
+/* Every value here is English prose lifted from the workbook. Isolation alone
+   leaves the sentence's own full stop stranded at the wrong end, so these run
+   LTR outright — which is also how English paragraphs should set. */
+.detail dd {
+  margin: 0;
+  line-height: 1.55;
+  direction: ltr;
+  text-align: start;
+  unicode-bidi: isolate;
+}
+
+.detail__aside {
+  display: block;
+  margin-block-start: var(--pw-s2);
+  color: var(--pw-ink-3);
+}
+
+.detail__label {
+  display: block;
+  font: var(--pw-t-micro);
+  letter-spacing: var(--pw-track-micro);
+  color: var(--pw-ink-3);
+}
+
+.detail__sources ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pw-s2);
+  margin-block: var(--pw-s3);
+}
+
+.detail__sources li {
+  display: flex;
+  align-items: baseline;
+  gap: var(--pw-s2);
+}
+
+.detail__sources a {
+  color: var(--pw-way-600);
+  word-break: break-all;
+  font-size: 12px;
+}
+
+.tier {
+  flex: none;
+  font: var(--pw-t-micro);
+  letter-spacing: 0.04em;
+  padding: 3px 7px;
+  border-radius: 6px;
+}
+
+.tier--t1 {
+  background: var(--pw-way-500);
+  color: #fff;
+}
+
+.tier--t4 {
+  background: var(--pw-sunken);
+  color: var(--pw-ink-2);
+}
+
+.detail__missing {
+  background: var(--pw-missing-bg);
+  border: 1px solid var(--pw-missing-line);
+  border-radius: var(--pw-r-sm);
+  padding: var(--pw-s3);
+  color: var(--pw-missing-ink);
+}
+
+.detail__missing b {
+  display: block;
+  font-weight: 600;
+  margin-block-end: 3px;
+}
+
 .intensity {
   display: inline-flex;
   gap: 3px;

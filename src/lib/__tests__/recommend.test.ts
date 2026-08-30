@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { emptyProfile, type Profile } from "../profile";
 import { recommend, searchExperiences } from "../recommend";
+import { refinementById } from "../refine";
 
 const withProfile = (patch: Partial<Profile>): Profile => ({ ...emptyProfile, ...patch });
 
@@ -84,5 +85,43 @@ describe("recommend", () => {
 
   it("returns nothing before a park is chosen", () => {
     expect(recommend(emptyProfile).total).toBe(0);
+  });
+});
+
+describe("refinements", () => {
+  const mk = withProfile({ parks: ["Magic Kingdom"], intensityMax: 4 });
+
+  it("calmer narrows the list and never empties it", () => {
+    let profile = mk;
+    for (let step = 0; step < 5; step += 1) {
+      const option = refinementById("calmer");
+      if (!option?.offered(profile)) break;
+      profile = option.apply(profile);
+      expect(recommend(profile).total).toBeGreaterThan(0);
+    }
+    expect(profile.intensityMax).toBe(1);
+    expect(refinementById("calmer")?.offered(profile)).toBe(false);
+  });
+
+  it("only-included drops the separately paid rides, and reverses cleanly", () => {
+    const included = refinementById("onlyIncluded")!.apply(mk);
+    const result = recommend(included);
+    expect(result.notes.singlePass).toHaveLength(0);
+    expect(result.total).toBe(recommend(mk).total - 2);
+    expect(recommend(refinementById("allAccess")!.apply(included)).total).toBe(
+      recommend(mk).total,
+    );
+  });
+
+  it("splitting by kind partitions the same set", () => {
+    const rides = recommend(refinementById("onlyAttractions")!.apply(mk)).total;
+    const shows = recommend(refinementById("onlyShows")!.apply(mk)).total;
+    expect(rides + shows).toBe(recommend(mk).total);
+  });
+
+  it("offers nothing that would be a no-op", () => {
+    const narrowed = refinementById("onlyAttractions")!.apply(mk);
+    expect(refinementById("onlyAttractions")?.offered(narrowed)).toBe(false);
+    expect(refinementById("bothKinds")?.offered(narrowed)).toBe(true);
   });
 });

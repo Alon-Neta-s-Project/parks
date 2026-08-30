@@ -20,6 +20,8 @@ export interface SearchFilters {
   includeUnrated?: boolean;
   /** Drop rides the workbook flags as temporarily unavailable. */
   includeClosed?: boolean;
+  /** Explicit opt-in: only rides whose short queue the group's pass covers. */
+  excludeSinglePass?: boolean;
   land?: string;
 }
 
@@ -32,6 +34,7 @@ export function searchExperiences(filters: SearchFilters): Experience[] {
     intensityMax = null,
     includeUnrated = false,
     includeClosed = false,
+    excludeSinglePass = false,
     land,
   } = filters;
 
@@ -40,6 +43,7 @@ export function searchExperiences(filters: SearchFilters): Experience[] {
     if (kinds?.length && !kinds.includes(e.kind)) return false;
     if (land && e.land !== land) return false;
     if (!includeClosed && e.status.state === "closed") return false;
+    if (excludeSinglePass && e.fastAccess.singlePassRequired) return false;
 
     if (!e.intensity.rated) return includeUnrated;
     const value = e.intensity.value as IntensityLevel;
@@ -113,6 +117,7 @@ export function recommend(profile: Profile): Recommendation {
     intensityMin: profile.intensityMin,
     intensityMax: profile.intensityMax,
     includeUnrated: profile.includeUnrated,
+    excludeSinglePass: profile.onlyIncludedInPass,
   });
 
   const sorted = [...matches].sort((a, b) => {
@@ -170,5 +175,6 @@ export function countFor(profile: Profile): number {
     intensityMin: profile.intensityMin,
     intensityMax: profile.intensityMax,
     includeUnrated: profile.includeUnrated,
+    excludeSinglePass: profile.onlyIncludedInPass,
   }).length;
 }

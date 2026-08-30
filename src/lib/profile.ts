@@ -20,6 +20,13 @@ export interface Profile {
   hasFastAccess: boolean | null;
   /** Willing to pay separately for a Single Pass ride. */
   paysExtra: boolean | null;
+  /**
+   * Opt-in only. By default a Single Pass ride still appears, because the paid
+   * queue is not park entry and anyone can queue for it normally — filtering it
+   * out silently would hide a ride the group can absolutely ride. This turns on
+   * only when someone explicitly asks to see what their pass covers.
+   */
+  onlyIncludedInPass: boolean;
   /** Unrated rides are hidden by default, never silently — the count is shown. */
   includeUnrated: boolean;
 }
@@ -33,6 +40,7 @@ export const emptyProfile: Profile = {
   kinds: ["attraction", "entertainment"],
   hasFastAccess: null,
   paysExtra: null,
+  onlyIncludedInPass: false,
   includeUnrated: false,
 };
 
