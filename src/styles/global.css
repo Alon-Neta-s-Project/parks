@@ -1,0 +1,488 @@
+@import "./tokens.css";
+
+/* Pathway — chat surface. Logical properties only (brief §8): no left/right. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--pw-canvas);
+}
+
+body {
+  margin: 0;
+  background: var(--pw-canvas);
+  color: var(--pw-ink);
+  font: var(--pw-t-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+p,
+ul,
+li {
+  margin: 0;
+}
+
+ul {
+  padding-inline-start: 0;
+  list-style: none;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--pw-way-500);
+  outline-offset: 2px;
+  border-radius: var(--pw-r-xs);
+}
+
+/* An English ride name inside a Hebrew sentence is the normal case here, so
+   every Latin run is isolated and every figure runs LTR. */
+.en,
+.num {
+  font-family: var(--pw-font-name);
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- shell --------------------------------------------------------------- */
+.app {
+  min-block-size: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.app__inner {
+  inline-size: min(560px, 100%);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: var(--pw-s3);
+  padding: var(--pw-s4) var(--pw-s5);
+  background: color-mix(in srgb, var(--pw-canvas) 88%, transparent);
+  backdrop-filter: blur(12px);
+  border-block-end: 1px solid var(--pw-hairline);
+}
+
+.topbar__id {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.topbar__id b {
+  display: block;
+  font: var(--pw-t-h2);
+}
+
+.topbar__id span {
+  display: block;
+  font: var(--pw-t-small);
+  color: var(--pw-ink-3);
+}
+
+.ghost {
+  appearance: none;
+  border: 1px solid var(--pw-hairline-strong);
+  background: var(--pw-surface);
+  color: var(--pw-ink-2);
+  border-radius: var(--pw-r-pill);
+  padding: 7px 13px;
+  font: 600 12.5px var(--pw-font-ui);
+  transition: border-color var(--pw-fast) var(--pw-ease);
+}
+
+.ghost:hover {
+  border-color: var(--pw-way-400);
+  color: var(--pw-way-600);
+}
+
+/* ---- Tim's mark ---------------------------------------------------------- */
+.orb {
+  flex: none;
+  inline-size: 28px;
+  block-size: 28px;
+  border-radius: var(--pw-r-pill);
+  background: var(--pw-magic-orb);
+  box-shadow: var(--pw-e-magic);
+  position: relative;
+}
+
+.orb::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+}
+
+.orb--lg {
+  inline-size: 44px;
+  block-size: 44px;
+}
+
+/* ---- conversation -------------------------------------------------------- */
+.thread {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--pw-s4);
+  padding: var(--pw-s5) var(--pw-s4) var(--pw-s9);
+}
+
+.msg {
+  display: flex;
+  gap: var(--pw-s2);
+  align-items: flex-start;
+  animation: rise var(--pw-base) var(--pw-ease) both;
+}
+
+.msg--me {
+  justify-content: flex-end;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .msg {
+    animation: none;
+  }
+}
+
+.bubble {
+  border-radius: var(--pw-r-lg);
+  padding: var(--pw-s4);
+  font-size: 15px;
+  line-height: 1.62;
+  max-inline-size: 46ch;
+}
+
+.bubble--tim {
+  background: var(--pw-surface);
+  border: 1px solid var(--pw-hairline);
+  box-shadow: var(--pw-e1);
+  border-end-start-radius: var(--pw-r-xs);
+}
+
+.bubble--me {
+  background: var(--pw-way-500);
+  color: #fff;
+  border-end-end-radius: var(--pw-r-xs);
+}
+
+.bubble strong {
+  font-weight: 600;
+}
+
+.bubble strong + p,
+.bubble p + p {
+  margin-block-start: var(--pw-s2);
+}
+
+.bubble__note {
+  margin-block-start: var(--pw-s3);
+  padding-block-start: var(--pw-s3);
+  border-block-start: 1px solid var(--pw-hairline);
+  font: var(--pw-t-small);
+  color: var(--pw-ink-3);
+}
+
+/* ---- answers ------------------------------------------------------------- */
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pw-s2);
+  padding-inline-start: 36px;
+}
+
+.option {
+  appearance: none;
+  border: 1px solid var(--pw-hairline-strong);
+  background: var(--pw-surface);
+  color: var(--pw-ink);
+  border-radius: var(--pw-r-pill);
+  padding: 10px 15px;
+  font: 500 14px var(--pw-font-ui);
+  box-shadow: var(--pw-e1);
+  transition:
+    border-color var(--pw-fast) var(--pw-ease),
+    background var(--pw-fast) var(--pw-ease),
+    color var(--pw-fast) var(--pw-ease);
+}
+
+.option:hover {
+  border-color: var(--pw-way-400);
+  color: var(--pw-way-600);
+}
+
+.option[aria-pressed="true"] {
+  background: var(--pw-way-500);
+  border-color: transparent;
+  color: #fff;
+}
+
+.option small {
+  display: block;
+  font-size: 11.5px;
+  opacity: 0.75;
+  margin-block-start: 1px;
+}
+
+.option--go {
+  background: var(--pw-magic-500);
+  border-color: transparent;
+  color: #fff;
+}
+
+.option--go:hover {
+  color: #fff;
+  border-color: transparent;
+  filter: brightness(1.08);
+}
+
+.option--go[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: none;
+}
+
+/* ---- results ------------------------------------------------------------- */
+.result {
+  padding-inline-start: 36px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--pw-s4);
+}
+
+.landgroup {
+  background: var(--pw-surface);
+  border: 1px solid var(--pw-hairline);
+  border-radius: var(--pw-r-lg);
+  box-shadow: var(--pw-e1);
+  overflow: hidden;
+}
+
+.landgroup__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--pw-s3);
+  padding: var(--pw-s4) var(--pw-s4) var(--pw-s3);
+}
+
+.landgroup__head b {
+  font: 600 15px var(--pw-font-name);
+  unicode-bidi: isolate;
+}
+
+.landgroup__head span {
+  font: var(--pw-t-micro);
+  letter-spacing: var(--pw-track-micro);
+  color: var(--pw-ink-3);
+}
+
+.exp {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pw-s2);
+  padding: var(--pw-s3) var(--pw-s4);
+  border-block-start: 1px solid var(--pw-hairline);
+}
+
+.exp__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--pw-s3);
+}
+
+/* Isolated but not forced to LTR: isolation fixes the ordering of a Latin run
+   inside a Hebrew page, while direction:ltr would also flip it to the far edge
+   and break alignment with the Hebrew around it. */
+.exp__n {
+  font: 600 14.5px var(--pw-font-name);
+  unicode-bidi: isolate;
+  min-inline-size: 0;
+}
+
+.exp__sub {
+  font: var(--pw-t-small);
+  color: var(--pw-ink-3);
+  unicode-bidi: isolate;
+  text-align: end;
+  flex: none;
+}
+
+.exp__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* ---- intensity ----------------------------------------------------------- */
+.intensity {
+  display: inline-flex;
+  gap: 3px;
+  vertical-align: -1px;
+  margin-inline-end: 6px;
+}
+
+.intensity i {
+  inline-size: 4px;
+  block-size: 12px;
+  border-radius: 2px;
+  background: var(--pw-hairline-strong);
+}
+
+.intensity i.on {
+  background: var(--pw-way-500);
+}
+
+.intensity--high i.on {
+  background: var(--pw-urgent-500);
+}
+
+/* ---- chips --------------------------------------------------------------- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font: var(--pw-t-micro);
+  letter-spacing: 0.02em;
+  padding: 5px 10px;
+  border-radius: var(--pw-r-pill);
+  border: 1px solid var(--pw-hairline-strong);
+  background: var(--pw-surface);
+  color: var(--pw-ink-2);
+  white-space: nowrap;
+}
+
+.chip--way {
+  background: var(--pw-way-50);
+  border-color: transparent;
+  color: var(--pw-way-600);
+}
+
+.chip--warn {
+  background: var(--pw-urgent-50);
+  border-color: transparent;
+  color: var(--pw-urgent-600);
+}
+
+.chip--missing {
+  background: var(--pw-missing-bg);
+  border-color: var(--pw-missing-line);
+  color: var(--pw-missing-ink);
+}
+
+/* ---- notes: the things that would mislead if left unsaid ------------------ */
+.notes {
+  background: var(--pw-magic-50);
+  border-radius: var(--pw-r-lg);
+  padding: var(--pw-s4);
+}
+
+.notes h3 {
+  font: var(--pw-t-micro);
+  letter-spacing: var(--pw-track-micro);
+  color: var(--pw-magic-600);
+  margin-block-end: var(--pw-s3);
+}
+
+.notes li {
+  display: flex;
+  gap: var(--pw-s3);
+  font: var(--pw-t-small);
+  color: var(--pw-ink-2);
+  padding-block: var(--pw-s2);
+}
+
+.notes li::before {
+  content: "";
+  flex: none;
+  inline-size: 5px;
+  block-size: 5px;
+  border-radius: var(--pw-r-pill);
+  background: var(--pw-magic-300);
+  margin-block-start: 8px;
+}
+
+.notes__names {
+  display: flex;
+  flex-direction: column;
+  /* Shrink each name to its content so the list starts at the RTL edge; a
+     stretched LTR child would align its text to the far side instead. */
+  align-items: flex-start;
+  gap: 2px;
+  margin-block-start: var(--pw-s2);
+  font-weight: 600;
+  color: var(--pw-ink);
+}
+
+.coverage {
+  display: flex;
+  align-items: center;
+  gap: var(--pw-s3);
+  font: var(--pw-t-small);
+  color: var(--pw-missing-ink);
+  background: var(--pw-missing-bg);
+  border: 1px solid var(--pw-missing-line);
+  border-radius: var(--pw-r-md);
+  padding: var(--pw-s3) var(--pw-s4);
+}
+
+.meter {
+  flex: none;
+  inline-size: 56px;
+  block-size: 5px;
+  border-radius: var(--pw-r-pill);
+  background: var(--pw-missing-line);
+  overflow: hidden;
+}
+
+.meter i {
+  display: block;
+  block-size: 100%;
+  background: var(--pw-missing-ink);
+}
+
+/* ---- the path, as a thinking state --------------------------------------- */
+.thinking {
+  display: flex;
+  align-items: center;
+  gap: var(--pw-s3);
+  padding-inline-start: 36px;
+  color: var(--pw-ink-3);
+  font: var(--pw-t-small);
+}
+
+.thinking__path {
+  inline-size: 74px;
+  block-size: 12px;
+}

@@ -1,0 +1,171 @@
+[
+ {
+  "name": "Magic Kingdom",
+  "resort": "Disney World",
+  "kind": "theme",
+  "count": 36,
+  "rated": 29,
+  "lands": [
+   "Adventureland",
+   "Cinderella Castle",
+   "Fantasyland",
+   "Fantasyland / Storybook Circus",
+   "Frontierland",
+   "Liberty Square",
+   "Main Street, U.S.A.",
+   "Parade Route",
+   "Tomorrowland"
+  ]
+ },
+ {
+  "name": "EPCOT",
+  "resort": "Disney World",
+  "kind": "theme",
+  "count": 27,
+  "rated": 19,
+  "lands": [
+   "World Celebration",
+   "World Discovery",
+   "World Nature",
+   "World Showcase Lagoon",
+   "World Showcase – American Adventure",
+   "World Showcase – Canada",
+   "World Showcase – France",
+   "World Showcase – Italy",
+   "World Showcase – Japan",
+   "World Showcase – Mexico",
+   "World Showcase – Norway",
+   "World Showcase – United Kingdom"
+  ]
+ },
+ {
+  "name": "Disney's Animal Kingdom",
+  "resort": "Disney World",
+  "kind": "theme",
+  "count": 24,
+  "rated": 11,
+  "lands": [
+   "Africa",
+   "Africa / Rafiki's Planet Watch",
+   "Asia",
+   "Discovery Island",
+   "Oasis",
+   "Pandora – The World of Avatar",
+   "Park-wide",
+   "Rafiki's Planet Watch",
+   "Theater in the Wild",
+   "Tree of Life Theater"
+  ]
+ },
+ {
+  "name": "Disney's Hollywood Studios",
+  "resort": "Disney World",
+  "kind": "theme",
+  "count": 21,
+  "rated": 15,
+  "lands": [
+   "Animation Courtyard",
+   "Chinese Theatre",
+   "Echo Lake",
+   "Hollywood Boulevard",
+   "Star Wars: Galaxy's Edge",
+   "Sunset Boulevard",
+   "Toy Story Land"
+  ]
+ },
+ {
+  "name": "Disney's Blizzard Beach",
+  "resort": "Disney World",
+  "kind": "water",
+  "count": 12,
+  "rated": 0,
+  "lands": [
+   "Melt-Away Bay",
+   "Mount Gushmore",
+   "Park-wide",
+   "Ski Patrol Training Camp",
+   "Tike's Peak"
+  ]
+ },
+ {
+  "name": "Disney's Typhoon Lagoon",
+  "resort": "Disney World",
+  "kind": "water",
+  "count": 11,
+  "rated": 0,
+  "lands": [
+   "Hideaway Bay",
+   "Ketchakiddee Creek",
+   "Mount Mayday",
+   "Park-wide",
+   "Surf Pool",
+   "Typhoon Lagoon"
+  ]
+ },
+ {
+  "name": "Universal Islands of Adventure",
+  "resort": "Universal Orlando",
+  "kind": "theme",
+  "count": 31,
+  "rated": 20,
+  "lands": [
+   "Hogsmeade",
+   "Jurassic Park",
+   "Marvel Super Hero Island",
+   "Seuss Landing",
+   "Skull Island",
+   "The Lost Continent",
+   "The Wizarding World of Harry Potter – Hogsmeade",
+   "Toon Lagoon"
+  ]
+ },
+ {
+  "name": "Universal Studios Florida",
+  "resort": "Universal Orlando",
+  "kind": "theme",
+  "count": 30,
+  "rated": 13,
+  "lands": [
+   "Diagon Alley",
+   "DreamWorks Land",
+   "Hollywood",
+   "Illumination's Minion Land",
+   "New York",
+   "New York / Production Central",
+   "Park-wide parade route",
+   "San Francisco",
+   "Springfield, U.S.A.",
+   "The Wizarding World of Harry Potter – Diagon Alley",
+   "Universal Studios Lagoon",
+   "World Expo"
+  ]
+ },
+ {
+  "name": "Universal Epic Universe",
+  "resort": "Universal Orlando",
+  "kind": "theme",
+  "count": 20,
+  "rated": 0,
+  "lands": [
+   "Celestial Park",
+   "Dark Universe",
+   "How to Train Your Dragon – Isle of Berk",
+   "SUPER NINTENDO WORLD",
+   "SUPER NINTENDO WORLD – Donkey Kong Country",
+   "The Wizarding World of Harry Potter – Ministry of Magic"
+  ]
+ },
+ {
+  "name": "Universal Volcano Bay",
+  "resort": "Universal Orlando",
+  "kind": "water",
+  "count": 20,
+  "rated": 0,
+  "lands": [
+   "Krakatau",
+   "Rainforest Village",
+   "River Village",
+   "Wave Village"
+  ]
+ }
+]

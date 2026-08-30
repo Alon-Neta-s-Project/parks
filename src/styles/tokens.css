@@ -1,0 +1,198 @@
+/* ============================================================================
+   Park Day Companion — Design Tokens
+   ----------------------------------------------------------------------------
+   מקור אמת יחיד לשפה העיצובית. סעיף 4.2 בבריף: קומפוננטה צורכת רק tokens,
+   לעולם לא ערך צבע קשיח.
+
+   הכיוון (מהבריף העיצובי של נטע):
+     60% Apple / premium travel-tech · 20% Google Maps / ניווט
+     10% קסם · 10% אנרגיה קולנועית
+   הממשק שקט. הצילום, המצב הנבחר והאקצנט מביאים את הצבע.
+
+   RTL: אין כאן ערכי left/right. רק logical properties (סעיף 8).
+   ========================================================================== */
+
+:root {
+  /* ---- ground -------------------------------------------------------------
+     נייטרלים עם הטיה כחולה קלה — לא אפור טהור. */
+  --pw-canvas:          #F2F5FA;
+  --pw-surface:         #FFFFFF;
+  --pw-surface-2:       #F7F9FD;
+  --pw-sunken:          #E9EEF7;
+  --pw-hairline:        #E1E8F3;
+  --pw-hairline-strong: #CBD6E8;
+  --pw-scrim:           rgba(8, 16, 30, .62);
+
+  /* ---- ink --------------------------------------------------------------- */
+  --pw-ink:             #0C1524;
+  --pw-ink-2:           #495871;
+  --pw-ink-3:           #7C8BA4;
+  --pw-ink-on-dark:     #FFFFFF;
+  --pw-ink-on-dark-2:   rgba(255, 255, 255, .74);
+
+  /* ---- wayfinding blue — ניווט, מפה, מצב נבחר, פעולה ראשית, אמון ------- */
+  --pw-way-50:          #EDF3FE;
+  --pw-way-100:         #DAE6FD;
+  --pw-way-200:         #B4CAFA;
+  --pw-way-400:         #4A7CE8;
+  --pw-way-500:         #2360E0;
+  --pw-way-600:         #1A4CBC;
+  --pw-way-700:         #143A92;
+
+  /* ---- magic violet — טים, AI, תובנה אישית, פרימיום -------------------- */
+  --pw-magic-50:        #F2EEFE;
+  --pw-magic-100:       #E5DEFC;
+  --pw-magic-300:       #A98FF2;
+  --pw-magic-500:       #6B45E4;
+  --pw-magic-600:       #5733C4;
+  --pw-magic-line:      linear-gradient(90deg, var(--pw-way-500) 0%, var(--pw-magic-500) 100%);
+  --pw-magic-orb:       radial-gradient(circle at 32% 28%, #9C7BFF 0%, #6B45E4 46%, #2360E0 100%);
+
+  /* ---- signal — במשורה בלבד -------------------------------------------- */
+  --pw-urgent-50:       #FDEFE9;
+  --pw-urgent-500:      #E2592C;
+  --pw-urgent-600:      #B94320;
+  --pw-clear-50:        #E7F5EF;
+  --pw-clear-500:       #0E8A5F;
+  --pw-clear-600:       #0A6746;
+
+  /* ---- missing data — חוסר הוא מצב מעוצב, לא תקלה --------------------- */
+  --pw-missing-bg:      #F5F2EC;
+  --pw-missing-line:    #E0D8C9;
+  --pw-missing-ink:     #8A7C63;
+
+  /* ---- radius ------------------------------------------------------------ */
+  --pw-r-xs:  8px;
+  --pw-r-sm:  12px;
+  --pw-r-md:  16px;
+  --pw-r-lg:  22px;
+  --pw-r-xl:  30px;
+  --pw-r-pill: 999px;
+
+  /* ---- elevation — שתי רמות בלבד. הבריף: "לא יותר מדי צללים" ---------- */
+  --pw-e1: 0 1px 2px rgba(12, 21, 36, .05), 0 1px 3px rgba(12, 21, 36, .04);
+  --pw-e2: 0 2px 5px rgba(12, 21, 36, .04), 0 14px 32px -16px rgba(12, 21, 36, .22);
+  --pw-e-magic: 0 6px 22px -8px rgba(107, 69, 228, .48);
+
+  /* ---- space — בסיס 4px -------------------------------------------------- */
+  --pw-s1: 4px;  --pw-s2: 8px;  --pw-s3: 12px; --pw-s4: 16px;
+  --pw-s5: 20px; --pw-s6: 24px; --pw-s7: 32px; --pw-s8: 40px;
+  --pw-s9: 56px; --pw-s10: 72px;
+
+  /* ---- type --------------------------------------------------------------
+     Assistant  — עברית וממשק. גיאומטרי, נקי, לא משחקי.
+     Archivo    — שמות מתקנים באנגלית ומספרים. אופי של שילוט ניווט.
+     ההפרדה מכוונת: קול עברי מול שם קנוני אנגלי (סעיף 8, <bdi>). */
+  --pw-font-ui:   "Assistant", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --pw-font-name: "Archivo", "Assistant", -apple-system, sans-serif;
+
+  --pw-t-display: 700 30px/1.16 var(--pw-font-ui);
+  --pw-t-h1:      700 23px/1.24 var(--pw-font-ui);
+  --pw-t-h2:      600 18px/1.32 var(--pw-font-ui);
+  --pw-t-h3:      600 15.5px/1.4 var(--pw-font-ui);
+  --pw-t-body:    400 15px/1.62 var(--pw-font-ui);
+  --pw-t-small:   400 13.5px/1.55 var(--pw-font-ui);
+  --pw-t-micro:   600 11px/1.3 var(--pw-font-ui);
+  --pw-track-micro: .07em;
+
+  /* ---- motion ------------------------------------------------------------ */
+  --pw-ease: cubic-bezier(.32, .72, .28, 1);
+  --pw-fast: 140ms;
+  --pw-base: 240ms;
+
+  /* ---- layout ------------------------------------------------------------ */
+  --pw-tap: 44px;
+  --pw-gutter: 20px;
+  --pw-phone: 390px;
+}
+
+/* ---- dark ----------------------------------------------------------------
+   הממשק הראשי מעוצב בהיר בכוונה. הכהה שומר על אותם תפקידים,
+   עם ניגודיות נבדקת ולא היפוך נאיבי. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --pw-canvas:          #0B1220;
+    --pw-surface:         #141D2E;
+    --pw-surface-2:       #1A2437;
+    --pw-sunken:          #0F1826;
+    --pw-hairline:        #253148;
+    --pw-hairline-strong: #35455F;
+    --pw-scrim:           rgba(4, 8, 16, .7);
+
+    --pw-ink:             #EEF3FB;
+    --pw-ink-2:           #A8B6CD;
+    --pw-ink-3:           #7A89A3;
+
+    --pw-way-50:          #16233C;
+    --pw-way-100:         #1D2F4F;
+    --pw-way-200:         #2B4470;
+    --pw-way-400:         #6E9BF5;
+    --pw-way-500:         #74A0F7;
+    --pw-way-600:         #9CBCFA;
+    --pw-way-700:         #C2D6FC;
+
+    --pw-magic-50:        #1E1A38;
+    --pw-magic-100:       #29224C;
+    --pw-magic-300:       #8E71EE;
+    --pw-magic-500:       #A98FF2;
+    --pw-magic-600:       #C4B2F7;
+
+    --pw-urgent-50:       #33190F;
+    --pw-urgent-500:      #FF9068;
+    --pw-urgent-600:      #FFB294;
+    --pw-clear-50:        #0D2A21;
+    --pw-clear-500:       #4FCB9B;
+    --pw-clear-600:       #7EDCB7;
+
+    --pw-missing-bg:      #23201A;
+    --pw-missing-line:    #3B3527;
+    --pw-missing-ink:     #C4B695;
+
+    --pw-e1: 0 1px 2px rgba(0, 0, 0, .4), 0 1px 3px rgba(0, 0, 0, .3);
+    --pw-e2: 0 2px 5px rgba(0, 0, 0, .35), 0 14px 32px -16px rgba(0, 0, 0, .7);
+    --pw-e-magic: 0 6px 22px -8px rgba(169, 143, 242, .4);
+  }
+}
+
+:root[data-theme="dark"] {
+  --pw-canvas:          #0B1220;
+  --pw-surface:         #141D2E;
+  --pw-surface-2:       #1A2437;
+  --pw-sunken:          #0F1826;
+  --pw-hairline:        #253148;
+  --pw-hairline-strong: #35455F;
+  --pw-scrim:           rgba(4, 8, 16, .7);
+
+  --pw-ink:             #EEF3FB;
+  --pw-ink-2:           #A8B6CD;
+  --pw-ink-3:           #7A89A3;
+
+  --pw-way-50:          #16233C;
+  --pw-way-100:         #1D2F4F;
+  --pw-way-200:         #2B4470;
+  --pw-way-400:         #6E9BF5;
+  --pw-way-500:         #74A0F7;
+  --pw-way-600:         #9CBCFA;
+  --pw-way-700:         #C2D6FC;
+
+  --pw-magic-50:        #1E1A38;
+  --pw-magic-100:       #29224C;
+  --pw-magic-300:       #8E71EE;
+  --pw-magic-500:       #A98FF2;
+  --pw-magic-600:       #C4B2F7;
+
+  --pw-urgent-50:       #33190F;
+  --pw-urgent-500:      #FF9068;
+  --pw-urgent-600:      #FFB294;
+  --pw-clear-50:        #0D2A21;
+  --pw-clear-500:       #4FCB9B;
+  --pw-clear-600:       #7EDCB7;
+
+  --pw-missing-bg:      #23201A;
+  --pw-missing-line:    #3B3527;
+  --pw-missing-ink:     #C4B695;
+
+  --pw-e1: 0 1px 2px rgba(0, 0, 0, .4), 0 1px 3px rgba(0, 0, 0, .3);
+  --pw-e2: 0 2px 5px rgba(0, 0, 0, .35), 0 14px 32px -16px rgba(0, 0, 0, .7);
+  --pw-e-magic: 0 6px 22px -8px rgba(169, 143, 242, .4);
+}

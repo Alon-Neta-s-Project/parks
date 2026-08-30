@@ -1,0 +1,88 @@
+import { describe, expect, it } from "vitest";
+import { emptyProfile, type Profile } from "../profile";
+import { recommend, searchExperiences } from "../recommend";
+
+const withProfile = (patch: Partial<Profile>): Profile => ({ ...emptyProfile, ...patch });
+
+describe("searchExperiences", () => {
+  it("respects an intensity ceiling", () => {
+    const gentle = searchExperiences({ parks: ["Magic Kingdom"], intensityMax: 2 });
+    expect(gentle.length).toBeGreaterThan(0);
+    for (const e of gentle) expect(e.intensity.value).toBeLessThanOrEqual(2);
+    expect(gentle.map((e) => e.nameEn)).not.toContain("Space Mountain");
+  });
+
+  it("respects an intensity floor for a thrill-seeking group", () => {
+    const thrills = searchExperiences({ parks: ["Magic Kingdom"], intensityMin: 3 });
+    expect(thrills.map((e) => e.nameEn).sort()).toEqual([
+      "Space Mountain",
+      "TRON Lightcycle / Run",
+      "Tiana's Bayou Adventure",
+    ]);
+  });
+
+  it("hides unrated rides by default and includes them on request", () => {
+    const filters = { parks: ["Magic Kingdom"] as string[] };
+    const hidden = searchExperiences(filters);
+    const shown = searchExperiences({ ...filters, includeUnrated: true });
+    expect(hidden.every((e) => e.intensity.rated)).toBe(true);
+    expect(shown.length).toBeGreaterThan(hidden.length);
+  });
+
+  it("drops rides the workbook marks as unavailable", () => {
+    const open = searchExperiences({ includeUnrated: true });
+    expect(open.some((e) => e.status.state === "closed")).toBe(false);
+  });
+
+  it("never filters on fast access, because a paid queue is not park entry", () => {
+    const all = searchExperiences({ parks: ["Magic Kingdom"], includeUnrated: true });
+    expect(all.some((e) => e.fastAccess.singlePassRequired)).toBe(true);
+  });
+});
+
+describe("recommend", () => {
+  it("groups by land and leads with the most intense ride allowed", () => {
+    const result = recommend(withProfile({ parks: ["Magic Kingdom"], intensityMax: 4 }));
+    // 29 rated rides, less Carousel of Progress, which the workbook marks
+    // temporarily unavailable.
+    expect(result.total).toBe(28);
+    expect(result.groups.flatMap((g) => g.items).map((e) => e.nameEn)).not.toContain(
+      "Walt Disney's Carousel of Progress",
+    );
+    // Lands are ordered by how much is in them, so the busiest land leads —
+    // not whichever land happens to hold the most intense ride.
+    const sizes = result.groups.map((g) => g.items.length);
+    expect([...sizes].sort((a, b) => b - a)).toEqual(sizes);
+    for (const group of result.groups) {
+      const values = group.items.map((e) => e.intensity.value ?? -1);
+      expect([...values].sort((a, b) => b - a)).toEqual(values);
+    }
+    // The one 4/4 ride in the park leads its own land.
+    const tomorrowland = result.groups.find((g) => g.land === "Tomorrowland");
+    expect(tomorrowland?.items[0]?.nameEn).toBe("TRON Lightcycle / Run");
+  });
+
+  it("counts what the intensity filter hid rather than hiding it silently", () => {
+    const result = recommend(withProfile({ parks: ["Magic Kingdom"], intensityMax: 2 }));
+    expect(result.notes.unratedExcluded).toBe(7);
+  });
+
+  it("flags the two Magic Kingdom rides needing a separately paid Single Pass", () => {
+    const result = recommend(withProfile({ parks: ["Magic Kingdom"], intensityMax: 4 }));
+    expect(result.notes.singlePass.map((e) => e.nameEn).sort()).toEqual([
+      "Seven Dwarfs Mine Train",
+      "TRON Lightcycle / Run",
+    ]);
+  });
+
+  it("names parks that carry no intensity ratings at all", () => {
+    const result = recommend(
+      withProfile({ parks: ["Universal Epic Universe", "Magic Kingdom"], intensityMax: 4 }),
+    );
+    expect(result.notes.unratedParks).toEqual(["Universal Epic Universe"]);
+  });
+
+  it("returns nothing before a park is chosen", () => {
+    expect(recommend(emptyProfile).total).toBe(0);
+  });
+});
