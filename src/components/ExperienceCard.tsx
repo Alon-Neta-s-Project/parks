@@ -20,6 +20,7 @@ export function ExperienceCard({ experience }: { experience: Experience }) {
         type="button"
         className="exp__main"
         aria-expanded={open}
+        aria-label={t("card.detailsFor", { name: experience.nameEn })}
         onClick={() => setOpen((current) => !current)}
       >
         <span className="exp__row">

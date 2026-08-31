@@ -15,6 +15,8 @@ export function Recommendation({
   includeUnrated: boolean;
   onToggleUnrated: () => void;
 }) {
+  /** With one park the name is already known and repeating it is noise. */
+  const multiPark = new Set(result.groups.map((g) => g.park)).size > 1;
   const { t } = useTranslation();
   const { notes } = result;
 
@@ -39,9 +41,12 @@ export function Recommendation({
   return (
     <div className="result">
       {result.groups.map((group) => (
-        <section className="landgroup" key={group.land}>
+        <section className="landgroup" key={`${group.park}/${group.land}`}>
           <header className="landgroup__head">
-            <b>{group.land}</b>
+            <span className="landgroup__title">
+              <b>{group.land}</b>
+              {multiPark && <span className="landgroup__park">{group.park}</span>}
+            </span>
             <span className="num">{group.items.length}</span>
           </header>
           <ul>

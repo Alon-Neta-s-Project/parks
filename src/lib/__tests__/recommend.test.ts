@@ -125,3 +125,30 @@ describe("refinements", () => {
     expect(refinementById("bothKinds")?.offered(narrowed)).toBe(true);
   });
 });
+
+describe("more than one park", () => {
+  const two = withProfile({ parks: ["Magic Kingdom", "EPCOT"], intensityMax: 4 });
+
+  it("labels every group with its park", () => {
+    const result = recommend(two);
+    expect(result.groups.length).toBeGreaterThan(1);
+    for (const group of result.groups) {
+      expect(["Magic Kingdom", "EPCOT"]).toContain(group.park);
+      expect(group.items.every((e) => e.park === group.park && e.land === group.land)).toBe(true);
+    }
+  });
+
+  it("keeps each park's lands together, in the order they were chosen", () => {
+    const parksInOrder = recommend(two).groups.map((g) => g.park);
+    const firstEpcot = parksInOrder.indexOf("EPCOT");
+    expect(parksInOrder.slice(0, firstEpcot).every((p) => p === "Magic Kingdom")).toBe(true);
+    expect(parksInOrder.slice(firstEpcot).every((p) => p === "EPCOT")).toBe(true);
+  });
+
+  it("loses nothing when a second park is added", () => {
+    const one = recommend(withProfile({ parks: ["Magic Kingdom"], intensityMax: 4 }));
+    const both = recommend(two);
+    expect(both.total).toBeGreaterThan(one.total);
+    expect(both.groups.flatMap((g) => g.items)).toHaveLength(both.total);
+  });
+});

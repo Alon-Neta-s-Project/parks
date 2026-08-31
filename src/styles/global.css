@@ -302,6 +302,20 @@ button {
   padding: var(--pw-s4) var(--pw-s4) var(--pw-s3);
 }
 
+.landgroup__title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-inline-size: 0;
+}
+
+.landgroup__park {
+  font: var(--pw-t-micro);
+  letter-spacing: var(--pw-track-micro);
+  color: var(--pw-way-600);
+  unicode-bidi: isolate;
+}
+
 .landgroup__head b {
   font: 600 15px var(--pw-font-name);
   unicode-bidi: isolate;

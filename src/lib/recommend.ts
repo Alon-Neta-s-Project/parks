@@ -54,6 +54,8 @@ export function searchExperiences(filters: SearchFilters): Experience[] {
 }
 
 export interface LandGroup {
+  /** Lands are unique per park, but the reader still needs to know which park. */
+  park: string;
   land: string;
   items: Experience[];
 }
@@ -127,16 +129,29 @@ export function recommend(profile: Profile): Recommendation {
     return a.nameEn.localeCompare(b.nameEn, "en");
   });
 
+  // Keyed by park as well as land: two parks in one answer would otherwise
+  // produce a flat run of land names with nothing saying where each one is.
   const byLand = new Map<string, Experience[]>();
   for (const item of sorted) {
-    const bucket = byLand.get(item.land);
+    const key = `${item.park}\u0000${item.land}`;
+    const bucket = byLand.get(key);
     if (bucket) bucket.push(item);
-    else byLand.set(item.land, [item]);
+    else byLand.set(key, [item]);
   }
 
   const groups: LandGroup[] = [...byLand.entries()]
-    .map(([land, items]) => ({ land, items }))
-    .sort((a, b) => b.items.length - a.items.length || a.land.localeCompare(b.land, "en"));
+    .map(([key, items]) => {
+      const [park = "", land = ""] = key.split("\u0000");
+      return { park, land, items };
+    })
+    // A park is visited as a unit, so its lands stay together. Within a park the
+    // fullest land leads, for the same walking reason as before.
+    .sort(
+      (a, b) =>
+        parks.indexOf(a.park) - parks.indexOf(b.park) ||
+        b.items.length - a.items.length ||
+        a.land.localeCompare(b.land, "en"),
+    );
 
   const unratedExcluded = profile.includeUnrated
     ? 0

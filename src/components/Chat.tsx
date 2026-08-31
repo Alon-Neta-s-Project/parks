@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { coverage, parks as allParks } from "../data";
 import { clear, load, save } from "../lib/persist";
@@ -35,6 +35,17 @@ export function Chat() {
   useEffect(() => {
     save({ profile, step, started });
   }, [profile, step, started]);
+
+  /**
+   * Each new question or answer is a new set of buttons appearing below the
+   * fold. Move focus to the first one so the conversation is operable from the
+   * keyboard, and let a screen reader announce Tim's line as it arrives.
+   */
+  const optionsRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!started) return;
+    optionsRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
+  }, [started, step, turns.length]);
 
   const reset = () => {
     clear();
@@ -93,7 +104,7 @@ export function Chat() {
     setProfile((current) => ({ ...current, includeUnrated: !current.includeUnrated }));
 
   return (
-    <div className="thread">
+    <div className="thread" aria-live="polite" aria-atomic="false">
       <div className="msg">
         <Orb />
         <div className="bubble bubble--tim">
@@ -106,7 +117,7 @@ export function Chat() {
       </div>
 
       {!started && (
-        <div className="options">
+        <div className="options" ref={optionsRef}>
           <button type="button" className="option option--go" onClick={() => setStarted(true)}>
             {t("intro.start")}
           </button>
@@ -142,7 +153,7 @@ export function Chat() {
           </div>
 
           {question.source === "parks" ? (
-            <div className="options">
+            <div className="options" ref={optionsRef}>
               {offeredParks.map((park) => {
                 const chosen = draftParks.includes(park.name);
                 return (
@@ -151,6 +162,7 @@ export function Chat() {
                     key={park.name}
                     className="option"
                     aria-pressed={chosen}
+                    aria-label={`${park.name} — ${t("questions.parks.ratedNote", { rated: park.rated, count: park.count })}`}
                     onClick={() =>
                       setDraftParks((current) =>
                         chosen ? current.filter((name) => name !== park.name) : [...current, park.name],
@@ -174,7 +186,7 @@ export function Chat() {
               </button>
             </div>
           ) : (
-            <div className="options">
+            <div className="options" ref={optionsRef}>
               {question.options?.map((option) => (
                 <button
                   type="button"
