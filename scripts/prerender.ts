@@ -53,6 +53,11 @@ for (const e of experiences) {
     `<dt>אזור</dt><dd>${esc(e.land)}</dd>`,
     `<dt>סוג</dt><dd>${esc(e.subtype)}</dd>`,
     `<dt>עוצמה</dt><dd>${e.intensity.rated ? `${e.intensity.value} מתוך 4` : "אין דירוג"}</dd>`,
+    `<dt>מגבלת גובה</dt><dd>${
+      e.heightRequirementCm === null ? "אין נתון"
+        : e.heightRequirementCm === 0 ? "אין מגבלת גובה"
+        : `${e.heightRequirementCm} ס"מ`
+    }</dd>`,
     `<dt>כניסה נדרשת</dt><dd>${esc(e.admission)}</dd>`,
     `<dt>דילוג בתור</dt><dd>${esc(e.fastAccess.summary)}</dd>`,
     `<dt>המידע נבדק</dt><dd>${e.lastVerified}</dd>`,

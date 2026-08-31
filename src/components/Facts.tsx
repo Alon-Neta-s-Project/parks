@@ -43,10 +43,14 @@ export function Facts({ experience: e }: { experience: Experience }) {
         <Intensity value={e.intensity.value} />
       </Row>
 
-      <Row label={t("facts.height")} missing={e.heightRequirementCm === null && !e.noHeightLimit}>
-        {e.heightRequirementCm !== null
-          ? <span className="num">{t("facts.heightCm", { cm: e.heightRequirementCm })}</span>
-          : e.noHeightLimit ? t("facts.noHeight") : t("facts.unknown")}
+      {/* 0 means "checked, no limit" and must read as words. Rendering it as a
+          number would put "0 ס\"מ" on the card, which is a bug, not a fact. */}
+      <Row label={t("facts.height")} missing={e.heightRequirementCm === null}>
+        {e.heightRequirementCm === null
+          ? t("facts.unknown")
+          : e.heightRequirementCm === 0
+            ? t("facts.noHeight")
+            : <span className="num">{t("facts.heightCm", { cm: e.heightRequirementCm })}</span>}
       </Row>
 
       <Row label={t("facts.motionWarning")} missing={isMissing(e.motionSicknessWarning)}>

@@ -106,12 +106,15 @@ export const experienceSchema = z.object({
   getsWet: z.enum(["none", "may_get_wet", "may_get_soaked"]).nullable(),
 
   /**
-   * Centimetres only, rounded from the official inches in the master.
-   * null = not found. "No limit" must be an explicit finding, never a default,
-   * so it is carried as noHeightLimit rather than as height 0.
+   * Centimetres, matching migration 012's three states exactly:
+   *   0        — checked, and there is no height limit
+   *   50..200  — the limit itself
+   *   null     — not checked
+   *
+   * 0 is not a magic number: the minimum height to ride really is zero. It must
+   * never reach the screen as a number, though — "0 ס\"מ" on a card is a bug.
    */
-  heightRequirementCm: z.number().int().nullable(),
-  noHeightLimit: z.boolean(),
+  heightRequirementCm: z.union([z.literal(0), z.number().int().min(50).max(200)]).nullable(),
 
   wheelchair: wheelchairSchema,
 

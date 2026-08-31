@@ -8,7 +8,7 @@ import { Facts, Ticket, Trust } from "../components/Facts";
 function missingFields(e: Experience): string[] {
   return REQUIRED_FIELDS.filter((f) => {
     if (f === "intensity") return !e.intensity.rated;
-    if (f === "heightRequirementCm") return e.heightRequirementCm === null && !e.noHeightLimit;
+    if (f === "heightRequirementCm") return e.heightRequirementCm === null;
     const v = e[f as keyof Experience];
     return v === null || v === "";
   });

@@ -38,8 +38,15 @@ export interface SearchFilters {
   land?: string;
 }
 
-/** Mirrors the tool signature in brief §7 so the later model layer calls this. */
-export function searchExperiences(filters: SearchFilters): Experience[] {
+/**
+ * Whether one experience satisfies the filters.
+ *
+ * Exported separately so the rules can be tested against constructed rows. The
+ * unrated rule in particular must keep holding when the live data happens to
+ * contain no unrated rides — a new ride arrives without a rating, which is
+ * exactly why the column stays nullable.
+ */
+export function matchesFilters(e: Experience, filters: SearchFilters): boolean {
   const {
     parks,
     kinds,
@@ -52,7 +59,7 @@ export function searchExperiences(filters: SearchFilters): Experience[] {
     land,
   } = filters;
 
-  return experiences.filter((e) => {
+  {
     if (parks?.length && !parks.includes(e.park)) return false;
     if (kinds?.length && !kinds.includes(e.kind)) return false;
     if (land && e.land !== land) return false;
@@ -79,7 +86,12 @@ export function searchExperiences(filters: SearchFilters): Experience[] {
     if (intensityMin !== null && value < intensityMin) return false;
     if (intensityMax !== null && value > intensityMax) return false;
     return true;
-  });
+  }
+}
+
+/** Mirrors the tool signature in brief §7 so the later model layer calls this. */
+export function searchExperiences(filters: SearchFilters): Experience[] {
+  return experiences.filter((e) => matchesFilters(e, filters));
 }
 
 export interface LandGroup {

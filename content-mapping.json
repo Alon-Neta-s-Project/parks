@@ -172,7 +172,8 @@
     },
     "heightRequirementCm": {
       "column": "height_requirement_cm",
-      "kind": "height"
+      "kind": "height",
+      "$note": "0 = checked, no limit (migration 012). null = not checked. 50-200 = the limit."
     },
     "wheelchair": {
       "column": "wheelchair",
@@ -204,18 +205,18 @@
     "type": {
       "kind": "subtypeMap",
       "from": [
-        "Activity Type",
         "Subtype"
       ],
-      "map": "data/source/subtype_map.json"
+      "map": "data/source/subtype_map.json",
+      "$note": "Subtype is a closed 42-value vocabulary; an unlisted value stops the row."
     },
     "category": {
       "kind": "subtypeMap",
       "from": [
-        "Activity Type",
         "Subtype"
       ],
-      "map": "data/source/subtype_map.json"
+      "map": "data/source/subtype_map.json",
+      "$note": "Subtype is a closed 42-value vocabulary; an unlisted value stops the row."
     }
   },
   "notInExport": {

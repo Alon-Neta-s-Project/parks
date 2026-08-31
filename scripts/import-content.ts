@@ -107,19 +107,19 @@ function num(v: string, key: string, col: string, integer: boolean): number | nu
 }
 
 /**
- * "none" is an explicit finding that there is no limit, and must never be a
- * default. Empty stays empty.
+ * Three states, matching migration 012. "none" is a finding, not a blank, and
+ * becomes 0 — the minimum height to ride really is zero.
  */
-function height(v: string, key: string): { cm: number | null; none: boolean } {
+function height(v: string, key: string): number | null {
   const t = v.trim().toLowerCase();
-  if (t === "") return { cm: null, none: false };
-  if (t === "none") return { cm: null, none: true };
+  if (t === "") return null;
+  if (t === "none") return 0;
   const n = Number(t);
-  if (!Number.isFinite(n) || n <= 0) {
-    note(key, `height_requirement_cm is neither a number nor "none": ${JSON.stringify(v)} — left empty`);
-    return { cm: null, none: false };
+  if (!Number.isFinite(n) || n < 50 || n > 200) {
+    note(key, `height_requirement_cm is not "none" and not 50-200: ${JSON.stringify(v)} — left unchecked`);
+    return null;
   }
-  return { cm: Math.round(n), none: false };
+  return Math.round(n);
 }
 
 function intensity(v: string, key: string) {
@@ -198,13 +198,13 @@ for (const row of rows) {
 
   const park = row["Park"] ?? "";
   const name = row["Activity"] ?? "";
-  const h = height(row["height_requirement_cm"] ?? "", key);
+  const heightCm = height(row["height_requirement_cm"] ?? "", key);
   const llType = (row["Lightning Lane Type"] ?? "").trim();
   const summary = row["Optional Fast Access / Pass"] ?? "";
 
   // No default. dark_ride is the largest category and therefore the tempting
   // default, and it is exactly where a wrong guess would never be noticed.
-  const mapKey = `${row["Activity Type"]}|${row["Subtype"]}`;
+  const mapKey = row["Subtype"] ?? "";
   const mapped = subtypeMap[mapKey];
   if (!mapped) {
     rejected.push({ key, reason: `Subtype not in the approved map: ${JSON.stringify(mapKey)}` });
@@ -256,8 +256,7 @@ for (const row of rows) {
     isMotionSimulator: quadState(row["is_motion_simulator"] ?? "", key, "is_motion_simulator"),
     usesLargeScreensOr3d: quadState(row["uses_large_screens_or_3d"] ?? "", key, "uses_large_screens_or_3d"),
     getsWet: enumOrNull(row["gets_wet"] ?? "", ["none", "may_get_wet", "may_get_soaked"], key, "gets_wet"),
-    heightRequirementCm: h.cm,
-    noHeightLimit: h.none,
+    heightRequirementCm: heightCm,
     wheelchair: (row["wheelchair"] ?? "").trim() === "" ? null : (row["wheelchair"] as never),
     // Column name in the export, field name in the schema — see content-mapping.json.
     motionSicknessWarning: quadState(
@@ -300,7 +299,7 @@ const fieldCoverage = REQUIRED_FIELDS.map((field) => {
   const filled = experiences.filter((e) => {
     const v = e[field as keyof Experience];
     if (field === "intensity") return e.intensity.rated;
-    if (field === "heightRequirementCm") return e.heightRequirementCm !== null || e.noHeightLimit;
+    if (field === "heightRequirementCm") return e.heightRequirementCm !== null;
     return v !== null && v !== "";
   }).length;
   return { field, filled, total: experiences.length };
@@ -311,7 +310,7 @@ const incomplete = experiences
     key: e.key,
     missing: REQUIRED_FIELDS.filter((f) => {
       if (f === "intensity") return !e.intensity.rated;
-      if (f === "heightRequirementCm") return e.heightRequirementCm === null && !e.noHeightLimit;
+      if (f === "heightRequirementCm") return e.heightRequirementCm === null;
       const v = e[f as keyof Experience];
       return v === null || v === "";
     }),

@@ -5,7 +5,7 @@
   "resort": "Disney World",
   "kind": "theme",
   "count": 36,
-  "rated": 30,
+  "rated": 36,
   "lands": [
    "Adventureland",
    "Cinderella Castle",
@@ -24,7 +24,7 @@
   "resort": "Disney World",
   "kind": "theme",
   "count": 27,
-  "rated": 19,
+  "rated": 27,
   "lands": [
    "World Celebration",
    "World Discovery",
@@ -46,7 +46,7 @@
   "resort": "Disney World",
   "kind": "theme",
   "count": 24,
-  "rated": 11,
+  "rated": 24,
   "lands": [
    "Africa",
    "Africa / Rafiki's Planet Watch",
@@ -66,7 +66,7 @@
   "resort": "Disney World",
   "kind": "theme",
   "count": 21,
-  "rated": 15,
+  "rated": 21,
   "lands": [
    "Animation Courtyard",
    "Chinese Theatre",
@@ -83,7 +83,7 @@
   "resort": "Disney World",
   "kind": "water",
   "count": 12,
-  "rated": 0,
+  "rated": 12,
   "lands": [
    "Melt-Away Bay",
    "Mount Gushmore",
@@ -98,7 +98,7 @@
   "resort": "Disney World",
   "kind": "water",
   "count": 11,
-  "rated": 0,
+  "rated": 11,
   "lands": [
    "Hideaway Bay",
    "Ketchakiddee Creek",
@@ -114,7 +114,7 @@
   "resort": "Universal Orlando",
   "kind": "theme",
   "count": 31,
-  "rated": 20,
+  "rated": 31,
   "lands": [
    "Hogsmeade",
    "Jurassic Park",
@@ -132,7 +132,7 @@
   "resort": "Universal Orlando",
   "kind": "theme",
   "count": 30,
-  "rated": 13,
+  "rated": 30,
   "lands": [
    "Diagon Alley",
    "DreamWorks Land",
@@ -154,7 +154,7 @@
   "resort": "Universal Orlando",
   "kind": "theme",
   "count": 20,
-  "rated": 0,
+  "rated": 20,
   "lands": [
    "Celestial Park",
    "Dark Universe",
@@ -170,7 +170,7 @@
   "resort": "Universal Orlando",
   "kind": "water",
   "count": 20,
-  "rated": 0,
+  "rated": 20,
   "lands": [
    "Krakatau",
    "Rainforest Village",

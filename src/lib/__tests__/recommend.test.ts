@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { emptyProfile, questions, type Profile } from "../profile";
 import { experiences } from "../../data";
-import { recommend, searchExperiences } from "../recommend";
+import { matchesFilters, recommend, searchExperiences } from "../recommend";
 import { refinementById } from "../refine";
 
 const withProfile = (patch: Partial<Profile>): Profile => ({ ...emptyProfile, ...patch });
@@ -28,7 +28,9 @@ describe("searchExperiences", () => {
     const hidden = searchExperiences(filters);
     const shown = searchExperiences({ ...filters, includeUnrated: true });
     expect(hidden.every((e) => e.intensity.rated)).toBe(true);
-    expect(shown.length).toBeGreaterThan(hidden.length);
+    // Equal while every ride is rated; the difference is exactly the unrated ones.
+    const unrated = shown.filter((e) => !e.intensity.rated).length;
+    expect(shown.length - hidden.length).toBe(unrated);
   });
 
   it("drops rides the workbook marks as unavailable", () => {
@@ -69,11 +71,12 @@ describe("recommend", () => {
 
   it("counts what the intensity filter hid rather than hiding it silently", () => {
     const result = recommend(withProfile({ parks: ["Magic Kingdom"], intensityMax: 2 }));
+    // Whatever the current coverage, the count reported must equal the number
+    // actually held back — zero once everything is rated.
     const unratedOpen = experiences.filter(
       (e) => e.park === "Magic Kingdom" && !e.intensity.rated && e.status.state !== "closed",
     ).length;
     expect(result.notes.unratedExcluded).toBe(unratedOpen);
-    expect(unratedOpen).toBeGreaterThan(0);
   });
 
   it("flags the two Magic Kingdom rides needing a separately paid Single Pass", () => {
@@ -88,7 +91,13 @@ describe("recommend", () => {
     const result = recommend(
       withProfile({ parks: ["Universal Epic Universe", "Magic Kingdom"], intensityMax: 4 }),
     );
-    expect(result.notes.unratedParks).toEqual(["Universal Epic Universe"]);
+    // Names any park in the profile that carries no ratings at all. Empty now
+    // that every park has them, which is the point of reporting it rather than
+    // hard-coding it.
+    const expected = ["Universal Epic Universe", "Magic Kingdom"].filter(
+      (p) => !experiences.some((e) => e.park === p && e.intensity.rated),
+    );
+    expect(result.notes.unratedParks).toEqual(expected);
   });
 
   it("returns nothing before a park is chosen", () => {
@@ -183,6 +192,7 @@ describe("condensed list", () => {
     const full = recommend(mk);
     const short = recommend({ ...mk, condensed: true });
 
+    expect(full.total).toBeGreaterThan(0);
     expect(short.groups).toHaveLength(full.groups.length);
     for (const g of short.groups) expect(g.items.length).toBeLessThanOrEqual(3);
 
@@ -203,28 +213,30 @@ describe("contextual refinements", () => {
 });
 
 describe("an unrated ride never answers a question about intensity", () => {
-  it("stays out of a bounded search even when unrated rides are requested", () => {
-    const bounded = searchExperiences({
-      parks: ["Magic Kingdom"],
-      intensityMax: 2,
-      includeUnrated: true,
-    });
-    expect(bounded.length).toBeGreaterThan(0);
-    expect(bounded.filter((e) => !e.intensity.rated)).toHaveLength(0);
+  // Built rather than taken from the data: every live row is rated today, and
+  // the rule must still hold when the next unrated ride arrives.
+  const unrated = {
+    ...experiences[0]!,
+    id: "test-unrated",
+    park: "Magic Kingdom",
+    kind: "attraction" as const,
+    status: { state: "open" as const, note: null },
+    intensity: { value: null, rated: false },
+  };
+  const rated = { ...unrated, id: "test-rated", intensity: { value: 2 as const, rated: true } };
+
+  it("is excluded by a ceiling even when unrated rides are requested", () => {
+    expect(matchesFilters(unrated, { intensityMax: 2, includeUnrated: true })).toBe(false);
+    expect(matchesFilters(rated, { intensityMax: 2, includeUnrated: true })).toBe(true);
   });
 
-  it("stays out of a floor-bounded search too", () => {
-    const thrills = searchExperiences({
-      parks: ["Magic Kingdom"],
-      intensityMin: 3,
-      includeUnrated: true,
-    });
-    expect(thrills.every((e) => e.intensity.rated)).toBe(true);
+  it("is excluded by a floor too", () => {
+    expect(matchesFilters(unrated, { intensityMin: 1, includeUnrated: true })).toBe(false);
   });
 
-  it("is listed only when no intensity bound is set", () => {
-    const unbounded = searchExperiences({ parks: ["Magic Kingdom"], includeUnrated: true });
-    expect(unbounded.some((e) => !e.intensity.rated)).toBe(true);
+  it("is listed only when no bound is set, and only on request", () => {
+    expect(matchesFilters(unrated, { includeUnrated: true })).toBe(true);
+    expect(matchesFilters(unrated, { includeUnrated: false })).toBe(false);
   });
 
   it("is never coerced to a middle value", () => {

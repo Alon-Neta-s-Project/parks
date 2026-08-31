@@ -1,707 +1,212 @@
 {
-  "Attraction|3D motion dark ride": {
+  "3D / 4D ride": {
+    "type": "attraction",
     "category": "360_film",
-    "rows": 1,
-    "type": "attraction"
+    "rows": 4
   },
-  "Attraction|3D motion ride": {
-    "category": "360_film",
-    "rows": 1,
-    "type": "attraction"
+  "Animal presentation": {
+    "type": "show",
+    "category": "show",
+    "rows": 2
   },
-  "Attraction|Aerial spinner": {
+  "Boat ride": {
+    "type": "attraction",
     "category": "dark_ride",
-    "rows": 4,
-    "type": "attraction"
+    "rows": 7
   },
-  "Attraction|Aerial spinning ride": {
-    "category": "dark_ride",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Animal care / exhibit": {
-    "category": "walkthrough",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Animal exhibits": {
-    "category": "walkthrough",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Beach / pool": {
+  "Body slide": {
+    "type": "attraction",
     "category": "water_ride",
-    "rows": 1,
-    "type": "attraction"
+    "rows": 10
   },
-  "Attraction|Boat / dark ride": {
+  "Carousel": {
+    "type": "attraction",
     "category": "dark_ride",
-    "rows": 3,
-    "type": "attraction"
+    "rows": 3
   },
-  "Attraction|Boat / drop ride": {
-    "category": "dark_ride",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Boat ride": {
-    "category": "dark_ride",
-    "rows": 4,
-    "type": "attraction"
-  },
-  "Attraction|Body slide": {
-    "category": "water_ride",
-    "rows": 2,
-    "type": "attraction"
-  },
-  "Attraction|Body slides": {
-    "category": "water_ride",
-    "rows": 3,
-    "type": "attraction"
-  },
-  "Attraction|Carousel": {
-    "category": "dark_ride",
-    "rows": 3,
-    "type": "attraction"
-  },
-  "Attraction|Chairlift": {
+  "Chairlift": {
+    "type": "transport",
     "category": "transport",
-    "rows": 1,
-    "type": "transport"
+    "rows": 1
   },
-  "Attraction|Character encounter": {
+  "Character meet": {
+    "type": "meet_greet",
     "category": "meet_greet",
-    "rows": 1,
-    "type": "meet_greet"
+    "rows": 1
   },
-  "Attraction|Dark ride": {
+  "Character show": {
+    "type": "meet_greet",
+    "category": "meet_greet",
+    "rows": 11
+  },
+  "Dark ride": {
+    "type": "attraction",
     "category": "dark_ride",
-    "rows": 9,
-    "type": "attraction"
+    "rows": 17
   },
-  "Attraction|Dark ride / coaster hybrid": {
+  "Driving ride": {
+    "type": "attraction",
+    "category": "dark_ride",
+    "rows": 2
+  },
+  "Drop ride": {
+    "type": "attraction",
+    "category": "dark_ride",
+    "rows": 2
+  },
+  "Family coaster": {
+    "type": "attraction",
     "category": "coaster",
-    "rows": 1,
-    "type": "attraction"
+    "rows": 5
   },
-  "Attraction|Dark ride / motion ride": {
-    "category": "dark_ride",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Driving ride": {
-    "category": "dark_ride",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Drop body slide": {
-    "category": "water_ride",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Drop tower / dark ride": {
-    "category": "dark_ride",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Dual-launch roller coaster": {
-    "category": "coaster",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Elevated family ride": {
-    "category": "dark_ride",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Family coaster": {
-    "category": "coaster",
-    "rows": 5,
-    "type": "attraction"
-  },
-  "Attraction|Family launch coaster": {
-    "category": "coaster",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Family raft ride": {
-    "category": "water_ride",
-    "rows": 3,
-    "type": "attraction"
-  },
-  "Attraction|Family ride": {
-    "category": "dark_ride",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Fast action river": {
-    "category": "water_ride",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Flying simulator": {
-    "category": "simulator",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Flying theater": {
-    "category": "simulator",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|High-speed body slide": {
-    "category": "water_ride",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|High-speed vehicle ride": {
-    "category": "dark_ride",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Indoor launch coaster": {
-    "category": "coaster",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Indoor roller coaster": {
-    "category": "coaster",
-    "rows": 2,
-    "type": "attraction"
-  },
-  "Attraction|Interactive 3D/4D ride": {
+  "Film / theater show": {
+    "type": "attraction",
     "category": "360_film",
-    "rows": 1,
-    "type": "attraction"
+    "rows": 8
   },
-  "Attraction|Interactive animation experience": {
-    "category": "dark_ride",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Interactive blaster": {
-    "category": "dark_ride",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Interactive dark ride": {
-    "category": "dark_ride",
-    "rows": 3,
-    "type": "attraction"
-  },
-  "Attraction|Interactive exhibit": {
-    "category": "walkthrough",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Interactive experience": {
-    "category": "dark_ride",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Interactive fountain": {
-    "category": "playground",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Interactive play": {
-    "category": "playground",
-    "rows": 3,
-    "type": "attraction"
-  },
-  "Attraction|Interactive play area": {
-    "category": "playground",
-    "rows": 2,
-    "type": "attraction"
-  },
-  "Attraction|Interactive scavenger hunt": {
-    "category": "walkthrough",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Interactive simulator": {
+  "Flying theater": {
+    "type": "attraction",
     "category": "simulator",
-    "rows": 1,
-    "type": "attraction"
+    "rows": 2
   },
-  "Attraction|Interactive story experience": {
-    "category": "dark_ride",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Interactive wand experience": {
-    "category": "dark_ride",
-    "rows": 2,
-    "type": "attraction"
-  },
-  "Attraction|Interactive water play": {
-    "category": "water_ride",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Interactive water ride": {
-    "category": "water_ride",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Kids / family water play": {
-    "category": "water_ride",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Kids water play": {
-    "category": "water_ride",
-    "rows": 3,
-    "type": "attraction"
-  },
-  "Attraction|Launch / drop tower": {
-    "category": "dark_ride",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Launch coaster": {
+  "Indoor coaster": {
+    "type": "attraction",
     "category": "coaster",
-    "rows": 3,
-    "type": "attraction"
+    "rows": 2
   },
-  "Attraction|Launch roller coaster": {
+  "Interactive dark ride": {
+    "type": "attraction",
+    "category": "dark_ride",
+    "rows": 7
+  },
+  "Launch coaster": {
+    "type": "attraction",
     "category": "coaster",
-    "rows": 1,
-    "type": "attraction"
+    "rows": 8
   },
-  "Attraction|Lazy river": {
+  "Lazy river": {
+    "type": "attraction",
     "category": "water_ride",
-    "rows": 3,
-    "type": "attraction"
+    "rows": 3
   },
-  "Attraction|Leisure pool": {
+  "Live music": {
+    "type": "show",
+    "category": "show",
+    "rows": 13
+  },
+  "Log flume": {
+    "type": "attraction",
     "category": "water_ride",
-    "rows": 1,
-    "type": "attraction"
+    "rows": 3
   },
-  "Attraction|Log flume": {
-    "category": "water_ride",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Log flume / water ride": {
-    "category": "water_ride",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Mat racing slides": {
-    "category": "water_ride",
-    "rows": 2,
-    "type": "attraction"
-  },
-  "Attraction|Mat slides": {
-    "category": "water_ride",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Motion / dark ride": {
-    "category": "dark_ride",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Motion dark ride": {
-    "category": "dark_ride",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Motion simulator": {
-    "category": "simulator",
-    "rows": 4,
-    "type": "attraction"
-  },
-  "Attraction|Motion simulator – intense mission": {
-    "category": "simulator",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Motion simulator – milder mission": {
-    "category": "simulator",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Paid interactive makeover experience": {
+  "Makeover experience": {
+    "type": "meet_greet",
     "category": "meet_greet",
-    "rows": 1,
-    "type": "attraction"
+    "rows": 1
   },
-  "Attraction|Park icon / exploration": {
-    "category": "walkthrough",
-    "rows": 1,
-    "type": "attraction"
+  "Mat racing slide": {
+    "type": "attraction",
+    "category": "water_ride",
+    "rows": 2
   },
-  "Attraction|People mover": {
+  "Motion simulator": {
+    "type": "attraction",
+    "category": "simulator",
+    "rows": 8
+  },
+  "Nighttime spectacular": {
+    "type": "show",
+    "category": "show",
+    "rows": 3
+  },
+  "Parade": {
+    "type": "parade",
+    "category": "show",
+    "rows": 4
+  },
+  "People mover": {
+    "type": "transport",
     "category": "transport",
-    "rows": 1,
-    "type": "transport"
+    "rows": 1
   },
-  "Attraction|Play area": {
+  "Play area": {
+    "type": "attraction",
     "category": "playground",
-    "rows": 6,
-    "type": "attraction"
+    "rows": 12
   },
-  "Attraction|Pool / play": {
+  "Projection show": {
+    "type": "attraction",
+    "category": "360_film",
+    "rows": 4
+  },
+  "River rapids": {
+    "type": "attraction",
     "category": "water_ride",
-    "rows": 1,
-    "type": "attraction"
+    "rows": 8
   },
-  "Attraction|Racing tube slides": {
-    "category": "water_ride",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Raft ride": {
-    "category": "water_ride",
-    "rows": 2,
-    "type": "attraction"
-  },
-  "Attraction|Raft slide": {
-    "category": "water_ride",
-    "rows": 2,
-    "type": "attraction"
-  },
-  "Attraction|Ride / motion experience": {
-    "category": "dark_ride",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|River rapids": {
-    "category": "water_ride",
-    "rows": 2,
-    "type": "attraction"
-  },
-  "Attraction|Roller coaster": {
+  "Roller coaster": {
+    "type": "attraction",
     "category": "coaster",
-    "rows": 4,
-    "type": "attraction"
+    "rows": 5
   },
-  "Attraction|Rotating theater": {
-    "category": "360_film",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Safari vehicle ride": {
+  "Safari": {
+    "type": "attraction",
     "category": "dark_ride",
-    "rows": 1,
-    "type": "attraction"
+    "rows": 1
   },
-  "Attraction|Short film": {
-    "category": "360_film",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Speed body slide": {
-    "category": "water_ride",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Speed body slides": {
-    "category": "water_ride",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Spinning / aerial ride": {
+  "Spinner": {
+    "type": "attraction",
     "category": "dark_ride",
-    "rows": 1,
-    "type": "attraction"
+    "rows": 9
   },
-  "Attraction|Spinning coaster": {
+  "Spinning coaster": {
+    "type": "attraction",
     "category": "coaster",
-    "rows": 1,
-    "type": "attraction"
+    "rows": 1
   },
-  "Attraction|Spinning ride": {
-    "category": "dark_ride",
-    "rows": 3,
-    "type": "attraction"
+  "Stage show": {
+    "type": "show",
+    "category": "show",
+    "rows": 21
   },
-  "Attraction|Splash play area": {
-    "category": "water_ride",
-    "rows": 1,
-    "type": "attraction"
+  "Stunt show": {
+    "type": "show",
+    "category": "show",
+    "rows": 2
   },
-  "Attraction|Suspended dark ride": {
-    "category": "dark_ride",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Suspended family ride": {
-    "category": "dark_ride",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Toddler water play": {
-    "category": "water_ride",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Trackless / simulator hybrid": {
-    "category": "simulator",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Trackless 3D dark ride": {
-    "category": "360_film",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Trackless dark ride": {
-    "category": "dark_ride",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Attraction|Train": {
+  "Train": {
+    "type": "transport",
     "category": "transport",
-    "rows": 1,
-    "type": "transport"
+    "rows": 3
   },
-  "Attraction|Train between parks": {
-    "category": "transport",
-    "rows": 2,
-    "type": "transport"
-  },
-  "Attraction|Tube slide": {
+  "Tube / raft slide": {
+    "type": "attraction",
     "category": "water_ride",
-    "rows": 2,
-    "type": "attraction"
+    "rows": 7
   },
-  "Attraction|Tube slides": {
-    "category": "water_ride",
-    "rows": 2,
-    "type": "attraction"
-  },
-  "Attraction|Walk-through": {
+  "Walk-through": {
+    "type": "walkthrough",
     "category": "walkthrough",
-    "rows": 1,
-    "type": "walkthrough"
+    "rows": 9
   },
-  "Attraction|Walk-through / exhibit": {
+  "Walking trail": {
+    "type": "walkthrough",
     "category": "walkthrough",
-    "rows": 1,
-    "type": "walkthrough"
+    "rows": 4
   },
-  "Attraction|Walk-through interactive trail": {
-    "category": "walkthrough",
-    "rows": 1,
-    "type": "walkthrough"
-  },
-  "Attraction|Walking trail": {
-    "category": "walkthrough",
-    "rows": 3,
-    "type": "walkthrough"
-  },
-  "Attraction|Water coaster": {
+  "Water coaster": {
+    "type": "attraction",
     "category": "coaster",
-    "rows": 2,
-    "type": "attraction"
+    "rows": 2
   },
-  "Attraction|Wave pool": {
+  "Water play area": {
+    "type": "attraction",
     "category": "water_ride",
-    "rows": 2,
-    "type": "attraction"
+    "rows": 8
   },
-  "Attraction|Wave pool / beach": {
+  "Wave pool": {
+    "type": "attraction",
     "category": "water_ride",
-    "rows": 1,
-    "type": "attraction"
-  },
-  "Entertainment|3D film": {
-    "category": "360_film",
-    "rows": 1,
-    "type": "show"
-  },
-  "Entertainment|3D theater show": {
-    "category": "360_film",
-    "rows": 1,
-    "type": "show"
-  },
-  "Entertainment|4D show": {
-    "category": "360_film",
-    "rows": 1,
-    "type": "show"
-  },
-  "Entertainment|A cappella live music": {
-    "category": "show",
-    "rows": 1,
-    "type": "show"
-  },
-  "Entertainment|Bird presentation": {
-    "category": "show",
-    "rows": 1,
-    "type": "show"
-  },
-  "Entertainment|Bird show": {
-    "category": "show",
-    "rows": 1,
-    "type": "show"
-  },
-  "Entertainment|Cavalcade": {
-    "category": "show",
-    "rows": 1,
-    "type": "parade"
-  },
-  "Entertainment|Character / entertainment": {
-    "category": "meet_greet",
-    "rows": 1,
-    "type": "meet_greet"
-  },
-  "Entertainment|Character / interactive entertainment": {
-    "category": "meet_greet",
-    "rows": 1,
-    "type": "meet_greet"
-  },
-  "Entertainment|Character entertainment": {
-    "category": "meet_greet",
-    "rows": 7,
-    "type": "meet_greet"
-  },
-  "Entertainment|Circle-Vision film": {
-    "category": "360_film",
-    "rows": 1,
-    "type": "show"
-  },
-  "Entertainment|Comedy / effects show": {
-    "category": "show",
-    "rows": 1,
-    "type": "show"
-  },
-  "Entertainment|Day parade": {
-    "category": "show",
-    "rows": 1,
-    "type": "parade"
-  },
-  "Entertainment|Fireworks / projections": {
-    "category": "360_film",
-    "rows": 1,
-    "type": "show"
-  },
-  "Entertainment|Interactive character show": {
-    "category": "meet_greet",
-    "rows": 2,
-    "type": "meet_greet"
-  },
-  "Entertainment|Interactive comedy show": {
-    "category": "show",
-    "rows": 1,
-    "type": "show"
-  },
-  "Entertainment|Live acrobatics": {
-    "category": "show",
-    "rows": 1,
-    "type": "show"
-  },
-  "Entertainment|Live entertainment": {
-    "category": "show",
-    "rows": 1,
-    "type": "show"
-  },
-  "Entertainment|Live music": {
-    "category": "show",
-    "rows": 7,
-    "type": "show"
-  },
-  "Entertainment|Live music show": {
-    "category": "show",
-    "rows": 1,
-    "type": "show"
-  },
-  "Entertainment|Live percussion": {
-    "category": "show",
-    "rows": 1,
-    "type": "show"
-  },
-  "Entertainment|Live performance": {
-    "category": "show",
-    "rows": 2,
-    "type": "show"
-  },
-  "Entertainment|Live show": {
-    "category": "show",
-    "rows": 1,
-    "type": "show"
-  },
-  "Entertainment|Live street show": {
-    "category": "show",
-    "rows": 1,
-    "type": "show"
-  },
-  "Entertainment|Live vocal entertainment": {
-    "category": "show",
-    "rows": 1,
-    "type": "show"
-  },
-  "Entertainment|Live vocal show": {
-    "category": "show",
-    "rows": 1,
-    "type": "show"
-  },
-  "Entertainment|Musical / animatronic show": {
-    "category": "show",
-    "rows": 1,
-    "type": "show"
-  },
-  "Entertainment|Night parade": {
-    "category": "show",
-    "rows": 1,
-    "type": "parade"
-  },
-  "Entertainment|Nighttime spectacular": {
-    "category": "show",
-    "rows": 3,
-    "type": "show"
-  },
-  "Entertainment|Parade": {
-    "category": "show",
-    "rows": 1,
-    "type": "parade"
-  },
-  "Entertainment|Projection / nighttime show": {
-    "category": "360_film",
-    "rows": 1,
-    "type": "show"
-  },
-  "Entertainment|Projection show": {
-    "category": "360_film",
-    "rows": 2,
-    "type": "show"
-  },
-  "Entertainment|Sing-along film": {
-    "category": "360_film",
-    "rows": 1,
-    "type": "show"
-  },
-  "Entertainment|Stage / animatronic show": {
-    "category": "show",
-    "rows": 1,
-    "type": "show"
-  },
-  "Entertainment|Stage / multimedia show": {
-    "category": "show",
-    "rows": 1,
-    "type": "show"
-  },
-  "Entertainment|Stage show": {
-    "category": "show",
-    "rows": 10,
-    "type": "show"
-  },
-  "Entertainment|Stunt show": {
-    "category": "show",
-    "rows": 2,
-    "type": "show"
-  },
-  "Entertainment|Theater film": {
-    "category": "360_film",
-    "rows": 1,
-    "type": "show"
-  },
-  "Entertainment|Theater presentation": {
-    "category": "360_film",
-    "rows": 1,
-    "type": "show"
+    "rows": 6
   }
 }

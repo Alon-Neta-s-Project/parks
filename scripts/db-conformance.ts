@@ -38,6 +38,10 @@ const PARK_ID: Record<string, string> = {
 const quad = (v: string | null) => (v === null ? "null" : `'${v}'`);
 const esc = (s: string) => `'${s.replace(/'/g, "''")}'`;
 
+// Start from empty every run. Without this a second run reports every row as
+// refused on a duplicate key, which reads like a regression and is not one.
+sql("truncate experience cascade");
+
 const failures = new Map<string, { count: number; example: string }>();
 const record = (reason: string, key: string) => {
   const hit = failures.get(reason);
@@ -83,7 +87,9 @@ for (const e of experiences) {
     const message = String((err as { stderr?: string }).stderr ?? err);
     const constraint = message.match(/violates check constraint "([^"]+)"/)?.[1]
       ?? message.match(/null value in column "([^"]+)"/)?.[1]
-      ?? message.split("\n").find((l) => l.includes("ERROR"))?.slice(0, 90)
+      ?? message.match(/violates foreign key constraint "([^"]+)"/)?.[1]
+      ?? message.match(/duplicate key value violates unique constraint "([^"]+)"/)?.[1]
+      ?? message.match(/ERROR:\s*(.{0,90})/)?.[1]
       ?? "unknown";
     record(constraint, `${e.park} — ${e.nameEn}`);
   }

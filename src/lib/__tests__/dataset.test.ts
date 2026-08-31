@@ -69,13 +69,15 @@ describe("dataset", () => {
     }
   });
 
-  it("never defaults a ride to having no height limit", () => {
-    // "No limit" has to be an explicit finding. With the export still empty,
-    // nothing may claim it.
+  it("keeps height to the three states migration 012 defines", () => {
+    // 0 = checked, no limit. 50-200 = the limit. null = not checked.
+    // Nothing in between, and never a number below 50 that is not zero.
     for (const e of experiences) {
-      if (e.noHeightLimit) expect(e.heightRequirementCm).toBeNull();
+      const h = e.heightRequirementCm;
+      if (h === null) continue;
+      expect(h === 0 || (h >= 50 && h <= 200)).toBe(true);
     }
-    expect(experiences.filter((e) => e.noHeightLimit)).toHaveLength(0);
+    expect(experiences.some((e) => e.heightRequirementCm === 0)).toBe(true);
   });
 });
 
@@ -85,7 +87,7 @@ describe("the master never reaches the repo", () => {
       "product_export.csv",
       "product_export_manifest.json",
       "subtype_map.json",
-      "subtype_map_review.csv",
+      "subtype_vocab_review.csv",
     ]);
     for (const file of readdirSync(join(process.cwd(), "data/source"))) {
       expect(allowed).toContain(file);
