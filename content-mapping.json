@@ -39,7 +39,7 @@
     "height_requirement_cm",
     "gets_wet",
     "wheelchair",
-    "official_motion_sickness_warning",
+    "motion_sickness_warning",
     "name_he",
     "aliases_he"
   ],
@@ -198,8 +198,24 @@
       }
     },
     "motionSicknessWarning": {
-      "column": "official_motion_sickness_warning",
+      "column": "motion_sickness_warning",
       "kind": "quadState"
+    },
+    "type": {
+      "kind": "subtypeMap",
+      "from": [
+        "Activity Type",
+        "Subtype"
+      ],
+      "map": "data/source/subtype_map.json"
+    },
+    "category": {
+      "kind": "subtypeMap",
+      "from": [
+        "Activity Type",
+        "Subtype"
+      ],
+      "map": "data/source/subtype_map.json"
     }
   },
   "notInExport": {
@@ -231,5 +247,5 @@
       "fill_notes"
     ]
   },
-  "$columnNote": "The export header is still official_motion_sickness_warning while the schema field is motionSicknessWarning. That is exactly what this mapping file is for: a column rename is a change here, never in code."
+  "$manifest": "data/source/product_export_manifest.json — the importer refuses to run on a column-set hash mismatch."
 }

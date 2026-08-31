@@ -29,7 +29,11 @@ describe("dataset", () => {
       if (e.intensity.rated) expect(e.intensity.value).toBeGreaterThan(0);
       else expect(e.intensity.value).toBeNull();
     }
-    expect(experiences.filter((e) => e.intensity.rated)).toHaveLength(107);
+    // The count moves with every export; what must hold is that rated and
+    // valued always agree.
+    const rated = experiences.filter((e) => e.intensity.rated);
+    expect(rated.length).toBeGreaterThan(0);
+    expect(rated.every((e) => e.intensity.value !== null)).toBe(true);
   });
 
   it("carries no invented content", () => {
@@ -52,13 +56,16 @@ describe("dataset", () => {
 
   it("keeps four-state fields four-state, never collapsing unknown to false", () => {
     const quad = [
-      "bigDrops", "spinning", "airConditioned", "getsWet",
+      "bigDrops", "spinning", "airConditioned",
       "isMotionSimulator", "usesLargeScreensOr3d", "motionSicknessWarning",
     ] as const;
     for (const e of experiences) {
       for (const f of quad) {
         expect([null, "true", "false", "na"]).toContain(e[f]);
       }
+      // gets_wet is a three-value enum, not four-state, and null means unchecked
+      // rather than "does not get you wet".
+      expect([null, "none", "may_get_wet", "may_get_soaked"]).toContain(e.getsWet);
     }
   });
 
@@ -73,9 +80,16 @@ describe("dataset", () => {
 });
 
 describe("the master never reaches the repo", () => {
-  it("keeps product_export.csv as the only content file", () => {
-    const dir = readdirSync(join(process.cwd(), "data/source"));
-    expect(dir).toEqual(["product_export.csv"]);
+  it("keeps data/source to the export and what describes it", () => {
+    const allowed = new Set([
+      "product_export.csv",
+      "product_export_manifest.json",
+      "subtype_map.json",
+      "subtype_map_review.csv",
+    ]);
+    for (const file of readdirSync(join(process.cwd(), "data/source"))) {
+      expect(allowed).toContain(file);
+    }
   });
 
   it("has no field that could name a source", () => {

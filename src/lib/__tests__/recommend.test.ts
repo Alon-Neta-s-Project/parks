@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { emptyProfile, questions, type Profile } from "../profile";
+import { experiences } from "../../data";
 import { recommend, searchExperiences } from "../recommend";
 import { refinementById } from "../refine";
 
@@ -44,9 +45,12 @@ describe("searchExperiences", () => {
 describe("recommend", () => {
   it("groups by land and leads with the most intense ride allowed", () => {
     const result = recommend(withProfile({ parks: ["Magic Kingdom"], intensityMax: 4 }));
-    // 29 rated rides, less Carousel of Progress, which the workbook marks
-    // temporarily unavailable.
-    expect(result.total).toBe(28);
+    // Every rated, open ride in the park. The figure moves as ratings arrive,
+    // so it is derived rather than pinned.
+    const expected = experiences.filter(
+      (e) => e.park === "Magic Kingdom" && e.intensity.rated && e.status.state !== "closed",
+    ).length;
+    expect(result.total).toBe(expected);
     expect(result.groups.flatMap((g) => g.items).map((e) => e.nameEn)).not.toContain(
       "Walt Disney's Carousel of Progress",
     );
@@ -65,7 +69,11 @@ describe("recommend", () => {
 
   it("counts what the intensity filter hid rather than hiding it silently", () => {
     const result = recommend(withProfile({ parks: ["Magic Kingdom"], intensityMax: 2 }));
-    expect(result.notes.unratedExcluded).toBe(7);
+    const unratedOpen = experiences.filter(
+      (e) => e.park === "Magic Kingdom" && !e.intensity.rated && e.status.state !== "closed",
+    ).length;
+    expect(result.notes.unratedExcluded).toBe(unratedOpen);
+    expect(unratedOpen).toBeGreaterThan(0);
   });
 
   it("flags the two Magic Kingdom rides needing a separately paid Single Pass", () => {
@@ -191,5 +199,37 @@ describe("contextual refinements", () => {
     expect(refinementById("onlyIncluded")?.offered(mk)).toBe(false);
     const withPass = refinementById("hasFastAccess")!.apply(mk);
     expect(refinementById("onlyIncluded")?.offered(withPass)).toBe(true);
+  });
+});
+
+describe("an unrated ride never answers a question about intensity", () => {
+  it("stays out of a bounded search even when unrated rides are requested", () => {
+    const bounded = searchExperiences({
+      parks: ["Magic Kingdom"],
+      intensityMax: 2,
+      includeUnrated: true,
+    });
+    expect(bounded.length).toBeGreaterThan(0);
+    expect(bounded.filter((e) => !e.intensity.rated)).toHaveLength(0);
+  });
+
+  it("stays out of a floor-bounded search too", () => {
+    const thrills = searchExperiences({
+      parks: ["Magic Kingdom"],
+      intensityMin: 3,
+      includeUnrated: true,
+    });
+    expect(thrills.every((e) => e.intensity.rated)).toBe(true);
+  });
+
+  it("is listed only when no intensity bound is set", () => {
+    const unbounded = searchExperiences({ parks: ["Magic Kingdom"], includeUnrated: true });
+    expect(unbounded.some((e) => !e.intensity.rated)).toBe(true);
+  });
+
+  it("is never coerced to a middle value", () => {
+    for (const e of experiences) {
+      if (!e.intensity.rated) expect(e.intensity.value).toBeNull();
+    }
   });
 });

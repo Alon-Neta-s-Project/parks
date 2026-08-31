@@ -70,6 +70,12 @@ export const experienceSchema = z.object({
   park: z.string().min(1),
   parkKind: z.enum(["theme", "water"]),
   kind: z.enum(["attraction", "entertainment"]),
+  /** From the approved subtype map — never derived in code. */
+  type: z.enum(["attraction", "show", "parade", "meet_greet", "walkthrough", "transport"]),
+  category: z.enum([
+    "dark_ride", "coaster", "simulator", "water_ride", "show",
+    "walkthrough", "playground", "meet_greet", "transport", "360_film",
+  ]),
   land: z.string().min(1),
   subtype: z.string().min(1),
 

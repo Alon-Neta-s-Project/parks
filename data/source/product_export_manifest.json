@@ -1,0 +1,15 @@
+{
+  "generated": "2026-08-31",
+  "source_file": "v6_4.xlsx",
+  "rows": 232,
+  "columns": 36,
+  "columns_hash": "c3501f47ab3d",
+  "scope": [
+    "Attraction",
+    "Entertainment"
+  ],
+  "held_out": [
+    "youtube_id",
+    "video_creator"
+  ]
+}

@@ -15,6 +15,7 @@
  *   npx tsx scripts/import-content.ts            # dry run + gap report
  *   npx tsx scripts/import-content.ts --write    # actually write the dataset
  */
+import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -83,6 +84,18 @@ function enumOrNull<T extends string>(v: string, allowed: readonly T[], key: str
   return null;
 }
 
+/**
+ * A value bound for an integer column. A fraction is kept as-is in the dataset
+ * but flagged, so the mismatch is visible instead of being rounded away.
+ */
+function intForIntegerColumn(v: string, key: string, col: string): number | null {
+  const n = num(v, key, col, false);
+  if (n !== null && !Number.isInteger(n)) {
+    note(key, `${col} is ${n} but the column is integer — it would be silently rounded to ${Math.round(n)}`);
+  }
+  return n;
+}
+
 function num(v: string, key: string, col: string, integer: boolean): number | null {
   if (v.trim() === "") return null;
   const n = Number(v);
@@ -140,6 +153,28 @@ const csv = readFileSync(join(ROOT, mapping.source), "utf8");
 const rows = parseCsv(csv);
 const headers = Object.keys(rows[0] ?? {});
 
+/**
+ * The manifest names the exact column set this export was built from. A silent
+ * mismatch is how the previous export shipped an obsolete column name, empty in
+ * all 232 rows, without anything failing loudly. Stop instead.
+ */
+const manifest = JSON.parse(readFileSync(join(ROOT, "data/source/product_export_manifest.json"), "utf8"));
+const columnsHash = createHash("sha256").update(headers.join("|")).digest("hex").slice(0, 12);
+if (columnsHash !== manifest.columns_hash) {
+  console.error(`✗ ABORT — column-set hash mismatch.`);
+  console.error(`  manifest expects ${manifest.columns_hash}, this file is ${columnsHash}`);
+  console.error(`  The export and the manifest disagree. Do not import.`);
+  process.exit(1);
+}
+
+/**
+ * Subtype carries 141 free-text descriptions; the schema needs two closed enums.
+ * The translation lives in an approved map, so it is visible and reviewable in
+ * one place rather than spread across 232 rows.
+ */
+const subtypeMap: Record<string, { type: string; category: string }> =
+  JSON.parse(readFileSync(join(ROOT, "data/source/subtype_map.json"), "utf8"));
+
 // A master-only column in the export means the export leaked. Stop.
 const leaked = mapping.neverExpected.columns.filter((c: string) => headers.includes(c));
 if (leaked.length) {
@@ -167,8 +202,19 @@ for (const row of rows) {
   const llType = (row["Lightning Lane Type"] ?? "").trim();
   const summary = row["Optional Fast Access / Pass"] ?? "";
 
+  // No default. dark_ride is the largest category and therefore the tempting
+  // default, and it is exactly where a wrong guess would never be noticed.
+  const mapKey = `${row["Activity Type"]}|${row["Subtype"]}`;
+  const mapped = subtypeMap[mapKey];
+  if (!mapped) {
+    rejected.push({ key, reason: `Subtype not in the approved map: ${JSON.stringify(mapKey)}` });
+    continue;
+  }
+
   const candidate = {
     id: slugify(park, name),
+    type: mapped.type,
+    category: mapped.category,
     key,
     nameEn: name,
     nameHe: textOrNull(row["name_he"] ?? ""),
@@ -197,7 +243,10 @@ for (const row of rows) {
       unconfirmed: /not confirmed/i.test(summary),
     },
     openedYear: num(row["opened_year"] ?? "", key, "opened_year", true),
-    durationMinutes: num(row["duration_minutes"] ?? "", key, "duration_minutes", false),
+    // The column is integer in the schema, so a fractional value cannot be
+    // stored as given. Reported rather than rounded here: silently rounding is
+    // the same class of mistake as defaulting gets_wet to 'none'.
+    durationMinutes: intForIntegerColumn(row["duration_minutes"] ?? "", key, "duration_minutes"),
     maxSpeedKmh: num(row["max_speed_kmh"] ?? "", key, "max_speed_kmh", false),
     inversions: num(row["inversions"] ?? "", key, "inversions", true),
     bigDrops: quadState(row["big_drops"] ?? "", key, "big_drops"),
@@ -212,7 +261,7 @@ for (const row of rows) {
     wheelchair: (row["wheelchair"] ?? "").trim() === "" ? null : (row["wheelchair"] as never),
     // Column name in the export, field name in the schema — see content-mapping.json.
     motionSicknessWarning: quadState(
-      row["official_motion_sickness_warning"] ?? "", key, "motion_sickness_warning"),
+      row["motion_sickness_warning"] ?? "", key, "motion_sickness_warning"),
     lastVerified: row["Last Verified"] ?? "",
     youtubeId: null,
     videoCreator: null,
@@ -292,6 +341,7 @@ writeFileSync(join(ROOT, "reports/import-gap-report.json"), JSON.stringify(repor
 
 // ── console summary ─────────────────────────────────────────────────────────
 console.log(`\n${WRITE ? "IMPORT" : "DRY RUN"} — ${mapping.source}`);
+console.log(`  columns hash  ${columnsHash} ✓ matches manifest`);
 console.log(`  rows read     ${rows.length}`);
 console.log(`  accepted      ${experiences.length}`);
 console.log(`  rejected      ${rejected.length}`);

@@ -66,7 +66,15 @@ export function searchExperiences(filters: SearchFilters): Experience[] {
       if (e.motionSicknessWarning !== want) return false;
     }
 
-    if (!e.intensity.rated) return includeUnrated;
+    if (!e.intensity.rated) {
+      // An unrated ride is never an answer to a question about intensity.
+      // Returning one under "intensity up to 2" would assert something nobody
+      // established — the exact false promise this product exists to avoid — so
+      // an active bound excludes it regardless of includeUnrated. That flag only
+      // governs whether unrated rides are listed when no bound is set at all.
+      if (intensityMin !== null || intensityMax !== null) return false;
+      return includeUnrated;
+    }
     const value = e.intensity.value as IntensityLevel;
     if (intensityMin !== null && value < intensityMin) return false;
     if (intensityMax !== null && value > intensityMax) return false;
