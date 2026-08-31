@@ -91,6 +91,8 @@ export interface Recommendation {
     needsCheck: Experience[];
     /** Universal rows where official Express participation is unconfirmed. */
     unconfirmedFastAccess: number;
+    /** Hidden purely by the condensed view, so the count can be stated. */
+    condensedAway: number;
     /** Parks in the profile that carry no intensity ratings at all. */
     unratedParks: string[];
   };
@@ -105,6 +107,7 @@ const emptyRecommendation: Recommendation = {
     singlePass: [],
     needsCheck: [],
     unconfirmedFastAccess: 0,
+    condensedAway: 0,
     unratedParks: [],
   },
   verifiedAt: null,
@@ -157,6 +160,8 @@ export function recommend(profile: Profile): Recommendation {
     else byLand.set(key, [item]);
   }
 
+  const CONDENSED_PER_LAND = 3;
+
   const groups: LandGroup[] = [...byLand.entries()]
     .map(([key, items]) => {
       const [park = "", land = ""] = key.split("\u0000");
@@ -169,6 +174,11 @@ export function recommend(profile: Profile): Recommendation {
         parks.indexOf(a.park) - parks.indexOf(b.park) ||
         b.items.length - a.items.length ||
         a.land.localeCompare(b.land, "en"),
+    )
+    // A condensed list keeps the top few per land rather than dropping lands,
+    // so the shape of the park still reads.
+    .map((g) =>
+      profile.condensed ? { ...g, items: g.items.slice(0, CONDENSED_PER_LAND) } : g,
     );
 
   const unratedExcluded = profile.includeUnrated
@@ -193,6 +203,7 @@ export function recommend(profile: Profile): Recommendation {
       singlePass: matches.filter((e) => e.fastAccess.singlePassRequired),
       needsCheck: matches.filter((e) => e.status.state === "check"),
       unconfirmedFastAccess: matches.filter((e) => e.fastAccess.unconfirmed).length,
+      condensedAway: matches.length - groups.reduce((n, g) => n + g.items.length, 0),
       unratedParks,
     },
     verifiedAt: matches[0]?.lastVerified ?? null,

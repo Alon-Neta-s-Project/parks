@@ -4,6 +4,10 @@ import type { Profile } from "./profile";
 /**
  * What the conversation can do after the first recommendation.
  *
+ * This is also where the questions that used to come before the answer now
+ * live: queue-skipping and list length are only meaningful once there is a list
+ * to apply them to, so they are asked here, in context.
+ *
  * Each refinement is a named, reversible change to the profile — the same shape
  * as an answer to an opening question, so the whole conversation stays one
  * mechanism. Like the questions, these are config rather than code, and each one
@@ -47,8 +51,24 @@ export const refinements: Refinement[] = [
     apply: (p) => ({ ...p, intensityMax: clamp((p.intensityMax ?? 1) + 1) }),
   },
   {
+    id: "hasFastAccess",
+    offered: (p) => p.hasFastAccess === null,
+    apply: (p) => ({ ...p, hasFastAccess: true }),
+  },
+  {
+    id: "condensed",
+    offered: (p) => !p.condensed,
+    apply: (p) => ({ ...p, condensed: true }),
+  },
+  {
+    id: "full",
+    offered: (p) => p.condensed,
+    apply: (p) => ({ ...p, condensed: false }),
+  },
+  {
     id: "onlyIncluded",
-    offered: (p) => !p.onlyIncludedInPass,
+    // Only worth offering once we know they hold a pass at all.
+    offered: (p) => !p.onlyIncludedInPass && p.hasFastAccess === true,
     apply: (p) => ({ ...p, onlyIncludedInPass: true }),
   },
   {

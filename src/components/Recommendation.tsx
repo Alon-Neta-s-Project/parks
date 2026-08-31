@@ -36,7 +36,8 @@ export function Recommendation({
     notes.unratedParks.length > 0 ||
     notes.singlePass.length > 0 ||
     notes.needsCheck.length > 0 ||
-    notes.unconfirmedFastAccess > 0;
+    notes.unconfirmedFastAccess > 0 ||
+    notes.condensedAway > 0;
 
   return (
     <div className="result">
@@ -86,6 +87,9 @@ export function Recommendation({
             )}
             {notes.needsCheck.length > 0 && (
               <li>{t("notes.needsCheck", { count: notes.needsCheck.length })}</li>
+            )}
+            {notes.condensedAway > 0 && (
+              <li>{t("notes.condensedAway", { count: notes.condensedAway })}</li>
             )}
             {notes.unconfirmedFastAccess > 0 && (
               <li>{t("notes.unconfirmed", { count: notes.unconfirmedFastAccess })}</li>

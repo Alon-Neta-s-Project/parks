@@ -92,13 +92,11 @@ export function Chat() {
     if (total > 0) setProfile(next);
   };
 
-  const offeredParks = useMemo(
-    () =>
-      allParks.filter((park) =>
-        profile.resort === "both" || profile.resort === null ? true : park.resort === profile.resort,
-      ),
-    [profile.resort],
-  );
+  /**
+   * All ten parks, straight from the dataset. Asking which resort first was a
+   * question whose answer the park choice already contains.
+   */
+  const offeredParks = allParks;
 
   const toggleUnrated = () =>
     setProfile((current) => ({ ...current, includeUnrated: !current.includeUnrated }));
@@ -146,8 +144,8 @@ export function Chat() {
             <Orb />
             <div className="bubble bubble--tim">
               {t(`questions.${question.id}.prompt`)}
-              {question.id === "group" && (
-                <div className="bubble__note">{t("questions.group.note")}</div>
+              {question.id === "intensity" && (
+                <div className="bubble__note">{t("questions.intensity.note")}</div>
               )}
             </div>
           </div>
@@ -197,11 +195,7 @@ export function Chat() {
                       question.id,
                       t(`questions.${question.id}.${option.id}`),
                       option.patch,
-                      // The one place Tim's behaviour visibly forks: a group that
-                      // said it prefers to improvise is not pushed into a plan.
-                      option.id === "flows" || option.id === "plans"
-                        ? t(`answers.${option.id}`)
-                        : undefined,
+                      undefined,
                     )
                   }
                 >

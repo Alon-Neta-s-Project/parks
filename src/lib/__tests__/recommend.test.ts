@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { emptyProfile, type Profile } from "../profile";
+import { emptyProfile, questions, type Profile } from "../profile";
 import { recommend, searchExperiences } from "../recommend";
 import { refinementById } from "../refine";
 
@@ -150,5 +150,46 @@ describe("more than one park", () => {
     const both = recommend(two);
     expect(both.total).toBeGreaterThan(one.total);
     expect(both.groups.flatMap((g) => g.items)).toHaveLength(both.total);
+  });
+});
+
+describe("opening questions", () => {
+  it("asks two questions before answering, not five", () => {
+    expect(questions.map((q) => q.id)).toEqual(["parks", "intensity"]);
+  });
+
+  it("asks for the comfortable intensity directly, never deriving it", () => {
+    const intensityQ = questions.find((q) => q.id === "intensity");
+    // Every option sets an intensity bound and nothing about who is in the group.
+    for (const option of intensityQ?.options ?? []) {
+      expect(Object.keys(option.patch).sort()).toEqual(["intensityMax", "intensityMin"]);
+    }
+    expect(JSON.stringify(emptyProfile)).not.toMatch(/group|age|height|planner/i);
+  });
+});
+
+describe("condensed list", () => {
+  const mk = withProfile({ parks: ["Magic Kingdom"], intensityMax: 4 });
+
+  it("keeps every land but at most three each, and says how many it held back", () => {
+    const full = recommend(mk);
+    const short = recommend({ ...mk, condensed: true });
+
+    expect(short.groups).toHaveLength(full.groups.length);
+    for (const g of short.groups) expect(g.items.length).toBeLessThanOrEqual(3);
+
+    const shown = short.groups.reduce((n, g) => n + g.items.length, 0);
+    expect(short.notes.condensedAway).toBe(full.total - shown);
+    expect(short.notes.condensedAway).toBeGreaterThan(0);
+  });
+});
+
+describe("contextual refinements", () => {
+  const mk = withProfile({ parks: ["Magic Kingdom"], intensityMax: 4 });
+
+  it("only offers the pass-coverage filter once a pass is known to exist", () => {
+    expect(refinementById("onlyIncluded")?.offered(mk)).toBe(false);
+    const withPass = refinementById("hasFastAccess")!.apply(mk);
+    expect(refinementById("onlyIncluded")?.offered(withPass)).toBe(true);
   });
 });

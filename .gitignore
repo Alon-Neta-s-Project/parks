@@ -6,3 +6,10 @@ dist/
 __pycache__/
 dist/
 *.tsbuildinfo
+
+# ── המאסטר לעולם לא ב-repo ────────────────────────────────────────────────
+# הוא נושא Intensity Source Basis, Intensity Source URL ושאר מידע מחקר פנימי.
+# מקור התוכן היחיד הוא data/source/product_export.csv, שנוצר מרשימת היתר.
+*.xlsx
+data/source/*.json
+!data/source/product_export.csv

@@ -8,7 +8,6 @@
     "build": "tsc -b && vite build && tsx scripts/prerender.ts",
     "preview": "vite preview",
     "test": "vitest run",
-    "data": "python3 scripts/build-dataset.py",
     "import": "tsx scripts/import-content.ts",
     "artifact": "npm run build && python3 scripts/build-artifact.py"
   },
@@ -21,6 +20,7 @@
     "zod": "^4.5.4"
   },
   "devDependencies": {
+    "@types/node": "^26.4.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",

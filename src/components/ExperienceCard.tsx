@@ -6,9 +6,11 @@ import { Intensity } from "./Intensity";
 
 /**
  * One row per experience: three facts at most, per the design direction.
- * Everything else — the ticket wording, the status sentence, the sources and
- * their authority tier — sits behind a tap, so the list stays scannable without
- * the trust footer being dropped.
+ * Everything else — the ticket wording, the status sentence and the date the
+ * information was checked — sits behind a tap, so the list stays scannable.
+ *
+ * No source is shown anywhere, by decision: the product says when something was
+ * checked, never what it was checked against.
  */
 export function ExperienceCard({ experience }: { experience: Experience }) {
   const { t } = useTranslation();
@@ -63,7 +65,7 @@ export function ExperienceCard({ experience }: { experience: Experience }) {
           </dl>
 
           {/* Freshness only. The export carries no source, by decision. */}
-          <div className="detail__sources">
+          <div className="detail__checked">
             <span className="detail__label num">
               {t("trust.checked", { date: experience.lastVerified })}
             </span>

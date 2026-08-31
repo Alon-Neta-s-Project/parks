@@ -434,43 +434,6 @@ button {
   color: var(--pw-ink-3);
 }
 
-.detail__sources ul {
-  display: flex;
-  flex-direction: column;
-  gap: var(--pw-s2);
-  margin-block: var(--pw-s3);
-}
-
-.detail__sources li {
-  display: flex;
-  align-items: baseline;
-  gap: var(--pw-s2);
-}
-
-.detail__sources a {
-  color: var(--pw-way-600);
-  word-break: break-all;
-  font-size: 12px;
-}
-
-.tier {
-  flex: none;
-  font: var(--pw-t-micro);
-  letter-spacing: 0.04em;
-  padding: 3px 7px;
-  border-radius: 6px;
-}
-
-.tier--t1 {
-  background: var(--pw-way-500);
-  color: var(--pw-on-way);
-}
-
-.tier--t4 {
-  background: var(--pw-sunken);
-  color: var(--pw-ink-2);
-}
-
 .detail__missing {
   background: var(--pw-missing-bg);
   border: 1px solid var(--pw-missing-line);

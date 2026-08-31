@@ -1,3 +1,5 @@
+import { readdirSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { experiences, parks } from "../../data";
 import { experienceSchema, parkSchema } from "../../data/schema";
@@ -67,5 +69,23 @@ describe("dataset", () => {
       if (e.noHeightLimit) expect(e.heightRequirementCm).toBeNull();
     }
     expect(experiences.filter((e) => e.noHeightLimit)).toHaveLength(0);
+  });
+});
+
+describe("the master never reaches the repo", () => {
+  it("keeps product_export.csv as the only content file", () => {
+    const dir = readdirSync(join(process.cwd(), "data/source"));
+    expect(dir).toEqual(["product_export.csv"]);
+  });
+
+  it("has no field that could name a source", () => {
+    const forbidden = /source|basis|tier|url|confidence|calibration|conflict|retrieved/i;
+    for (const e of experiences) {
+      for (const key of Object.keys(e)) {
+        // lastVerified is a date, and a date does not give away where it came from.
+        if (key === "lastVerified") continue;
+        expect(key).not.toMatch(forbidden);
+      }
+    }
   });
 });
