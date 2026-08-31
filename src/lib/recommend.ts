@@ -14,6 +14,16 @@ import type { Profile } from "./profile";
 
 export interface SearchFilters {
   parks?: string[];
+  /**
+   * Replaces the four sensitivity filters and motion_sickness_max, per data
+   * spec §5. Those asked for a severity we cannot source; this asks whether the
+   * operator publishes a warning, which is a fact.
+   *
+   * true  — only rides carrying an official warning
+   * false — only rides explicitly found to carry none
+   * Rides where it is simply unknown are never swept into either answer.
+   */
+  hasMotionSicknessWarning?: boolean;
   kinds?: ("attraction" | "entertainment")[];
   intensityMin?: IntensityLevel | null;
   intensityMax?: IntensityLevel | null;
@@ -35,6 +45,7 @@ export function searchExperiences(filters: SearchFilters): Experience[] {
     includeUnrated = false,
     includeClosed = false,
     excludeSinglePass = false,
+    hasMotionSicknessWarning,
     land,
   } = filters;
 
@@ -44,6 +55,13 @@ export function searchExperiences(filters: SearchFilters): Experience[] {
     if (land && e.land !== land) return false;
     if (!includeClosed && e.status.state === "closed") return false;
     if (excludeSinglePass && e.fastAccess.singlePassRequired) return false;
+
+    if (hasMotionSicknessWarning !== undefined) {
+      // "na" and null both mean we cannot answer, so neither counts as a match
+      // in either direction — an unknown must not read as a clean bill.
+      const want = hasMotionSicknessWarning ? "true" : "false";
+      if (e.officialMotionSicknessWarning !== want) return false;
+    }
 
     if (!e.intensity.rated) return includeUnrated;
     const value = e.intensity.value as IntensityLevel;
@@ -177,7 +195,7 @@ export function recommend(profile: Profile): Recommendation {
       unconfirmedFastAccess: matches.filter((e) => e.fastAccess.unconfirmed).length,
       unratedParks,
     },
-    verifiedAt: matches[0]?.sourceVerifiedAt ?? null,
+    verifiedAt: matches[0]?.lastVerified ?? null,
   };
 }
 

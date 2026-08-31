@@ -1,5 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { HashRouter } from "react-router-dom";
 import App from "./App";
 import "./i18n";
 import "./styles/global.css";
@@ -14,6 +15,10 @@ if (!root) throw new Error("root element missing from index.html");
 
 createRoot(root).render(
   <StrictMode>
-    <App />
+    {/* Hash routing so the built app also works opened from a single file,
+        with no server to rewrite unknown paths onto index.html. */}
+    <HashRouter>
+      <App />
+    </HashRouter>
   </StrictMode>,
 );

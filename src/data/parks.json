@@ -1,6 +1,7 @@
 [
  {
   "name": "Magic Kingdom",
+  "slug": "magic-kingdom",
   "resort": "Disney World",
   "kind": "theme",
   "count": 36,
@@ -19,6 +20,7 @@
  },
  {
   "name": "EPCOT",
+  "slug": "epcot",
   "resort": "Disney World",
   "kind": "theme",
   "count": 27,
@@ -40,6 +42,7 @@
  },
  {
   "name": "Disney's Animal Kingdom",
+  "slug": "disney-s-animal-kingdom",
   "resort": "Disney World",
   "kind": "theme",
   "count": 24,
@@ -59,6 +62,7 @@
  },
  {
   "name": "Disney's Hollywood Studios",
+  "slug": "disney-s-hollywood-studios",
   "resort": "Disney World",
   "kind": "theme",
   "count": 21,
@@ -75,6 +79,7 @@
  },
  {
   "name": "Disney's Blizzard Beach",
+  "slug": "disney-s-blizzard-beach",
   "resort": "Disney World",
   "kind": "water",
   "count": 12,
@@ -89,6 +94,7 @@
  },
  {
   "name": "Disney's Typhoon Lagoon",
+  "slug": "disney-s-typhoon-lagoon",
   "resort": "Disney World",
   "kind": "water",
   "count": 11,
@@ -104,6 +110,7 @@
  },
  {
   "name": "Universal Islands of Adventure",
+  "slug": "universal-islands-of-adventure",
   "resort": "Universal Orlando",
   "kind": "theme",
   "count": 31,
@@ -121,6 +128,7 @@
  },
  {
   "name": "Universal Studios Florida",
+  "slug": "universal-studios-florida",
   "resort": "Universal Orlando",
   "kind": "theme",
   "count": 30,
@@ -142,6 +150,7 @@
  },
  {
   "name": "Universal Epic Universe",
+  "slug": "universal-epic-universe",
   "resort": "Universal Orlando",
   "kind": "theme",
   "count": 20,
@@ -157,6 +166,7 @@
  },
  {
   "name": "Universal Volcano Bay",
+  "slug": "universal-volcano-bay",
   "resort": "Universal Orlando",
   "kind": "water",
   "count": 20,

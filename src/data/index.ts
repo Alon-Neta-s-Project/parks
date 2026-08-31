@@ -10,10 +10,13 @@ export const experiences = experiencesJson as unknown as Experience[];
 export const parks = parksJson as unknown as Park[];
 
 export const byId = new Map(experiences.map((e) => [e.id, e]));
+export const bySlug = (slug: string) => experiences.find((e) => e.id === slug);
+export const parkBySlug = (slug: string) => parks.find((p) => p.slug === slug);
+export const inPark = (park: string) => experiences.filter((e) => e.park === park);
 
 /** Coverage the UI has to be honest about rather than quietly filter away. */
 export const coverage = {
   total: experiences.length,
   rated: experiences.filter((e) => e.intensity.rated).length,
-  verifiedAt: experiences[0]?.sourceVerifiedAt ?? null,
+  verifiedAt: experiences[0]?.lastVerified ?? null,
 };

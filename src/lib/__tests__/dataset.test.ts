@@ -32,25 +32,40 @@ describe("dataset", () => {
 
   it("carries no invented content", () => {
     for (const e of experiences) {
-      expect(e.heightMinCm).toBeNull();
-      expect(e.sensitivities).toBeNull();
+      // Held back by decision, not missing by accident.
       expect(e.editorial).toBeNull();
       expect(e.youtubeId).toBeNull();
-      expect(e.nameHe).toBeNull();
+      expect(e.videoCreator).toBeNull();
     }
   });
 
-  it("every row cites at least one source and a verification date", () => {
+  it("every row carries a check date, and no source of any kind", () => {
     for (const e of experiences) {
-      expect(e.sources.length).toBeGreaterThan(0);
-      expect(e.sourceVerifiedAt).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+      expect(e.lastVerified).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+      // Attribution stays in the master. A leak would show up as a URL anywhere
+      // in the row.
+      expect(JSON.stringify(e)).not.toMatch(/https?:\/\/|www\./);
     }
   });
 
-  it("intensity ratings only ever cite the aggregator tier", () => {
+  it("keeps four-state fields four-state, never collapsing unknown to false", () => {
+    const quad = [
+      "bigDrops", "spinning", "airConditioned", "getsWet",
+      "isMotionSimulator", "usesLargeScreensOr3d", "officialMotionSicknessWarning",
+    ] as const;
     for (const e of experiences) {
-      const intensitySource = e.sources.find((s) => s.role === "intensity");
-      expect(intensitySource?.tier).toBe(4);
+      for (const f of quad) {
+        expect([null, "true", "false", "na"]).toContain(e[f]);
+      }
     }
+  });
+
+  it("never defaults a ride to having no height limit", () => {
+    // "No limit" has to be an explicit finding. With the export still empty,
+    // nothing may claim it.
+    for (const e of experiences) {
+      if (e.noHeightLimit) expect(e.heightRequirementCm).toBeNull();
+    }
+    expect(experiences.filter((e) => e.noHeightLimit)).toHaveLength(0);
   });
 });

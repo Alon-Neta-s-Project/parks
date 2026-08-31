@@ -1,0 +1,81 @@
+{
+  "$comment": [
+    "Maps product_export.csv columns onto the schema. Explicit on purpose:",
+    "a renamed column is a fix here, never a change in code (brief §6a.2).",
+    "'column' is the exact CSV header. 'kind' is how the value is read."
+  ],
+  "source": "data/source/product_export.csv",
+  "requiredColumns": [
+    "Key", "Resort", "Park", "Park Type", "Area / Land",
+    "Activity Type", "Activity", "Subtype", "Intensity",
+    "Required Admission / Ticket", "Optional Fast Access / Pass",
+    "Reservation / Additional Payment", "Included With Admission?",
+    "Status / Seasonality", "Lightning Lane Type", "Premier Pass Included?",
+    "Included in Multi Pass?", "Separate Single Pass Purchase Required?",
+    "Extra Cost Beyond Multi Pass?", "Last Verified",
+    "opened_year", "duration_minutes", "max_speed_kmh", "inversions",
+    "big_drops", "spinning", "environment", "air_conditioned",
+    "is_motion_simulator", "uses_large_screens_or_3d",
+    "height_requirement_cm", "gets_wet", "wheelchair",
+    "official_motion_sickness_warning", "name_he", "aliases_he"
+  ],
+  "fields": {
+    "key":                           { "column": "Key", "kind": "text" },
+    "nameEn":                        { "column": "Activity", "kind": "text" },
+    "nameHe":                        { "column": "name_he", "kind": "textOrNull" },
+    "aliasesHe":                     { "column": "aliases_he", "kind": "list" },
+    "resort":                        { "column": "Resort", "kind": "enum", "values": ["Disney World", "Universal Orlando"] },
+    "park":                          { "column": "Park", "kind": "text" },
+    "parkKind":                      { "column": "Park Type", "kind": "map", "map": { "Theme Park": "theme", "Water Park": "water" } },
+    "kind":                          { "column": "Activity Type", "kind": "map", "map": { "Attraction": "attraction", "Entertainment": "entertainment" } },
+    "land":                          { "column": "Area / Land", "kind": "text" },
+    "subtype":                       { "column": "Subtype", "kind": "text" },
+    "intensity":                     { "column": "Intensity", "kind": "intensity" },
+    "status":                        { "column": "Status / Seasonality", "kind": "status" },
+    "admission":                     { "column": "Required Admission / Ticket", "kind": "text" },
+    "reservation":                   { "column": "Reservation / Additional Payment", "kind": "text" },
+    "includedWithAdmission":         { "column": "Included With Admission?", "kind": "text" },
+    "lastVerified":                  { "column": "Last Verified", "kind": "date" },
+    "openedYear":                    { "column": "opened_year", "kind": "integer" },
+    "durationMinutes":               { "column": "duration_minutes", "kind": "number" },
+    "maxSpeedKmh":                   { "column": "max_speed_kmh", "kind": "number" },
+    "inversions":                    { "column": "inversions", "kind": "integer" },
+    "bigDrops":                      { "column": "big_drops", "kind": "quadState" },
+    "spinning":                      { "column": "spinning", "kind": "quadState" },
+    "environment":                   { "column": "environment", "kind": "textOrNull" },
+    "airConditioned":                { "column": "air_conditioned", "kind": "quadState" },
+    "isMotionSimulator":             { "column": "is_motion_simulator", "kind": "quadState" },
+    "usesLargeScreensOr3d":          { "column": "uses_large_screens_or_3d", "kind": "quadState" },
+    "getsWet":                       { "column": "gets_wet", "kind": "quadState" },
+    "heightRequirementCm":           { "column": "height_requirement_cm", "kind": "height" },
+    "wheelchair":                    { "column": "wheelchair", "kind": "enum", "values": ["remain_in_wheelchair", "transfer_ecv_to_wheelchair", "transfer_to_ride_vehicle", "transfer_wheelchair_then_ride", "must_be_ambulatory"], "nullable": true },
+    "officialMotionSicknessWarning": { "column": "official_motion_sickness_warning", "kind": "quadState" },
+    "fastAccess": {
+      "kind": "fastAccess",
+      "columns": {
+        "system": "Lightning Lane Type",
+        "premierIncluded": "Premier Pass Included?",
+        "inMultiPass": "Included in Multi Pass?",
+        "singlePassRequired": "Separate Single Pass Purchase Required?",
+        "extraCost": "Extra Cost Beyond Multi Pass?",
+        "summary": "Optional Fast Access / Pass"
+      }
+    }
+  },
+  "notInExport": {
+    "$comment": "Held back by decision, not missing by accident. Always null.",
+    "youtubeId": "master-only until embedding and commercial use are settled (spec §3.4)",
+    "videoCreator": "same",
+    "editorial": "only Neta writes this"
+  },
+  "neverExpected": {
+    "$comment": "Master-only. If any of these appears in the export, the export leaked and the import must fail.",
+    "columns": [
+      "Intensity Source Basis", "Intensity Source URL", "Official Activity Source URL",
+      "Access Source URL", "Lightning Lane Purchase Notes", "height_requirement_in",
+      "wheelchair_official_text", "intensity_method", "intensity_confidence",
+      "intensity_calibration_notes", "name_he_origin", "conflict_flag", "conflict_notes",
+      "source_url_new", "source_url_safety", "retrieved_date", "fill_confidence", "fill_notes"
+    ]
+  }
+}

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import type { Experience } from "../data/schema";
 import { Intensity } from "./Intensity";
@@ -36,7 +37,7 @@ export function ExperienceCard({ experience }: { experience: Experience }) {
           {fastAccess.system === "Multi Pass" && (
             <span className="chip chip--way">{t("card.multiPass")}</span>
           )}
-          {fastAccess.system === "None" && <span className="chip">{t("card.noFastAccess")}</span>}
+          {fastAccess.system === null && <span className="chip">{t("card.noFastAccess")}</span>}
           {fastAccess.unconfirmed && (
             <span className="chip chip--missing">{t("card.unconfirmed")}</span>
           )}
@@ -49,55 +50,28 @@ export function ExperienceCard({ experience }: { experience: Experience }) {
       {open && (
         <div className="detail">
           <dl>
-            <dt>{t("card.admission")}</dt>
+            <dt>{t("ticket.admission")}</dt>
             <dd>{experience.admission}</dd>
-
-            <dt>{t("card.fastAccess")}</dt>
-            <dd>
-              {fastAccess.summary}
-              {fastAccess.notes && fastAccess.notes !== "N/A" && (
-                <span className="detail__aside">{fastAccess.notes}</span>
-              )}
-            </dd>
-
-            {status.note && (
+            <dt>{t("ticket.fastAccess")}</dt>
+            <dd>{experience.fastAccess.summary || t("ticket.noFastAccess")}</dd>
+            {experience.status.note && (
               <>
                 <dt>{t("card.statusNote")}</dt>
-                <dd>{status.note}</dd>
-              </>
-            )}
-
-            {experience.intensity.basis && (
-              <>
-                <dt>{t("card.intensity")}</dt>
-                <dd>{experience.intensity.basis}</dd>
+                <dd>{experience.status.note}</dd>
               </>
             )}
           </dl>
 
+          {/* Freshness only. The export carries no source, by decision. */}
           <div className="detail__sources">
-            <span className="detail__label">{t("card.sources")}</span>
-            <ul>
-              {experience.sources.map((source) => (
-                <li key={source.url}>
-                  <span className={source.tier === 1 ? "tier tier--t1" : "tier tier--t4"}>
-                    {t(source.tier === 1 ? "card.tier1" : "card.tier4")}
-                  </span>
-                  <a href={source.url} target="_blank" rel="noreferrer noopener" className="en">
-                    {source.url.replace(/^https?:\/\//, "")}
-                  </a>
-                </li>
-              ))}
-            </ul>
-            <span className="detail__label">
-              {t("card.verified", { date: experience.sourceVerifiedAt })}
+            <span className="detail__label num">
+              {t("trust.checked", { date: experience.lastVerified })}
             </span>
           </div>
 
-          <div className="detail__missing">
-            <b>{t("card.missingTitle")}</b>
-            {t("card.missingList")}
-          </div>
+          <Link className="deeplink" to={`/experience/${experience.id}`}>
+            {t("card.fullPage")}
+          </Link>
         </div>
       )}
     </li>

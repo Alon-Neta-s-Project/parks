@@ -1,81 +1,131 @@
 import { z } from "zod";
 
 /**
- * The workbook is the database, so these types are derived from its columns —
- * not from an imagined schema. Anything the workbook does not carry is typed as
- * nullable and stays null; the UI renders those as an explicit empty state so a
- * gap reads as a gap rather than disappearing.
+ * One schema, used by the importer and by the app (brief §11.1).
  *
- * One schema, used by the dataset test and (later) by any admin form, per the
- * brief's single-source-of-truth rule.
+ * Every field maps to a column in product_export.csv, which is the only content
+ * input. Anything the export does not carry stays null and shows as an explicit
+ * gap — never filled in from anywhere else.
+ *
+ * Migration 007 (db/migrations/) is the SQL form of this; this file is where it
+ * actually takes effect today.
  */
 
+/**
+ * Four-state, per data spec §3.1. A Postgres boolean holds three states and
+ * cannot separate "we don't know" from "doesn't apply to this kind of activity",
+ * so the distinction is carried explicitly:
+ *   "true" | "false" — found to be so
+ *   "na"             — not applicable to this kind of activity
+ *   null             — not enough information yet
+ */
+export const quadStateSchema = z.enum(["true", "false", "na"]).nullable();
+export type QuadState = z.infer<typeof quadStateSchema>;
+
+/** Five transfer modes, per data spec §3.3. Three would lose real distinctions. */
+export const wheelchairSchema = z
+  .enum([
+    "remain_in_wheelchair",
+    "transfer_ecv_to_wheelchair",
+    "transfer_to_ride_vehicle",
+    "transfer_wheelchair_then_ride",
+    "must_be_ambulatory",
+  ])
+  .nullable();
+
 export const intensitySchema = z.object({
-  /** 1–4 from DisneyGirlBlog, or null where it has no explicit rating. Never 0. */
+  /** 1–4, or null where the export says Unknown. Never 0 — unrated is not gentle. */
   value: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]).nullable(),
-  basis: z.string(),
   rated: z.boolean(),
 });
 
 export const statusSchema = z.object({
   state: z.enum(["open", "closed", "check"]),
-  /** The workbook's original sentence, kept because it carries dates. */
+  /** The export's own sentence, kept because it carries dates. */
   note: z.string().nullable(),
 });
 
 export const fastAccessSchema = z.object({
-  system: z.enum(["Multi Pass", "Single Pass", "None", "N/A"]),
+  /** null where the export leaves it blank, meaning no such product here. */
+  system: z.enum(["Multi Pass", "Single Pass"]).nullable(),
   offered: z.boolean(),
-  inMultiPass: z.enum(["Yes", "No", "N/A"]),
+  inMultiPass: z.enum(["Yes", "No"]).nullable(),
   singlePassRequired: z.boolean(),
-  premierIncluded: z.enum(["Yes", "No", "N/A"]),
+  premierIncluded: z.enum(["Yes", "No"]).nullable(),
   extraCost: z.boolean(),
   summary: z.string(),
-  notes: z.string(),
-  /** Universal rows where official participation could not be confirmed. */
+  /** Universal rows where official Express participation is unconfirmed. */
   unconfirmed: z.boolean(),
-});
-
-export const sourceSchema = z.object({
-  url: z.string().url(),
-  /** T1 official operator, T4 aggregator. Safety fields may only cite T1. */
-  tier: z.union([z.literal(1), z.literal(4)]),
-  role: z.enum(["official", "access", "intensity"]),
 });
 
 export const experienceSchema = z.object({
   id: z.string().min(1),
+  /** The export's Key. The stability key across re-imports. */
+  key: z.string().min(1),
   nameEn: z.string().min(1),
   nameHe: z.string().nullable(),
+  aliasesHe: z.array(z.string()),
+
   resort: z.enum(["Disney World", "Universal Orlando"]),
   park: z.string().min(1),
   parkKind: z.enum(["theme", "water"]),
   kind: z.enum(["attraction", "entertainment"]),
   land: z.string().min(1),
   subtype: z.string().min(1),
+
   intensity: intensitySchema,
   status: statusSchema,
   admission: z.string(),
   reservation: z.string(),
+  includedWithAdmission: z.string(),
   fastAccess: fastAccessSchema,
-  sources: z.array(sourceSchema).min(1),
-  sourceVerifiedAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
 
-  // Absent from the workbook. Present as nulls on purpose — see docs/content-file-analysis.md.
-  heightMinCm: z.null(),
-  sensitivities: z.null(),
-  durationMin: z.null(),
-  opened: z.null(),
-  getsWet: z.null(),
-  airConditioned: z.null(),
-  accessibility: z.null(),
-  popularity: z.null(),
-  editorial: z.null(),
+  // ---- ride characteristics (data spec §2.6–2.7) ----
+  openedYear: z.number().int().nullable(),
+  durationMinutes: z.number().nullable(),
+  maxSpeedKmh: z.number().nullable(),
+  inversions: z.number().int().nullable(),
+  bigDrops: quadStateSchema,
+  spinning: quadStateSchema,
+  environment: z.string().nullable(),
+  airConditioned: quadStateSchema,
+  isMotionSimulator: quadStateSchema,
+  usesLargeScreensOr3d: quadStateSchema,
+  getsWet: quadStateSchema,
+
+  /**
+   * Centimetres only, rounded from the official inches in the master.
+   * null = not found. "No limit" must be an explicit finding, never a default,
+   * so it is carried as noHeightLimit rather than as height 0.
+   */
+  heightRequirementCm: z.number().int().nullable(),
+  noHeightLimit: z.boolean(),
+
+  wheelchair: wheelchairSchema,
+
+  /**
+   * Whether the operator publishes a motion-sickness warning. A fact, not a
+   * severity judgement. Never set to "false" merely because none was found.
+   */
+  officialMotionSicknessWarning: quadStateSchema,
+
+  /**
+   * The only date in the export. Shown as "checked on", never with a source
+   * name: attribution stays in the master, freshness is what users need.
+   */
+  lastVerified: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+
+  // ---- held back deliberately ----
+  /** Master-only until embedding and commercial use are settled (spec §3.4). */
   youtubeId: z.null(),
+  videoCreator: z.null(),
+  /** Editorial voice: only Neta writes this. */
+  editorial: z.null(),
 });
 
 export const parkSchema = z.object({
   name: z.string().min(1),
+  slug: z.string().min(1),
   resort: z.enum(["Disney World", "Universal Orlando"]),
   kind: z.enum(["theme", "water"]),
   count: z.number().int().positive(),
@@ -86,3 +136,17 @@ export const parkSchema = z.object({
 export type Experience = z.infer<typeof experienceSchema>;
 export type Park = z.infer<typeof parkSchema>;
 export type IntensityLevel = 1 | 2 | 3 | 4;
+
+/** Required for a page to count as complete (brief §3.3a, minus held-back video). */
+export const REQUIRED_FIELDS = [
+  "nameHe",
+  "intensity",
+  "heightRequirementCm",
+  "officialMotionSicknessWarning",
+  "wheelchair",
+  "durationMinutes",
+  "openedYear",
+  "getsWet",
+  "airConditioned",
+  "environment",
+] as const;
