@@ -8,7 +8,10 @@
   box-sizing: border-box;
 }
 
+/* Direction is set here as well as on the element, so the app is still RTL when
+   it is embedded in a host page that supplies its own <html> without a dir. */
 html {
+  direction: rtl;
   background: var(--pw-canvas);
 }
 
@@ -198,7 +201,7 @@ button {
 
 .bubble--me {
   background: var(--pw-way-500);
-  color: #fff;
+  color: var(--pw-on-way);
   border-end-end-radius: var(--pw-r-xs);
 }
 
@@ -250,7 +253,7 @@ button {
 .option[aria-pressed="true"] {
   background: var(--pw-way-500);
   border-color: transparent;
-  color: #fff;
+  color: var(--pw-on-way);
 }
 
 .option small {
@@ -263,11 +266,11 @@ button {
 .option--go {
   background: var(--pw-magic-500);
   border-color: transparent;
-  color: #fff;
+  color: var(--pw-on-magic);
 }
 
 .option--go:hover {
-  color: #fff;
+  color: var(--pw-on-magic);
   border-color: transparent;
   filter: brightness(1.08);
 }
@@ -460,7 +463,7 @@ button {
 
 .tier--t1 {
   background: var(--pw-way-500);
-  color: #fff;
+  color: var(--pw-on-way);
 }
 
 .tier--t4 {

@@ -26,7 +26,7 @@
   /* ---- ink --------------------------------------------------------------- */
   --pw-ink:             #0C1524;
   --pw-ink-2:           #495871;
-  --pw-ink-3:           #7C8BA4;
+  --pw-ink-3:           #606E85;
   --pw-ink-on-dark:     #FFFFFF;
   --pw-ink-on-dark-2:   rgba(255, 255, 255, .74);
 
@@ -38,6 +38,10 @@
   --pw-way-500:         #2360E0;
   --pw-way-600:         #1A4CBC;
   --pw-way-700:         #143A92;
+  /* Foreground for anything sitting on a filled accent. Flips with the accent:
+     the dark palette lightens the fills, so white text on them would drop to
+     roughly 2.5:1. */
+  --pw-on-way:          #FFFFFF;
 
   /* ---- magic violet — טים, AI, תובנה אישית, פרימיום -------------------- */
   --pw-magic-50:        #F2EEFE;
@@ -47,6 +51,7 @@
   --pw-magic-600:       #5733C4;
   --pw-magic-line:      linear-gradient(90deg, var(--pw-way-500) 0%, var(--pw-magic-500) 100%);
   --pw-magic-orb:       radial-gradient(circle at 32% 28%, #9C7BFF 0%, #6B45E4 46%, #2360E0 100%);
+  --pw-on-magic:        #FFFFFF;
 
   /* ---- signal — במשורה בלבד -------------------------------------------- */
   --pw-urgent-50:       #FDEFE9;
@@ -130,12 +135,16 @@
     --pw-way-500:         #74A0F7;
     --pw-way-600:         #9CBCFA;
     --pw-way-700:         #C2D6FC;
+  --pw-on-way:          #08101E;
+    --pw-on-way:          #08101E;
 
     --pw-magic-50:        #1E1A38;
     --pw-magic-100:       #29224C;
     --pw-magic-300:       #8E71EE;
     --pw-magic-500:       #A98FF2;
     --pw-magic-600:       #C4B2F7;
+  --pw-on-magic:        #140E2C;
+    --pw-on-magic:        #140E2C;
 
     --pw-urgent-50:       #33190F;
     --pw-urgent-500:      #FF9068;
