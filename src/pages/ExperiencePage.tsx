@@ -72,7 +72,7 @@ export function ExperiencePage() {
               ? t("trust.complete")
               : `${t("trust.missingTitle")}: ${missing.length} — ${missing
                   .map((f) => t(`facts.${f === "heightRequirementCm" ? "height"
-                    : f === "officialMotionSicknessWarning" ? "motionWarning"
+                    : f === "motionSicknessWarning" ? "motionWarning"
                     : f === "nameHe" ? "unknown" : f === "durationMinutes" ? "duration"
                     : f === "openedYear" ? "opened" : f === "airConditioned" ? "airConditioned"
                     : f === "getsWet" ? "getsWet" : f}`))

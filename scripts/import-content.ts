@@ -74,6 +74,15 @@ function quadState(v: string, key: string, col: string): QuadState {
   return null;
 }
 
+/** A closed set of values, where anything else is reported rather than guessed. */
+function enumOrNull<T extends string>(v: string, allowed: readonly T[], key: string, col: string): T | null {
+  const t = v.trim();
+  if (t === "") return null;
+  if ((allowed as readonly string[]).includes(t)) return t as T;
+  note(key, `${col} is not one of ${allowed.join(" | ")}: ${JSON.stringify(v)} — left empty`);
+  return null;
+}
+
 function num(v: string, key: string, col: string, integer: boolean): number | null {
   if (v.trim() === "") return null;
   const n = Number(v);
@@ -197,12 +206,13 @@ for (const row of rows) {
     airConditioned: quadState(row["air_conditioned"] ?? "", key, "air_conditioned"),
     isMotionSimulator: quadState(row["is_motion_simulator"] ?? "", key, "is_motion_simulator"),
     usesLargeScreensOr3d: quadState(row["uses_large_screens_or_3d"] ?? "", key, "uses_large_screens_or_3d"),
-    getsWet: quadState(row["gets_wet"] ?? "", key, "gets_wet"),
+    getsWet: enumOrNull(row["gets_wet"] ?? "", ["none", "may_get_wet", "may_get_soaked"], key, "gets_wet"),
     heightRequirementCm: h.cm,
     noHeightLimit: h.none,
     wheelchair: (row["wheelchair"] ?? "").trim() === "" ? null : (row["wheelchair"] as never),
-    officialMotionSicknessWarning: quadState(
-      row["official_motion_sickness_warning"] ?? "", key, "official_motion_sickness_warning"),
+    // Column name in the export, field name in the schema — see content-mapping.json.
+    motionSicknessWarning: quadState(
+      row["official_motion_sickness_warning"] ?? "", key, "motion_sickness_warning"),
     lastVerified: row["Last Verified"] ?? "",
     youtubeId: null,
     videoCreator: null,

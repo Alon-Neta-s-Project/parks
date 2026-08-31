@@ -49,10 +49,10 @@ export function Facts({ experience: e }: { experience: Experience }) {
           : e.noHeightLimit ? t("facts.noHeight") : t("facts.unknown")}
       </Row>
 
-      <Row label={t("facts.motionWarning")} missing={isMissing(e.officialMotionSicknessWarning)}>
-        {e.officialMotionSicknessWarning === "true" ? t("facts.motionYes")
-          : e.officialMotionSicknessWarning === "false" ? t("facts.motionNo")
-          : <Quad value={e.officialMotionSicknessWarning} />}
+      <Row label={t("facts.motionWarning")} missing={isMissing(e.motionSicknessWarning)}>
+        {e.motionSicknessWarning === "true" ? t("facts.motionYes")
+          : e.motionSicknessWarning === "false" ? t("facts.motionNo")
+          : <Quad value={e.motionSicknessWarning} />}
       </Row>
 
       <Row label={t("facts.wheelchair")} missing={e.wheelchair === null}>
@@ -77,8 +77,9 @@ export function Facts({ experience: e }: { experience: Experience }) {
         <Quad value={e.airConditioned} />
       </Row>
 
-      <Row label={t("facts.getsWet")} missing={isMissing(e.getsWet)}>
-        <Quad value={e.getsWet} />
+      {/* Three values rather than four — the schema keeps this an enum. */}
+      <Row label={t("facts.getsWet")} missing={e.getsWet === null}>
+        {e.getsWet ? t(`facts.wet_${e.getsWet}`) : t("facts.unknown")}
       </Row>
 
       <Row label={t("facts.bigDrops")} missing={isMissing(e.bigDrops)}>

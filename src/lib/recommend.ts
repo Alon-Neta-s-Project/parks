@@ -15,9 +15,12 @@ import type { Profile } from "./profile";
 export interface SearchFilters {
   parks?: string[];
   /**
-   * Replaces the four sensitivity filters and motion_sickness_max, per data
-   * spec §5. Those asked for a severity we cannot source; this asks whether the
-   * operator publishes a warning, which is a fact.
+   * Replaces the four sensitivity filters and motion_sickness_max.
+   *
+   * Not the operator's own safety notice — that turned out to mark a whole
+   * class of rides at once and said nothing about nausea. This reflects sources
+   * that actually rate it, which are T3/T4, so the field sits outside the
+   * T1-only carve-out that now covers height limits and accessibility alone.
    *
    * true  — only rides carrying an official warning
    * false — only rides explicitly found to carry none
@@ -60,7 +63,7 @@ export function searchExperiences(filters: SearchFilters): Experience[] {
       // "na" and null both mean we cannot answer, so neither counts as a match
       // in either direction — an unknown must not read as a clean bill.
       const want = hasMotionSicknessWarning ? "true" : "false";
-      if (e.officialMotionSicknessWarning !== want) return false;
+      if (e.motionSicknessWarning !== want) return false;
     }
 
     if (!e.intensity.rated) return includeUnrated;

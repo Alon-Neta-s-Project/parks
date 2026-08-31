@@ -91,7 +91,13 @@ export const experienceSchema = z.object({
   airConditioned: quadStateSchema,
   isMotionSimulator: quadStateSchema,
   usesLargeScreensOr3d: quadStateSchema,
-  getsWet: quadStateSchema,
+  /**
+   * Three values, not four: migration 007 deliberately left this an enum where
+   * the other mechanical flags became four-state.
+   * null here means the export has not filled it. The database defaults it to
+   * "none", which is a conflict worth knowing about — see docs/db-conformance.md.
+   */
+  getsWet: z.enum(["none", "may_get_wet", "may_get_soaked"]).nullable(),
 
   /**
    * Centimetres only, rounded from the official inches in the master.
@@ -104,10 +110,19 @@ export const experienceSchema = z.object({
   wheelchair: wheelchairSchema,
 
   /**
-   * Whether the operator publishes a motion-sickness warning. A fact, not a
-   * severity judgement. Never set to "false" merely because none was found.
+   * A dependable indication that the ride may cause motion sickness.
+   *
+   * Explicitly NOT the operator's own safety notice: Disney pastes an identical
+   * block across a whole class of rides, which marked all 25 Magic Kingdom
+   * attractions including a slow driving track while leaving the spinning
+   * teacups unmarked. It measured the presence of legal wording, not the risk.
+   * The value now comes from sources that actually rate nausea.
+   *
+   * Those sources are T3/T4, so this field is outside the T1-only carve-out,
+   * which now covers height limits and accessibility alone. Tim reports the
+   * value and never attributes it to an official source.
    */
-  officialMotionSicknessWarning: quadStateSchema,
+  motionSicknessWarning: quadStateSchema,
 
   /**
    * The only date in the export. Shown as "checked on", never with a source
@@ -142,7 +157,7 @@ export const REQUIRED_FIELDS = [
   "nameHe",
   "intensity",
   "heightRequirementCm",
-  "officialMotionSicknessWarning",
+  "motionSicknessWarning",
   "wheelchair",
   "durationMinutes",
   "openedYear",

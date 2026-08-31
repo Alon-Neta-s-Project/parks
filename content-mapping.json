@@ -6,50 +6,186 @@
   ],
   "source": "data/source/product_export.csv",
   "requiredColumns": [
-    "Key", "Resort", "Park", "Park Type", "Area / Land",
-    "Activity Type", "Activity", "Subtype", "Intensity",
-    "Required Admission / Ticket", "Optional Fast Access / Pass",
-    "Reservation / Additional Payment", "Included With Admission?",
-    "Status / Seasonality", "Lightning Lane Type", "Premier Pass Included?",
-    "Included in Multi Pass?", "Separate Single Pass Purchase Required?",
-    "Extra Cost Beyond Multi Pass?", "Last Verified",
-    "opened_year", "duration_minutes", "max_speed_kmh", "inversions",
-    "big_drops", "spinning", "environment", "air_conditioned",
-    "is_motion_simulator", "uses_large_screens_or_3d",
-    "height_requirement_cm", "gets_wet", "wheelchair",
-    "official_motion_sickness_warning", "name_he", "aliases_he"
+    "Key",
+    "Resort",
+    "Park",
+    "Park Type",
+    "Area / Land",
+    "Activity Type",
+    "Activity",
+    "Subtype",
+    "Intensity",
+    "Required Admission / Ticket",
+    "Optional Fast Access / Pass",
+    "Reservation / Additional Payment",
+    "Included With Admission?",
+    "Status / Seasonality",
+    "Lightning Lane Type",
+    "Premier Pass Included?",
+    "Included in Multi Pass?",
+    "Separate Single Pass Purchase Required?",
+    "Extra Cost Beyond Multi Pass?",
+    "Last Verified",
+    "opened_year",
+    "duration_minutes",
+    "max_speed_kmh",
+    "inversions",
+    "big_drops",
+    "spinning",
+    "environment",
+    "air_conditioned",
+    "is_motion_simulator",
+    "uses_large_screens_or_3d",
+    "height_requirement_cm",
+    "gets_wet",
+    "wheelchair",
+    "official_motion_sickness_warning",
+    "name_he",
+    "aliases_he"
   ],
   "fields": {
-    "key":                           { "column": "Key", "kind": "text" },
-    "nameEn":                        { "column": "Activity", "kind": "text" },
-    "nameHe":                        { "column": "name_he", "kind": "textOrNull" },
-    "aliasesHe":                     { "column": "aliases_he", "kind": "list" },
-    "resort":                        { "column": "Resort", "kind": "enum", "values": ["Disney World", "Universal Orlando"] },
-    "park":                          { "column": "Park", "kind": "text" },
-    "parkKind":                      { "column": "Park Type", "kind": "map", "map": { "Theme Park": "theme", "Water Park": "water" } },
-    "kind":                          { "column": "Activity Type", "kind": "map", "map": { "Attraction": "attraction", "Entertainment": "entertainment" } },
-    "land":                          { "column": "Area / Land", "kind": "text" },
-    "subtype":                       { "column": "Subtype", "kind": "text" },
-    "intensity":                     { "column": "Intensity", "kind": "intensity" },
-    "status":                        { "column": "Status / Seasonality", "kind": "status" },
-    "admission":                     { "column": "Required Admission / Ticket", "kind": "text" },
-    "reservation":                   { "column": "Reservation / Additional Payment", "kind": "text" },
-    "includedWithAdmission":         { "column": "Included With Admission?", "kind": "text" },
-    "lastVerified":                  { "column": "Last Verified", "kind": "date" },
-    "openedYear":                    { "column": "opened_year", "kind": "integer" },
-    "durationMinutes":               { "column": "duration_minutes", "kind": "number" },
-    "maxSpeedKmh":                   { "column": "max_speed_kmh", "kind": "number" },
-    "inversions":                    { "column": "inversions", "kind": "integer" },
-    "bigDrops":                      { "column": "big_drops", "kind": "quadState" },
-    "spinning":                      { "column": "spinning", "kind": "quadState" },
-    "environment":                   { "column": "environment", "kind": "textOrNull" },
-    "airConditioned":                { "column": "air_conditioned", "kind": "quadState" },
-    "isMotionSimulator":             { "column": "is_motion_simulator", "kind": "quadState" },
-    "usesLargeScreensOr3d":          { "column": "uses_large_screens_or_3d", "kind": "quadState" },
-    "getsWet":                       { "column": "gets_wet", "kind": "quadState" },
-    "heightRequirementCm":           { "column": "height_requirement_cm", "kind": "height" },
-    "wheelchair":                    { "column": "wheelchair", "kind": "enum", "values": ["remain_in_wheelchair", "transfer_ecv_to_wheelchair", "transfer_to_ride_vehicle", "transfer_wheelchair_then_ride", "must_be_ambulatory"], "nullable": true },
-    "officialMotionSicknessWarning": { "column": "official_motion_sickness_warning", "kind": "quadState" },
+    "key": {
+      "column": "Key",
+      "kind": "text"
+    },
+    "nameEn": {
+      "column": "Activity",
+      "kind": "text"
+    },
+    "nameHe": {
+      "column": "name_he",
+      "kind": "textOrNull"
+    },
+    "aliasesHe": {
+      "column": "aliases_he",
+      "kind": "list"
+    },
+    "resort": {
+      "column": "Resort",
+      "kind": "enum",
+      "values": [
+        "Disney World",
+        "Universal Orlando"
+      ]
+    },
+    "park": {
+      "column": "Park",
+      "kind": "text"
+    },
+    "parkKind": {
+      "column": "Park Type",
+      "kind": "map",
+      "map": {
+        "Theme Park": "theme",
+        "Water Park": "water"
+      }
+    },
+    "kind": {
+      "column": "Activity Type",
+      "kind": "map",
+      "map": {
+        "Attraction": "attraction",
+        "Entertainment": "entertainment"
+      }
+    },
+    "land": {
+      "column": "Area / Land",
+      "kind": "text"
+    },
+    "subtype": {
+      "column": "Subtype",
+      "kind": "text"
+    },
+    "intensity": {
+      "column": "Intensity",
+      "kind": "intensity"
+    },
+    "status": {
+      "column": "Status / Seasonality",
+      "kind": "status"
+    },
+    "admission": {
+      "column": "Required Admission / Ticket",
+      "kind": "text"
+    },
+    "reservation": {
+      "column": "Reservation / Additional Payment",
+      "kind": "text"
+    },
+    "includedWithAdmission": {
+      "column": "Included With Admission?",
+      "kind": "text"
+    },
+    "lastVerified": {
+      "column": "Last Verified",
+      "kind": "date"
+    },
+    "openedYear": {
+      "column": "opened_year",
+      "kind": "integer"
+    },
+    "durationMinutes": {
+      "column": "duration_minutes",
+      "kind": "number"
+    },
+    "maxSpeedKmh": {
+      "column": "max_speed_kmh",
+      "kind": "number"
+    },
+    "inversions": {
+      "column": "inversions",
+      "kind": "integer"
+    },
+    "bigDrops": {
+      "column": "big_drops",
+      "kind": "quadState"
+    },
+    "spinning": {
+      "column": "spinning",
+      "kind": "quadState"
+    },
+    "environment": {
+      "column": "environment",
+      "kind": "textOrNull"
+    },
+    "airConditioned": {
+      "column": "air_conditioned",
+      "kind": "quadState"
+    },
+    "isMotionSimulator": {
+      "column": "is_motion_simulator",
+      "kind": "quadState"
+    },
+    "usesLargeScreensOr3d": {
+      "column": "uses_large_screens_or_3d",
+      "kind": "quadState"
+    },
+    "getsWet": {
+      "column": "gets_wet",
+      "kind": "enum",
+      "values": [
+        "none",
+        "may_get_wet",
+        "may_get_soaked"
+      ],
+      "nullable": true
+    },
+    "heightRequirementCm": {
+      "column": "height_requirement_cm",
+      "kind": "height"
+    },
+    "wheelchair": {
+      "column": "wheelchair",
+      "kind": "enum",
+      "values": [
+        "remain_in_wheelchair",
+        "transfer_ecv_to_wheelchair",
+        "transfer_to_ride_vehicle",
+        "transfer_wheelchair_then_ride",
+        "must_be_ambulatory"
+      ],
+      "nullable": true
+    },
     "fastAccess": {
       "kind": "fastAccess",
       "columns": {
@@ -60,6 +196,10 @@
         "extraCost": "Extra Cost Beyond Multi Pass?",
         "summary": "Optional Fast Access / Pass"
       }
+    },
+    "motionSicknessWarning": {
+      "column": "official_motion_sickness_warning",
+      "kind": "quadState"
     }
   },
   "notInExport": {
@@ -71,11 +211,25 @@
   "neverExpected": {
     "$comment": "Master-only. If any of these appears in the export, the export leaked and the import must fail.",
     "columns": [
-      "Intensity Source Basis", "Intensity Source URL", "Official Activity Source URL",
-      "Access Source URL", "Lightning Lane Purchase Notes", "height_requirement_in",
-      "wheelchair_official_text", "intensity_method", "intensity_confidence",
-      "intensity_calibration_notes", "name_he_origin", "conflict_flag", "conflict_notes",
-      "source_url_new", "source_url_safety", "retrieved_date", "fill_confidence", "fill_notes"
+      "Intensity Source Basis",
+      "Intensity Source URL",
+      "Official Activity Source URL",
+      "Access Source URL",
+      "Lightning Lane Purchase Notes",
+      "height_requirement_in",
+      "wheelchair_official_text",
+      "intensity_method",
+      "intensity_confidence",
+      "intensity_calibration_notes",
+      "name_he_origin",
+      "conflict_flag",
+      "conflict_notes",
+      "source_url_new",
+      "source_url_safety",
+      "retrieved_date",
+      "fill_confidence",
+      "fill_notes"
     ]
-  }
+  },
+  "$columnNote": "The export header is still official_motion_sickness_warning while the schema field is motionSicknessWarning. That is exactly what this mapping file is for: a column rename is a change here, never in code."
 }

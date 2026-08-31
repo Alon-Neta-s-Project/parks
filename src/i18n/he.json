@@ -30,7 +30,7 @@
   },
   "answers": {
     "missing": "לפני שנמשיך, שני דברים שאין לי ואני לא אמציא:",
-    "missingFields": "מגבלות גובה ואזהרות בחילה",
+    "missingFields": "מגבלות גובה ונטייה לבחילה",
     "missingTail": "— אין לזה עדיין מקור במידע שיש לנו, אז לא אתייחס אליהם. נשלים בהמשך."
   },
   "result": {
@@ -98,9 +98,9 @@
     "height": "מגבלת גובה",
     "heightCm": "{{cm}} ס\"מ",
     "noHeight": "אין מגבלת גובה",
-    "motionWarning": "אזהרת בחילה רשמית",
-    "motionYes": "קיימת אזהרה רשמית",
-    "motionNo": "לא נמצאה אזהרה רשמית",
+    "motionWarning": "נטייה לבחילה",
+    "motionYes": "עלול להבחיל",
+    "motionNo": "לא נמצא שמבחיל",
     "wheelchair": "נגישות בכיסא גלגלים",
     "wheelchair_remain_in_wheelchair": "אפשר להישאר בכיסא",
     "wheelchair_transfer_ecv_to_wheelchair": "מעבר מקלנועית לכיסא גלגלים",
@@ -128,7 +128,10 @@
     "subtype": "סוג",
     "park": "פארק",
     "noHebrewName": "אין עדיין שם בעברית",
-    "open": "פתוח"
+    "open": "פתוח",
+    "wet_none": "לא מרטיב",
+    "wet_may_get_wet": "עלול להרטיב",
+    "wet_may_get_soaked": "עלול להרטיב לגמרי"
   },
   "ticket": {
     "title": "כרטיס וגישה",

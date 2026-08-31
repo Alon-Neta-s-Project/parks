@@ -53,7 +53,7 @@ describe("dataset", () => {
   it("keeps four-state fields four-state, never collapsing unknown to false", () => {
     const quad = [
       "bigDrops", "spinning", "airConditioned", "getsWet",
-      "isMotionSimulator", "usesLargeScreensOr3d", "officialMotionSicknessWarning",
+      "isMotionSimulator", "usesLargeScreensOr3d", "motionSicknessWarning",
     ] as const;
     for (const e of experiences) {
       for (const f of quad) {
