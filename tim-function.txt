@@ -49,19 +49,31 @@ export async function bucketKey(ip: string, salt: string): Promise<string> {
   return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-const CORS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
-
-const json = (body: unknown, status = 200) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: { ...CORS, "Content-Type": "application/json; charset=utf-8" },
-  });
+/**
+ * `*` נכון כל עוד אין דומיין. ברגע שיהיה — להגדיר את הסוד ALLOWED_ORIGIN
+ * לדומיין שלנו, וזה מצטמצם מעצמו בלי שינוי קוד. מקור שאינו תואם לא מקבל
+ * כותרת CORS כלל, והדפדפן חוסם אותו.
+ */
+function corsFor(req: Request, env: Record<string, string | undefined>) {
+  const allowed = env.ALLOWED_ORIGIN;
+  const origin = req.headers.get("origin");
+  const value = !allowed ? "*" : origin === allowed ? origin : "";
+  const h: Record<string, string> = {
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+  };
+  if (value) h["Access-Control-Allow-Origin"] = value;
+  return h;
+}
 
 export async function handle(req: Request, env: Record<string, string | undefined>): Promise<Response> {
+  const CORS = corsFor(req, env);
+  const json = (body: unknown, status = 200) =>
+    new Response(JSON.stringify(body), {
+      status,
+      headers: { ...CORS, "Content-Type": "application/json; charset=utf-8" },
+    });
+
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
 
@@ -86,9 +98,22 @@ export async function handle(req: Request, env: Record<string, string | undefine
   }
 
   // ── הגבלת קצב ────────────────────────────────────────────────────────
+  //
+  // ⚠️ נכשלת **סגור**. אם אי אפשר לספור — אין קריאה למודל.
+  //
+  // הגרסה הראשונה דילגה על ההגבלה כשמשתני הסביבה חסרו, והמשיכה למודל.
+  // כלומר: תקלה בהגדרה הייתה הופכת את נקודת הקצה לפתוחה לגמרי, בשקט,
+  // בדיוק במצב שבו אימות הטוקן כבוי. עדיף שגיאה שרואים מנקודת קצה פתוחה
+  // שאיש לא יודע עליה — זה אותו כלל של "אין נפילה שקטה" ב-CLAUDE.md.
   const url = env.SUPABASE_URL;
   const serviceKey = env.SUPABASE_SERVICE_ROLE_KEY;
-  if (url && serviceKey) {
+  if (!url || !serviceKey) {
+    return json({
+      error: "rate_limit_unavailable",
+      detail: "SUPABASE_URL או SUPABASE_SERVICE_ROLE_KEY חסרים, ולכן אי אפשר לאכוף גג קריאות",
+    }, 500);
+  }
+  {
     const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
     const bucket = await bucketKey(ip, env.RATE_LIMIT_SALT ?? serviceKey.slice(0, 16));
     const since = new Date(Date.now() - WINDOW_MINUTES * 60_000).toISOString();
@@ -98,21 +123,55 @@ export async function handle(req: Request, env: Record<string, string | undefine
       "Content-Type": "application/json",
     };
 
-    const counted = await fetch(
-      `${url}/rest/v1/api_call?select=id&bucket=eq.${bucket}&created_at=gt.${since}`,
-      { headers: { ...auth, Prefer: "count=exact", Range: "0-0" } },
-    );
+    let counted: Response;
+    try {
+      counted = await fetch(
+        `${url}/rest/v1/api_call?select=id&bucket=eq.${bucket}&created_at=gt.${since}`,
+        { headers: { ...auth, Prefer: "count=exact", Range: "0-0" } },
+      );
+    } catch {
+      return json({ error: "rate_limit_unavailable", detail: "המסד לא נענה" }, 500);
+    }
     // PostgREST מחזיר את הסך הכל בכותרת content-range, בצורה "0-0/17".
-    const total = Number(counted.headers.get("content-range")?.split("/")[1] ?? "0");
+    // כותרת חסרה פירושה שהספירה לא התקבלה — לא שהיא אפס.
+    const header = counted.headers.get("content-range");
+    const total = Number(header?.split("/")[1]);
+    if (!counted.ok || !Number.isFinite(total)) {
+      return json({ error: "rate_limit_unavailable", detail: `ספירה נכשלה (${counted.status})` }, 500);
+    }
 
     if (total >= MAX_PER_WINDOW) {
       return json({ error: "rate_limited", retry_after_minutes: WINDOW_MINUTES }, 429);
     }
-    await fetch(`${url}/rest/v1/api_call`, {
-      method: "POST",
-      headers: auth,
-      body: JSON.stringify({ bucket }),
-    });
+
+    // רישום הקריאה. גם כאן סגור: אם לא נרשמה, הגג אינו ניתן לאכיפה
+    // בקריאה הבאה, ולכן אין טעם להמשיך.
+    let logged: Response;
+    try {
+      logged = await fetch(`${url}/rest/v1/api_call`, {
+        method: "POST",
+        headers: auth,
+        body: JSON.stringify({ bucket }),
+      });
+    } catch {
+      return json({ error: "rate_limit_unavailable", detail: "רישום הקריאה נכשל" }, 500);
+    }
+    if (!logged.ok) {
+      return json({ error: "rate_limit_unavailable", detail: `רישום הקריאה נכשל (${logged.status})` }, 500);
+    }
+
+    // ניקוי. הטבלה גדלה לנצח אחרת, ושורות ישנות מהחלון חסרות ערך — הספירה
+    // ממילא מסננת אותן. רץ באחוזים כדי לא להוסיף בקשה לכל קריאה; החלופה
+    // הנקייה היא pg_cron, והיא דורשת עוד הגדרה בסופאבייס.
+    // ⚠️ ובכוונה בלי await ובלי בדיקת תוצאה: ניקוי שנכשל אינו סיבה
+    //    לדחות משתמשת, בשונה מספירה שנכשלה.
+    if (Math.random() < 0.02) {
+      const stale = new Date(Date.now() - 2 * WINDOW_MINUTES * 60_000).toISOString();
+      fetch(`${url}/rest/v1/api_call?created_at=lt.${stale}`, {
+        method: "DELETE",
+        headers: auth,
+      }).catch(() => {});
+    }
   }
 
   // ── הקריאה למודל ─────────────────────────────────────────────────────

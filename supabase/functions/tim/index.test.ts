@@ -53,20 +53,32 @@ Deno.test("GET נדחה, OPTIONS מקבל CORS", async () => {
   assertEquals(o.headers.get("Access-Control-Allow-Origin"), "*");
 });
 
+const FULL = { GEMINI_API_KEY: KEY, SUPABASE_URL: "http://db", SUPABASE_SERVICE_ROLE_KEY: "svc" };
+/** מסד שמאפשר לעבור: ספירה נמוכה, ורישום שמצליח. */
+const dbOk = (n = 0) => (url: string) =>
+  url.startsWith("http://db/rest")
+    ? new Response("[]", { status: 200, headers: { "content-range": `0-0/${n}` } })
+    : geminiOk();
+
 Deno.test("מסלול תקין — המפתח נשלח לגוגל ואינו חוזר לדפדפן", async () => {
-  const s = stub(() => geminiOk());
-  const r = await handle(ask({ question: "היי" }), { GEMINI_API_KEY: KEY });
+  const s = stub(dbOk());
+  const r = await handle(ask({ question: "היי" }), FULL);
   s.restore();
   assertEquals(r.status, 200);
   const body = await r.text();
   assertEquals(body.includes(KEY), false);          // המפתח לא בגוף התשובה
   assertEquals(JSON.parse(body).answer, "שלום, אני מחובר.");
-  assertEquals((s.calls[0].init?.headers as Record<string, string>)["x-goog-api-key"], KEY);
+  const gemini = s.calls.find((c) => c.url.includes("generativelanguage"))!;
+  assertEquals((gemini.init?.headers as Record<string, string>)["x-goog-api-key"], KEY);
 });
 
 Deno.test("שגיאה מגוגל מוחזרת כקוד בלבד, בלי גוף התשובה שלה", async () => {
-  const s = stub(() => new Response("quota exceeded for key AIzaSECRET", { status: 429 }));
-  const r = await handle(ask({ question: "היי" }), { GEMINI_API_KEY: KEY });
+  const s = stub((url) =>
+    url.startsWith("http://db/rest")
+      ? new Response("[]", { status: 200, headers: { "content-range": "0-0/0" } })
+      : new Response("quota exceeded for key AIzaSECRET", { status: 429 })
+  );
+  const r = await handle(ask({ question: "היי" }), FULL);
   s.restore();
   assertEquals(r.status, 502);
   const body = await r.text();
@@ -75,24 +87,72 @@ Deno.test("שגיאה מגוגל מוחזרת כקוד בלבד, בלי גוף �
 });
 
 Deno.test("הגבלת קצב חוסמת מעל הגג ולא מתחתיו", async () => {
-  const env = { GEMINI_API_KEY: KEY, SUPABASE_URL: "http://db", SUPABASE_SERVICE_ROLE_KEY: "svc" };
-
-  const under = stub((url) =>
-    url.startsWith("http://db/rest")
-      ? new Response("[]", { status: 200, headers: { "content-range": "0-0/19" } })
-      : geminiOk()
-  );
-  assertEquals((await handle(ask({ question: "היי" }), env)).status, 200);
+  const under = stub(dbOk(19));
+  assertEquals((await handle(ask({ question: "היי" }), FULL)).status, 200);
   under.restore();
 
-  const over = stub((url) =>
-    url.startsWith("http://db/rest")
-      ? new Response("[]", { status: 200, headers: { "content-range": "0-0/20" } })
-      : geminiOk()
-  );
-  const blocked = await handle(ask({ question: "היי" }), env);
+  const over = stub(dbOk(20));
+  const blocked = await handle(ask({ question: "היי" }), FULL);
   over.restore();
   assertEquals(blocked.status, 429);
+});
+
+// ── כישלון סגור ──────────────────────────────────────────────────────
+// הגרסה הראשונה דילגה על ההגבלה כשלא ניתן היה לאכוף אותה, והמשיכה למודל.
+// זו הייתה נקודת קצה פתוחה בשקט, בדיוק כשאימות הטוקן כבוי.
+
+Deno.test("בלי הגדרות מסד — נעצר, ולא ממשיך למודל", async () => {
+  const s = stub(() => geminiOk());
+  const r = await handle(ask({ question: "היי" }), { GEMINI_API_KEY: KEY });
+  s.restore();
+  assertEquals(r.status, 500);
+  assertEquals((await r.json()).error, "rate_limit_unavailable");
+  assertEquals(s.calls.length, 0, "אסור שתהיה ולו קריאה אחת החוצה");
+});
+
+Deno.test("ספירה שנכשלה נחשבת ככישלון, לא כאפס", async () => {
+  for (const bad of [
+    new Response("", { status: 500 }),                                  // המסד שגה
+    new Response("[]", { status: 200 }),                                // בלי content-range
+    new Response("[]", { status: 200, headers: { "content-range": "*/*" } }), // לא מספר
+  ]) {
+    const s = stub((url) => (url.startsWith("http://db/rest") ? bad.clone() : geminiOk()));
+    const r = await handle(ask({ question: "היי" }), FULL);
+    const outbound = s.calls.filter((c) => c.url.includes("generativelanguage")).length;
+    s.restore();
+    assertEquals(r.status, 500);
+    assertEquals((await r.json()).error, "rate_limit_unavailable");
+    assertEquals(outbound, 0, "לא פונים למודל כשאי אפשר לספור");
+  }
+});
+
+Deno.test("רישום שנכשל עוצר גם הוא — אחרת הגג לא ניתן לאכיפה בקריאה הבאה", async () => {
+  let first = true;
+  const s = stub((url) => {
+    if (!url.startsWith("http://db/rest")) return geminiOk();
+    if (first) { first = false; return new Response("[]", { status: 200, headers: { "content-range": "0-0/0" } }); }
+    return new Response("", { status: 403 });   // ה-INSERT נכשל
+  });
+  const r = await handle(ask({ question: "היי" }), FULL);
+  const outbound = s.calls.filter((c) => c.url.includes("generativelanguage")).length;
+  s.restore();
+  assertEquals(r.status, 500);
+  assertEquals(outbound, 0);
+});
+
+Deno.test("CORS מצטמצם לדומיין ברגע ש-ALLOWED_ORIGIN מוגדר", async () => {
+  const withOrigin = (o: string) =>
+    new Request("http://x/tim", { method: "OPTIONS", headers: { origin: o } });
+
+  const open = await handle(new Request("http://x/tim", { method: "OPTIONS" }), {});
+  assertEquals(open.headers.get("Access-Control-Allow-Origin"), "*");
+
+  const env = { ALLOWED_ORIGIN: "https://parkday.example" };
+  const ours = await handle(withOrigin("https://parkday.example"), env);
+  assertEquals(ours.headers.get("Access-Control-Allow-Origin"), "https://parkday.example");
+
+  const theirs = await handle(withOrigin("https://evil.example"), env);
+  assertEquals(theirs.headers.get("Access-Control-Allow-Origin"), null);
 });
 
 Deno.test("הדלי הוא גיבוב — כתובת ה-IP עצמה אינה נשמרת", async () => {

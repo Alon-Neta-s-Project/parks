@@ -248,19 +248,31 @@ export async function bucketKey(ip: string, salt: string): Promise&lt;string&gt;
   return [...new Uint8Array(digest)].map((b) =&gt; b.toString(16).padStart(2, &quot;0&quot;)).join(&quot;&quot;);
 }
 
-const CORS = {
-  &quot;Access-Control-Allow-Origin&quot;: &quot;*&quot;,
-  &quot;Access-Control-Allow-Headers&quot;: &quot;authorization, x-client-info, apikey, content-type&quot;,
-  &quot;Access-Control-Allow-Methods&quot;: &quot;POST, OPTIONS&quot;,
-};
-
-const json = (body: unknown, status = 200) =&gt;
-  new Response(JSON.stringify(body), {
-    status,
-    headers: { ...CORS, &quot;Content-Type&quot;: &quot;application/json; charset=utf-8&quot; },
-  });
+/**
+ * `*` נכון כל עוד אין דומיין. ברגע שיהיה — להגדיר את הסוד ALLOWED_ORIGIN
+ * לדומיין שלנו, וזה מצטמצם מעצמו בלי שינוי קוד. מקור שאינו תואם לא מקבל
+ * כותרת CORS כלל, והדפדפן חוסם אותו.
+ */
+function corsFor(req: Request, env: Record&lt;string, string | undefined&gt;) {
+  const allowed = env.ALLOWED_ORIGIN;
+  const origin = req.headers.get(&quot;origin&quot;);
+  const value = !allowed ? &quot;*&quot; : origin === allowed ? origin : &quot;&quot;;
+  const h: Record&lt;string, string&gt; = {
+    &quot;Access-Control-Allow-Headers&quot;: &quot;authorization, x-client-info, apikey, content-type&quot;,
+    &quot;Access-Control-Allow-Methods&quot;: &quot;POST, OPTIONS&quot;,
+  };
+  if (value) h[&quot;Access-Control-Allow-Origin&quot;] = value;
+  return h;
+}
 
 export async function handle(req: Request, env: Record&lt;string, string | undefined&gt;): Promise&lt;Response&gt; {
+  const CORS = corsFor(req, env);
+  const json = (body: unknown, status = 200) =&gt;
+    new Response(JSON.stringify(body), {
+      status,
+      headers: { ...CORS, &quot;Content-Type&quot;: &quot;application/json; charset=utf-8&quot; },
+    });
+
   if (req.method === &quot;OPTIONS&quot;) return new Response(&quot;ok&quot;, { headers: CORS });
   if (req.method !== &quot;POST&quot;) return json({ error: &quot;method_not_allowed&quot; }, 405);
 
@@ -285,9 +297,22 @@ export async function handle(req: Request, env: Record&lt;string, string | undef
   }
 
   // ── הגבלת קצב ────────────────────────────────────────────────────────
+  //
+  // ⚠️ נכשלת **סגור**. אם אי אפשר לספור — אין קריאה למודל.
+  //
+  // הגרסה הראשונה דילגה על ההגבלה כשמשתני הסביבה חסרו, והמשיכה למודל.
+  // כלומר: תקלה בהגדרה הייתה הופכת את נקודת הקצה לפתוחה לגמרי, בשקט,
+  // בדיוק במצב שבו אימות הטוקן כבוי. עדיף שגיאה שרואים מנקודת קצה פתוחה
+  // שאיש לא יודע עליה — זה אותו כלל של &quot;אין נפילה שקטה&quot; ב-CLAUDE.md.
   const url = env.SUPABASE_URL;
   const serviceKey = env.SUPABASE_SERVICE_ROLE_KEY;
-  if (url &amp;&amp; serviceKey) {
+  if (!url || !serviceKey) {
+    return json({
+      error: &quot;rate_limit_unavailable&quot;,
+      detail: &quot;SUPABASE_URL או SUPABASE_SERVICE_ROLE_KEY חסרים, ולכן אי אפשר לאכוף גג קריאות&quot;,
+    }, 500);
+  }
+  {
     const ip = req.headers.get(&quot;x-forwarded-for&quot;)?.split(&quot;,&quot;)[0]?.trim() ?? &quot;unknown&quot;;
     const bucket = await bucketKey(ip, env.RATE_LIMIT_SALT ?? serviceKey.slice(0, 16));
     const since = new Date(Date.now() - WINDOW_MINUTES * 60_000).toISOString();
@@ -297,21 +322,55 @@ export async function handle(req: Request, env: Record&lt;string, string | undef
       &quot;Content-Type&quot;: &quot;application/json&quot;,
     };
 
-    const counted = await fetch(
-      `${url}/rest/v1/api_call?select=id&amp;bucket=eq.${bucket}&amp;created_at=gt.${since}`,
-      { headers: { ...auth, Prefer: &quot;count=exact&quot;, Range: &quot;0-0&quot; } },
-    );
+    let counted: Response;
+    try {
+      counted = await fetch(
+        `${url}/rest/v1/api_call?select=id&amp;bucket=eq.${bucket}&amp;created_at=gt.${since}`,
+        { headers: { ...auth, Prefer: &quot;count=exact&quot;, Range: &quot;0-0&quot; } },
+      );
+    } catch {
+      return json({ error: &quot;rate_limit_unavailable&quot;, detail: &quot;המסד לא נענה&quot; }, 500);
+    }
     // PostgREST מחזיר את הסך הכל בכותרת content-range, בצורה &quot;0-0/17&quot;.
-    const total = Number(counted.headers.get(&quot;content-range&quot;)?.split(&quot;/&quot;)[1] ?? &quot;0&quot;);
+    // כותרת חסרה פירושה שהספירה לא התקבלה — לא שהיא אפס.
+    const header = counted.headers.get(&quot;content-range&quot;);
+    const total = Number(header?.split(&quot;/&quot;)[1]);
+    if (!counted.ok || !Number.isFinite(total)) {
+      return json({ error: &quot;rate_limit_unavailable&quot;, detail: `ספירה נכשלה (${counted.status})` }, 500);
+    }
 
     if (total &gt;= MAX_PER_WINDOW) {
       return json({ error: &quot;rate_limited&quot;, retry_after_minutes: WINDOW_MINUTES }, 429);
     }
-    await fetch(`${url}/rest/v1/api_call`, {
-      method: &quot;POST&quot;,
-      headers: auth,
-      body: JSON.stringify({ bucket }),
-    });
+
+    // רישום הקריאה. גם כאן סגור: אם לא נרשמה, הגג אינו ניתן לאכיפה
+    // בקריאה הבאה, ולכן אין טעם להמשיך.
+    let logged: Response;
+    try {
+      logged = await fetch(`${url}/rest/v1/api_call`, {
+        method: &quot;POST&quot;,
+        headers: auth,
+        body: JSON.stringify({ bucket }),
+      });
+    } catch {
+      return json({ error: &quot;rate_limit_unavailable&quot;, detail: &quot;רישום הקריאה נכשל&quot; }, 500);
+    }
+    if (!logged.ok) {
+      return json({ error: &quot;rate_limit_unavailable&quot;, detail: `רישום הקריאה נכשל (${logged.status})` }, 500);
+    }
+
+    // ניקוי. הטבלה גדלה לנצח אחרת, ושורות ישנות מהחלון חסרות ערך — הספירה
+    // ממילא מסננת אותן. רץ באחוזים כדי לא להוסיף בקשה לכל קריאה; החלופה
+    // הנקייה היא pg_cron, והיא דורשת עוד הגדרה בסופאבייס.
+    // ⚠️ ובכוונה בלי await ובלי בדיקת תוצאה: ניקוי שנכשל אינו סיבה
+    //    לדחות משתמשת, בשונה מספירה שנכשלה.
+    if (Math.random() &lt; 0.02) {
+      const stale = new Date(Date.now() - 2 * WINDOW_MINUTES * 60_000).toISOString();
+      fetch(`${url}/rest/v1/api_call?created_at=lt.${stale}`, {
+        method: &quot;DELETE&quot;,
+        headers: auth,
+      }).catch(() =&gt; {});
+    }
   }
 
   // ── הקריאה למודל ─────────────────────────────────────────────────────
@@ -345,6 +404,7 @@ export async function handle(req: Request, env: Record&lt;string, string | undef
 }
 
 Deno.serve((req) =&gt; handle(req, Deno.env.toObject()));
+
 </pre>
     </div>
   </details>
@@ -354,7 +414,8 @@ Deno.serve((req) =&gt; handle(req, Deno.env.toObject()));
     <p>סופאבייס דורשת כברירת מחדל טוקן התחברות לכל קריאה לפונקציה. עדיין אין לנו הרשמה, ולכן צריך לכבות את זה — <b>לעכשיו</b>.</p>
     <p>בדף של הפונקציה <span class="mono">tim</span>, לחפש הגדרה בנוסח <b>Verify JWT</b> / <b>Enforce JWT verification</b> ולכבות אותה.</p>
     <div class="warn"><b>אם אין הגדרה כזו בממשק</b> — לעצור ולכתוב לי. אפשר גם לעקוף את זה בבדיקה עצמה, ואסביר.</div>
-    <div class="note">זה בטוח <b>רק</b> מפני שהגבלת הקצב מצעד 6 כבר עומדת. בלעדיה, פונקציה פתוחה שקוראת למודל בתשלום היא חשבון פתוח.</div>
+    <div class="note">זה בטוח <b>רק</b> מפני שהגבלת הקצב מצעד 6 כבר עומדת — והיא <b>נכשלת סגור</b>: אם הפונקציה לא מצליחה לספור קריאות, היא מחזירה שגיאה ולא פונה למודל. בלי זה, פונקציה פתוחה שקוראת למודל בתשלום היא חשבון פתוח.</div>
+    <div class="note"><b>ולעתיד, לא עכשיו:</b> הפונקציה מקבלת קריאות מכל דומיין, כי עדיין אין לנו אחד. ברגע שיהיה — מוסיפים סוד בשם <code>ALLOWED_ORIGIN</code> עם כתובת האתר, והיא מצטמצמת אליו לבדו. בלי שינוי קוד.</div>
   </div></div>
 
   <div class="stop">
@@ -392,6 +453,7 @@ Deno.serve((req) =&gt; handle(req, Deno.env.toObject()));
     <thead><tr><th>מה רואים</th><th>המשמעות</th><th>מה עושים</th></tr></thead>
     <tbody>
       <tr><td><code>401</code> · <code>403</code><br>או <span class="mono">Missing authorization header</span></td><td>אימות הטוקן עדיין דולק</td><td>צעד 9 לא נתפס. לחזור אליו, ואם אין הגדרה כזו — לכתוב לי</td></tr>
+      <tr><td><code>500</code> · <span class="mono">rate_limit_unavailable</span></td><td>הפונקציה לא הצליחה לספור קריאות, ולכן <b>סירבה להמשיך</b></td><td>בדרך כלל טבלת <code>api_call</code> חסרה — לחזור לצעד 6. <b>זו לא תקלה אלא הגנה:</b> בלי ספירה אין גג, ולכן היא נעצרת במקום להיפתח</td></tr>
       <tr><td><code>500</code> · <span class="mono">missing_api_key</span></td><td>הפונקציה לא מוצאת את המפתח</td><td>הסוד לא נשמר, או שהשם אינו בדיוק <code>GEMINI_API_KEY</code>. לבדוק אותיות גדולות וקו תחתון. <b>אחרי שינוי סוד צריך Deploy מחדש</b></td></tr>
       <tr><td><code>502</code> · <span class="mono">upstream_error</span> · <span class="n">400</span></td><td>גוגל דחתה את המפתח</td><td>המפתח שגוי או הועתק חלקית. ליצור חדש בצעד 3 ולעדכן את הסוד</td></tr>
       <tr><td><code>502</code> · <span class="mono">upstream_error</span> · <span class="n">429</span></td><td>חרגת מהמכסה החינמית של גוגל</td><td>להמתין דקה. אם חוזר — לכתוב לי</td></tr>
