@@ -25,8 +25,8 @@
     "rows": 3
   },
   "Chairlift": {
-    "type": "transport",
-    "category": "transport",
+    "type": "attraction",
+    "category": "scenic_ride",
     "rows": 1
   },
   "Character meet": {
@@ -125,8 +125,8 @@
     "rows": 4
   },
   "People mover": {
-    "type": "transport",
-    "category": "transport",
+    "type": "attraction",
+    "category": "scenic_ride",
     "rows": 1
   },
   "Play area": {
@@ -175,8 +175,8 @@
     "rows": 2
   },
   "Train": {
-    "type": "transport",
-    "category": "transport",
+    "type": "attraction",
+    "category": "scenic_ride",
     "rows": 3
   },
   "Tube / raft slide": {

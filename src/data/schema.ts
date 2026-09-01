@@ -70,11 +70,19 @@ export const experienceSchema = z.object({
   park: z.string().min(1),
   parkKind: z.enum(["theme", "water"]),
   kind: z.enum(["attraction", "entertainment"]),
-  /** From the approved subtype map — never derived in code. */
-  type: z.enum(["attraction", "show", "parade", "meet_greet", "walkthrough", "transport"]),
+  /**
+   * From the approved subtype map — never derived in code.
+   *
+   * There is no "transport" type. Buses, the monorail, the Skyliner and the
+   * ferries are not in this table at all; they are logistics, and they belong in
+   * the knowledge layer. A Hogwarts Express or a PeopleMover is an attraction
+   * you queue for, whose form happens to be a vehicle — so the category calls
+   * that scenic_ride, describing shape rather than logistics.
+   */
+  type: z.enum(["attraction", "show", "parade", "meet_greet", "walkthrough"]),
   category: z.enum([
     "dark_ride", "coaster", "simulator", "water_ride", "show",
-    "walkthrough", "playground", "meet_greet", "transport", "360_film",
+    "walkthrough", "playground", "meet_greet", "scenic_ride", "360_film",
   ]),
   land: z.string().min(1),
   subtype: z.string().min(1),

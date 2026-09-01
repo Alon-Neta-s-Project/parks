@@ -1,4 +1,4 @@
-import { readdirSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { experiences, parks } from "../../data";
@@ -103,5 +103,54 @@ describe("the master never reaches the repo", () => {
         expect(key).not.toMatch(forbidden);
       }
     }
+  });
+});
+
+describe("the closed vocabulary", () => {
+  const map: Record<string, { type: string; category: string }> = JSON.parse(
+    readFileSync(join(process.cwd(), "data/source/subtype_map.json"), "utf8"),
+  );
+
+  it("covers every row, so no row needs a default", () => {
+    for (const e of experiences) {
+      expect(Object.values(map).length).toBeGreaterThan(0);
+      expect(e.type).toBeTruthy();
+      expect(e.category).toBeTruthy();
+    }
+  });
+
+  it("has no transport, in either the map or the data", () => {
+    // Buses, the monorail, the Skyliner and the ferries are not in this table
+    // at all. A ride whose shape is a vehicle is scenic_ride, not transport, so
+    // "how do I get to EPCOT" can never be answered with "PeopleMover".
+    for (const entry of Object.values(map)) {
+      expect(entry.type).not.toBe("transport");
+      expect(entry.category).not.toBe("transport");
+    }
+    for (const e of experiences) {
+      expect(e.type).not.toBe("transport");
+      expect(e.category).not.toBe("transport");
+    }
+  });
+
+  it("keeps the five scenic rides as attractions", () => {
+    const scenic = experiences.filter((e) => e.category === "scenic_ride");
+    expect(scenic).toHaveLength(5);
+    expect(scenic.every((e) => e.type === "attraction")).toBe(true);
+  });
+
+  it("never lets a dark ride imply a sensitivity flag", () => {
+    // dark_ride is an industry term for an indoor tracked ride. Peter Pan's
+    // Flight is one. The category must not predict nausea or intensity, so the
+    // test is that dark rides genuinely vary on both — not that any particular
+    // one is unset.
+    const darkRides = experiences.filter((e) => e.category === "dark_ride");
+    expect(darkRides.length).toBeGreaterThan(0);
+    expect(new Set(darkRides.map((e) => e.motionSicknessWarning)).size).toBeGreaterThan(1);
+    expect(new Set(darkRides.map((e) => e.intensity.value)).size).toBeGreaterThan(1);
+    // And most of them are the gentlest rating, which is the point.
+    expect(darkRides.filter((e) => e.intensity.value === 1).length).toBeGreaterThan(
+      darkRides.length / 2,
+    );
   });
 });

@@ -3,8 +3,8 @@
 360_film,3D / 4D ride,attraction,4
 360_film,Projection show,attraction,4
 coaster,Launch coaster,attraction,8
-coaster,Family coaster,attraction,5
 coaster,Roller coaster,attraction,5
+coaster,Family coaster,attraction,5
 coaster,Indoor coaster,attraction,2
 coaster,Water coaster,attraction,2
 coaster,Spinning coaster,attraction,1
@@ -13,13 +13,16 @@ dark_ride,Spinner,attraction,9
 dark_ride,Boat ride,attraction,7
 dark_ride,Interactive dark ride,attraction,7
 dark_ride,Carousel,attraction,3
-dark_ride,Driving ride,attraction,2
 dark_ride,Drop ride,attraction,2
+dark_ride,Driving ride,attraction,2
 dark_ride,Safari,attraction,1
 meet_greet,Character show,meet_greet,11
 meet_greet,Character meet,meet_greet,1
 meet_greet,Makeover experience,meet_greet,1
 playground,Play area,attraction,12
+scenic_ride,Train,attraction,3
+scenic_ride,Chairlift,attraction,1
+scenic_ride,People mover,attraction,1
 show,Stage show,show,21
 show,Live music,show,13
 show,Parade,parade,4
@@ -28,9 +31,6 @@ show,Animal presentation,show,2
 show,Stunt show,show,2
 simulator,Motion simulator,attraction,8
 simulator,Flying theater,attraction,2
-transport,Train,transport,3
-transport,Chairlift,transport,1
-transport,People mover,transport,1
 walkthrough,Walk-through,walkthrough,9
 walkthrough,Walking trail,walkthrough,4
 water_ride,Body slide,attraction,10
@@ -38,6 +38,6 @@ water_ride,River rapids,attraction,8
 water_ride,Water play area,attraction,8
 water_ride,Tube / raft slide,attraction,7
 water_ride,Wave pool,attraction,6
-water_ride,Lazy river,attraction,3
 water_ride,Log flume,attraction,3
+water_ride,Lazy river,attraction,3
 water_ride,Mat racing slide,attraction,2
