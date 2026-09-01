@@ -186,15 +186,25 @@ export type Experience = z.infer<typeof experienceSchema>;
 export type Park = z.infer<typeof parkSchema>;
 export type IntensityLevel = 1 | 2 | 3 | 4;
 
-/** Required for a page to count as complete (brief §3.3a, minus held-back video). */
+/**
+ * What a content page needs before it counts as complete.
+ *
+ * Two fields were dropped from this list on purpose. Opening year changes no
+ * decision anyone makes — nobody picks a ride by its age — and ride length
+ * belongs to the day-planning screen in V2, not to deciding whether a ride suits
+ * your family. Holding a page incomplete over either of them measures the wrong
+ * thing.
+ *
+ * It does not move today's count, which nameHe alone holds at zero. It does move
+ * the projection: with nameHe filled the count is 54 rather than 33, so the two
+ * fields were suppressing a third of the pages they would never have informed.
+ */
 export const REQUIRED_FIELDS = [
   "nameHe",
   "intensity",
   "heightRequirementCm",
   "motionSicknessWarning",
   "wheelchair",
-  "durationMinutes",
-  "openedYear",
   "getsWet",
   "airConditioned",
   "environment",
