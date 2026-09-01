@@ -35,13 +35,13 @@
     },
     {
       "field": "heightRequirementCm",
-      "filled": 214,
+      "filled": 232,
       "notApplicable": 0,
       "total": 232
     },
     {
       "field": "motionSicknessWarning",
-      "filled": 216,
+      "filled": 232,
       "notApplicable": 0,
       "total": 232
     },
@@ -53,27 +53,27 @@
     },
     {
       "field": "getsWet",
-      "filled": 144,
+      "filled": 166,
       "notApplicable": 0,
       "total": 232
     },
     {
       "field": "airConditioned",
-      "filled": 158,
+      "filled": 164,
       "notApplicable": 0,
       "total": 232
     },
     {
       "field": "environment",
-      "filled": 219,
+      "filled": 232,
       "notApplicable": 0,
       "total": 232
     }
   ],
   "valueProblems": [],
   "rejected": [],
-  "pagesComplete": 96,
-  "incompleteCount": 136,
+  "pagesComplete": 122,
+  "incompleteCount": 110,
   "incomplete": [
     {
       "key": "Disney's Animal Kingdom|Entertainment|Festival of the Lion King",
@@ -91,12 +91,6 @@
       "key": "Disney's Animal Kingdom|Entertainment|Tam Tam Drummers of Harambe",
       "missing": [
         "getsWet"
-      ]
-    },
-    {
-      "key": "Disney's Animal Kingdom|Attraction|Expedition Everest – Legend of the Forbidden Mountain",
-      "missing": [
-        "airConditioned"
       ]
     },
     {
@@ -127,12 +121,6 @@
       "key": "Disney's Animal Kingdom|Entertainment|Winged Encounters – The Kingdom Takes Flight",
       "missing": [
         "getsWet"
-      ]
-    },
-    {
-      "key": "Disney's Animal Kingdom|Attraction|Bluey's Wild World at Conservation Station",
-      "missing": [
-        "airConditioned"
       ]
     },
     {
@@ -168,7 +156,6 @@
     {
       "key": "Disney's Blizzard Beach|Attraction|Runoff Rapids",
       "missing": [
-        "motionSicknessWarning",
         "airConditioned"
       ]
     },
@@ -181,7 +168,6 @@
     {
       "key": "Disney's Blizzard Beach|Attraction|Snow Stormers",
       "missing": [
-        "motionSicknessWarning",
         "airConditioned"
       ]
     },
@@ -194,7 +180,6 @@
     {
       "key": "Disney's Blizzard Beach|Attraction|Teamboat Springs",
       "missing": [
-        "motionSicknessWarning",
         "airConditioned"
       ]
     },
@@ -304,28 +289,24 @@
     {
       "key": "Disney's Typhoon Lagoon|Attraction|Keelhaul Falls",
       "missing": [
-        "motionSicknessWarning",
         "airConditioned"
       ]
     },
     {
       "key": "Disney's Typhoon Lagoon|Attraction|Mayday Falls",
       "missing": [
-        "motionSicknessWarning",
         "airConditioned"
       ]
     },
     {
       "key": "Disney's Typhoon Lagoon|Attraction|Miss Adventure Falls",
       "missing": [
-        "motionSicknessWarning",
         "airConditioned"
       ]
     },
     {
       "key": "Disney's Typhoon Lagoon|Attraction|Storm Slides",
       "missing": [
-        "motionSicknessWarning",
         "airConditioned"
       ]
     },
@@ -351,12 +332,6 @@
       "key": "EPCOT|Entertainment|Disney and Pixar Short Film Festival",
       "missing": [
         "getsWet"
-      ]
-    },
-    {
-      "key": "EPCOT|Attraction|Test Track",
-      "missing": [
-        "airConditioned"
       ]
     },
     {
@@ -426,35 +401,9 @@
       ]
     },
     {
-      "key": "Magic Kingdom|Attraction|Jungle Cruise",
-      "missing": [
-        "heightRequirementCm",
-        "getsWet",
-        "environment"
-      ]
-    },
-    {
-      "key": "Magic Kingdom|Attraction|Pirates of the Caribbean",
-      "missing": [
-        "heightRequirementCm",
-        "getsWet"
-      ]
-    },
-    {
       "key": "Magic Kingdom|Attraction|Swiss Family Treehouse",
       "missing": [
-        "heightRequirementCm",
-        "getsWet",
-        "airConditioned",
-        "environment"
-      ]
-    },
-    {
-      "key": "Magic Kingdom|Attraction|The Magic Carpets of Aladdin",
-      "missing": [
-        "heightRequirementCm",
-        "getsWet",
-        "environment"
+        "airConditioned"
       ]
     },
     {
@@ -470,115 +419,20 @@
       ]
     },
     {
-      "key": "Magic Kingdom|Attraction|Enchanted Tales with Belle",
-      "missing": [
-        "heightRequirementCm",
-        "getsWet"
-      ]
-    },
-    {
-      "key": "Magic Kingdom|Attraction|it's a small world",
-      "missing": [
-        "heightRequirementCm",
-        "getsWet"
-      ]
-    },
-    {
-      "key": "Magic Kingdom|Attraction|Mad Tea Party",
-      "missing": [
-        "heightRequirementCm",
-        "getsWet",
-        "environment"
-      ]
-    },
-    {
       "key": "Magic Kingdom|Entertainment|Mickey's PhilharMagic",
       "missing": [
         "getsWet"
       ]
     },
     {
-      "key": "Magic Kingdom|Attraction|Peter Pan's Flight",
-      "missing": [
-        "heightRequirementCm",
-        "getsWet",
-        "environment"
-      ]
-    },
-    {
-      "key": "Magic Kingdom|Attraction|Prince Charming Regal Carrousel",
-      "missing": [
-        "heightRequirementCm",
-        "getsWet",
-        "environment"
-      ]
-    },
-    {
-      "key": "Magic Kingdom|Attraction|Seven Dwarfs Mine Train",
-      "missing": [
-        "getsWet",
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Magic Kingdom|Attraction|The Many Adventures of Winnie the Pooh",
-      "missing": [
-        "heightRequirementCm",
-        "getsWet"
-      ]
-    },
-    {
-      "key": "Magic Kingdom|Attraction|Under the Sea ~ Journey of The Little Mermaid",
-      "missing": [
-        "heightRequirementCm",
-        "getsWet"
-      ]
-    },
-    {
       "key": "Magic Kingdom|Attraction|Casey Jr. Splash 'N' Soak Station",
       "missing": [
-        "heightRequirementCm",
         "airConditioned"
-      ]
-    },
-    {
-      "key": "Magic Kingdom|Attraction|Dumbo the Flying Elephant",
-      "missing": [
-        "heightRequirementCm",
-        "getsWet",
-        "environment"
-      ]
-    },
-    {
-      "key": "Magic Kingdom|Attraction|The Barnstormer",
-      "missing": [
-        "getsWet",
-        "environment"
-      ]
-    },
-    {
-      "key": "Magic Kingdom|Attraction|Big Thunder Mountain Railroad",
-      "missing": [
-        "environment"
       ]
     },
     {
       "key": "Magic Kingdom|Entertainment|Country Bear Musical Jamboree",
       "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "Magic Kingdom|Attraction|Tiana's Bayou Adventure",
-      "missing": [
-        "airConditioned",
-        "environment"
-      ]
-    },
-    {
-      "key": "Magic Kingdom|Attraction|Haunted Mansion",
-      "missing": [
-        "heightRequirementCm",
         "getsWet"
       ]
     },
@@ -619,58 +473,8 @@
       ]
     },
     {
-      "key": "Magic Kingdom|Attraction|Astro Orbiter",
-      "missing": [
-        "heightRequirementCm",
-        "getsWet",
-        "environment"
-      ]
-    },
-    {
-      "key": "Magic Kingdom|Attraction|Buzz Lightyear's Space Ranger Spin",
-      "missing": [
-        "heightRequirementCm",
-        "getsWet"
-      ]
-    },
-    {
       "key": "Magic Kingdom|Entertainment|Monsters Inc. Laugh Floor",
       "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "Magic Kingdom|Attraction|Space Mountain",
-      "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "Magic Kingdom|Attraction|Tomorrowland Speedway",
-      "missing": [
-        "getsWet",
-        "environment"
-      ]
-    },
-    {
-      "key": "Magic Kingdom|Attraction|Tomorrowland Transit Authority PeopleMover",
-      "missing": [
-        "heightRequirementCm",
-        "getsWet",
-        "environment"
-      ]
-    },
-    {
-      "key": "Magic Kingdom|Attraction|TRON Lightcycle / Run",
-      "missing": [
-        "getsWet",
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Magic Kingdom|Attraction|Walt Disney's Carousel of Progress",
-      "missing": [
-        "heightRequirementCm",
         "getsWet"
       ]
     },
@@ -844,7 +648,6 @@
     {
       "key": "Universal Volcano Bay|Attraction|Krakatau Aqua Coaster",
       "missing": [
-        "motionSicknessWarning",
         "airConditioned"
       ]
     },
@@ -864,35 +667,30 @@
     {
       "key": "Universal Volcano Bay|Attraction|Kala and Tai Nui Serpentine Body Slides",
       "missing": [
-        "motionSicknessWarning",
         "airConditioned"
       ]
     },
     {
       "key": "Universal Volcano Bay|Attraction|Maku of Maku Puihi Round Raft Rides",
       "missing": [
-        "motionSicknessWarning",
         "airConditioned"
       ]
     },
     {
       "key": "Universal Volcano Bay|Attraction|Ohno of Ohyah and Ohno Drop Slides",
       "missing": [
-        "motionSicknessWarning",
         "airConditioned"
       ]
     },
     {
       "key": "Universal Volcano Bay|Attraction|Ohyah of Ohyah and Ohno Drop Slides",
       "missing": [
-        "motionSicknessWarning",
         "airConditioned"
       ]
     },
     {
       "key": "Universal Volcano Bay|Attraction|Puihi of Maku Puihi Round Raft Rides",
       "missing": [
-        "motionSicknessWarning",
         "airConditioned"
       ]
     },
@@ -911,7 +709,6 @@
     {
       "key": "Universal Volcano Bay|Attraction|Taniwha Tubes",
       "missing": [
-        "motionSicknessWarning",
         "airConditioned"
       ]
     },
@@ -942,14 +739,12 @@
     {
       "key": "Universal Volcano Bay|Attraction|Honu of Honu ika Moana",
       "missing": [
-        "motionSicknessWarning",
         "airConditioned"
       ]
     },
     {
       "key": "Universal Volcano Bay|Attraction|ika Moana of Honu ika Moana",
       "missing": [
-        "motionSicknessWarning",
         "airConditioned"
       ]
     },
