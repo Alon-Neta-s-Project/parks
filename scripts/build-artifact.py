@@ -29,14 +29,36 @@ def one(pattern: str, text: str) -> str:
     return found[0]
 
 
+# The published preview is a public page. It is built from the bundled dataset on
+# purpose: the remote project has no migrations run yet, so reading from it would
+# fail, and shipping a key to a project whose RLS cannot be checked from here is
+# premature. This refuses to publish if a key ever ends up in the output.
+SECRET_MARKERS = (
+    "supabase.co",
+    "VITE_SUPABASE_ANON_KEY",
+    "service_role",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9",  # the standard Supabase JWT header
+)
+
+
+def refuse_if_credentials_present(html: str) -> None:
+    found = [m for m in SECRET_MARKERS if m in html]
+    if found:
+        raise SystemExit(
+            "✗ ABORT — the artifact would carry credentials: "
+            + ", ".join(found)
+            + "\n  The published page is public. Build it without env vars, or"
+            " confirm RLS on the target project first."
+        )
+
+
 def main():
     index = (DIST / "index.html").read_text(encoding="utf-8")
     js = (DIST / one(r'<script type="module"[^>]*src="\.?/?([^"]+)"', index)).read_text("utf-8")
     css = (DIST / one(r'<link rel="stylesheet"[^>]*href="\.?/?([^"]+)"', index)).read_text("utf-8")
 
     # The bundle ends in an ES module; keep it a module so its imports still work.
-    OUT.write_text(
-        "\n".join([
+    page = "\n".join([
             "<title>טים · מדריך הפארקים</title>",
             '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>',
             f'<link rel="stylesheet" href="{FONTS}">',
@@ -44,9 +66,9 @@ def main():
             '<div id="root"></div>',
             f'<script type="module">{js}</script>',
             "",
-        ]),
-        encoding="utf-8",
-    )
+    ])
+    refuse_if_credentials_present(page)
+    OUT.write_text(page, encoding="utf-8")
     print(f"{OUT.relative_to(ROOT)}  {OUT.stat().st_size / 1024:.0f} KB")
 
 
