@@ -53,6 +53,16 @@ export function Facts({ experience: e }: { experience: Experience }) {
             : <span className="num">{t("facts.heightCm", { cm: e.heightRequirementCm })}</span>}
       </Row>
 
+      {/* Not tagged is stated, not left silent — and nothing here is inferred
+          from category. A dark_ride is an indoor tracked ride, not a scary one. */}
+      <Row
+        label={t("facts.sensitivities")}
+        missing={e.sensEnclosedDark === null}
+        note={e.sensEnclosedDark === null ? t("facts.notTaggedWhy") : undefined}
+      >
+        {e.sensEnclosedDark === null ? t("facts.notTagged") : t("facts.yes")}
+      </Row>
+
       <Row label={t("facts.motionWarning")} missing={isMissing(e.motionSicknessWarning)}>
         {e.motionSicknessWarning === "true" ? t("facts.motionYes")
           : e.motionSicknessWarning === "false" ? t("facts.motionNo")

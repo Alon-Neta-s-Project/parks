@@ -223,7 +223,11 @@
     "$comment": "Held back by decision, not missing by accident. Always null.",
     "youtubeId": "master-only until embedding and commercial use are settled (spec §3.4)",
     "videoCreator": "same",
-    "editorial": "only Neta writes this"
+    "editorial": "only Neta writes this",
+    "sensEnclosedDark": "anchor-ride tagging, not yet collected — never derived from category",
+    "sensHeights": "same",
+    "sensLoudSudden": "same",
+    "sensStrobe": "same"
   },
   "neverExpected": {
     "$comment": "Master-only. If any of these appears in the export, the export leaked and the import must fail.",

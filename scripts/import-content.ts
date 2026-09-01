@@ -262,6 +262,12 @@ for (const row of rows) {
     motionSicknessWarning: quadState(
       row["motion_sickness_warning"] ?? "", key, "motion_sickness_warning"),
     lastVerified: row["Last Verified"] ?? "",
+    // Not in the export at all yet. Explicitly null rather than absent, so the
+    // UI renders "not tagged" instead of inferring anything.
+    sensEnclosedDark: null,
+    sensHeights: null,
+    sensLoudSudden: null,
+    sensStrobe: null,
     youtubeId: null,
     videoCreator: null,
     editorial: null,

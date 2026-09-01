@@ -147,6 +147,23 @@ export const experienceSchema = z.object({
    */
   lastVerified: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
 
+  /**
+   * The four sensitivity flags, back in scope for a subset only: roughly 68
+   * anchor rides — the ones with a real queue-skipping product, which are the
+   * ones people plan around anyway.
+   *
+   * null means NOT TAGGED, and Tim must say so outright rather than going quiet.
+   * Nothing here may be derived from anything else, and in particular
+   * sensEnclosedDark must never be inferred from category === "dark_ride":
+   * that is an industry term for an indoor tracked ride, and Peter Pan's Flight
+   * is one. Inferring it would flag a gentle family ride as a claustrophobia
+   * risk and destroy trust in the flag entirely.
+   */
+  sensEnclosedDark: z.boolean().nullable(),
+  sensHeights: z.boolean().nullable(),
+  sensLoudSudden: z.boolean().nullable(),
+  sensStrobe: z.boolean().nullable(),
+
   // ---- held back deliberately ----
   /** Master-only until embedding and commercial use are settled (spec §3.4). */
   youtubeId: z.null(),

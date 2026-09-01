@@ -13,7 +13,11 @@
     "heldBackByDecision": [
       "youtubeId",
       "videoCreator",
-      "editorial"
+      "editorial",
+      "sensEnclosedDark",
+      "sensHeights",
+      "sensLoudSudden",
+      "sensStrobe"
     ]
   },
   "fieldCoverage": [

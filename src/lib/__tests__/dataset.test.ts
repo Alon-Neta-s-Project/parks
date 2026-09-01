@@ -154,3 +154,35 @@ describe("the closed vocabulary", () => {
     );
   });
 });
+
+describe("what must never be inferred", () => {
+  it("leaves every sensitivity flag untagged rather than derived", () => {
+    // They are not in the export yet. Absent must read as "not tagged", never as
+    // "checked and clear", and never as something worked out from the category.
+    for (const e of experiences) {
+      expect(e.sensEnclosedDark).toBeNull();
+      expect(e.sensHeights).toBeNull();
+      expect(e.sensLoudSudden).toBeNull();
+      expect(e.sensStrobe).toBeNull();
+    }
+  });
+
+  it("never lets dark_ride imply enclosed-and-dark", () => {
+    // The trap: dark_ride is an indoor tracked ride, not a frightening one.
+    // Peter Pan's Flight is one. Inferring the flag would mark a gentle family
+    // ride as a claustrophobia risk.
+    const darkRides = experiences.filter((e) => e.category === "dark_ride");
+    expect(darkRides.length).toBeGreaterThan(0);
+    expect(darkRides.every((e) => e.sensEnclosedDark === null)).toBe(true);
+  });
+
+  it("reports a fractional duration instead of rounding it into an integer column", () => {
+    // 2.583 is a real ride time, not a typo. Rounding is a content decision and
+    // belongs in the master, so the importer keeps the value and flags it.
+    const fractional = experiences.filter(
+      (e) => e.durationMinutes !== null && !Number.isInteger(e.durationMinutes),
+    );
+    expect(fractional.length).toBeGreaterThan(0);
+    expect(fractional.some((e) => e.durationMinutes === 2.583)).toBe(true);
+  });
+});

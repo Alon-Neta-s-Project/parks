@@ -8,6 +8,24 @@ import { experiences } from "../data";
  * Deliberately reads the report rather than recomputing: the admin view and the
  * import must never disagree about what is missing.
  */
+/**
+ * The one field that blocks every content page.
+ *
+ * The product is Hebrew — that is the whole proposition against the English
+ * guides — so without a Hebrew name a ride page is an English page in a Hebrew
+ * frame, and entity linking has nothing to match a Hebrew question against.
+ */
+const BLOCKER = "nameHe";
+
+/** Blocker first, then emptiest first. Alphabetical order buries the thing that matters. */
+function orderedCoverage<T extends { field: string; filled: number; total: number }>(rows: T[]): T[] {
+  return [...rows].sort((a, b) => {
+    if (a.field === BLOCKER) return -1;
+    if (b.field === BLOCKER) return 1;
+    return a.filled / a.total - b.filled / b.total;
+  });
+}
+
 export function AdminPage() {
   const { t } = useTranslation();
   const r = report as {
@@ -37,16 +55,24 @@ export function AdminPage() {
 
       <section className="block">
         <h2>{t("admin.coverage")}</h2>
+        <p className="muted" style={{ marginBlockEnd: "var(--pw-s4)" }}>
+          {t("admin.blockerWhy")}
+        </p>
         <table className="dtable">
           <thead>
             <tr><th>{t("admin.field")}</th><th>{t("admin.coverage")}</th><th /></tr>
           </thead>
           <tbody>
-            {r.fieldCoverage.map((c) => {
+            {orderedCoverage(r.fieldCoverage).map((c) => {
               const pct = Math.round((c.filled / c.total) * 100);
               return (
-                <tr key={c.field}>
-                  <td className="en">{c.field}</td>
+                <tr key={c.field} className={c.field === BLOCKER ? "row--blocker" : undefined}>
+                  <td>
+                    <span className="en">{c.field}</span>
+                    {c.field === BLOCKER && (
+                      <span className="chip chip--warn">{t("admin.blocker")}</span>
+                    )}
+                  </td>
                   <td className="num">{c.filled} / {c.total}</td>
                   <td>
                     <span className="bar"><i style={{ inlineSize: `${pct}%` }} data-zero={pct === 0} /></span>

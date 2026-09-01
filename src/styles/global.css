@@ -685,6 +685,9 @@ button {
 .dtable { inline-size: 100%; border-collapse: collapse; font-size: 14px; }
 .dtable th, .dtable td { text-align: start; padding: var(--pw-s3) var(--pw-s2); border-block-end: 1px solid var(--pw-hairline); }
 .dtable th { font: var(--pw-t-micro); letter-spacing: var(--pw-track-micro); color: var(--pw-ink-3); }
+.row--blocker td { background: var(--pw-urgent-50); }
+.row--blocker td:first-child { display: flex; align-items: center; gap: var(--pw-s2); flex-wrap: wrap; }
+
 .bar { display: block; inline-size: 100%; min-inline-size: 60px; block-size: 6px; background: var(--pw-sunken); border-radius: var(--pw-r-pill); overflow: hidden; }
 .bar i { display: block; block-size: 100%; background: var(--pw-way-500); }
 .bar i[data-zero="true"] { background: var(--pw-missing-line); }
