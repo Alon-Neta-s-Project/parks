@@ -166,9 +166,11 @@
       "values": [
         "none",
         "may_get_wet",
-        "may_get_soaked"
+        "may_get_soaked",
+        "na"
       ],
-      "nullable": true
+      "nullable": true,
+      "$note": "Four states per migration 014. 'na' is a stage show; null is not checked."
     },
     "heightRequirementCm": {
       "column": "height_requirement_cm",

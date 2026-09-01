@@ -230,3 +230,25 @@ describe("what must never be inferred", () => {
     expect(compared).toBeGreaterThan(0);
   });
 });
+
+describe("gets_wet holds four states, not three", () => {
+  it("accepts na as a value distinct from null", () => {
+    // "na" is a stage show: the question does not apply, and that is an answer.
+    // null is "not checked". Collapsing them would make Tim say "no information"
+    // about something with a perfectly clear answer — the same family of mistake
+    // this field has already made twice.
+    for (const e of experiences) {
+      expect([null, "none", "may_get_wet", "may_get_soaked", "na"]).toContain(e.getsWet);
+    }
+  });
+
+  it("has not yet received na from the export, so shows are still unchecked", () => {
+    // Migration 014 is ready ahead of the data. Until an export carries "na",
+    // the entertainment rows stay null, and the UI must keep saying "not
+    // checked" rather than inventing an answer.
+    const shows = experiences.filter((e) => e.kind === "entertainment");
+    expect(shows.length).toBeGreaterThan(0);
+    expect(shows.every((e) => e.getsWet === null)).toBe(true);
+    expect(experiences.some((e) => e.getsWet === "na")).toBe(false);
+  });
+});

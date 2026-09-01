@@ -255,7 +255,7 @@ for (const row of rows) {
     airConditioned: quadState(row["air_conditioned"] ?? "", key, "air_conditioned"),
     isMotionSimulator: quadState(row["is_motion_simulator"] ?? "", key, "is_motion_simulator"),
     usesLargeScreensOr3d: quadState(row["uses_large_screens_or_3d"] ?? "", key, "uses_large_screens_or_3d"),
-    getsWet: enumOrNull(row["gets_wet"] ?? "", ["none", "may_get_wet", "may_get_soaked"], key, "gets_wet"),
+    getsWet: enumOrNull(row["gets_wet"] ?? "", ["none", "may_get_wet", "may_get_soaked", "na"], key, "gets_wet"),
     heightRequirementCm: heightCm,
     wheelchair: (row["wheelchair"] ?? "").trim() === "" ? null : (row["wheelchair"] as never),
     // Column name in the export, field name in the schema — see content-mapping.json.

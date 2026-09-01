@@ -106,12 +106,18 @@ export const experienceSchema = z.object({
   isMotionSimulator: quadStateSchema,
   usesLargeScreensOr3d: quadStateSchema,
   /**
-   * Three values, not four: migration 007 deliberately left this an enum where
-   * the other mechanical flags became four-state.
-   * null here means the export has not filled it. The database defaults it to
-   * "none", which is a conflict worth knowing about — see docs/db-conformance.md.
+   * Four states, per migration 014:
+   *   "none"                       — checked, does not get you wet
+   *   "may_get_wet" / "..._soaked" — checked, and this is the answer
+   *   "na"                         — a stage show; the question does not apply
+   *   null                         — not checked
+   *
+   * "na" and null are not the same thing, and collapsing them is the mistake
+   * this field has already made twice. A show that cannot get you wet has an
+   * answer; saying "no information" about it would be wrong in the other
+   * direction.
    */
-  getsWet: z.enum(["none", "may_get_wet", "may_get_soaked"]).nullable(),
+  getsWet: z.enum(["none", "may_get_wet", "may_get_soaked", "na"]).nullable(),
 
   /**
    * Centimetres, matching migration 012's three states exactly:
