@@ -91,6 +91,48 @@ WHEELCHAIR = {"remain_in_wheelchair", "transfer_ecv_to_wheelchair",
 GETS_WET = {"none", "may_get_wet", "may_get_soaked", "na"}
 QUAD = {"true", "false", "na"}
 
+
+# ── מוצר הדילוג בתור ──────────────────────────────────────────────────────
+# ממופה מ-fastAccess.summary ולא מ-'Lightning Lane Type'. שתי סיבות:
+#
+# 1. 'Lightning Lane Type' הוא שם המוצר של דיסני. ל-101 שורות יוניברסל יש
+#    בו N/A, וזה נכון — אין להן Lightning Lane. המידע שלהן במקום אחר.
+# 2. הייצוא נקרא בלי keep_default_na=False, ולכן 'None' ו-'N/A' כאחד
+#    נמחקו מהעמודה ההיא. 75 שורות דיסני יצאו ריקות, ואי אפשר להפריד
+#    ביניהן. השדה הזה הוא טקסט חופשי, והבאג לא נגע בו.
+#
+# התאמה מדויקת למחרוזת המלאה, לא התאמה מטושטשת. מחרוזת שאינה כאן עוצרת
+# את השורה — היא לא הופכת ל-'none' בשקט. זו הטעות שהמיגרציה מתקנת, ואין
+# טעם לחזור עליה בדרך פנימה.
+SKIP_LINE = {
+    "Lightning Lane Multi Pass. Included within Multi Pass; no separate per-attraction "
+    "Single Pass purchase required. Also included with Premier Pass.": "multi_pass",
+
+    "Lightning Lane Single Pass. NOT included in Multi Pass. Requires a separate paid "
+    "Single Pass purchase; price varies by attraction and date. Also included with "
+    "Premier Pass.": "single_pass",
+
+    "Optional paid: Universal Express Pass at this attraction (separate valid park "
+    "admission required).": "express",
+
+    "Optional paid: Universal Express Pass at this attraction. Separate valid Epic "
+    "Universe admission is still required.": "express",
+
+    # נבדק, ואין מוצר דילוג — שתי דרכים לומר אותו דבר
+    "No current Lightning Lane Multi Pass or Single Pass access.": "none",
+    "N/A \u2013 Disney Lightning Lane products do not apply to the water parks.": "none",
+
+    # "אולי", "לא אומת" — כלומר לא נבדק. NULL, לא 'none'.
+    "Express availability not confirmed - check the official Universal app before "
+    "buying.": None,
+    "Volcano Bay Express/Express Plus may be available at participating attractions; "
+    "verify this specific attraction in the current Universal app/map before "
+    "purchase.": None,
+    "Universal Express may be available at this attraction, but it does NOT replace "
+    "the mandatory Park-to-Park admission. Verify current participation in the "
+    "Universal app.": None,
+}
+
 # Columns the export owns. Everything else on the table keeps its default and
 # is never touched by this file — see the report printed at the end.
 COLUMNS = [
@@ -99,6 +141,7 @@ COLUMNS = [
     "height_requirement_cm", "gets_wet", "environment", "air_conditioned",
     "wheelchair", "motion_sickness_warning", "is_motion_simulator",
     "uses_large_screens_or_3d", "big_drops", "spinning",
+    "skip_line_system",
     "sens_enclosed_dark", "sens_heights", "sens_loud_sudden", "sens_strobe",
     "intensity_factors", "last_verified",
 ]
@@ -171,6 +214,11 @@ for e in experiences:
     if not ok:
         continue
 
+    summary = (e.get("fastAccess") or {}).get("summary")
+    if summary not in SKIP_LINE:
+        skipped.append((label, f"fastAccess.summary אינו באוצר המילים: {(summary or '')[:60]!r}"))
+        continue
+
     def text(v):
         return "null" if v is None else q(v)
 
@@ -201,6 +249,7 @@ for e in experiences:
         text(checked["uses_large_screens_or_3d"]),
         text(checked["big_drops"]),
         text(checked["spinning"]),
+        text(SKIP_LINE[summary]),
         boolean(e["sensEnclosedDark"]),
         boolean(e["sensHeights"]),
         boolean(e["sensLoudSudden"]),
@@ -297,6 +346,11 @@ checks = [
           "✅ תקין — Tike's Peak, וזה נכון", ""),
 ]
 
+SKIP = Counter(SKIP_LINE[(e.get("fastAccess") or {}).get("summary")] for e in emitted)
+SKIP_NULL = SKIP.get(None, 0)
+SKIP_NONE = SKIP.get("none", 0)
+SKIP_TALLY = " · ".join(f"{k or '(לא נבדק)'}: {v}" for k, v in SKIP.most_common())
+
 STATUS_TALLY = " · ".join(f"{n} {st}" for st, n in sorted(
     Counter(r[1] for r in resolved_status).items(), key=lambda kv: -kv[1]))
 
@@ -330,6 +384,18 @@ extra = f"""  select 9,
          '—',
          case when (select count(distinct park_id) from experience) = 10
                 then '✅ תקין' else '❌ פארק חסר' end
+
+  union all
+  select 11.5,
+         'מוצר דילוג בתור',
+         (select string_agg(coalesce(skip_line_system,'(לא נבדק)') || ': ' || n, ' · ' order by n desc)
+            from (select skip_line_system, count(*) as n from experience group by 1) s),
+         '{SKIP_TALLY}',
+         '—',
+         case when (select count(*) from experience where skip_line_system is null) = {SKIP_NULL}
+               and (select count(*) from experience where skip_line_system = 'none') = {SKIP_NONE}
+                then '✅ תקין — NULL הוא "לא נבדק", לא "אין"'
+              else '❌ לא תואם לייצוא' end
 
   union all
   select 12,
@@ -421,7 +487,20 @@ if skipped:
     for label, why in skipped:
         print(f"      {label}\n        {why}")
 
-untouched = ["land_id", "aliases", "skip_line_system", "skip_line_extra_cost",
-             "popularity", "type_data", "location", "verdict", "recommendation",
-             "best_time_of_day", "volatility"]
+# Derived, not restated: a hand-kept list goes stale the moment a column moves
+# into COLUMNS, and then the report quietly says the opposite of the truth.
+TABLE_COLUMNS = [
+    "id", "park_id", "land_id", "type", "status", "name", "name_i18n", "aliases",
+    "aliases_i18n", "category", "opened_year", "duration_minutes", "intensity",
+    "height_requirement_cm", "gets_wet", "environment", "air_conditioned",
+    "wheelchair", "skip_line_system", "skip_line_extra_cost", "popularity",
+    "sens_enclosed_dark", "sens_heights", "sens_loud_sudden", "sens_strobe",
+    "intensity_factors", "type_data", "location", "verdict", "recommendation",
+    "best_time_of_day", "volatility", "last_verified", "created_at", "updated_at",
+    "motion_sickness_warning", "is_motion_simulator", "uses_large_screens_or_3d",
+    "big_drops", "spinning",
+]
+assert not set(COLUMNS) - set(TABLE_COLUMNS), set(COLUMNS) - set(TABLE_COLUMNS)
+untouched = [c for c in TABLE_COLUMNS
+             if c not in COLUMNS and c not in ("created_at", "updated_at")]
 print(f"\nⓘ  not written, left at their column defaults: {', '.join(untouched)}")

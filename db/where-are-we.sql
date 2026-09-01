@@ -29,7 +29,9 @@ x(k, n) as (
     ('h_null', 'height_requirement_cm is null'),
     ('wet_na', $q$gets_wet = 'na'$q$),
     ('he_bad', $q$name_i18n->>'he' is null or name_i18n->>'he' = ''$q$),
-    ('closed', $q$status <> 'open'$q$)
+    ('closed',   $q$status <> 'open'$q$),
+    ('skip_null', 'skip_line_system is null'),
+    ('skip_none', $q$skip_line_system = 'none'$q$)
   ) v(k, w)
 ),
 mig(n, ok) as (values
@@ -55,7 +57,13 @@ mig(n, ok) as (values
         and conname = 'experience_gets_wet_check'
         and pg_get_constraintdef(oid) like '%na%'))),
   (15, (select exists (select 1 from information_schema.columns
-        where table_schema='public' and table_name='trip' and column_name='park_days')))
+        where table_schema='public' and table_name='trip' and column_name='park_days'))),
+  -- לא לפי המחרוזת 'express': היא מוכלת גם ב-'express_pass' של אוצר המילים
+  -- הישן, וזה החזיר ✅ על מסד שלא הריץ את המיגרציה. הסימן החד-משמעי הוא
+  -- שהעמודה הפכה ל-nullable.
+  (16, (select exists (select 1 from information_schema.columns
+        where table_schema='public' and table_name='experience'
+          and column_name='skip_line_system' and is_nullable='YES')))
 ),
 g(passed, missing) as (
   select count(*) filter (where ok),
@@ -63,7 +71,8 @@ g(passed, missing) as (
   from mig
 ),
 n(experience, park, land, profile, trip, conversation, knowledge_doc,
-  h_pos, h_zero, h_null, wet_na, he_bad, closed, tables, policies, passed, missing) as (
+  h_pos, h_zero, h_null, wet_na, he_bad, closed, skip_null, skip_none,
+  tables, policies, passed, missing) as (
   select (select n from c where name='experience'),
          (select n from c where name='park'),
          (select n from c where name='land'),
@@ -77,6 +86,8 @@ n(experience, park, land, profile, trip, conversation, knowledge_doc,
          (select n from x where k='wet_na'),
          (select n from x where k='he_bad'),
          (select n from x where k='closed'),
+         (select n from x where k='skip_null'),
+         (select n from x where k='skip_none'),
          (select count(*) from information_schema.tables
             where table_schema='public' and table_type='BASE TABLE'),
          (select count(*) from pg_policies where schemaname='public'),
@@ -84,8 +95,8 @@ n(experience, park, land, profile, trip, conversation, knowledge_doc,
 ),
 report(ord, "מה", "מצב") as (
   select 1, 'מיגרציות',
-         case when passed = 15 then '15 מתוך 15 ✅'
-              else passed || ' מתוך 15 ❌  — חסרות: ' || missing end from n
+         case when passed = 16 then '16 מתוך 16 ✅'
+              else passed || ' מתוך 16 ❌  — חסרות: ' || missing end from n
   union all
   select 2, 'מבנה',
          case when tables = 18 then '18 טבלאות ✅'
@@ -129,6 +140,14 @@ report(ord, "מה", "מצב") as (
          case when experience is null or experience = 0 then 'אין תוכן עדיין'
               when closed > 0 then closed || ' מסומנים סגור/בקרוב ✅'
               else 'הכל נטען כפתוח ❌ — סטטוס נמעך' end from n
+  union all
+  select 9.5, 'מוצר דילוג בתור',
+         case when experience is null or experience = 0 then 'אין תוכן עדיין'
+              when skip_null = 74 and skip_none = 75
+                then '74 לא נבדקו · 75 נבדקו ואין ✅'
+              when skip_null = 0 and skip_none = 232
+                then 'כל 232 מסומנים "אין" ❌ — לא הורצה מיגרציה 016'
+              else skip_null || ' לא נבדקו · ' || skip_none || ' נבדקו ואין ⚠️' end from n
   union all
   select 10, 'אזורים בפארקים (land)',
          case when land is null then 'הטבלה לא קיימת ❌'

@@ -147,14 +147,14 @@ with checks as (
                 select 1 from pg_constraint
                 where conrelid = to_regclass('public.experience')
                   and pg_get_constraintdef(oid) like '%height_requirement_cm%'
-                  and pg_get_constraintdef(oid) like '%0%'
+                  and pg_get_constraintdef(oid) like '%= 0)%'
               ) then 'כן' else 'לא' end,
          'כן',
          case when exists (
                 select 1 from pg_constraint
                 where conrelid = to_regclass('public.experience')
                   and pg_get_constraintdef(oid) like '%height_requirement_cm%'
-                  and pg_get_constraintdef(oid) like '%0%'
+                  and pg_get_constraintdef(oid) like '%= 0)%'
               ) then '✅ תקין' else '❌ 012_height_none לא רץ' end
 
   union all

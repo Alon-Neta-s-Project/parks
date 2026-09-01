@@ -121,6 +121,18 @@ with checks as (
                 then '✅ תקין' else '❌ פארק חסר' end
 
   union all
+  select 11.5,
+         'מוצר דילוג בתור',
+         (select string_agg(coalesce(skip_line_system,'(לא נבדק)') || ': ' || n, ' · ' order by n desc)
+            from (select skip_line_system, count(*) as n from experience group by 1) s),
+         'none: 75 · (לא נבדק): 74 · multi_pass: 51 · express: 27 · single_pass: 5',
+         '—',
+         case when (select count(*) from experience where skip_line_system is null) = 74
+               and (select count(*) from experience where skip_line_system = 'none') = 75
+                then '✅ תקין — NULL הוא "לא נבדק", לא "אין"'
+              else '❌ לא תואם לייצוא' end
+
+  union all
   select 12,
          'שורות שנעצרו בכוונה',
          '0',
