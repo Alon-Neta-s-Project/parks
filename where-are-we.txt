@@ -103,9 +103,10 @@ report(ord, "מה", "מצב") as (
               else passed || ' מתוך 18 ❌  — חסרות: ' || missing end from n
   union all
   select 2, 'מבנה',
-         case when tables = 18 then '18 טבלאות ✅'
+         case when tables = 19 then '19 טבלאות ✅'
+              when tables = 18 then '18 טבלאות — חסרה api_call, לא הורץ קובץ 018 ❌'
               when tables = 0  then 'המסד ריק לגמרי ❌ — לא הורץ supabase-bundle.sql'
-              else tables || ' טבלאות מתוך 18 ❌' end from n
+              else tables || ' טבלאות מתוך 19 ❌' end from n
   union all
   select 3, 'הרשאות (RLS)',
          case when policies >= 29 then policies || ' מדיניות ✅'
@@ -155,8 +156,9 @@ report(ord, "מה", "מצב") as (
   union all
   select 10, 'אזורים בפארקים (land)',
          case when land is null then 'הטבלה לא קיימת ❌'
-              when land = 0 then 'ריק — בכוונה, לא נכנס ל-V1 ✅'
-              else land || ' אזורים' end from n
+              when land = 0 then 'ריק — 77 האזורים עוד לא נשתלו ⏳'
+              when land = 77 then '77 אזורים ✅'
+              else land || ' אזורים מתוך 77 ⚠️' end from n
   union all
   select 11, 'מאגר הידע',
          case when knowledge_doc is null then 'הטבלה לא קיימת ❌'
@@ -173,12 +175,10 @@ report(ord, "מה", "מצב") as (
               when trip = 0 then 'ריק — האפליקציה עוד לא כותבת למסד ⏳'
               else trip || ' טיולים' end from n
   union all
-  select 13.5, 'מוכן לחיבור המודל',
-         case when to_regclass('public.api_call') is null then 'לא' else 'כן' end,
-         'כן',
+  select 15, 'מוכן לחיבור המודל',
          case when to_regclass('public.api_call') is null
-                then '❌ טבלת הגבלת הקצב חסרה — לא הורצה מיגרציה 018'
-              else '✅ תקין — אפשר להתקדם למדריך של ג׳מיני' end from n
+                then '❌ חסרה טבלת הגבלת הקצב — לא הורץ קובץ 018'
+              else '✅ כן — אפשר להתקדם למדריך של ג׳מיני' end from n
   union all
   select 14, 'שיחות שנשמרו',
          case when conversation is null then 'הטבלה לא קיימת ❌'
