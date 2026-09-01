@@ -6,6 +6,7 @@ import { HomePage } from "./pages/HomePage";
 import { BrowsePage } from "./pages/BrowsePage";
 import { ExperiencePage } from "./pages/ExperiencePage";
 import { AdminPage } from "./pages/AdminPage";
+import { MemoryPage } from "./pages/MemoryPage";
 
 export default function App() {
   const { t } = useTranslation();
@@ -20,6 +21,7 @@ export default function App() {
           <nav className="topbar__nav">
             <Link to="/browse">{t("nav.browse")}</Link>
             <Link to="/chat">{t("nav.chat")}</Link>
+            <Link to="/me">{t("nav.me")}</Link>
           </nav>
         </header>
 
@@ -29,6 +31,7 @@ export default function App() {
           <Route path="/park/:park" element={<BrowsePage />} />
           <Route path="/experience/:slug" element={<ExperiencePage />} />
           <Route path="/chat" element={<Chat />} />
+          <Route path="/me" element={<MemoryPage />} />
           <Route path="/admin" element={<AdminPage />} />
         </Routes>
       </div>

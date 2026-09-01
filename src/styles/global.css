@@ -740,7 +740,7 @@ button {
   border-radius: var(--pw-r-md);
 }
 .member__who { font-weight: 600; font-size: 14px; }
-.member__height { display: flex; flex-direction: column; gap: 4px; flex: 1; min-inline-size: 160px; }
+.member__field, .member__height { display: flex; flex-direction: column; gap: 4px; flex: 1; min-inline-size: 160px; }
 .member__why { font: var(--pw-t-small); color: var(--pw-ink-3); }
 .member__x {
   margin-inline-start: auto; appearance: none; border: 0; background: none;
