@@ -1,0 +1,486 @@
+<title>הפעלת טים</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700&family=Assistant:wght@400;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --ground:#F5F7F5; --surface:#FFFFFF; --sunk:#EDF1EE;
+  --ink:#17201C; --ink-2:#3C4A43; --ink-3:#5D6B64; --line:#D8E0DA;
+  --accent:#116149; --accent-soft:#E4EFE9; --accent-ink:#0C4735;
+  --stop:#8C2F1E; --stop-soft:#F8E7E3; --caution:#8A5A11; --caution-soft:#FBF0DC;
+  --ok:#1F6B3F; --ok-soft:#E3F1E7;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#0F1512; --surface:#161E1A; --sunk:#1D2723;
+  --ink:#E3EAE6; --ink-2:#BDC9C3; --ink-3:#93A39B; --line:#2A3733;
+  --accent:#4FB893; --accent-soft:#16302730; --accent-ink:#7FD3B4;
+  --stop:#E8917C; --stop-soft:#2E1B16;
+  --caution:#D9A557; --caution-soft:#2C2113; --ok:#6FC98D; --ok-soft:#14291B;
+}}
+:root[data-theme="dark"]{
+  --ground:#0F1512; --surface:#161E1A; --sunk:#1D2723;
+  --ink:#E3EAE6; --ink-2:#BDC9C3; --ink-3:#93A39B; --line:#2A3733;
+  --accent:#4FB893; --accent-soft:#16302730; --accent-ink:#7FD3B4;
+  --stop:#E8917C; --stop-soft:#2E1B16; --caution:#D9A557; --caution-soft:#2C2113;
+  --ok:#6FC98D; --ok-soft:#14291B;
+}
+*{box-sizing:border-box}
+body{
+  background:var(--ground); color:var(--ink);
+  font-family:Assistant,"Segoe UI",system-ui,sans-serif; font-size:17px; line-height:1.65;
+  margin:0; padding:0;
+}
+.wrap{max-width:54rem; margin:0 auto; padding:2.5rem 1.25rem 6rem; display:flex; flex-direction:column; gap:2rem}
+h1,h2,h3{font-family:"Frank Ruhl Libre",Georgia,serif; text-wrap:balance; margin:0; line-height:1.25}
+h1{font-size:2.6rem; font-weight:700; letter-spacing:-.01em}
+h2{font-size:1.75rem; font-weight:700}
+h3{font-size:1.2rem; font-weight:700; font-family:Assistant,sans-serif}
+p{margin:0}
+code,kbd,.mono{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:.9em}
+code{background:var(--sunk); padding:.12em .4em; border-radius:4px; direction:ltr; unicode-bidi:isolate; display:inline-block}
+.lead{font-size:1.15rem; color:var(--ink-2); max-width:60ch}
+.eyebrow{font-size:.78rem; font-weight:700; letter-spacing:.09em; color:var(--accent); text-transform:uppercase}
+.hr{height:1px; background:var(--line); border:0; margin:0}
+
+.part{display:flex; flex-direction:column; gap:1.25rem}
+.part__head{display:flex; align-items:baseline; gap:.75rem; padding-bottom:.6rem; border-bottom:2px solid var(--accent)}
+.part__letter{font-family:"Frank Ruhl Libre",serif; font-size:2.2rem; font-weight:700; color:var(--accent); line-height:1}
+
+.step{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:1.15rem 1.25rem; display:flex; gap:1rem; align-items:flex-start}
+.step__n{flex:0 0 auto; width:2rem; height:2rem; border-radius:50%; background:var(--accent); color:#fff; display:grid; place-items:center; font-weight:700; font-size:.95rem; font-variant-numeric:tabular-nums}
+.step__body{display:flex; flex-direction:column; gap:.6rem; min-width:0; flex:1}
+.step ul{margin:0; padding-inline-start:1.15rem; display:flex; flex-direction:column; gap:.35rem}
+.expect{background:var(--ok-soft); border-inline-start:3px solid var(--ok); padding:.55rem .8rem; border-radius:0 6px 6px 0; font-size:.95rem}
+.expect b{color:var(--ok)}
+
+.stop{background:var(--stop-soft); border:1px solid var(--stop); border-radius:10px; padding:1.1rem 1.25rem; display:flex; flex-direction:column; gap:.5rem}
+.stop__t{font-weight:700; color:var(--stop); font-size:1.05rem}
+.warn{background:var(--caution-soft); border-inline-start:3px solid var(--caution); padding:.8rem 1rem; border-radius:0 8px 8px 0; display:flex; flex-direction:column; gap:.4rem}
+.warn b{color:var(--caution)}
+.note{background:var(--sunk); border-radius:8px; padding:.8rem 1rem; font-size:.95rem; color:var(--ink-2)}
+
+.field{display:grid; grid-template-columns:auto 1fr; gap:.4rem .9rem; align-items:baseline; background:var(--sunk); border-radius:8px; padding:.8rem 1rem}
+.field dt{font-size:.8rem; font-weight:700; color:var(--ink-3); letter-spacing:.04em}
+.field dd{margin:0; font-family:"IBM Plex Mono",monospace; direction:ltr; unicode-bidi:isolate; text-align:start; word-break:break-all}
+
+.tbl{width:100%; border-collapse:collapse; font-size:.95rem}
+.tblwrap{overflow-x:auto; border:1px solid var(--line); border-radius:10px; background:var(--surface)}
+.tbl th,.tbl td{padding:.7rem .9rem; text-align:start; border-bottom:1px solid var(--line); vertical-align:top}
+.tbl th{background:var(--sunk); font-size:.82rem; letter-spacing:.04em; color:var(--ink-3); font-weight:700}
+.tbl tr:last-child td{border-bottom:0}
+.tbl code{white-space:nowrap}
+
+details{background:var(--surface); border:1px solid var(--line); border-radius:10px; overflow:hidden}
+summary{padding:.9rem 1.1rem; cursor:pointer; font-weight:600; list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"▸ "; color:var(--accent)}
+details[open] summary::before{content:"▾ "}
+.codewrap{border-top:1px solid var(--line)}
+.codebar{display:flex; gap:.6rem; align-items:center; padding:.6rem .9rem; background:var(--sunk); border-bottom:1px solid var(--line)}
+button{font:inherit; font-weight:600; font-size:.9rem; padding:.4rem .9rem; border-radius:6px; border:1px solid var(--accent); background:var(--accent); color:#fff; cursor:pointer}
+button.ghost{background:transparent; color:var(--accent)}
+button:focus-visible,summary:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+pre{margin:0; padding:1rem; overflow-x:auto; direction:ltr; text-align:left; background:var(--surface); font-family:"IBM Plex Mono",monospace; font-size:.78rem; line-height:1.55; max-height:26rem}
+.status{font-size:.85rem; color:var(--ink-3)}
+
+.qa{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:1.15rem 1.25rem; display:flex; flex-direction:column; gap:.7rem}
+.pill{display:inline-block; font-size:.75rem; font-weight:700; padding:.15rem .55rem; border-radius:999px; background:var(--accent-soft); color:var(--accent-ink); border:1px solid var(--accent)}
+.n{font-variant-numeric:tabular-nums; direction:ltr; unicode-bidi:isolate; display:inline-block}
+@media (max-width:560px){h1{font-size:2rem} body{font-size:16px} .step{padding:1rem}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important; animation:none!important}}
+</style>
+<script>document.documentElement.lang="he";document.documentElement.dir="rtl";</script>
+<div class="wrap">
+
+<header style="display:flex;flex-direction:column;gap:.9rem">
+  <div class="eyebrow">Park Day Companion · שלב 2</div>
+  <h1>הפעלת טים</h1>
+  <p class="lead">מ״אין מפתח״ עד ״טים עונה״. שלושה חלקים, שבעה־עשר צעדים, וארבע נקודות עצירה שבהן את מדווחת לי לפני שממשיכים.</p>
+</header>
+
+<div class="warn">
+  <b>⛔ המפתח לא נשלח אליי, ולא לאף אחד בצ׳אט.</b>
+  <p>את מייצרת אותו אצל גוגל ומדביקה אותו ישירות בסופאבייס. הוא לא עובר דרכי, לא נכנס לקוד, ולא מופיע בשום הודעה. אני לא צריך לראות אותו כדי שזה יעבוד — וגם לא רוצה.</p>
+</div>
+
+<div class="note">
+  <b>ולמה יש כאן נקודות עצירה:</b> אני חסום ברשת מסופאבייס ומגוגל ולא יכול לראות את המסכים שלך. את העיניים שלי. בכל נקודת עצירה — תכתבי לי מה ראית, כולל אם משהו נראה אחרת ממה שכתוב כאן. ממשקים משתנים, והתיאורים כאן נכונים למה שאני יודע ולא למה שראיתי.
+</div>
+
+<hr class="hr">
+
+<!-- ─────────────── חלק א ─────────────── -->
+<section class="part">
+  <div class="part__head"><span class="part__letter">א</span><h2>מפתח Gemini</h2></div>
+  <p class="lead">כ־5 דקות. צריך חשבון גוגל רגיל — אותו אחד שיש לך.</p>
+
+  <div class="step"><div class="step__n">1</div><div class="step__body">
+    <h3>להיכנס ל־Google AI Studio</h3>
+    <p>בכתובת <code>aistudio.google.com</code>. להתחבר עם חשבון הגוגל שלך.</p>
+    <p>בפעם הראשונה יוצגו תנאי שימוש — לאשר.</p>
+    <div class="expect"><b>אמור לקרות:</b> נפתח מסך עם תיבת טקסט לכתיבת הודעה למודל, ותפריט בצד.</div>
+  </div></div>
+
+  <div class="step"><div class="step__n">2</div><div class="step__body">
+    <h3>לפתוח את מסך המפתחות</h3>
+    <p>לחפש כפתור או קישור בשם <b>Get API key</b> — בדרך כלל בסרגל הצד השמאלי, או בפינה הימנית העליונה. אפשר גם ללכת ישירות ל־<code>aistudio.google.com/apikey</code>.</p>
+    <div class="expect"><b>אמור לקרות:</b> נפתח דף בשם <b>API keys</b>. אם עוד אין לך מפתחות, הוא כמעט ריק.</div>
+  </div></div>
+
+  <div class="step"><div class="step__n">3</div><div class="step__body">
+    <h3>ליצור מפתח</h3>
+    <p>ללחוץ על <b>Create API key</b>.</p>
+    <p>אם תישאלי לאיזה פרויקט לשייך אותו — לבחור באפשרות שמציעה ליצור פרויקט חדש, או לבחור פרויקט קיים אם יש. זה פרויקט של גוגל קלאוד, לא של סופאבייס. שם הפרויקט לא משנה.</p>
+    <div class="expect"><b>אמור לקרות:</b> מוצגת שורת אותיות ומספרים שמתחילה ב־<code>AIza</code>. זה המפתח.</div>
+  </div></div>
+
+  <div class="step"><div class="step__n">4</div><div class="step__body">
+    <h3>להעתיק ולשמור לרגע</h3>
+    <p>ללחוץ על אייקון ההעתקה שליד המפתח.</p>
+    <p><b>לשמור אותו זמנית במקום שרק את רואה</b> — פתק בטלפון, מסמך פרטי, מנהל סיסמאות. תזדקקי לו בעוד שני צעדים.</p>
+    <div class="warn"><b>גוגל כן מאפשרת לחזור ולראות אותו,</b> אז זה לא אסון אם נסגר החלון. אבל אל תשלחי אותו בוואטסאפ, במייל לעצמך, או בצ׳אט — ברגע שהוא עובר בערוץ כזה הוא כבר לא סוד.</div>
+  </div></div>
+
+  <div class="stop">
+    <div class="stop__t">⏸ נקודת עצירה 1</div>
+    <p>תכתבי לי: <b>״יש לי מפתח״</b>. לא את המפתח — רק שהוא קיים, ושהוא מתחיל ב־<code>AIza</code>.</p>
+  </div>
+</section>
+<hr class="hr">
+
+<!-- ─────────────── חלק ב ─────────────── -->
+<section class="part">
+  <div class="part__head"><span class="part__letter">ב</span><h2>סופאבייס</h2></div>
+  <p class="lead">כאן רוב העבודה. ארבעה צעדים: לשמור את המפתח, ליצור טבלה, ליצור פונקציה, ולפתוח אותה לקריאה.</p>
+
+  <div class="step"><div class="step__n">5</div><div class="step__body">
+    <h3>לשמור את המפתח כ״סוד״ של הפונקציות</h3>
+    <p>בפרויקט שלך בסופאבייס, בסרגל הצד השמאלי למטה — <b>Project Settings</b> (אייקון גלגל שיניים).</p>
+    <p>בתוך ההגדרות, לחפש בתפריט הצד את <b>Edge Functions</b>. שם יש אזור בשם <b>Secrets</b> או <b>Function Secrets</b>.</p>
+    <p>ללחוץ <b>Add new secret</b>. שני שדות:</p>
+    <dl class="field">
+      <dt>Name / Key</dt><dd>GEMINI_API_KEY</dd>
+      <dt>Value / Secret</dt><dd>AIza… ← המפתח שהעתקת</dd>
+    </dl>
+    <div class="warn"><b>השם חייב להיות מדויק:</b> <code>GEMINI_API_KEY</code> — אותיות גדולות, קו תחתון, בלי רווחים לפני או אחרי. הפונקציה מחפשת בדיוק את השם הזה. שם אחר = הפונקציה תגיד שאין מפתח.</div>
+    <p>לשמור.</p>
+    <div class="expect"><b>אמור לקרות:</b> <code>GEMINI_API_KEY</code> מופיע ברשימת הסודות. <b>הערך עצמו מוסתר</b> — נקודות או כוכביות. זה תקין וזה רצוי.</div>
+  </div></div>
+
+  <div class="step"><div class="step__n">6</div><div class="step__body">
+    <h3>ליצור את טבלת הגבלת הקצב</h3>
+    <p><b>SQL Editor</b> ← <b>New query</b>. להדביק את הקובץ <code>018-rate-limit.txt</code> ששלחתי, ולהריץ.</p>
+    <p>לקרוא לקוורי <span class="mono">03 — הגבלת קצב</span>.</p>
+    <div class="expect"><b>אמור לקרות:</b> <span class="mono">Success. No rows returned</span>. הטבלה נוצרה.</div>
+    <div class="note"><b>למה זה לא ״עוד צעד טכני״:</b> נקודת קצה שקוראת למודל עולה כסף על כל קריאה. בלי גג, מישהו שמוצא את הכתובת יכול לקרוא לה עשרת אלפים פעם בלילה על חשבונך. הטבלה הזו סופרת קריאות וחוסמת מעל 20 בשעה. <b>הרשמה עם מייל לא הייתה מגנה על זה</b> — בוט פותח תיבת דואר.</div>
+  </div></div>
+
+  <div class="step"><div class="step__n">7</div><div class="step__body">
+    <h3>ליצור את הפונקציה</h3>
+    <p>בסרגל הצד — <b>Edge Functions</b>. ואז כפתור בנוסח <b>Deploy a new function</b> או <b>Create function</b>.</p>
+    <p>אם מוצעות אפשרויות, לבחור את זו שמאפשרת <b>לכתוב בדפדפן</b> (<span class="mono">Via Editor</span> / <span class="mono">Create via editor</span>) ולא את זו שדורשת התקנת תוכנה במחשב.</p>
+    <dl class="field"><dt>שם הפונקציה</dt><dd>tim</dd></dl>
+    <div class="warn"><b>אם אין אפשרות לכתוב בדפדפן</b> ורק מוצע להתקין <span class="mono">Supabase CLI</span> — <b>לעצור ולכתוב לי.</b> יש דרך אחרת, ואין טעם שתתקיני כלי פיתוח.</div>
+    <div class="expect"><b>אמור לקרות:</b> נפתח עורך קוד עם קובץ לדוגמה.</div>
+  </div></div>
+
+  <div class="step"><div class="step__n">8</div><div class="step__body">
+    <h3>להחליף את התוכן בקוד של טים</h3>
+    <p><b>למחוק את כל מה שיש בעורך</b> (⌘A ואז Delete), ולהדביק את הקוד למטה — או את הקובץ <code>tim-function.txt</code> ששלחתי.</p>
+    <p>ללחוץ <b>Deploy</b>.</p>
+    <div class="expect"><b>אמור לקרות:</b> סרגל התקדמות, ואז הפונקציה מופיעה ברשימה עם סטטוס פעיל. לוקח 10–60 שניות.</div>
+  </div></div>
+  <details>
+    <summary>הקוד של הפונקציה — <span class="mono">supabase/functions/tim/index.ts</span></summary>
+    <div class="codewrap">
+      <div class="codebar">
+        <button id="copyfn" type="button">העתק הכל</button>
+        <button class="ghost" id="selfn" type="button">סמן הכל</button>
+        <span class="status" id="fnstatus"></span>
+      </div>
+      <pre id="fn">
+/**
+ * טים — נקודת הקצה של המודל.
+ *
+ * ⛔ הסיבה שהפונקציה הזו קיימת בכלל: מפתח Gemini לעולם אינו יכול לשבת
+ * ב-frontend. משתנה עם קידומת VITE_ נכנס לחבילת הדפדפן **בהגדרה** — כל מי
+ * שפותח את כלי המפתחים רואה אותו. המפתח יושב במשתני הסביבה של הפונקציה
+ * הזו, בשרת, ולא עוזב אותם. הדפדפן מדבר עם הפונקציה; הפונקציה מדברת עם
+ * Gemini.
+ *
+ * מה שהפונקציה הזו **אינה** עדיין: טים. אין לה שליפה ואין לה כלים, ולכן
+ * היא אינה יודעת דבר על הפארקים. זה מכוון — כלל הברזל הראשון הוא שמה
+ * שאינו במאגר אינו נענה, ולכן ההוראות למטה אוסרות עליה להמציא עובדה.
+ * שליפה היא שלב 3, וטים המלא הוא שלב 4.
+ *
+ * ⚠️ ובכוונה בלי שום import. הפונקציה מדברת עם המסד דרך PostgREST ב-fetch
+ * רגיל, ולא דרך ספריית הלקוח. הסיבה מעשית: קובץ בלי תלויות אפשר לבדוק
+ * ולהריץ במלואו מקומית, וזה קובץ שנטע מדביקה ביד לתוך הדפדפן. תלות שאי
+ * אפשר לאמת בקובץ כזה היא בדיוק מה שנופל אצלה ולא אצלי.
+ */
+const MODEL = &quot;gemini-2.0-flash&quot;;
+const MAX_QUESTION_CHARS = 1000;
+
+/** חלון וגג. הגבלת קצב בשרת היא ההגנה האמיתית על נקודת קצה שעולה כסף —
+ *  הרשמה עם מייל אינה הגנה מבוטים. */
+const WINDOW_MINUTES = 60;
+const MAX_PER_WINDOW = 20;
+
+const SYSTEM = `אתה טים, עוזר לתכנון יום בפארקים באורלנדו. אתה עונה בעברית.
+
+כללי הזהירות שלך, ושלושתם מחייבים:
+1. אינך משלים פרט חסר מהיגיון או מהקשר. אם המידע לא ניתן לך — אתה אומר שאין לך אותו.
+2. אינך מבטיח זמינות, החזר כספי, או חיסכון בזמן.
+3. כשפרט עשוי להשתנות — אתה אומר זאת ומפנה לאימות במקור הרשמי.
+
+⛔ וכרגע, במיוחד: עדיין לא חוברת למאגר המידע של הפארקים. אין לך שום נתון על
+מתקנים, מגבלות גובה, שעות פתיחה או מחירים. על כל שאלה עובדתית כזו ענה
+במפורש שאתה עדיין לא מחובר למאגר ולכן אינך יכול לענות — ואל תנחש, גם לא
+&quot;בערך&quot;. שיחה כללית וברכות מותרות.`;
+
+/** האם המפתח נראה כמו מפתח Gemini, לפני שמנסים לקרוא איתו. */
+export function looksLikeGeminiKey(key: string | undefined): boolean {
+  return typeof key === &quot;string&quot; &amp;&amp; key.startsWith(&quot;AIza&quot;) &amp;&amp; key.length &gt;= 35;
+}
+
+/** מזהה יציב לדלי ההגבלה, בלי לאחסן כתובת IP. */
+export async function bucketKey(ip: string, salt: string): Promise&lt;string&gt; {
+  const bytes = new TextEncoder().encode(`${salt}:${ip}`);
+  const digest = await crypto.subtle.digest(&quot;SHA-256&quot;, bytes);
+  return [...new Uint8Array(digest)].map((b) =&gt; b.toString(16).padStart(2, &quot;0&quot;)).join(&quot;&quot;);
+}
+
+const CORS = {
+  &quot;Access-Control-Allow-Origin&quot;: &quot;*&quot;,
+  &quot;Access-Control-Allow-Headers&quot;: &quot;authorization, x-client-info, apikey, content-type&quot;,
+  &quot;Access-Control-Allow-Methods&quot;: &quot;POST, OPTIONS&quot;,
+};
+
+const json = (body: unknown, status = 200) =&gt;
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { ...CORS, &quot;Content-Type&quot;: &quot;application/json; charset=utf-8&quot; },
+  });
+
+export async function handle(req: Request, env: Record&lt;string, string | undefined&gt;): Promise&lt;Response&gt; {
+  if (req.method === &quot;OPTIONS&quot;) return new Response(&quot;ok&quot;, { headers: CORS });
+  if (req.method !== &quot;POST&quot;) return json({ error: &quot;method_not_allowed&quot; }, 405);
+
+  const key = env.GEMINI_API_KEY;
+  if (!looksLikeGeminiKey(key)) {
+    // בכוונה מפורש: זו השגיאה היחידה שנטע תראה אם הסוד לא נשמר נכון, והיא
+    // צריכה לדעת בדיוק מה חסר. שום חלק מהמפתח אינו מוחזר.
+    return json({ error: &quot;missing_api_key&quot;, detail: &quot;GEMINI_API_KEY לא הוגדר בסודות הפונקציה, או שאינו מתחיל ב-AIza&quot; }, 500);
+  }
+
+  let question: unknown;
+  try {
+    question = (await req.json())?.question;
+  } catch {
+    return json({ error: &quot;bad_json&quot; }, 400);
+  }
+  if (typeof question !== &quot;string&quot; || question.trim() === &quot;&quot;) {
+    return json({ error: &quot;empty_question&quot; }, 400);
+  }
+  if (question.length &gt; MAX_QUESTION_CHARS) {
+    return json({ error: &quot;question_too_long&quot;, limit: MAX_QUESTION_CHARS }, 413);
+  }
+
+  // ── הגבלת קצב ────────────────────────────────────────────────────────
+  const url = env.SUPABASE_URL;
+  const serviceKey = env.SUPABASE_SERVICE_ROLE_KEY;
+  if (url &amp;&amp; serviceKey) {
+    const ip = req.headers.get(&quot;x-forwarded-for&quot;)?.split(&quot;,&quot;)[0]?.trim() ?? &quot;unknown&quot;;
+    const bucket = await bucketKey(ip, env.RATE_LIMIT_SALT ?? serviceKey.slice(0, 16));
+    const since = new Date(Date.now() - WINDOW_MINUTES * 60_000).toISOString();
+    const auth = {
+      apikey: serviceKey,
+      Authorization: `Bearer ${serviceKey}`,
+      &quot;Content-Type&quot;: &quot;application/json&quot;,
+    };
+
+    const counted = await fetch(
+      `${url}/rest/v1/api_call?select=id&amp;bucket=eq.${bucket}&amp;created_at=gt.${since}`,
+      { headers: { ...auth, Prefer: &quot;count=exact&quot;, Range: &quot;0-0&quot; } },
+    );
+    // PostgREST מחזיר את הסך הכל בכותרת content-range, בצורה &quot;0-0/17&quot;.
+    const total = Number(counted.headers.get(&quot;content-range&quot;)?.split(&quot;/&quot;)[1] ?? &quot;0&quot;);
+
+    if (total &gt;= MAX_PER_WINDOW) {
+      return json({ error: &quot;rate_limited&quot;, retry_after_minutes: WINDOW_MINUTES }, 429);
+    }
+    await fetch(`${url}/rest/v1/api_call`, {
+      method: &quot;POST&quot;,
+      headers: auth,
+      body: JSON.stringify({ bucket }),
+    });
+  }
+
+  // ── הקריאה למודל ─────────────────────────────────────────────────────
+  const endpoint =
+    `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
+  let res: Response;
+  try {
+    res = await fetch(endpoint, {
+      method: &quot;POST&quot;,
+      headers: { &quot;Content-Type&quot;: &quot;application/json&quot;, &quot;x-goog-api-key&quot;: key! },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: SYSTEM }] },
+        contents: [{ role: &quot;user&quot;, parts: [{ text: question }] }],
+        generationConfig: { temperature: 0.3, maxOutputTokens: 800 },
+      }),
+    });
+  } catch {
+    return json({ error: &quot;upstream_unreachable&quot; }, 502);
+  }
+
+  if (!res.ok) {
+    // גוף התשובה של גוגל עלול לשקף בחזרה חלקים מהבקשה. מוחזר קוד בלבד.
+    return json({ error: &quot;upstream_error&quot;, status: res.status }, 502);
+  }
+
+  const data = await res.json();
+  const answer = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (typeof answer !== &quot;string&quot;) return json({ error: &quot;empty_answer&quot; }, 502);
+
+  return json({ answer });
+}
+
+Deno.serve((req) =&gt; handle(req, Deno.env.toObject()));
+</pre>
+    </div>
+  </details>
+
+  <div class="step"><div class="step__n">9</div><div class="step__body">
+    <h3>לאפשר קריאה לפונקציה בלי טוקן</h3>
+    <p>סופאבייס דורשת כברירת מחדל טוקן התחברות לכל קריאה לפונקציה. עדיין אין לנו הרשמה, ולכן צריך לכבות את זה — <b>לעכשיו</b>.</p>
+    <p>בדף של הפונקציה <span class="mono">tim</span>, לחפש הגדרה בנוסח <b>Verify JWT</b> / <b>Enforce JWT verification</b> ולכבות אותה.</p>
+    <div class="warn"><b>אם אין הגדרה כזו בממשק</b> — לעצור ולכתוב לי. אפשר גם לעקוף את זה בבדיקה עצמה, ואסביר.</div>
+    <div class="note">זה בטוח <b>רק</b> מפני שהגבלת הקצב מצעד 6 כבר עומדת. בלעדיה, פונקציה פתוחה שקוראת למודל בתשלום היא חשבון פתוח.</div>
+  </div></div>
+
+  <div class="stop">
+    <div class="stop__t">⏸ נקודת עצירה 2</div>
+    <p>תכתבי לי מה קרה בכל אחד מארבעת הצעדים — במיוחד <b>אם משהו נראה אחרת</b> ממה שכתוב, או אם לא מצאת מסך שתיארתי. אל תמשיכי לחלק ג׳ לפני שנדבר.</p>
+  </div>
+</section>
+
+<hr class="hr">
+
+<!-- ─────────────── חלק ג ─────────────── -->
+<section class="part">
+  <div class="part__head"><span class="part__letter">ג</span><h2>איך יודעים שזה עבד</h2></div>
+
+  <div class="step"><div class="step__n">10</div><div class="step__body">
+    <h3>לשלוח לטים שאלה</h3>
+    <p>בדף של הפונקציה יש לשונית בנוסח <b>Test</b> / <b>Invoke</b>. שם אפשר לשלוח בקשה בלי לצאת מסופאבייס.</p>
+    <p>בשדה הגוף (<span class="mono">Body</span> / <span class="mono">Request body</span>) להדביק בדיוק את זה:</p>
+    <dl class="field"><dt>Body</dt><dd>{"question": "שלום, אתה מחובר?"}</dd></dl>
+    <p>לוודא שהשיטה היא <b>POST</b>, ולשלוח.</p>
+  </div></div>
+
+  <div class="step"><div class="step__n">11</div><div class="step__body">
+    <h3>לקרוא את התשובה</h3>
+    <div class="expect"><b>הצלחה נראית כך:</b> קוד <span class="n">200</span>, וגוף תשובה שנראה בערך כמו <code>{"answer": "..."}</code> — עם הטקסט של טים בפנים</div>
+    <div class="warn">
+      <b>⚠️ וטים יגיד שהוא לא יודע כלום על הפארקים. זו התשובה הנכונה.</b>
+      <p>בשלב הזה בנינו את הצנרת בלבד — טים מחובר למודל אבל <b>עדיין לא למאגר המידע</b>. ההוראות שלו אוסרות עליו במפורש לנחש עובדות על מתקנים. אם תשאלי אותו מה מגבלת הגובה בספייס מאונטן והוא <b>יענה</b> — <b>זו התקלה</b>, לא ההיפך. תשלחי לי אם זה קורה.</p>
+      <p>החיבור למאגר הוא שלב 3, והוא הצעד הבא שלי.</p>
+    </div>
+  </div></div>
+
+  <h3 style="margin-top:.5rem">אם יצאה שגיאה</h3>
+  <div class="tblwrap"><table class="tbl">
+    <thead><tr><th>מה רואים</th><th>המשמעות</th><th>מה עושים</th></tr></thead>
+    <tbody>
+      <tr><td><code>401</code> · <code>403</code><br>או <span class="mono">Missing authorization header</span></td><td>אימות הטוקן עדיין דולק</td><td>צעד 9 לא נתפס. לחזור אליו, ואם אין הגדרה כזו — לכתוב לי</td></tr>
+      <tr><td><code>500</code> · <span class="mono">missing_api_key</span></td><td>הפונקציה לא מוצאת את המפתח</td><td>הסוד לא נשמר, או שהשם אינו בדיוק <code>GEMINI_API_KEY</code>. לבדוק אותיות גדולות וקו תחתון. <b>אחרי שינוי סוד צריך Deploy מחדש</b></td></tr>
+      <tr><td><code>502</code> · <span class="mono">upstream_error</span> · <span class="n">400</span></td><td>גוגל דחתה את המפתח</td><td>המפתח שגוי או הועתק חלקית. ליצור חדש בצעד 3 ולעדכן את הסוד</td></tr>
+      <tr><td><code>502</code> · <span class="mono">upstream_error</span> · <span class="n">429</span></td><td>חרגת מהמכסה החינמית של גוגל</td><td>להמתין דקה. אם חוזר — לכתוב לי</td></tr>
+      <tr><td><code>429</code> · <span class="mono">rate_limited</span></td><td>הגג <b>שלנו</b> — יותר מ־20 קריאות בשעה</td><td>זה עובד כמתוכנן. להמתין, או לכתוב לי אם צריך גג גבוה יותר לבדיקות</td></tr>
+      <tr><td><code>400</code> · <span class="mono">bad_json</span></td><td>הגוף לא נשלח כ־JSON תקין</td><td>לוודא שהודבק בדיוק <code>{"question": "..."}</code> עם המרכאות הכפולות</td></tr>
+      <tr><td>שגיאה עם המילה <span class="mono">relation</span> ו־<span class="mono">api_call</span></td><td>הטבלה מצעד 6 לא נוצרה</td><td>לחזור לצעד 6 ולהריץ את ה־SQL</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="stop">
+    <div class="stop__t">⏸ נקודת עצירה 3</div>
+    <p>תשלחי לי <b>צילום מסך של התשובה</b> — גם אם הצליח. אני רוצה לראות מה טים ענה בפועל, כי זו הפעם הראשונה שהוא מדבר.</p>
+  </div>
+</section>
+<hr class="hr">
+
+<section class="part">
+  <div class="part__head"><span class="part__letter">?</span><h2>שתי השאלות</h2></div>
+
+  <div class="qa">
+    <span class="pill">עלות</span>
+    <h3>מה חינמי, ומאיפה מתחיל תשלום</h3>
+    <p><b>Gemini</b> — יש שכבה חינמית אמיתית, עם גג של מספר בקשות לדקה וליום. לפיתוח ולבדיקות זה מספיק בנוחות. <b>חיוב מתחיל רק אם מקשרים חשבון חיוב</b> ועוברים לתוכנית בתשלום — זה לא קורה מעצמו.</p>
+    <p><b>סופאבייס</b> — התוכנית החינמית כוללת מסד, אימות, ומכסה נדיבה של קריאות לפונקציות. אנחנו הרבה מתחת לה.</p>
+    <div class="warn"><b>המספרים המדויקים משתנים,</b> ואני לא יכול לבדוק אותם מכאן — הרשת חסומה לי. אל תסמכי על מספר שאני אנקוב בו. הדף הרשמי של כל אחת מהן הוא המקור.</div>
+    <p><b>ומה שבאמת שומר עלינו אינו התוכנית אלא הגג בצעד 6.</b> חשבון מפתיע לא נולד משימוש רגיל — הוא נולד מנקודת קצה פתוחה שמישהו מצא. את זה סגרנו.</p>
+  </div>
+
+  <div class="qa">
+    <span class="pill">בטיחות</span>
+    <h3>מה אסור לעשות עם המפתח</h3>
+    <ul style="margin:0;padding-inline-start:1.15rem;display:flex;flex-direction:column;gap:.5rem">
+      <li><b>לא לשלוח אותו בצ׳אט — לא אליי ולא לאף אחד.</b> כולל צילום מסך שהוא נראה בו.</li>
+      <li><b>לא לשים אותו בקוד של האתר.</b> כל משתנה שמתחיל ב־<code>VITE_</code> נכנס לקובץ שהדפדפן מוריד — כלומר כל מי שפותח את כלי המפתחים רואה אותו. <b>זו הסיבה היחידה שהפונקציה בצד השרת קיימת בכלל.</b></li>
+      <li><b>לא לשמור אותו בקובץ שנכנס ל־GitHub.</b> אם הוא הגיע לשם, למחוק אותו מהקובץ <b>לא מספיק</b> — הוא נשאר בהיסטוריה.</li>
+      <li><b>לא בוואטסאפ ולא במייל</b>, גם לא לעצמך.</li>
+    </ul>
+    <div class="warn">
+      <b>ואם הוא נחשף בכל זאת — זה לא אסון, ויש תיקון:</b>
+      <p>לחזור ל־<code>aistudio.google.com/apikey</code>, למחוק את המפתח שנחשף (<span class="mono">Delete</span>), ליצור חדש, ולעדכן את הסוד בצעד 5. <b>המפתח הישן מת ברגע שנמחק.</b> העיקר הוא לומר לי שזה קרה — לא כדי שאעשה משהו, אלא כדי שנוודא שהוחלף.</p>
+    </div>
+    <p><b>ומה שאני לא צריך:</b> את המפתח, את <code>service_role</code>, ואת סיסמת המסד. אף אחד משלושתם לא יגיע אליי, ואף אחד מהם לא נדרש לי כדי לבנות.</p>
+  </div>
+</section>
+
+<hr class="hr">
+
+<section class="part">
+  <div class="part__head"><span class="part__letter">←</span><h2>ומה אחר כך</h2></div>
+  <p>ברגע שטים עונה, החוסם היחיד שרק את יכולה לפתוח — סגור. משם:</p>
+  <ol style="margin:0;padding-inline-start:1.3rem;display:flex;flex-direction:column;gap:.5rem">
+    <li><b>שלב 3 — שליפה.</b> 52 מסמכי הידע נכנסים למסד כווקטורים, וטים מתחיל לענות מתוכם ולא מהאוויר. זה הצעד שהופך את התשובה ״אני לא מחובר למאגר״ לתשובה אמיתית.</li>
+    <li><b>שלב 4 — טים המלא.</b> קריאות פונקציה לעובדות, כלים לפעולות, וסט זהב לבדיקות.</li>
+  </ol>
+  <div class="note"><b>ושלב 0 — האפליקציה קוראת מהמסד — עדיין חסום</b> על החלטה אחת שלך: האם האזור בפארק (<span class="mono">land</span>) נכנס ל־V1. פירוט ב־<span class="mono">docs/stage-0-schema-gap.md</span>.</div>
+
+  <div class="stop">
+    <div class="stop__t">⏸ נקודת עצירה 4</div>
+    <p>אחרי שטים ענה — <b>שתי מילים ואני ממשיך:</b> ״טים עונה״, ותשובה על <span class="mono">land</span>: <b>כן</b> או <b>לא</b>.</p>
+  </div>
+</section>
+
+</div>
+
+<script>
+(function () {
+  var pre = document.getElementById("fn");
+  var status = document.getElementById("fnstatus");
+  function say(t) { status.textContent = t; }
+
+  document.getElementById("copyfn").addEventListener("click", function () {
+    var text = pre.textContent;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(
+        function () { say("הועתק ✓"); },
+        function () { say("ההעתקה נחסמה — לחצי ״סמן הכל״ ואז ⌘C"); }
+      );
+      return;
+    }
+    say("ההעתקה נחסמה — לחצי ״סמן הכל״ ואז ⌘C");
+  });
+
+  document.getElementById("selfn").addEventListener("click", function () {
+    var r = document.createRange();
+    r.selectNodeContents(pre);
+    var s = window.getSelection();
+    s.removeAllRanges();
+    s.addRange(r);
+    say("מסומן — עכשיו ⌘C");
+  });
+})();
+</script>

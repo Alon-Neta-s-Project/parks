@@ -51,7 +51,9 @@ _1.9.2026 · מדוד מול `experience` ב-39 עמודות ומול `src/data/
 
 ## מה נדרש
 
-**מיגרציה 018** — שבע עמודות (`key`, `kind`, `subtype`, `admission`,
+_(018 נתפסה בינתיים על ידי דלי הגבלת הקצב של נקודת הקצה.)_
+
+**מיגרציה 019** — שבע עמודות (`key`, `kind`, `subtype`, `admission`,
 `reservation`, `included_with_admission`, `status_note`), כולן nullable, בלי
 ברירת מחדל. **בלי `NOT NULL DEFAULT`** — זו התבנית שנתפסה שבע פעמים.
 
