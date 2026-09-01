@@ -6,6 +6,9 @@ import { applyPatch, emptyProfile, questions, type Profile } from "../lib/profil
 import type { TFunction } from "i18next";
 import { HEIGHT_ASK_BELOW_AGE, type Member } from "../lib/group";
 import { GroupBuilder } from "./GroupBuilder";
+import { FactAnswer } from "./FactAnswer";
+import { classify, findExperience, whichFact, type FactKey } from "../lib/intent";
+import type { Experience } from "../data/schema";
 import { recommend } from "../lib/recommend";
 import { refinements } from "../lib/refine";
 import { Orb } from "./Orb";
@@ -31,6 +34,11 @@ export function Chat() {
   const [draftParks, setDraftParks] = useState<string[]>(restored?.profile.parks ?? []);
   /** How many times each question has been put. Two is the ceiling. */
   const [asked, setAsked] = useState<Record<string, number>>({});
+  const [draft, setDraft] = useState("");
+  /** Answers given before onboarding, so a question is never held hostage to it. */
+  const [answered, setAnswered] = useState<
+    { id: string; question: string; experience: Experience | null; fact: FactKey | null }[]
+  >([]);
   const [resumed] = useState(Boolean(restored?.started));
 
   const question = questions[step];
@@ -57,8 +65,21 @@ export function Chat() {
    * keyboard, and let a screen reader announce Tim's line as it arrives.
    */
   const optionsRef = useRef<HTMLDivElement>(null);
+  /**
+   * Set when the step changed because of typing rather than clicking.
+   *
+   * Pressing Enter in the composer starts the conversation, and moving focus to
+   * the first option in the same keystroke let that same Enter land on the
+   * button and answer question one by itself. Skipping the focus move for that
+   * one transition fixes it without depending on event timing.
+   */
+  const skipFocus = useRef(false);
   useEffect(() => {
     if (!started) return;
+    if (skipFocus.current) {
+      skipFocus.current = false;
+      return;
+    }
     optionsRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
   }, [started, step, turns.length]);
 
@@ -99,6 +120,42 @@ export function Chat() {
       ]);
       setStep((current) => current + 1);
     }
+  };
+
+  /**
+   * Route what was typed by what it asks for, not by what we still want to know.
+   *
+   * A pointed question gets its answer immediately — it goes through the data
+   * and never touches the profile, so there is nothing to gate it on. A request
+   * to plan opens the three questions instead of producing something generic,
+   * because a generic plan handed back to "plan me a day" is a failure rather
+   * than a reasonable default.
+   */
+  const submit = () => {
+    const text = draft.trim();
+    if (!text) return;
+    setDraft("");
+
+    const intent = classify(text);
+    if (intent === "planning") {
+      skipFocus.current = true;
+      setStarted(true);
+      setAnswered((current) => [
+        ...current,
+        { id: `q${current.length}`, question: text, experience: null, fact: null },
+      ]);
+      return;
+    }
+
+    setAnswered((current) => [
+      ...current,
+      {
+        id: `q${current.length}`,
+        question: text,
+        experience: findExperience(text),
+        fact: whichFact(text),
+      },
+    ]);
   };
 
   const answer = (key: string, label: string, patch: Partial<Profile>, reply?: string) => {
@@ -159,12 +216,60 @@ export function Chat() {
         </div>
       </div>
 
-      {!started && (
-        <div className="options" ref={optionsRef}>
-          <button type="button" className="option option--go" onClick={() => setStarted(true)}>
-            {t("intro.start")}
-          </button>
+      {answered.map((a) => (
+        <div key={a.id} className="exchange">
+          <div className="msg msg--me">
+            <div className="bubble bubble--me">{a.question}</div>
+          </div>
+          <div className="msg">
+            <Orb />
+            {a.experience ? (
+              <FactAnswer experience={a.experience} fact={a.fact} />
+            ) : (
+              <div className="bubble bubble--tim">
+                {a.fact === null && a.experience === null && classify(a.question) === "planning"
+                  ? t("ask.planningFirst")
+                  : t("ask.notFound")}
+              </div>
+            )}
+          </div>
         </div>
+      ))}
+
+      {!started && (
+        <>
+          <div className="composer">
+            <input
+              className="composer__input"
+              value={draft}
+              placeholder={t("ask.placeholder")}
+              aria-label={t("ask.placeholder")}
+              onChange={(e) => setDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key !== "Enter") return;
+                e.preventDefault();
+                submit();
+              }}
+            />
+            <button type="button" className="send" onClick={submit} aria-label={t("ask.send")}>
+              ←
+            </button>
+          </div>
+
+          <div className="options" ref={optionsRef}>
+            <button type="button" className="option option--go" onClick={() => setStarted(true)}>
+              {answered.length ? t("ask.startPlanning") : t("intro.start")}
+            </button>
+          </div>
+
+          {/* Offered after an answer, never before it. */}
+          {answered.some((a) => a.experience) && (
+            <div className="msg">
+              <Orb />
+              <div className="bubble bubble--tim">{t("ask.thenPlan")}</div>
+            </div>
+          )}
+        </>
       )}
 
       {started &&

@@ -264,5 +264,24 @@
     "clearAll": "למחוק הכול",
     "cleared": "נמחק.",
     "unset": "לא נשמר"
+  },
+  "ask": {
+    "placeholder": "שאלו אותי משהו, או בקשו לתכנן",
+    "send": "שליחה",
+    "answerFor": "{{name}}",
+    "checked": "המידע נבדק ב־{{date}}",
+    "noData": "אין לי את זה במאגר, ולא אנחש.",
+    "notFound": "לא מצאתי מתקן בשם הזה. אפשר לנסות את השם באנגלית.",
+    "thenPlan": "אגב — מתכננים טיול? אשמח לעזור לתכנן את כל היום.",
+    "startPlanning": "כן, בואו נתכנן",
+    "planningFirst": "בשמחה. שלוש שאלות קצרות קודם, כדי שההמלצה תהיה שלכם ולא כללית.",
+    "fact_height": "מגבלת גובה",
+    "fact_intensity": "עוצמה",
+    "fact_nausea": "נטייה לבחילה",
+    "fact_wet": "הרטבה",
+    "fact_duration": "משך",
+    "fact_wheelchair": "נגישות בכיסא גלגלים",
+    "fact_airConditioned": "ממוזג",
+    "fact_fastAccess": "דילוג בתור"
   }
 }

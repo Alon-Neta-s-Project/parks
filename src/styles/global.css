@@ -761,3 +761,15 @@ button {
   border: 1px solid var(--pw-hairline-strong); border-radius: var(--pw-r-sm);
   background: var(--pw-surface); color: var(--pw-ink);
 }
+
+.composer__input {
+  flex: 1;
+  min-inline-size: 0;
+  border: 0;
+  background: none;
+  font: 400 14.5px var(--pw-font-ui);
+  color: var(--pw-ink);
+}
+.composer__input::placeholder { color: var(--pw-ink-3); }
+.composer__input:focus { outline: none; }
+.factanswer__he { color: var(--pw-ink-2); font-size: 14px; }
