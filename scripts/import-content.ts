@@ -301,25 +301,36 @@ const parks = [...parkMap.values()]
 for (const p of parks) parkSchema.parse(p);
 
 // ── gap report, both directions ─────────────────────────────────────────────
-const fieldCoverage = REQUIRED_FIELDS.map((field) => {
-  const filled = experiences.filter((e) => {
-    const v = e[field as keyof Experience];
-    if (field === "intensity") return e.intensity.rated;
-    if (field === "heightRequirementCm") return e.heightRequirementCm !== null;
-    return v !== null && v !== "";
-  }).length;
-  return { field, filled, total: experiences.length };
-});
+/**
+ * Whether a field has been answered.
+ *
+ * "na" counts as answered, and that is the point. Someone looked, decided the
+ * question does not apply to this kind of activity, and closed the field —
+ * a stage show cannot get you wet. Counting that as a gap sends it to the
+ * verification queue and spends a person's time on something already settled.
+ *
+ * null is the opposite and stays a gap: nobody has looked yet.
+ */
+const isAnswered = (e: Experience, field: string): boolean => {
+  if (field === "intensity") return e.intensity.rated;
+  if (field === "heightRequirementCm") return e.heightRequirementCm !== null;
+  const v = e[field as keyof Experience];
+  return v !== null && v !== "";
+};
+
+const fieldCoverage = REQUIRED_FIELDS.map((field) => ({
+  field,
+  filled: experiences.filter((e) => isAnswered(e, field)).length,
+  // Split out so the report distinguishes "decided not applicable" from
+  // "answered with a value" — they look the same in a coverage percentage.
+  notApplicable: experiences.filter((e) => e[field as keyof Experience] === "na").length,
+  total: experiences.length,
+}));
 
 const incomplete = experiences
   .map((e) => ({
     key: e.key,
-    missing: REQUIRED_FIELDS.filter((f) => {
-      if (f === "intensity") return !e.intensity.rated;
-      if (f === "heightRequirementCm") return e.heightRequirementCm === null;
-      const v = e[f as keyof Experience];
-      return v === null || v === "";
-    }),
+    missing: REQUIRED_FIELDS.filter((f) => !isAnswered(e, f)),
   }))
   .filter((r) => r.missing.length);
 
@@ -356,7 +367,8 @@ if (problems.length) console.log(`  ⚠ ${problems.length} value problems (see r
 console.log("\n  coverage of required fields:");
 for (const c of fieldCoverage) {
   const pct = Math.round((c.filled / c.total) * 100);
-  console.log(`    ${c.field.padEnd(32)} ${String(c.filled).padStart(3)} / ${c.total}  ${pct}%`);
+  const na = c.notApplicable ? `  (${c.notApplicable} n/a)` : "";
+  console.log(`    ${c.field.padEnd(32)} ${String(c.filled).padStart(3)} / ${c.total}  ${pct}%${na}`);
 }
 console.log(`\n  pages complete: ${report.pagesComplete} / ${experiences.length}`);
 console.log(`  gap report → reports/import-gap-report.json`);

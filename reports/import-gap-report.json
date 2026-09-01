@@ -24,41 +24,49 @@
     {
       "field": "nameHe",
       "filled": 232,
+      "notApplicable": 0,
       "total": 232
     },
     {
       "field": "intensity",
       "filled": 232,
+      "notApplicable": 0,
       "total": 232
     },
     {
       "field": "heightRequirementCm",
       "filled": 214,
+      "notApplicable": 0,
       "total": 232
     },
     {
       "field": "motionSicknessWarning",
       "filled": 216,
+      "notApplicable": 0,
       "total": 232
     },
     {
       "field": "wheelchair",
       "filled": 231,
+      "notApplicable": 0,
       "total": 232
     },
     {
       "field": "getsWet",
       "filled": 144,
+      "notApplicable": 0,
       "total": 232
     },
     {
       "field": "airConditioned",
       "filled": 158,
+      "notApplicable": 0,
       "total": 232
     },
     {
       "field": "environment",
       "filled": 219,
+      "notApplicable": 0,
       "total": 232
     }
   ],

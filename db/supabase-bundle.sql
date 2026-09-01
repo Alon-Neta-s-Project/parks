@@ -1,0 +1,1030 @@
+-- Park Day Companion — כל המיגרציות בקובץ אחד, לפי הסדר.
+-- נוצר על ידי scripts/build-supabase-bundle.py מתוך 14 מיגרציות ו-2 seeds.
+--
+-- להדביק ל-Supabase Studio → SQL Editor ולהריץ פעם אחת.
+--
+-- ⚠️ db/local/000_auth_shim.sql אינו כאן, בכוונה. ב-Supabase סכמת auth
+--    שייכת לפלטפורמה, והפיגום המקומי היה מתנגש בה.
+--
+-- כל קובץ עטוף ב-BEGIN/COMMIT משלו, ולכן כישלון עוצר בנקודה מוגדרת
+-- ואינו משאיר מיגרציה חצי-מיושמת.
+
+
+-- ==========================================================================
+-- migration: 001_extensions_and_taxonomy.sql
+-- ==========================================================================
+
+-- 001_extensions_and_taxonomy.sql
+-- Park Day Companion — הרחבות ודומיינים
+--
+-- החלטה: ערכי ה-enum נאכפים ב-CHECK על עמודות text, ולא כטיפוסי enum מקומיים
+-- של Postgres. הסיבה: הוספת ערך ל-enum מקומי אפשרית, אבל שינוי שם או הסרה
+-- דורשים מיגרציה כואבת. CHECK מאפשר לשנות ערך במיגרציה אחת פשוטה.
+-- מקור האמת הוא src/data/taxonomy.ts — הקבצים כאן חייבים להישאר תואמים לו.
+
+BEGIN;
+
+create extension if not exists "pgcrypto";   -- gen_random_uuid()
+create extension if not exists "vector";     -- pgvector
+create extension if not exists "pg_trgm";    -- דמיון תווים, פתרון חלקי להיעדר stemmer עברי
+
+-- ── דומיינים משותפים ────────────────────────────────────────────────
+-- שימוש ב-domain ולא ב-CHECK חוזר: הגדרה אחת, נאכפת בכל טבלה שמשתמשת בה.
+
+create domain authority_tier as text
+  check (value in ('T1','T2','T3','T4','T5'));
+
+create domain volatility_tier as text
+  check (value in ('static','seasonal','volatile'));
+
+create domain source_type as text
+  check (value in ('official','blog','video','community'));
+
+create domain locale_code as text
+  check (value in ('he','en'));
+
+create domain sensitivity_level as text
+  check (value in ('none','low','medium','high'));
+
+comment on domain authority_tier is
+  'שכבת סמכות. T1/T2 לעולם אינם נסתרים על ידי T3-T5. ראה tim-retrieval-and-memory-architecture.md';
+
+COMMIT;
+
+
+-- ==========================================================================
+-- migration: 002_content.sql
+-- ==========================================================================
+
+-- 002_content.sql
+-- שכבת התוכן: destination → resort → park → land → experience
+--
+-- החלטת עיצוב מרכזית — עמודות מול JSONB:
+--   כל שדה ש-search_experiences מסננת לפיו הוא **עמודה אמיתית עם אינדקס**.
+--   כל שדה שרק מוצג ואף פעם לא מסונן יושב ב-JSONB.
+--   הסיבה: פילטור על JSONB עובד אבל לא מקבל אינדקס טוב, ובדיוק השדות
+--   האלה (אינטנסיביות, גובה, רגישויות) הם מה שמייצר את הערך של המוצר.
+
+BEGIN;
+
+create table destination (
+  id            text primary key,
+  name          text not null,
+  name_i18n     jsonb not null default '{}'::jsonb,
+  country_code  char(2) not null,
+  timezone      text not null,
+  is_active     boolean not null default false,
+  sort_order    int not null default 0
+);
+
+create table resort (
+  id                text primary key,
+  destination_id    text not null references destination(id) on delete restrict,
+  operator          text not null check (operator in ('disney','universal')),
+  name              text not null,
+  name_i18n         jsonb not null default '{}'::jsonb,
+  skip_line_system  text not null check (skip_line_system in ('lightning_lane','express_pass')),
+  sort_order        int not null default 0
+);
+
+create table park (
+  id             text primary key,
+  resort_id      text not null references resort(id) on delete restrict,
+  name           text not null,
+  short_name     text,
+  name_i18n      jsonb not null default '{}'::jsonb,
+  status         text not null default 'open'
+                 check (status in ('open','coming_soon','closed')),
+  typical_hours  jsonb not null default '{}'::jsonb,
+  hero_image_url text,
+  icon           text,
+  sort_order     int not null default 0
+);
+create index park_resort_idx on park (resort_id);
+
+create table land (
+  id          text primary key,
+  park_id     text not null references park(id) on delete cascade,
+  name        text not null,
+  name_i18n   jsonb not null default '{}'::jsonb,
+  -- קירוב גיאוגרפי גס בלבד. מאפשר "סדר הגיוני לפי מיקום" בלי מפה ובלי גרף.
+  zone        text check (zone in ('hub','north','south','east','west')),
+  sort_order  int not null default 0,   -- סדר הליכה טבעי בפארק
+  unique (park_id, name)
+);
+create index land_park_idx on land (park_id);
+
+-- ── experience — ישות אחת למתקנים ולהופעות ──────────────────────────
+create table experience (
+  id          text primary key,          -- {resort}-{park}-{slug}. לעולם לא משתנה.
+  park_id     text not null references park(id) on delete cascade,
+  land_id     text references land(id) on delete set null,
+
+  type        text not null check (type in
+                ('attraction','show','parade','meet_greet','walkthrough','transport')),
+  status      text not null default 'open' check (status in
+                ('open','seasonal','temporarily_closed','coming_soon','closed')),
+
+  name            text not null,                                  -- השם הרשמי באנגלית. קנוני.
+  name_i18n       jsonb not null default '{}'::jsonb,             -- {"he":"..."} אופציונלי
+  aliases         text[] not null default '{}',                   -- לקישור ישויות ולחיפוש
+  aliases_i18n    jsonb not null default '{}'::jsonb,
+
+  -- ── עובדות: עמודות מסוננות ──
+  category    text not null check (category in
+                ('dark_ride','coaster','simulator','water_ride','show','walkthrough',
+                 'playground','meet_greet','transport','360_film')),
+  opened_year       int check (opened_year between 1900 and 2100),
+  duration_minutes  int check (duration_minutes > 0),
+  intensity         int not null check (intensity between 1 and 4),
+  height_requirement_cm int check (height_requirement_cm between 50 and 200),
+  gets_wet    text not null default 'none'
+              check (gets_wet in ('none','may_get_wet','may_get_soaked')),
+  environment text check (environment in ('indoor','outdoor','mixed')),
+  air_conditioned boolean,
+  wheelchair  text check (wheelchair in ('full_access','must_transfer','not_accessible')),
+  skip_line_system text not null default 'none' check (skip_line_system in
+                ('none','lightning_lane_multi','lightning_lane_single',
+                 'express_pass','virtual_queue')),
+  skip_line_extra_cost boolean not null default false,
+  popularity  int check (popularity between 1 and 5),
+
+  -- ── רגישויות: בלוק נפרד, לא נגזר מ-intensity ──
+  -- מתקן יכול להיות intensity=1 ובכל זאת בלתי נסבל. ראה סעיף 2.5 במסמך הסכמה.
+  -- שדות בטיחות: T1 בלבד, לא ממקורות קהילתיים.
+  sens_motion_sickness sensitivity_level not null default 'none',
+  sens_enclosed_dark   boolean not null default false,
+  sens_heights         boolean not null default false,
+  sens_loud_sudden     boolean not null default false,
+  sens_strobe          boolean not null default false,
+
+  -- ── שאר העובדות: מוצג, לא מסונן ──
+  intensity_factors jsonb not null default '{}'::jsonb,  -- inversions, max_speed_kmh, big_drops, spinning, loud
+  type_data         jsonb not null default '{}'::jsonb,  -- show_times, runs_continuously, seasonal_window
+  location          jsonb,                               -- ריק ב-V1. שמור ל-V1.2.
+
+  -- ── דעה שאינה טקסט: אחת לכל השפות, לא מוכפלת ──
+  verdict          text check (verdict in ('must_do','worth_it','if_time','skip')),
+  recommendation   int check (recommendation between 1 and 5),
+  best_time_of_day text check (best_time_of_day in
+                     ('must_early','morning','noon','afternoon','evening','anytime','show_time')),
+
+  -- ── טריות ──
+  volatility     volatility_tier not null default 'static',
+  last_verified  date,
+
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index experience_park_idx      on experience (park_id);
+create index experience_land_idx      on experience (land_id);
+create index experience_type_idx      on experience (type, status);
+create index experience_intensity_idx on experience (intensity);
+create index experience_height_idx    on experience (height_requirement_cm);
+create index experience_sens_idx      on experience (sens_motion_sickness, sens_enclosed_dark);
+create index experience_skipline_idx  on experience (skip_line_system);
+-- קישור ישויות: חיפוש שם ואליאס. הצעד עם ההחזר הגבוה ביותר במנוע השליפה.
+create index experience_aliases_idx   on experience using gin (aliases);
+create index experience_name_trgm_idx on experience using gin (name gin_trgm_ops);
+
+comment on column experience.sens_motion_sickness is
+  'בחילה/מחלת תנועה. לא נגזר מ-intensity: סימולטור בעצימות 1 יכול להיות high.';
+
+-- ── תוכן עריכתי: שורה לכל שפה, לא עמודה לכל שפה ──
+-- הוספת אנגלית = הוספת שורות, לא מיגרציה של טבלה.
+create table experience_editorial (
+  experience_id text not null references experience(id) on delete cascade,
+  locale        locale_code not null,
+  summary       text,
+  good_for      text[] not null default '{}',
+  skip_if       text[] not null default '{}',
+  tips          text[] not null default '{}',
+  author        text,
+  last_reviewed date,
+  primary key (experience_id, locale)
+);
+
+create table experience_media (
+  id            uuid primary key default gen_random_uuid(),
+  experience_id text not null references experience(id) on delete cascade,
+  kind          text not null check (kind in ('hero','gallery','video')),
+  url           text,
+  youtube_id    text,
+  video_kind    text check (video_kind in ('pov','review','overview')),
+  title_i18n    jsonb not null default '{}'::jsonb,
+  alt_i18n      jsonb not null default '{}'::jsonb,
+  credit        text,
+  sort_order    int not null default 0,
+  check (kind <> 'video' or youtube_id is not null),
+  check (kind = 'video' or url is not null)
+);
+create index experience_media_exp_idx on experience_media (experience_id, kind);
+
+-- מקורות אינם מטא-דאטה טכני — הם פיצ'ר. טים מצטט מהם.
+create table experience_source (
+  id            uuid primary key default gen_random_uuid(),
+  experience_id text not null references experience(id) on delete cascade,
+  title         text,
+  url           text not null,
+  kind          source_type not null,
+  tier          authority_tier not null,
+  retrieved_at  date
+);
+create index experience_source_exp_idx on experience_source (experience_id);
+
+COMMIT;
+
+
+-- ==========================================================================
+-- migration: 003_knowledge.sql
+-- ==========================================================================
+
+-- 003_knowledge.sql
+-- מאגר הידע הלא-מובנה: מה שנשלף ב-RAG.
+--
+-- שים לב להפרדה: עובדות קשות יושבות ב-experience ונשלפות דרך כלים.
+-- כאן יושב רק מה שהוא פרוזה — דעה, טיפים, מדריכים, תוכן קהילתי.
+-- ערבוב השניים הוא בדיוק הטעות שהארכיטקטורה נועדה למנוע.
+
+-- ממד ה-embedding נגזר מהמודל. 1024 = Cohere embed-multilingual-v3.0.
+-- שינוי מודל בעל ממד אחר מחייב מיגרציה — להכריע לפני שנבנים על זה.
+BEGIN;
+
+create table knowledge_doc (
+  id            text primary key,               -- מזהה יציב מה-frontmatter. ingest אידמפוטנטי לפיו.
+  title         text not null,
+  doc_type      text not null check (doc_type in
+                  ('guide','attraction_note','faq','policy','tip','community_qa')),
+  authority_tier authority_tier not null,
+  locale        locale_code not null default 'he',
+
+  scope_resort  text references resort(id) on delete set null,
+  scope_park    text references park(id) on delete set null,
+  scope_experience text references experience(id) on delete set null,
+
+  source_url    text,
+  source_kind   source_type,
+  volatility    volatility_tier not null default 'static',
+  last_verified date,
+  last_seen     date,                            -- לתפוגה של טיפים קהילתיים
+
+  -- תוכן קהילתי אינו נכנס לאינדקס לפני אישור אדמין. אף פעם.
+  review_status text not null default 'draft' check (review_status in
+                  ('draft','pending_review','approved','rejected')),
+  reviewed_by   uuid,
+  reviewed_at   timestamptz,
+
+  corroboration_count int not null default 1,    -- בכמה מקורות בלתי-תלויים חזר הטיפ
+  submitted_by  uuid,
+
+  body          text not null,
+  created_at    timestamptz not null default now(),
+  updated_at    timestamptz not null default now()
+);
+create index knowledge_doc_status_idx on knowledge_doc (review_status, authority_tier);
+create index knowledge_doc_scope_idx  on knowledge_doc (scope_park, scope_experience);
+
+create table knowledge_chunk (
+  id             uuid primary key default gen_random_uuid(),
+  doc_id         text not null references knowledge_doc(id) on delete cascade,
+  chunk_index    int not null,
+  content        text not null,
+
+  -- משוכפל מה-doc בכוונה: השליפה מסננת על השדות האלה, ו-join לכל שאילתה
+  -- על טבלה קטנה הוא בזבוז. ingest אחראי לעקביות.
+  authority_tier authority_tier not null,
+  locale         locale_code not null,
+  scope_park     text,
+  scope_experience text,
+  review_status  text not null,
+
+  embedding      vector(1024),
+  embedding_model text not null,   -- אסור לערבב מודלים באותו אינדקס. שאילתה במודל
+                                   -- אחד מול מסמכים באחר מחזירה רעש בלי שום שגיאה.
+  created_at     timestamptz not null default now(),
+  unique (doc_id, chunk_index)
+);
+
+-- אין אינדקס ANN בכוונה. מתחת ל-10,000 שורות סריקה מדויקת מהירה יותר מ-HNSW
+-- וגם לא מאבדת recall. להוסיף רק כשהקורפוס גדל — ראה נספח 6א במסמך השליפה.
+create index knowledge_chunk_filter_idx on knowledge_chunk
+  (review_status, authority_tier, locale, scope_park);
+create index knowledge_chunk_exp_idx on knowledge_chunk (scope_experience);
+
+-- תור אימות האדמין: אדם מאשר, לא רובוט מעדכן.
+create view verification_queue as
+  select 'experience' as kind, e.id, e.name as title,
+         e.volatility, e.last_verified,
+         current_date - e.last_verified as days_since
+    from experience e
+   where e.last_verified is null
+      or (e.volatility = 'seasonal' and e.last_verified < current_date - interval '90 days')
+      or (e.volatility = 'static'   and e.last_verified < current_date - interval '365 days')
+  union all
+  select 'knowledge', d.id, d.title, d.volatility, d.last_verified,
+         current_date - d.last_verified
+    from knowledge_doc d
+   where d.review_status = 'approved'
+     and (d.last_verified is null
+       or (d.volatility = 'seasonal' and d.last_verified < current_date - interval '90 days')
+       or (d.volatility = 'static'   and d.last_verified < current_date - interval '365 days'));
+
+COMMIT;
+
+
+-- ==========================================================================
+-- migration: 004_users_trips.sql
+-- ==========================================================================
+
+-- 004_users_trips.sql
+-- משתמשים, זיכרון פרופיל, וטיולים.
+
+BEGIN;
+
+create table profile (
+  id         uuid primary key references auth.users(id) on delete cascade,
+  role       text not null default 'user' check (role in ('user','admin')),
+  display_name text,
+  locale     locale_code not null default 'he',
+  onboarding_completed boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
+-- ── זיכרון פרופיל ───────────────────────────────────────────────────
+-- כל עובדה היא שורה, לא עמודה. שלוש סיבות:
+--   1. כל עובדה חייבת לשאת source/confidence/updated_at לחוד.
+--   2. scope מתבטא מבנית: trip_id ריק = עובדה על האדם (נשארת תמיד),
+--      trip_id מלא = עובדה על הנסיעה הזו. בלי זה הטיול הבא יורש תאריכים ישנים.
+--   3. הוספת שדה חדש היא ערך ב-CHECK, לא ALTER TABLE.
+-- הטיפוסיות מגיעה משכבת Zod באפליקציה. הטבלה קטנה וחסומה, ולכן
+-- **נטענת במלואה בכל תור** — אין כאן שליפה סמנטית של עובדות על המשתמש.
+create table profile_fact (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null references profile(id) on delete cascade,
+  trip_id    uuid,                              -- null = scope:person, אחרת scope:trip
+  key        text not null check (key in (
+               'planner_type','sensitivities','party','split_logistics',
+               'experience_by_resort','deliberate_non_planning','staying_at_park_hotel',
+               'travel_dates','ticket_type','intensity_tolerance','mobility',
+               'price_sensitivity','dietary')),
+  value      jsonb not null,
+  source     text not null check (source in ('stated','inferred')),
+  confidence real not null default 1.0 check (confidence between 0 and 1),
+  updated_at timestamptz not null default now(),
+  unique (user_id, trip_id, key)
+);
+create index profile_fact_user_idx on profile_fact (user_id);
+
+comment on table profile_fact is
+  'עובדות מוקלדות על המשתמש. נטען במלואו לכל תור. לעולם לא זיכרון וקטורי.';
+comment on column profile_fact.source is
+  'inferred לעולם לא דורס stated. נאכף בשכבת האפליקציה.';
+
+-- ── טיולים ──────────────────────────────────────────────────────────
+create table trip (
+  id             uuid primary key default gen_random_uuid(),
+  user_id        uuid not null references profile(id) on delete cascade,
+  name           text,
+  destination_id text not null references destination(id),
+  start_date     date,
+  end_date       date,
+  party          jsonb not null default '{}'::jsonb,   -- [{age, height_cm}]
+  created_at     timestamptz not null default now(),
+  updated_at     timestamptz not null default now(),
+  check (end_date is null or start_date is null or end_date >= start_date)
+);
+create index trip_user_idx on trip (user_id);
+
+create table trip_day (
+  id        uuid primary key default gen_random_uuid(),
+  trip_id   uuid not null references trip(id) on delete cascade,
+  day_index int not null,
+  date      date not null,                       -- תמיד ISO. הפורמט הוא תצוגה בלבד.
+  park_ids  text[] not null default '{}',        -- מערך מסודר: park-hopper. ריק = יום מנוחה.
+  notes     text,
+  unique (trip_id, day_index)
+);
+create index trip_day_trip_idx on trip_day (trip_id);
+
+create table plan_item (
+  id            uuid primary key default gen_random_uuid(),
+  trip_id       uuid not null references trip(id) on delete cascade,
+  -- NULL = הפריט במאגר המשאלות, נבחר אך עוד לא שובץ ליום.
+  -- זו ההחלטה שמפרידה בין "מה מעניין אותי" ל"מתי אעשה את זה".
+  trip_day_id   uuid references trip_day(id) on delete set null,
+
+  experience_id text references experience(id) on delete cascade,
+  custom_title  text,
+
+  priority        int check (priority between 1 and 5),
+  time_preference jsonb,     -- {mode:'bucket'|'exact', bucket?, exact?}
+  booking_note    text,      -- טקסט חופשי. ללא לוגיקה ב-V1.
+  personal_notes  text,
+  status        text not null default 'wishlist'
+                check (status in ('wishlist','planned','done','skipped')),
+  sort_order    int not null default 0,
+  -- דריסה מפורשת של המשתמש. כל שאר העובדות נקראות דרך experience_id ולא מועתקות.
+  overrides     jsonb not null default '{}'::jsonb,
+  created_at    timestamptz not null default now(),
+  check (experience_id is not null or custom_title is not null)
+);
+create index plan_item_trip_idx on plan_item (trip_id, trip_day_id);
+create index plan_item_exp_idx  on plan_item (experience_id);
+
+COMMIT;
+
+
+-- ==========================================================================
+-- migration: 005_conversations.sql
+-- ==========================================================================
+
+-- 005_conversations.sql
+-- שיחות טים + יומן השאלות שלא נענו.
+--
+-- היומן אינו לוג תפעולי — הוא מכשיר מדידה. רשימת השאלות שטים לא ידע
+-- לענות עליהן היא מפת הדרכים של התוכן הבא, והיא רצה 24/7 על משתמשים
+-- אמיתיים בזמן שהם באמת מתכננים.
+
+BEGIN;
+
+create table conversation (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null references profile(id) on delete cascade,
+  trip_id    uuid references trip(id) on delete set null,
+  title      text,
+  summary    text,                    -- סיכום מתגלגל. שדה טקסט, לא נשלף וקטורית.
+  locale     locale_code not null default 'he',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index conversation_user_idx on conversation (user_id, updated_at desc);
+
+create table message (
+  id              uuid primary key default gen_random_uuid(),
+  conversation_id uuid not null references conversation(id) on delete cascade,
+  role            text not null check (role in ('user','assistant','tool','system')),
+  content         text,
+  tool_calls      jsonb,     -- מה נקרא ועם אילו פרמטרים. עליו רצות בדיקות סט הזהב.
+  citations       jsonb,     -- [{chunk_id|experience_id, tier, source_url}]
+  -- טים מסמן בעצמו כשלא ידע לענות. זה מה שמזין את היומן.
+  answered        boolean,
+  refusal_reason  text check (refusal_reason in
+                    ('no_data','unverified','safety_official_only','out_of_scope')),
+  proactive       boolean not null default false,  -- שכבת "כדאי שתדע"
+  model           text,
+  input_tokens    int,
+  output_tokens   int,
+  created_at      timestamptz not null default now()
+);
+create index message_conv_idx on message (conversation_id, created_at);
+create index message_unanswered_idx on message (created_at desc)
+  where answered = false;
+
+-- שאלות שטים לא ידע לענות עליהן, מוכנות להפוך לתוכן או למקרה בסט הזהב.
+create view unanswered_questions as
+  select m.id            as message_id,
+         m.conversation_id,
+         m.refusal_reason,
+         m.created_at,
+         (select prev.content
+            from message prev
+           where prev.conversation_id = m.conversation_id
+             and prev.role = 'user'
+             and prev.created_at < m.created_at
+           order by prev.created_at desc
+           limit 1) as question
+    from message m
+   where m.role = 'assistant'
+     and m.answered = false;
+
+COMMIT;
+
+
+-- ==========================================================================
+-- migration: 006_rls.sql
+-- ==========================================================================
+
+-- 006_rls.sql
+-- הרשאות ברמת המסד, לא בבדיקות ב-UI. יותר בטוח ופחות קוד.
+--
+-- הכלל: שכבת התוכן פתוחה לקריאה לכולם — כולל מי שלא נרשם. חסימת התוכן
+-- הייתה הורגת את ערוץ ה-SEO שהוא הנכס העיקרי. נרשמים רק כדי לשמור טיול.
+-- אדמין אינו רואה טיולים או שיחות של משתמשים אחרים — החלטה מודעת.
+
+BEGIN;
+
+create or replace function is_admin() returns boolean
+  language sql stable security definer set search_path = public as $$
+  select exists (select 1 from profile where id = auth.uid() and role = 'admin');
+$$;
+
+-- ── תוכן: קריאה לכולם, כתיבה לאדמין ────────────────────────────────
+do $$
+declare t text;
+begin
+  foreach t in array array['destination','resort','park','land','experience',
+                           'experience_editorial','experience_media','experience_source']
+  loop
+    execute format('alter table %I enable row level security', t);
+    execute format('create policy %I_read on %I for select using (true)', t, t);
+    execute format('create policy %I_admin on %I for all using (is_admin()) with check (is_admin())', t, t);
+  end loop;
+end $$;
+
+-- ── ידע: רק מאושר נראה לציבור ──────────────────────────────────────
+alter table knowledge_doc   enable row level security;
+alter table knowledge_chunk enable row level security;
+
+create policy knowledge_doc_read on knowledge_doc
+  for select using (review_status = 'approved' or is_admin());
+create policy knowledge_doc_submit on knowledge_doc
+  for insert with check (auth.uid() = submitted_by and review_status = 'pending_review');
+create policy knowledge_doc_admin on knowledge_doc
+  for all using (is_admin()) with check (is_admin());
+
+create policy knowledge_chunk_read on knowledge_chunk
+  for select using (review_status = 'approved' or is_admin());
+create policy knowledge_chunk_admin on knowledge_chunk
+  for all using (is_admin()) with check (is_admin());
+
+-- ── פרופיל, טיולים, שיחות: הבעלים בלבד ─────────────────────────────
+alter table profile enable row level security;
+create policy profile_self on profile
+  for all using (id = auth.uid()) with check (id = auth.uid());
+
+alter table profile_fact enable row level security;
+create policy profile_fact_self on profile_fact
+  for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+alter table trip enable row level security;
+create policy trip_self on trip
+  for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+alter table trip_day enable row level security;
+create policy trip_day_self on trip_day for all
+  using (exists (select 1 from trip where trip.id = trip_day.trip_id and trip.user_id = auth.uid()))
+  with check (exists (select 1 from trip where trip.id = trip_day.trip_id and trip.user_id = auth.uid()));
+
+alter table plan_item enable row level security;
+create policy plan_item_self on plan_item for all
+  using (exists (select 1 from trip where trip.id = plan_item.trip_id and trip.user_id = auth.uid()))
+  with check (exists (select 1 from trip where trip.id = plan_item.trip_id and trip.user_id = auth.uid()));
+
+alter table conversation enable row level security;
+create policy conversation_self on conversation
+  for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+alter table message enable row level security;
+create policy message_self on message for all
+  using (exists (select 1 from conversation c where c.id = message.conversation_id and c.user_id = auth.uid()))
+  with check (exists (select 1 from conversation c where c.id = message.conversation_id and c.user_id = auth.uid()));
+
+COMMIT;
+
+
+-- ==========================================================================
+-- migration: 007_content_fields.sql
+-- ==========================================================================
+
+-- 007_content_fields.sql
+-- שדות התוכן שנגזרו מהמחקר ומהחלטות איסוף המידע.
+-- מחליף כל גרסה מוקדמת של 007. מיישם את park-day-companion-data-spec-v2.md.
+
+-- 1 ─ בחילה: לא רמת חומרה, ולא אזהרת הבטיחות המשפטית של דיסני ---------------
+-- הגרסה הקודמת (official_motion_sickness_warning) סימנה בפועל את בלוק
+-- האזהרה הכללי שדיסני מדביקה למחלקת מתקנים שלמה, ולכן לא אמרה דבר על
+-- הסיכוי לבחילה. השדה הנוכחי נקבע משני מקורות איכותיים שמדרגים בחילה בפועל.
+BEGIN;
+
+alter table experience drop column if exists sens_motion_sickness;
+
+alter table experience
+  add column motion_sickness_warning text
+    check (motion_sickness_warning in ('true','false','na'));
+
+comment on column experience.motion_sickness_warning is
+  'אינדיקציה אמינה שהמתקן עלול להבחיל. נקבע משני מקורות איכותיים (TouringPlans, Orlando Informer וכו''), לא מאזהרת הבטיחות הכללית. NULL = אין מספיק מידע. השדה יצא מהחרגת ה-T1.';
+
+-- 2 ─ שני מאפיינים שתומכים בקביעת הבחילה --------------------------------------
+alter table experience
+  add column is_motion_simulator text check (is_motion_simulator in ('true','false','na')),
+  add column uses_large_screens_or_3d text check (uses_large_screens_or_3d in ('true','false','na'));
+
+-- 3 ─ מאפיינים מכניים כעמודות, וארבעת-מצבים ------------------------------------
+-- big_drops ו-spinning היו מפתחות בתוך intensity_factors. הם נדרשים ב-Export
+-- וב-importer, ולכן הופכים לעמודות אמיתיות. boolean מחזיק שלושה מצבים ואינו
+-- מבחין בין "לא ידוע" ל"לא רלוונטי" — ולכן text עם CHECK.
+alter table experience
+  add column big_drops text check (big_drops in ('true','false','na')),
+  add column spinning  text check (spinning  in ('true','false','na'));
+
+alter table experience
+  alter column air_conditioned type text using (case when air_conditioned is null then null when air_conditioned then 'true' else 'false' end);
+alter table experience
+  add constraint experience_air_conditioned_check check (air_conditioned in ('true','false','na'));
+
+-- 4 ─ נגישות: שלושה ערכים → חמישה --------------------------------------------
+-- כדי לא לאבד הבחנות שקיימות במקורות הרשמיים.
+alter table experience drop constraint if exists experience_wheelchair_check;
+alter table experience add constraint experience_wheelchair_check check (wheelchair in (
+  'remain_in_wheelchair','transfer_ecv_to_wheelchair','transfer_to_ride_vehicle',
+  'transfer_wheelchair_then_ride','must_be_ambulatory'));
+
+-- 5 ─ ארבעת דגלי הרגישות יורדים מהיקף שלב 1 -----------------------------------
+-- נשארים בסכמה, ריקים, ואינם נחשפים בטקסונומיה, בכלים או בממשק.
+comment on column experience.sens_enclosed_dark is 'לא בהיקף שלב 1. לא לאסוף, לא לחשוף.';
+comment on column experience.sens_heights       is 'לא בהיקף שלב 1. לא לאסוף, לא לחשוף.';
+comment on column experience.sens_loud_sudden   is 'לא בהיקף שלב 1. לא לאסוף, לא לחשוף.';
+comment on column experience.sens_strobe        is 'לא בהיקף שלב 1. לא לאסוף, לא לחשוף.';
+
+create index experience_motion_sickness_idx on experience (motion_sickness_warning);
+
+COMMIT;
+
+
+-- ==========================================================================
+-- migration: 008_profile_axes.sql
+-- ==========================================================================
+
+-- 008_profile_axes.sql
+-- צירי הפרופיל מהמחקר (park-day-companion-user-profile-axes.md).
+--
+-- שלושה שינויים. אף אחד מהם אינו מבני — הטבלה כבר בנויה נכון למודל
+-- של שדות עצמאיים, ולא לשיוך לפרסונה אחת.
+
+-- ── 1. הרחבת רשימת המפתחות ──────────────────────────────────────────
+-- הרשימה היא allowlist בכוונה: מפתח חדש מחייב מיגרציה, ולכן אי אפשר
+-- להמציא שדה פרופיל בשקט בקוד.
+BEGIN;
+
+alter table profile_fact drop constraint if exists profile_fact_key_check;
+alter table profile_fact add constraint profile_fact_key_check check (key in (
+  -- קיימים
+  'planner_type','sensitivities','party','split_logistics',
+  'experience_by_resort','deliberate_non_planning','staying_at_park_hotel',
+  'travel_dates','ticket_type','intensity_tolerance','mobility',
+  'price_sensitivity','dietary',
+  -- ציר 1 — עומק התכנון. שני השדות עצמאיים ויכולים להיות true יחד.
+  'planning_focus_fit',      -- התאמת אטרקציות ופארקים
+  'planning_focus_cost',     -- עלויות, כרטיסים, לינה
+  'planning_depth',          -- כמה מאמץ מושקע מראש בכלל
+  -- ציר 2 — סגנון מיצוי היום
+  'park_style',
+  -- ציר 3 — לינה ותחבורה
+  'lodging_pref',
+  -- תווית פרסונה: ייחוס לצוות בלבד. הקוד לא מסתעף לפיה.
+  'persona_labels'
+));
+
+-- ── 2. ותק נשאל, לעולם לא מוסק ──────────────────────────────────────
+-- דרישה מפורשת מהמחקר: ידע ממבקר חוזר רלוונטי רק לאותו פארק/מדינה
+-- בדיוק, ואי אפשר להסיק אותו משום נתון אחר. נאכף במסד ולא בהסכמה.
+alter table profile_fact add constraint experience_must_be_stated
+  check (key <> 'experience_by_resort' or source = 'stated');
+
+-- תווית פרסונה היא תמיד מסקנה, לעולם לא הצהרה של המשתמש.
+alter table profile_fact add constraint persona_must_be_inferred
+  check (key <> 'persona_labels' or source = 'inferred');
+
+-- ── 3. מוצהר ומוסק חיים זה לצד זה ───────────────────────────────────
+-- היה: unique (user_id, trip_id, key) — מפתח אחד, שורה אחת. המשמעות
+-- הייתה שכתיבת ערך מוצהר **דורסת** את המוסק, והמידע מה הנחנו נעלם.
+--
+-- הכלל "מוצהר גובר על מוסק" מיושם עכשיו בקריאה ולא בכתיבה:
+-- שתי השורות מתקיימות במקביל, והקורא מעדיף stated.
+--
+-- שלוש תמורות: אין אובדן מידע · אפשר להראות במסך "מה טים יודע עליי"
+-- גם מה הנחנו וגם מה תוקן · ומוסק לא יכול לדרוס מוצהר בטעות, כי הוא
+-- כותב לשורה אחרת לגמרי.
+alter table profile_fact drop constraint if exists profile_fact_user_id_trip_id_key_key;
+create unique index profile_fact_unique_idx
+  on profile_fact (user_id, coalesce(trip_id, '00000000-0000-0000-0000-000000000000'::uuid), key, source);
+
+-- הקריאה שכל האפליקציה עוברת דרכה. stated מנצח, ובלעדיו מוסק.
+create or replace view profile_effective as
+  select distinct on (user_id, trip_id, key)
+         user_id, trip_id, key, value, source, confidence, updated_at
+    from profile_fact
+   order by user_id, trip_id, key,
+            (source = 'stated') desc,   -- מוצהר קודם
+            updated_at desc;            -- ובתוך אותו סוג, המאוחר
+
+comment on view profile_effective is
+  'הפרופיל האפקטיבי. מוצהר גובר על מוסק. זהו המקור לטעינת הפרופיל בכל תור.';
+
+COMMIT;
+
+
+-- ==========================================================================
+-- migration: 009_plan_item_interest.sql
+-- ==========================================================================
+
+-- 009_plan_item_interest.sql
+-- כן / לא / אולי — כוונת המשתמש לגבי מתקן.
+--
+-- נפרד מ-status בכוונה. status הוא מחזור חיים (wishlist→planned→done),
+-- ו-interest הוא כוונה. "לא" הוא לא היעדר "כן": דחייה מפורשת היא מידע
+-- שמנוע המסלול חייב לכבד, אחרת הוא יציע שוב את מה שכבר נדחה.
+
+BEGIN;
+
+alter table plan_item
+  add column interest text check (interest in ('yes','maybe','no'));
+
+comment on column plan_item.interest is
+  'כוונת המשתמש מהגיליון. NULL = טרם סומן. no = נדחה מפורשות, לעולם לא יוצע במסלול.';
+
+-- עוגן זמן: הזמנת דילוג-תור שהמשתמש הזין ידנית. אין אינטגרציה עם
+-- אפליקציות הפארקים, ולכן זהו קלט ידני שהמנוע מתייחס אליו כאילוץ קשיח.
+alter table plan_item
+  add column anchor_time time;
+
+comment on column plan_item.anchor_time is
+  'שעת הזמנה שהמשתמש הזין (Lightning Lane / Express). אילוץ קשיח למנוע המסלול.';
+
+create index plan_item_interest_idx on plan_item (trip_id, interest);
+
+COMMIT;
+
+
+-- ==========================================================================
+-- migration: 010_trip_members.sql
+-- ==========================================================================
+
+-- 010_trip_members.sql
+-- הרכב הקבוצה: שורה לכל חבר/ה, לא מערך בתוך שדה אחד.
+--
+-- הדרישה שהוגדרה: עדכון על member אחד לא דורס את השאר, ו-stated גובר על
+-- inferred ברזולוציה של member בודד. שורה לכל member נותנת את זה בחינם —
+-- עדכון של הילד האמצעי הוא UPDATE על שורה אחת. במערך jsonb היה צריך
+-- לממש את זה ידנית, וכל עדכון היה קריאה-שינוי-כתיבה של כל המערך.
+--
+-- העיקרון שנקבע נשמר: אין שדות-סיכום ברמת קבוצה ("יש ילד קטן?").
+-- הם נגזרים בזמן ריצה מהשורות כאן, כדי שלא ייווצר מקור אמת כפול.
+
+BEGIN;
+
+create table trip_member (
+  id         uuid primary key default gen_random_uuid(),
+  trip_id    uuid not null references trip(id) on delete cascade,
+  member_key text not null,                    -- 'm1' וכו', יציב לאורך הטיול
+  role       text not null check (role in ('adult','child')),
+
+  -- גיל נאסף לכולם. גובה נאסף **רק מתחת לגיל 14** — מבוגרים עוברים כל
+  -- מגבלה, ולכן השאלה מיותרת. התנאי נגזר מ-age בזמן ריצה, אין דגל נפרד.
+  -- מינימיזציה: גיל כמספר ולא תאריך לידה, ואין שדה שם — הנתון הוא
+  -- מגבלה טכנית של נוסע, לא פרופיל של ילד.
+  age        int check (age between 0 and 120),
+  height_cm  int check (height_cm between 30 and 220),
+
+  intensity_tolerance text check (intensity_tolerance in ('low','medium','high','extreme')),
+  sensitivities       text[] not null default '{}',   -- motion_sickness · fear_dark · fear_heights · claustrophobia
+
+  -- מקור ורמת ביטחון **לכל שדה בנפרד**, לא לשורה כולה:
+  -- {"intensity_tolerance": {"source":"stated","confidence":1,"updated_at":"..."}}
+  field_provenance jsonb not null default '{}'::jsonb,
+
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (trip_id, member_key)
+);
+
+create index trip_member_trip_idx on trip_member (trip_id);
+
+comment on table trip_member is
+  'חבר/ה אחד/ת בקבוצה. שורה לכל אחד/ת כדי שעדכון בודד לא ידרוס את השאר.';
+comment on column trip_member.field_provenance is
+  'source/confidence לכל שדה בנפרד. stated גובר על inferred ברזולוציה של שדה בודד.';
+comment on column trip_member.height_cm is
+  'נאסף באונבורדינג. משמש לזכאות למתקן ול-Child Swap. ניתן לעריכה ומחיקה על ידי המשתמש.';
+
+alter table trip_member enable row level security;
+create policy trip_member_self on trip_member for all
+  using (exists (select 1 from trip where trip.id = trip_member.trip_id and trip.user_id = auth.uid()))
+  with check (exists (select 1 from trip where trip.id = trip_member.trip_id and trip.user_id = auth.uid()));
+
+-- הרכב הקבוצה יוצא מ-profile_fact: הוא חי בטבלה משלו.
+alter table profile_fact drop constraint if exists profile_fact_key_check;
+alter table profile_fact add constraint profile_fact_key_check check (key in (
+  'planner_type','sensitivities','split_logistics',
+  'experience_by_resort','deliberate_non_planning','staying_at_park_hotel',
+  'travel_dates','ticket_type','mobility','price_sensitivity','dietary',
+  'planning_focus_fit','planning_focus_cost','planning_depth',
+  'park_style','lodging_pref','persona_labels'
+));
+
+COMMIT;
+
+
+-- ==========================================================================
+-- migration: 011_conformance_fixes.sql
+-- ==========================================================================
+
+-- 011_conformance_fixes.sql
+-- ארבעה ממצאים שהתגלו כשנטענו 232 שורות אמיתיות למסד ונדחו 125.
+-- הבדיקה הזו — לתת למסד לפסוק במקום להשוות בעין — היא שמצאה אותם.
+
+BEGIN;
+
+-- 1 ─ intensity מותר להיות NULL --------------------------------------------
+-- הכלל שסוכם: "מתקן בלי דירוג מוצג עם עובדות וציון מפורש שאין דירוג".
+-- NOT NULL סתר אותו ישירות — אי אפשר להציג מה שאי אפשר לשמור.
+alter table experience alter column intensity drop not null;
+
+comment on column experience.intensity is
+  'NULL = אין דירוג. מוצג במפורש כ"אין דירוג", ו**לעולם אינו נכלל בתוצאות של פילטר עוצמה** — לא בשקט ולא כברירת מחדל.';
+
+-- 2 ─ gets_wet: אין ברירת מחדל ---------------------------------------------
+-- 'none' כברירת מחדל הפך "לא נבדק" ל"נבדק ואינו מרטיב", בניגוד לכלל
+-- "שדה ריק אינו שדה שאין לו ערך".
+alter table experience alter column gets_wet drop default;
+alter table experience alter column gets_wet drop not null;
+
+comment on column experience.gets_wet is
+  'NULL = לא נבדק. ''none'' = נבדק ונמצא שאינו מרטיב. שני מצבים שונים.';
+
+-- 3 ─ סוג הפארק: נושא מול מים ------------------------------------------------
+-- הייצוא נושא Park Type, ולא הייתה לו עמודה. פארקי המים דורשים טיפול
+-- שונה (gets_wet חסר משמעות, air_conditioned לא רלוונטי).
+alter table park add column park_kind text not null default 'theme'
+  check (park_kind in ('theme','water'));
+alter table park alter column park_kind drop default;
+
+-- 4 ─ אותם ארבעה דגלי רגישות שיצאו מהיקף שלב 1 --------------------------------
+-- היו NOT NULL DEFAULT false, כלומר "נבדק ואין" — בעוד שהם כלל לא נאספים.
+alter table experience alter column sens_enclosed_dark drop not null;
+alter table experience alter column sens_enclosed_dark drop default;
+alter table experience alter column sens_heights       drop not null;
+alter table experience alter column sens_heights       drop default;
+alter table experience alter column sens_loud_sudden   drop not null;
+alter table experience alter column sens_loud_sudden   drop default;
+alter table experience alter column sens_strobe        drop not null;
+alter table experience alter column sens_strobe        drop default;
+
+COMMIT;
+
+
+-- ==========================================================================
+-- migration: 012_height_none.sql
+-- ==========================================================================
+
+-- 012_height_none.sql
+-- "אין מגבלת גובה" הוא ערך, לא היעדר ערך.
+--
+-- הסוכן מילא 136 שורות ב-'none' — כלומר **נבדק, ואין מגבלה**. העמודה היא
+-- integer, ולכן הערך הזה לא יכול להיכנס, ו-NULL היה מוחק את ההבחנה בין
+-- "נבדק ואין" ל"לא נבדק". זו אותה משפחת באגים של gets_wet ושל ארבעת
+-- דגלי הרגישות.
+--
+-- הפתרון: 0 הוא הערך הנכון ולא מספר קסם — הגובה המזערי לעלייה הוא באמת
+-- אפס. ⚠️ **אסור להציג אותו כמספר.** ב-UI: "אין מגבלת גובה".
+
+BEGIN;
+
+alter table experience drop constraint experience_height_requirement_cm_check;
+alter table experience add constraint experience_height_requirement_cm_check
+  check (height_requirement_cm = 0
+      or (height_requirement_cm >= 50 and height_requirement_cm <= 200));
+
+comment on column experience.height_requirement_cm is
+  '0 = נבדק, אין מגבלת גובה (מוצג כטקסט, לעולם לא כמספר). NULL = לא נבדק. 50-200 = המגבלה בפועל.';
+
+COMMIT;
+
+
+-- ==========================================================================
+-- migration: 013_scenic_ride.sql
+-- ==========================================================================
+
+-- 013_scenic_ride.sql
+-- שינוי שם קטגוריה: transport → scenic_ride.
+--
+-- למה: השם "transport" קרא כאילו הוא עונה על "איך מגיעים מפארק לפארק".
+-- הוא לא. חמש השורות שנפלו אליו — Hogwarts Express (×2), PeopleMover,
+-- Wildlife Express Train, ורכבל בליזרד ביץ׳ — הן **אטרקציות** שעומדים
+-- להן בתור ונהנים מהן, שהצורה שלהן היא כלי רכב שנוסע.
+--
+-- הסיכון שהשם ייצר: משתמש שואל "איך מגיעים לאפקוט", וטים עונה
+-- "PeopleMover". התחבורה האמיתית בפארקים — אוטובוסים, מונורייל, סקיילינר,
+-- מעבורות — **אינה בטבלה הזו בכלל.** היא תוכן לוגיסטי בשכבת הידע.
+--
+-- ו-type: חמש השורות הופכות ל-'attraction'. הן אטרקציות. 'transport'
+-- יוצא מרשימת ה-type לגמרי, כי אין דבר כזה במוצר.
+--
+-- הערה על Hogwarts Express: הוא באמת גם הדרך היחידה לעבור בין שני פארקי
+-- יוניברסל, ודורש כרטיס Park-to-Park. זו עובדה חשובה — ומקומה בשכבת
+-- הידע ובעריכה, לא בקטגוריה. הקטגוריה מתארת צורה, לא לוגיסטיקה.
+
+BEGIN;
+
+alter table experience drop constraint experience_category_check;
+update experience set category = 'scenic_ride' where category = 'transport';
+alter table experience add constraint experience_category_check
+  check (category in ('dark_ride','coaster','simulator','water_ride','show',
+                      'walkthrough','playground','meet_greet','scenic_ride','360_film'));
+
+alter table experience drop constraint experience_type_check;
+update experience set type = 'attraction' where type = 'transport';
+alter table experience add constraint experience_type_check
+  check (type in ('attraction','show','parade','meet_greet','walkthrough'));
+
+comment on column experience.category is
+  'צורת החוויה. scenic_ride = נוסעים בכלי רכב והנוף הוא העניין — לא תחבורה בפארק.';
+
+COMMIT;
+
+
+-- ==========================================================================
+-- migration: 014_gets_wet_na.sql
+-- ==========================================================================
+
+-- 014_gets_wet_na.sql
+-- `gets_wet` מקבל ערך רביעי: 'na'.
+--
+-- למה: המאסטר מבחין בין ארבעה מצבים, והמסד ידע להחזיק רק שלושה.
+--   ערך  = נבדק, וזו התשובה
+--   'none' = נבדק, אינו מרטיב
+--   'na'   = **מופע במה. השאלה לא רלוונטית.**  ← זה מה שנפל
+--   NULL   = לא נבדק
+--
+-- בלי הערך הזה 66 שורות הבידור נטענו כ-NULL, כלומר "לא בדקנו" —
+-- וטים היה אומר "אין לי מידע" על שאלה שיש לה תשובה ברורה.
+-- זו אותה משפחת באגים, הפעם בשכבת המסד.
+--
+-- ⚠️ אין ברירת מחדל ואין NOT NULL. NULL נשאר "לא נבדק".
+
+BEGIN;
+
+alter table experience drop constraint experience_gets_wet_check;
+alter table experience add constraint experience_gets_wet_check
+  check (gets_wet in ('none','may_get_wet','may_get_soaked','na'));
+
+comment on column experience.gets_wet is
+  'ערך = נבדק · ''none'' = נבדק ואינו מרטיב · ''na'' = לא רלוונטי (מופע) · NULL = לא נבדק. ארבעה מצבים, לא שלושה.';
+
+COMMIT;
+
+
+-- ==========================================================================
+-- seed: 010_reference.sql
+-- ==========================================================================
+
+-- 010_reference.sql — נתוני ייחוס יציבים בלבד.
+--
+-- מה שכאן: יעד, שני ריזורטים, ושבעה פארקים. אלה עובדות מבניות שלא משתנות.
+-- מה שאין כאן בכוונה: אזורים (lands) ומתקנים. זהו תוכן, וכלל העבודה
+-- בפרויקט הוא שתוכן מגיע מנטע ומאומת מול המקורות הרשמיים — לא מהזיכרון
+-- של מודל שפה. שתילת רשימת מתקנים "מהידע הכללי" הייתה מכניסה למסד
+-- בדיוק את סוג המידע הלא-מאומת שהמוצר קיים כדי לפתור.
+--
+-- אידמפוטנטי: אפשר להריץ שוב בבטחה.
+
+insert into destination (id, name, name_i18n, country_code, timezone, is_active, sort_order)
+values ('orlando','Orlando','{"he":"אורלנדו"}','US','America/New_York',true,1)
+on conflict (id) do update set
+  name = excluded.name, name_i18n = excluded.name_i18n, is_active = excluded.is_active;
+
+insert into resort (id, destination_id, operator, name, name_i18n, skip_line_system, sort_order)
+values
+  ('wdw','orlando','disney','Walt Disney World Resort','{"he":"וולט דיסני וורלד"}','lightning_lane',1),
+  ('uor','orlando','universal','Universal Orlando Resort','{"he":"יוניברסל אורלנדו"}','express_pass',2)
+on conflict (id) do update set
+  name = excluded.name, name_i18n = excluded.name_i18n,
+  skip_line_system = excluded.skip_line_system;
+
+insert into park (id, resort_id, name, short_name, name_i18n, park_kind, status, sort_order)
+values
+  ('mk',    'wdw','Magic Kingdom Park',            'Magic Kingdom',   '{"he":"מג''יק קינגדום"}',        'theme','open', 1),
+  ('epcot', 'wdw','EPCOT',                         'EPCOT',           '{"he":"אפקוט"}',                 'theme','open', 2),
+  ('hs',    'wdw','Disney''s Hollywood Studios',   'Hollywood Studios','{"he":"הוליווד סטודיוס"}',      'theme','open', 3),
+  ('ak',    'wdw','Disney''s Animal Kingdom Theme Park','Animal Kingdom','{"he":"אנימל קינגדום"}',      'theme','open', 4),
+  ('us',    'uor','Universal Studios Florida',     'Universal Studios','{"he":"יוניברסל סטודיוס"}',     'theme','open', 5),
+  ('ioa',   'uor','Universal Islands of Adventure','Islands of Adventure','{"he":"איילנדס אוף אדוונצ''ר"}','theme','open',6),
+  ('epic',  'uor','Universal Epic Universe',       'Epic Universe',   '{"he":"אפיק יוניברס"}',          'theme','open', 7)
+on conflict (id) do update set
+  resort_id = excluded.resort_id, name = excluded.name,
+  short_name = excluded.short_name, name_i18n = excluded.name_i18n,
+  park_kind = excluded.park_kind, sort_order = excluded.sort_order;
+
+
+-- ==========================================================================
+-- seed: 011_water_parks.sql
+-- ==========================================================================
+
+-- 011_water_parks.sql — שלושת פארקי המים, שנשמטו מה-seed הראשון.
+-- אידמפוטנטי.
+BEGIN;
+
+insert into park (id, resort_id, name, short_name, name_i18n, park_kind, status, sort_order)
+values
+  ('bb',  'wdw','Disney''s Blizzard Beach Water Park','Blizzard Beach','{"he":"בליזרד ביץ׳"}','water','open', 8),
+  ('tl',  'wdw','Disney''s Typhoon Lagoon Water Park','Typhoon Lagoon','{"he":"טייפון לגון"}','water','open', 9),
+  ('vb',  'uor','Universal Volcano Bay',              'Volcano Bay',   '{"he":"וולקנו ביי"}',  'water','open',10)
+on conflict (id) do update set
+  resort_id = excluded.resort_id, name = excluded.name,
+  short_name = excluded.short_name, name_i18n = excluded.name_i18n,
+  park_kind = excluded.park_kind, sort_order = excluded.sort_order;
+
+COMMIT;
+
