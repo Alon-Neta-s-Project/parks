@@ -66,7 +66,8 @@ mig(n, ok) as (values
           and column_name='skip_line_system' and is_nullable='YES'))),
   (17, (select not exists (select 1 from information_schema.columns
         where table_schema='public' and table_name='experience'
-          and column_name='skip_line_extra_cost')))
+          and column_name='skip_line_extra_cost'))),
+  (18, to_regclass('public.api_call') is not null)
 ),
 g(passed, missing) as (
   select count(*) filter (where ok),
@@ -98,8 +99,8 @@ n(experience, park, land, profile, trip, conversation, knowledge_doc,
 ),
 report(ord, "מה", "מצב") as (
   select 1, 'מיגרציות',
-         case when passed = 17 then '17 מתוך 17 ✅'
-              else passed || ' מתוך 17 ❌  — חסרות: ' || missing end from n
+         case when passed = 18 then '18 מתוך 18 ✅'
+              else passed || ' מתוך 18 ❌  — חסרות: ' || missing end from n
   union all
   select 2, 'מבנה',
          case when tables = 18 then '18 טבלאות ✅'
@@ -171,6 +172,13 @@ report(ord, "מה", "מצב") as (
          case when trip is null then 'הטבלה לא קיימת ❌'
               when trip = 0 then 'ריק — האפליקציה עוד לא כותבת למסד ⏳'
               else trip || ' טיולים' end from n
+  union all
+  select 13.5, 'מוכן לחיבור המודל',
+         case when to_regclass('public.api_call') is null then 'לא' else 'כן' end,
+         'כן',
+         case when to_regclass('public.api_call') is null
+                then '❌ טבלת הגבלת הקצב חסרה — לא הורצה מיגרציה 018'
+              else '✅ תקין — אפשר להתקדם למדריך של ג׳מיני' end from n
   union all
   select 14, 'שיחות שנשמרו',
          case when conversation is null then 'הטבלה לא קיימת ❌'
