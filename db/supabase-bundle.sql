@@ -1246,10 +1246,25 @@ set search_path = public, extensions;
 -- שאילתה תיפול, מיגרציה תידרש. חמש עמודות שנכתבות ביד היו משקרות בשקט.
 -- זה ההבדל, וזו הסיבה לגזירה.
 --
--- להחזרה כעמודה נגזרת, אם תידרש שאילתה עליה — שורה אחת:
+-- להחזרה כעמודה נגזרת, אם תידרש שאילתה עליה:
+--
 --   alter table experience add column skip_line_extra_cost boolean
---     generated always as (skip_line_system = 'single_pass') stored;
--- (NULL ב-skip_line_system מייצר NULL, וזה נכון.)
+--     generated always as (
+--       case when skip_line_system in ('multi_pass','single_pass')
+--            then skip_line_system = 'single_pass' end
+--     ) stored;
+--
+-- ⚠️ ולא `skip_line_system = 'single_pass'` לבדו. הביטוי הפשוט מחזיר
+-- `false` ל-`express`, כלומר "אין עלות נוספת מעבר ל-Multi Pass" על שורות
+-- יוניברסל — שם אין Multi Pass והשאלה כלל לא רלוונטית. אותה תשובה שקרית
+-- בדיוק שהעמודה הישנה נתנה, רק בלבוש של נגזרת.
+--
+-- הסייג הזה חל גם על `none`, ולא רק על `express`: מתקן דיסני בלי מוצר
+-- Lightning Lane כלל אינו נשאל "האם יש עלות מעבר ל-Multi Pass". השאלה
+-- משמעותית רק היכן שקיימת מדרגת Multi Pass — כלומר `multi_pass` או
+-- `single_pass`. בכל השאר `NULL`, כלומר "לא רלוונטי", ולא "לא".
+--
+-- ה-CASE בלי ELSE מחזיר NULL, וזה בדיוק ההתנהגות הרצויה.
 
 BEGIN;
 

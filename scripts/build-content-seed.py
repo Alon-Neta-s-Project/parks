@@ -104,6 +104,18 @@ QUAD = {"true", "false", "na"}
 # התאמה מדויקת למחרוזת המלאה, לא התאמה מטושטשת. מחרוזת שאינה כאן עוצרת
 # את השורה — היא לא הופכת ל-'none' בשקט. זו הטעות שהמיגרציה מתקנת, ואין
 # טעם לחזור עליה בדרך פנימה.
+#
+# ⚠️ זהו גשר, לא יעד. התאמה לפרוזה נשברת כשמישהו מנסח מחדש — וזה כבר קרה:
+# במאסטר הנוכחי כתוב "Not confirmed on the current official source used for
+# this row; check the Universal app/official attraction page before buying
+# Express.", בעוד כאן רשום הניסוח שבייצוא שבידי. **בייצוא הבא 52 שורות
+# ייעצרו, וזה נכון** — זה הגלאי עובד, לא נשבר.
+#
+# ברגע שהייצוא יירוץ עם keep_default_na=False, 'Lightning Lane Type' תחזור
+# להיות שמישה (היום 75 שורות דיסני יצאו ריקות כי 'None' ו-'N/A' נמחקו
+# יחד). אז יש לעבור למיפוי משתי העמודות המובנות — 'Lightning Lane Type'
+# לדיסני, 'Optional Fast Access / Pass' ליוניברסל — ולשמור על העצירה
+# הרועשת. ערכים מובנים לא משתנים בניסוח מחדש; פרוזה כן.
 SKIP_LINE = {
     "Lightning Lane Multi Pass. Included within Multi Pass; no separate per-attraction "
     "Single Pass purchase required. Also included with Premier Pass.": "multi_pass",
