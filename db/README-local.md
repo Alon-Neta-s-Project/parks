@@ -10,7 +10,7 @@ su postgres -c "/usr/lib/postgresql/16/bin/pg_ctl -D $PGDATA -o '-p $PGPORT -k /
 su postgres -c "psql -h /tmp -p $PGPORT -d postgres -c 'create database pdc;'"
 
 # ⚠️ קודם השכבה המקומית, ואז השרשרת לפי הסדר
-for f in db/local/000_auth_shim db/migrations/00{1,2,3,4,5,6,7,8,9}_* db/migrations/010_* db/seed/010_*; do
+for f in db/local/000_auth_shim db/migrations/0*_* db/seed/0*_*; do
   su postgres -c "psql -h /tmp -p $PGPORT -d pdc -v ON_ERROR_STOP=1 -q -f $f"
 done
 ```
@@ -21,7 +21,7 @@ done
 ל-Supabase ואינה קיימת ב-PostgreSQL נקי**, ולכן השרשרת נעצרת ב-004 בלעדיה.
 בפרודקשן על Supabase הסכמה קיימת ואין להריץ את הקובץ הזה.
 
-**תוצאה מאומתת:** 16 הקבצים רצים נקי, ונוצרים **18 טבלאות**, 3 views,
+**תוצאה מאומתת:** 17 הקבצים רצים נקי, ונוצרים **18 טבלאות**, 3 views,
 50 אינדקסים ו-29 מדיניות RLS.
 
 > ה-README הזה אמר קודם "21 טבלאות". 21 הוא טבלאות **ועוד** views

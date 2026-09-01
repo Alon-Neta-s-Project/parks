@@ -23,9 +23,10 @@
 --   12. מיגרציה 012_height_none.sql
 --   13. מיגרציה 013_scenic_ride.sql
 --   14. מיגרציה 014_gets_wet_na.sql
---   15. seed 010_reference.sql
---   16. seed 011_water_parks.sql
---   17. בלוק אימות — שאילתה אחת שמדווחת מה נוצר בפועל.
+--   15. מיגרציה 015_trip_park_days.sql
+--   16. seed 010_reference.sql
+--   17. seed 011_water_parks.sql
+--   18. בלוק אימות — שאילתה אחת שמדווחת מה נוצר בפועל.
 --
 -- מה שאין כאן, בכוונה
 --   db/local/000_auth_shim.sql. הוא מפגם מקומי לסכמת auth. ב-Supabase
@@ -1133,6 +1134,36 @@ COMMIT;
 
 
 -- ==========================================================================
+-- מיגרציה: 015_trip_park_days.sql
+-- ==========================================================================
+
+set search_path = public, extensions;
+
+-- 015_trip_park_days.sql
+-- "כמה ימי פארק" הוא שדה משלו, לא נגזרת של התאריכים.
+--
+-- למחקר: מי שמבקש עזרה בתכנון פותח בעצמו עם כמה ימים באורלנדו **וכמה
+-- מהם ימי פארק** — אלה שני מספרים שונים, ומשפחה שנמצאת עשרה ימים
+-- ומתכננת ארבעה ימי פארק היא מקרה שכיח ולא חריג.
+--
+-- ⚠️ ואי אפשר לגזור: end_date - start_date נותן את אורך החופשה, לא את
+-- מספר ימי הפארק. גזירה כזו הייתה מייצרת תוכנית לעשרה ימים למי שתכנן
+-- ארבעה — בדיוק סוג ההנחה השקטה שהמוצר נמנע ממנה.
+--
+-- NULL = לא נשאל או לא נענה. אין ברירת מחדל.
+
+BEGIN;
+
+alter table trip add column park_days int
+  check (park_days is null or (park_days >= 1 and park_days <= 30));
+
+comment on column trip.park_days is
+  'כמה ימי פארק מתוכננים. נפרד מ-start_date/end_date, שהם אורך השהות. NULL = לא ידוע, ולעולם אינו מוחלף באורך השהות.';
+
+COMMIT;
+
+
+-- ==========================================================================
 -- seed: 010_reference.sql
 -- ==========================================================================
 
@@ -1365,6 +1396,48 @@ with checks as (
                   and pg_get_constraintdef(oid) like '%height_requirement_cm%'
                   and pg_get_constraintdef(oid) like '%0%'
               ) then '✅ תקין' else '❌ 012_height_none לא רץ' end
+
+  union all
+  -- ⚠️ תת-שאילתה סקלרית, לא "from information_schema.columns" ישירות:
+  --    עמודה חסרה הייתה מחזירה אפס שורות, והבדיקה הייתה נעלמת מהטבלה
+  --    במקום להידלק באדום. ככה תמיד יוצאת בדיוק שורה אחת.
+  select 13,
+         'trip.park_days',
+         coalesce(state, 'אין עמודה'),
+         'integer · NULL מותר · בלי ברירת מחדל',
+         case when state is null
+                then '❌ 015_trip_park_days לא רץ'
+              when state = 'integer · NULL מותר · בלי ברירת מחדל'
+                then '✅ תקין'
+              else '❌ העמודה קיימת אבל לא כפי שהוגדרה. ברירת מחדל או NOT NULL '
+                   || 'הופכים "לא נשאל" ל"נענה" — זה הבאג שהמיגרציה נועדה למנוע' end
+  from (
+    select (select data_type
+                || (case when is_nullable = 'YES' then ' · NULL מותר' else ' · NOT NULL' end)
+                || (case when column_default is null then ' · בלי ברירת מחדל'
+                         else ' · ברירת מחדל ' || column_default end)
+            from information_schema.columns
+            where table_schema = 'public'
+              and table_name   = 'trip'
+              and column_name  = 'park_days') as state
+  ) pd
+
+  union all
+  select 14,
+         'התחום של park_days',
+         case when exists (
+                select 1 from pg_constraint
+                where conrelid = to_regclass('public.trip')
+                  and pg_get_constraintdef(oid) like '%park_days%'
+                  and pg_get_constraintdef(oid) like '%30%'
+              ) then '1..30' else 'אין' end,
+         '1..30',
+         case when exists (
+                select 1 from pg_constraint
+                where conrelid = to_regclass('public.trip')
+                  and pg_get_constraintdef(oid) like '%park_days%'
+                  and pg_get_constraintdef(oid) like '%30%'
+              ) then '✅ תקין' else '❌ אילוץ התחום חסר' end
 )
 select "בדיקה", "נמצא", "ציפינו", "מצב" from checks order by ord;
 

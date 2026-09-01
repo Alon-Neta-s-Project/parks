@@ -156,5 +156,47 @@ with checks as (
                   and pg_get_constraintdef(oid) like '%height_requirement_cm%'
                   and pg_get_constraintdef(oid) like '%0%'
               ) then '✅ תקין' else '❌ 012_height_none לא רץ' end
+
+  union all
+  -- ⚠️ תת-שאילתה סקלרית, לא "from information_schema.columns" ישירות:
+  --    עמודה חסרה הייתה מחזירה אפס שורות, והבדיקה הייתה נעלמת מהטבלה
+  --    במקום להידלק באדום. ככה תמיד יוצאת בדיוק שורה אחת.
+  select 13,
+         'trip.park_days',
+         coalesce(state, 'אין עמודה'),
+         'integer · NULL מותר · בלי ברירת מחדל',
+         case when state is null
+                then '❌ 015_trip_park_days לא רץ'
+              when state = 'integer · NULL מותר · בלי ברירת מחדל'
+                then '✅ תקין'
+              else '❌ העמודה קיימת אבל לא כפי שהוגדרה. ברירת מחדל או NOT NULL '
+                   || 'הופכים "לא נשאל" ל"נענה" — זה הבאג שהמיגרציה נועדה למנוע' end
+  from (
+    select (select data_type
+                || (case when is_nullable = 'YES' then ' · NULL מותר' else ' · NOT NULL' end)
+                || (case when column_default is null then ' · בלי ברירת מחדל'
+                         else ' · ברירת מחדל ' || column_default end)
+            from information_schema.columns
+            where table_schema = 'public'
+              and table_name   = 'trip'
+              and column_name  = 'park_days') as state
+  ) pd
+
+  union all
+  select 14,
+         'התחום של park_days',
+         case when exists (
+                select 1 from pg_constraint
+                where conrelid = to_regclass('public.trip')
+                  and pg_get_constraintdef(oid) like '%park_days%'
+                  and pg_get_constraintdef(oid) like '%30%'
+              ) then '1..30' else 'אין' end,
+         '1..30',
+         case when exists (
+                select 1 from pg_constraint
+                where conrelid = to_regclass('public.trip')
+                  and pg_get_constraintdef(oid) like '%park_days%'
+                  and pg_get_constraintdef(oid) like '%30%'
+              ) then '✅ תקין' else '❌ אילוץ התחום חסר' end
 )
 select "בדיקה", "נמצא", "ציפינו", "מצב" from checks order by ord;
