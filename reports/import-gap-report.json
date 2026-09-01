@@ -23,7 +23,7 @@
   "fieldCoverage": [
     {
       "field": "nameHe",
-      "filled": 25,
+      "filled": 232,
       "total": 232
     },
     {
@@ -43,7 +43,7 @@
     },
     {
       "field": "wheelchair",
-      "filled": 122,
+      "filled": 231,
       "total": 232
     },
     {
@@ -62,301 +62,155 @@
       "total": 232
     }
   ],
-  "valueProblems": [
-    "Magic Kingdom|Attraction|Big Thunder Mountain Railroad: duration_minutes is 3.5 but the column is integer — it would be silently rounded to 4",
-    "Magic Kingdom|Attraction|Space Mountain: duration_minutes is 2.583 but the column is integer — it would be silently rounded to 3",
-    "EPCOT|Attraction|Guardians of the Galaxy: Cosmic Rewind: duration_minutes is 3.5 but the column is integer — it would be silently rounded to 4",
-    "EPCOT|Attraction|Mission: SPACE – Green: duration_minutes is 5.5 but the column is integer — it would be silently rounded to 6",
-    "EPCOT|Attraction|Mission: SPACE – Orange: duration_minutes is 5.5 but the column is integer — it would be silently rounded to 6",
-    "Disney's Hollywood Studios|Attraction|Alien Swirling Saucers: duration_minutes is 1.5 but the column is integer — it would be silently rounded to 2",
-    "Disney's Hollywood Studios|Attraction|Millennium Falcon: Smugglers Run: duration_minutes is 4.5 but the column is integer — it would be silently rounded to 5",
-    "Disney's Hollywood Studios|Attraction|Rock 'n' Roller Coaster Starring The Muppets: duration_minutes is 1.5 but the column is integer — it would be silently rounded to 2",
-    "Disney's Hollywood Studios|Attraction|Star Tours – The Adventures Continue: duration_minutes is 4.5 but the column is integer — it would be silently rounded to 5",
-    "Disney's Animal Kingdom|Attraction|Avatar Flight of Passage: duration_minutes is 4.5 but the column is integer — it would be silently rounded to 5",
-    "Disney's Animal Kingdom|Attraction|Kali River Rapids: duration_minutes is 3.5 but the column is integer — it would be silently rounded to 4",
-    "Universal Studios Florida|Attraction|Race Through New York Starring Jimmy Fallon: duration_minutes is 4.5 but the column is integer — it would be silently rounded to 5",
-    "Universal Islands of Adventure|Attraction|The Incredible Hulk Coaster: duration_minutes is 2.25 but the column is integer — it would be silently rounded to 2",
-    "Universal Islands of Adventure|Attraction|Pteranodon Flyers: duration_minutes is 1.5 but the column is integer — it would be silently rounded to 2"
-  ],
+  "valueProblems": [],
   "rejected": [],
-  "pagesComplete": 0,
-  "incompleteCount": 232,
+  "pagesComplete": 96,
+  "incompleteCount": 136,
   "incomplete": [
     {
       "key": "Disney's Animal Kingdom|Entertainment|Festival of the Lion King",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
-      ]
-    },
-    {
-      "key": "Disney's Animal Kingdom|Attraction|Gorilla Falls Exploration Trail",
-      "missing": [
-        "nameHe",
-        "wheelchair"
       ]
     },
     {
       "key": "Disney's Animal Kingdom|Entertainment|Harambe Village Street Band – Burudika",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
-      ]
-    },
-    {
-      "key": "Disney's Animal Kingdom|Attraction|Kilimanjaro Safaris",
-      "missing": [
-        "nameHe",
-        "wheelchair"
       ]
     },
     {
       "key": "Disney's Animal Kingdom|Entertainment|Tam Tam Drummers of Harambe",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
-      ]
-    },
-    {
-      "key": "Disney's Animal Kingdom|Attraction|Wildlife Express Train",
-      "missing": [
-        "nameHe",
-        "wheelchair"
       ]
     },
     {
       "key": "Disney's Animal Kingdom|Attraction|Expedition Everest – Legend of the Forbidden Mountain",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "airConditioned"
       ]
     },
     {
       "key": "Disney's Animal Kingdom|Entertainment|Feathered Friends in Flight!",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
-      ]
-    },
-    {
-      "key": "Disney's Animal Kingdom|Attraction|Kali River Rapids",
-      "missing": [
-        "nameHe",
-        "wheelchair"
-      ]
-    },
-    {
-      "key": "Disney's Animal Kingdom|Attraction|Maharajah Jungle Trek",
-      "missing": [
-        "nameHe",
-        "wheelchair"
-      ]
-    },
-    {
-      "key": "Disney's Animal Kingdom|Attraction|Discovery Island Trails",
-      "missing": [
-        "nameHe",
-        "wheelchair"
       ]
     },
     {
       "key": "Disney's Animal Kingdom|Entertainment|Jumping Junction",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
-      ]
-    },
-    {
-      "key": "Disney's Animal Kingdom|Attraction|Tree of Life",
-      "missing": [
-        "nameHe",
-        "wheelchair"
       ]
     },
     {
       "key": "Disney's Animal Kingdom|Entertainment|Tree of Life Awakenings",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
       ]
     },
     {
       "key": "Disney's Animal Kingdom|Entertainment|Viva Gaia Street Band!",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
       ]
     },
     {
       "key": "Disney's Animal Kingdom|Entertainment|Winged Encounters – The Kingdom Takes Flight",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
-      ]
-    },
-    {
-      "key": "Disney's Animal Kingdom|Attraction|The Oasis Exhibits",
-      "missing": [
-        "nameHe",
-        "wheelchair"
-      ]
-    },
-    {
-      "key": "Disney's Animal Kingdom|Attraction|Avatar Flight of Passage",
-      "missing": [
-        "nameHe",
-        "wheelchair"
-      ]
-    },
-    {
-      "key": "Disney's Animal Kingdom|Attraction|Na'vi River Journey",
-      "missing": [
-        "nameHe",
-        "wheelchair"
-      ]
-    },
-    {
-      "key": "Disney's Animal Kingdom|Attraction|Wilderness Explorers",
-      "missing": [
-        "nameHe",
-        "wheelchair"
-      ]
-    },
-    {
-      "key": "Disney's Animal Kingdom|Attraction|Animal Care at Conservation Station",
-      "missing": [
-        "nameHe",
-        "wheelchair"
       ]
     },
     {
       "key": "Disney's Animal Kingdom|Attraction|Bluey's Wild World at Conservation Station",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "airConditioned"
       ]
     },
     {
       "key": "Disney's Animal Kingdom|Entertainment|Finding Nemo: The Big Blue... and Beyond!",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
       ]
     },
     {
       "key": "Disney's Animal Kingdom|Entertainment|Zootopia: Better Zoogether!",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
       ]
     },
     {
       "key": "Disney's Blizzard Beach|Attraction|Melt-Away Bay",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "airConditioned"
       ]
     },
     {
       "key": "Disney's Blizzard Beach|Attraction|Chairlift",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "airConditioned"
       ]
     },
     {
       "key": "Disney's Blizzard Beach|Attraction|Downhill Double Dipper",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "airConditioned"
       ]
     },
     {
       "key": "Disney's Blizzard Beach|Attraction|Runoff Rapids",
       "missing": [
-        "nameHe",
         "motionSicknessWarning",
-        "wheelchair",
         "airConditioned"
       ]
     },
     {
       "key": "Disney's Blizzard Beach|Attraction|Slush Gusher",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "airConditioned"
       ]
     },
     {
       "key": "Disney's Blizzard Beach|Attraction|Snow Stormers",
       "missing": [
-        "nameHe",
         "motionSicknessWarning",
-        "wheelchair",
         "airConditioned"
       ]
     },
     {
       "key": "Disney's Blizzard Beach|Attraction|Summit Plummet",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "airConditioned"
       ]
     },
     {
       "key": "Disney's Blizzard Beach|Attraction|Teamboat Springs",
       "missing": [
-        "nameHe",
         "motionSicknessWarning",
-        "wheelchair",
         "airConditioned"
       ]
     },
     {
       "key": "Disney's Blizzard Beach|Attraction|Toboggan Racers",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "airConditioned"
       ]
     },
     {
       "key": "Disney's Blizzard Beach|Attraction|Cross Country Creek",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "airConditioned"
       ]
     },
     {
       "key": "Disney's Blizzard Beach|Attraction|Ski Patrol Training Camp",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "airConditioned"
       ]
     },
     {
       "key": "Disney's Blizzard Beach|Attraction|Tike's Peak",
       "missing": [
-        "nameHe",
         "wheelchair",
         "airConditioned"
       ]
@@ -364,450 +218,202 @@
     {
       "key": "Disney's Hollywood Studios|Entertainment|Disney Jr. Mickey Mouse Clubhouse Live!",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
       ]
     },
     {
       "key": "Disney's Hollywood Studios|Entertainment|The Little Mermaid – A Musical Adventure",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
-      ]
-    },
-    {
-      "key": "Disney's Hollywood Studios|Attraction|The Magic of Disney Animation",
-      "missing": [
-        "nameHe",
-        "wheelchair"
-      ]
-    },
-    {
-      "key": "Disney's Hollywood Studios|Attraction|Vacation Fun",
-      "missing": [
-        "nameHe",
-        "wheelchair"
-      ]
-    },
-    {
-      "key": "Disney's Hollywood Studios|Attraction|Walt Disney Presents",
-      "missing": [
-        "nameHe",
-        "wheelchair"
       ]
     },
     {
       "key": "Disney's Hollywood Studios|Entertainment|Disney Movie Magic",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
       ]
     },
     {
       "key": "Disney's Hollywood Studios|Entertainment|Wonderful World of Animation",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
       ]
     },
     {
       "key": "Disney's Hollywood Studios|Entertainment|For the First Time in Forever: A Frozen Sing-Along Celebration",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
       ]
     },
     {
       "key": "Disney's Hollywood Studios|Entertainment|Indiana Jones Epic Stunt Spectacular!",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
-      ]
-    },
-    {
-      "key": "Disney's Hollywood Studios|Attraction|Star Tours – The Adventures Continue",
-      "missing": [
-        "nameHe",
-        "wheelchair"
-      ]
-    },
-    {
-      "key": "Disney's Hollywood Studios|Attraction|Mickey & Minnie's Runaway Railway",
-      "missing": [
-        "nameHe",
-        "wheelchair"
-      ]
-    },
-    {
-      "key": "Disney's Hollywood Studios|Attraction|Millennium Falcon: Smugglers Run",
-      "missing": [
-        "nameHe",
-        "wheelchair"
-      ]
-    },
-    {
-      "key": "Disney's Hollywood Studios|Attraction|Star Wars: Rise of the Resistance",
-      "missing": [
-        "nameHe",
-        "wheelchair"
       ]
     },
     {
       "key": "Disney's Hollywood Studios|Entertainment|Beauty and the Beast – Live on Stage",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
       ]
     },
     {
       "key": "Disney's Hollywood Studios|Entertainment|Disney Villains: Unfairly Ever After",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
       ]
     },
     {
       "key": "Disney's Hollywood Studios|Entertainment|Fantasmic!",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
-      ]
-    },
-    {
-      "key": "Disney's Hollywood Studios|Attraction|Rock 'n' Roller Coaster Starring The Muppets",
-      "missing": [
-        "nameHe",
-        "wheelchair"
-      ]
-    },
-    {
-      "key": "Disney's Hollywood Studios|Attraction|The Twilight Zone Tower of Terror",
-      "missing": [
-        "nameHe",
-        "wheelchair"
-      ]
-    },
-    {
-      "key": "Disney's Hollywood Studios|Attraction|Alien Swirling Saucers",
-      "missing": [
-        "nameHe",
-        "wheelchair"
-      ]
-    },
-    {
-      "key": "Disney's Hollywood Studios|Attraction|Slinky Dog Dash",
-      "missing": [
-        "nameHe",
-        "wheelchair"
-      ]
-    },
-    {
-      "key": "Disney's Hollywood Studios|Attraction|Toy Story Mania!",
-      "missing": [
-        "nameHe",
-        "wheelchair"
       ]
     },
     {
       "key": "Disney's Typhoon Lagoon|Attraction|Crush 'n' Gusher",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "airConditioned"
       ]
     },
     {
       "key": "Disney's Typhoon Lagoon|Attraction|Ketchakiddee Creek",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "airConditioned"
       ]
     },
     {
       "key": "Disney's Typhoon Lagoon|Attraction|Gangplank Falls",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "airConditioned"
       ]
     },
     {
       "key": "Disney's Typhoon Lagoon|Attraction|Humunga Kowabunga",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "airConditioned"
       ]
     },
     {
       "key": "Disney's Typhoon Lagoon|Attraction|Keelhaul Falls",
       "missing": [
-        "nameHe",
         "motionSicknessWarning",
-        "wheelchair",
         "airConditioned"
       ]
     },
     {
       "key": "Disney's Typhoon Lagoon|Attraction|Mayday Falls",
       "missing": [
-        "nameHe",
         "motionSicknessWarning",
-        "wheelchair",
         "airConditioned"
       ]
     },
     {
       "key": "Disney's Typhoon Lagoon|Attraction|Miss Adventure Falls",
       "missing": [
-        "nameHe",
         "motionSicknessWarning",
-        "wheelchair",
         "airConditioned"
       ]
     },
     {
       "key": "Disney's Typhoon Lagoon|Attraction|Storm Slides",
       "missing": [
-        "nameHe",
         "motionSicknessWarning",
-        "wheelchair",
         "airConditioned"
       ]
     },
     {
       "key": "Disney's Typhoon Lagoon|Attraction|Castaway Creek",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "airConditioned"
       ]
     },
     {
       "key": "Disney's Typhoon Lagoon|Attraction|Typhoon Lagoon Surf Pool",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "airConditioned"
       ]
     },
     {
       "key": "Disney's Typhoon Lagoon|Attraction|Bay Slides",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "airConditioned"
       ]
     },
     {
       "key": "EPCOT|Entertainment|Disney and Pixar Short Film Festival",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
-      ]
-    },
-    {
-      "key": "EPCOT|Attraction|Journey Into Imagination With Figment",
-      "missing": [
-        "nameHe",
-        "wheelchair"
-      ]
-    },
-    {
-      "key": "EPCOT|Attraction|Spaceship Earth",
-      "missing": [
-        "nameHe",
-        "wheelchair"
-      ]
-    },
-    {
-      "key": "EPCOT|Attraction|Advanced Training Lab",
-      "missing": [
-        "nameHe",
-        "wheelchair"
-      ]
-    },
-    {
-      "key": "EPCOT|Attraction|Guardians of the Galaxy: Cosmic Rewind",
-      "missing": [
-        "nameHe",
-        "wheelchair"
-      ]
-    },
-    {
-      "key": "EPCOT|Attraction|Mission: SPACE – Green",
-      "missing": [
-        "nameHe",
-        "wheelchair"
-      ]
-    },
-    {
-      "key": "EPCOT|Attraction|Mission: SPACE – Orange",
-      "missing": [
-        "nameHe",
-        "wheelchair"
       ]
     },
     {
       "key": "EPCOT|Attraction|Test Track",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "airConditioned"
       ]
     },
     {
       "key": "EPCOT|Entertainment|Awesome Planet",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
-      ]
-    },
-    {
-      "key": "EPCOT|Attraction|Bruce's Shark World",
-      "missing": [
-        "nameHe",
-        "wheelchair"
-      ]
-    },
-    {
-      "key": "EPCOT|Attraction|Journey of Water, Inspired by Moana",
-      "missing": [
-        "nameHe",
-        "wheelchair"
-      ]
-    },
-    {
-      "key": "EPCOT|Attraction|Living with the Land",
-      "missing": [
-        "nameHe",
-        "wheelchair"
-      ]
-    },
-    {
-      "key": "EPCOT|Attraction|Soarin' Across America",
-      "missing": [
-        "nameHe",
-        "wheelchair"
-      ]
-    },
-    {
-      "key": "EPCOT|Attraction|The Seas with Nemo & Friends",
-      "missing": [
-        "nameHe",
-        "wheelchair"
       ]
     },
     {
       "key": "EPCOT|Entertainment|Turtle Talk With Crush",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
       ]
     },
     {
       "key": "EPCOT|Entertainment|The American Adventure",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
       ]
     },
     {
       "key": "EPCOT|Entertainment|Voices of Liberty",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
       ]
     },
     {
       "key": "EPCOT|Entertainment|Canada Far and Wide in Circle-Vision 360",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
       ]
     },
     {
       "key": "EPCOT|Entertainment|Beauty and the Beast Sing-Along",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
-      ]
-    },
-    {
-      "key": "EPCOT|Attraction|Remy's Ratatouille Adventure",
-      "missing": [
-        "nameHe",
-        "wheelchair"
       ]
     },
     {
       "key": "EPCOT|Entertainment|Acrobatico!",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
       ]
     },
     {
       "key": "EPCOT|Entertainment|Matsuriza",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
-      ]
-    },
-    {
-      "key": "EPCOT|Attraction|Gran Fiesta Tour Starring The Three Caballeros",
-      "missing": [
-        "nameHe",
-        "wheelchair"
       ]
     },
     {
       "key": "EPCOT|Entertainment|Mariachi Cobre",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
-      ]
-    },
-    {
-      "key": "EPCOT|Attraction|Frozen Ever After",
-      "missing": [
-        "nameHe",
-        "wheelchair"
       ]
     },
     {
       "key": "EPCOT|Entertainment|Command Performance",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
       ]
     },
     {
       "key": "EPCOT|Entertainment|Luminous: The Symphony of Us",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
       ]
     },
@@ -846,16 +452,12 @@
     {
       "key": "Magic Kingdom|Entertainment|Walt Disney's Enchanted Tiki Room",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
       ]
     },
     {
       "key": "Magic Kingdom|Entertainment|Happily Ever After",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
       ]
     },
@@ -884,8 +486,6 @@
     {
       "key": "Magic Kingdom|Entertainment|Mickey's PhilharMagic",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
       ]
     },
@@ -957,8 +557,6 @@
     {
       "key": "Magic Kingdom|Entertainment|Country Bear Musical Jamboree",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
       ]
     },
@@ -979,48 +577,36 @@
     {
       "key": "Magic Kingdom|Entertainment|The Hall of Presidents",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
       ]
     },
     {
       "key": "Magic Kingdom|Entertainment|Casey's Corner Pianist",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
       ]
     },
     {
       "key": "Magic Kingdom|Entertainment|The Dapper Dans",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
       ]
     },
     {
       "key": "Magic Kingdom|Entertainment|Disney Adventure Friends Cavalcade",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
       ]
     },
     {
       "key": "Magic Kingdom|Entertainment|Disney Festival of Fantasy Parade",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
       ]
     },
     {
       "key": "Magic Kingdom|Entertainment|Disney Starlight: Dream the Night Away",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
       ]
     },
@@ -1042,8 +628,6 @@
     {
       "key": "Magic Kingdom|Entertainment|Monsters Inc. Laugh Floor",
       "missing": [
-        "nameHe",
-        "wheelchair",
         "getsWet"
       ]
     },
@@ -1083,71 +667,15 @@
       ]
     },
     {
-      "key": "Universal Epic Universe|Attraction|Astronomica",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Universal Epic Universe|Attraction|Constellation Carousel",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Universal Epic Universe|Attraction|Stardust Racers",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Universal Epic Universe|Attraction|Curse of the Werewolf",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
       "key": "Universal Epic Universe|Entertainment|Dark Universe Character Meet & Greet",
       "missing": [
-        "nameHe",
         "getsWet",
         "airConditioned"
       ]
     },
     {
-      "key": "Universal Epic Universe|Attraction|Darkmoor Monster Makeup Experience",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Universal Epic Universe|Attraction|Monsters Unchained: The Frankenstein Experiment",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Universal Epic Universe|Attraction|Dragon Racer's Rally",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Universal Epic Universe|Attraction|Fyre Drill",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Universal Epic Universe|Attraction|Hiccup's Wing Gliders",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
       "key": "Universal Epic Universe|Entertainment|Meet Toothless and Friends",
       "missing": [
-        "nameHe",
         "getsWet",
         "airConditioned"
       ]
@@ -1155,61 +683,27 @@
     {
       "key": "Universal Epic Universe|Entertainment|The Untrainable Dragon",
       "missing": [
-        "nameHe",
         "getsWet",
         "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Epic Universe|Attraction|Viking Training Camp",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Universal Epic Universe|Attraction|Mario Kart: Bowser's Challenge",
-      "missing": [
-        "nameHe"
       ]
     },
     {
       "key": "Universal Epic Universe|Entertainment|Meet Mario, Luigi, Princess Peach and Toad",
       "missing": [
-        "nameHe",
         "getsWet",
         "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Epic Universe|Attraction|Yoshi's Adventure",
-      "missing": [
-        "nameHe"
       ]
     },
     {
       "key": "Universal Epic Universe|Entertainment|Meet Donkey Kong",
       "missing": [
-        "nameHe",
         "getsWet",
         "airConditioned"
       ]
     },
     {
-      "key": "Universal Epic Universe|Attraction|Mine-Cart Madness",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Universal Epic Universe|Attraction|Harry Potter and the Battle at the Ministry",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
       "key": "Universal Epic Universe|Entertainment|Le Cirque Arcanus",
       "missing": [
-        "nameHe",
         "getsWet",
         "airConditioned"
       ]
@@ -1217,221 +711,55 @@
     {
       "key": "Universal Islands of Adventure|Entertainment|Frog Choir",
       "missing": [
-        "nameHe",
         "getsWet",
         "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Islands of Adventure|Attraction|Ollivanders – Hogsmeade",
-      "missing": [
-        "nameHe"
       ]
     },
     {
       "key": "Universal Islands of Adventure|Entertainment|Triwizard Spirit Rally",
       "missing": [
-        "nameHe",
         "getsWet",
         "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Islands of Adventure|Attraction|Camp Jurassic",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Universal Islands of Adventure|Attraction|Jurassic Park Discovery Center",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Universal Islands of Adventure|Attraction|Jurassic Park River Adventure",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Universal Islands of Adventure|Attraction|Jurassic World VelociCoaster",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Universal Islands of Adventure|Attraction|Pteranodon Flyers",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Universal Islands of Adventure|Attraction|Raptor Encounter",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Universal Islands of Adventure|Attraction|Doctor Doom's Fearfall",
-      "missing": [
-        "nameHe"
       ]
     },
     {
       "key": "Universal Islands of Adventure|Entertainment|Meet the Marvel Super Heroes",
       "missing": [
-        "nameHe",
         "getsWet",
         "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Islands of Adventure|Attraction|Storm Force Accelatron",
-      "missing": [
-        "nameHe",
-        "wheelchair"
-      ]
-    },
-    {
-      "key": "Universal Islands of Adventure|Attraction|The Amazing Adventures of Spider-Man",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Universal Islands of Adventure|Attraction|The Incredible Hulk Coaster",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Universal Islands of Adventure|Attraction|Caro-Seuss-el",
-      "missing": [
-        "nameHe"
       ]
     },
     {
       "key": "Universal Islands of Adventure|Entertainment|Dr. Seuss Character Zone",
       "missing": [
-        "nameHe",
         "getsWet",
         "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Islands of Adventure|Attraction|If I Ran The Zoo",
-      "missing": [
-        "nameHe"
       ]
     },
     {
       "key": "Universal Islands of Adventure|Entertainment|Oh! The Stories You'll Hear!",
       "missing": [
-        "nameHe",
         "getsWet",
         "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Islands of Adventure|Attraction|One Fish, Two Fish, Red Fish, Blue Fish",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Universal Islands of Adventure|Attraction|The Cat in the Hat",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Universal Islands of Adventure|Attraction|The High in the Sky Seuss Trolley Train Ride!",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Universal Islands of Adventure|Attraction|Skull Island: Reign of Kong",
-      "missing": [
-        "nameHe",
-        "wheelchair"
-      ]
-    },
-    {
-      "key": "Universal Islands of Adventure|Attraction|The Mystic Fountain",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Universal Islands of Adventure|Attraction|Flight of the Hippogriff",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Universal Islands of Adventure|Attraction|Hagrid's Magical Creatures Motorbike Adventure",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Universal Islands of Adventure|Attraction|Harry Potter and the Forbidden Journey",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Universal Islands of Adventure|Attraction|Hogwarts Express – Hogsmeade Station",
-      "missing": [
-        "nameHe"
       ]
     },
     {
       "key": "Universal Islands of Adventure|Entertainment|Classic Comic Strip Characters",
       "missing": [
-        "nameHe",
         "getsWet",
         "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Islands of Adventure|Attraction|Dudley Do-Right's Ripsaw Falls",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Universal Islands of Adventure|Attraction|Me Ship, The Olive",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Universal Islands of Adventure|Attraction|Popeye & Bluto's Bilge-Rat Barges",
-      "missing": [
-        "nameHe"
       ]
     },
     {
       "key": "Universal Studios Florida|Entertainment|Celestina Warbeck and the Banshees",
       "missing": [
-        "nameHe",
         "getsWet",
         "airConditioned"
       ]
     },
     {
-      "key": "Universal Studios Florida|Attraction|Ollivanders – Diagon Alley",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
       "key": "Universal Studios Florida|Entertainment|The Tales of Beedle the Bard",
       "missing": [
-        "nameHe",
         "getsWet",
         "airConditioned"
       ]
@@ -1439,65 +767,20 @@
     {
       "key": "Universal Studios Florida|Entertainment|DreamWorks Imagination Celebration",
       "missing": [
-        "nameHe",
         "getsWet",
         "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Studios Florida|Attraction|King Harold's Swamp Symphony",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Universal Studios Florida|Attraction|Mama Luna Feline Fiesta",
-      "missing": [
-        "nameHe"
       ]
     },
     {
       "key": "Universal Studios Florida|Entertainment|Po Live!",
       "missing": [
-        "nameHe",
         "getsWet",
         "airConditioned"
       ]
     },
     {
-      "key": "Universal Studios Florida|Attraction|Po's Kung Fu Training Camp",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Universal Studios Florida|Attraction|Poppy's Playground",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Universal Studios Florida|Attraction|Shrek's Swamp for Little Ogres",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Universal Studios Florida|Attraction|Trolls Trollercoaster",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Universal Studios Florida|Attraction|E.T. Adventure",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
       "key": "Universal Studios Florida|Entertainment|The Bourne Stuntacular",
       "missing": [
-        "nameHe",
         "getsWet",
         "airConditioned"
       ]
@@ -1505,130 +788,54 @@
     {
       "key": "Universal Studios Florida|Entertainment|Universal Orlando's Horror Make-Up Show",
       "missing": [
-        "nameHe",
         "getsWet",
         "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Studios Florida|Attraction|Despicable Me Minion Mayhem",
-      "missing": [
-        "nameHe"
       ]
     },
     {
       "key": "Universal Studios Florida|Entertainment|Illumination Theater",
       "missing": [
-        "nameHe",
         "getsWet",
         "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Studios Florida|Attraction|Illumination's Villain-Con Minion Blast",
-      "missing": [
-        "nameHe"
       ]
     },
     {
       "key": "Universal Studios Florida|Entertainment|¡Vamos! – Báilalo",
       "missing": [
-        "nameHe",
         "getsWet",
         "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Studios Florida|Attraction|Race Through New York Starring Jimmy Fallon",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Universal Studios Florida|Attraction|Revenge of the Mummy",
-      "missing": [
-        "nameHe"
       ]
     },
     {
       "key": "Universal Studios Florida|Entertainment|The Blues Brothers Show",
       "missing": [
-        "nameHe",
         "getsWet",
         "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Studios Florida|Attraction|TRANSFORMERS: The Ride-3D",
-      "missing": [
-        "nameHe"
       ]
     },
     {
       "key": "Universal Studios Florida|Entertainment|Universal Mega Movie Parade",
       "missing": [
-        "nameHe",
         "getsWet",
         "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Studios Florida|Attraction|Fast & Furious – Supercharged",
-      "missing": [
-        "nameHe",
-        "wheelchair"
-      ]
-    },
-    {
-      "key": "Universal Studios Florida|Attraction|Kang & Kodos' Twirl 'n' Hurl",
-      "missing": [
-        "nameHe",
-        "wheelchair"
-      ]
-    },
-    {
-      "key": "Universal Studios Florida|Attraction|The Simpsons Ride",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Universal Studios Florida|Attraction|Harry Potter and the Escape from Gringotts",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Universal Studios Florida|Attraction|Hogwarts Express – King's Cross Station",
-      "missing": [
-        "nameHe"
       ]
     },
     {
       "key": "Universal Studios Florida|Entertainment|CineSational: A Symphonic Spectacular",
       "missing": [
-        "nameHe",
         "getsWet",
         "airConditioned"
       ]
     },
     {
-      "key": "Universal Studios Florida|Attraction|MEN IN BLACK Alien Attack",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
       "key": "Universal Volcano Bay|Attraction|Ko'okiri Body Plunge",
       "missing": [
-        "nameHe",
         "airConditioned"
       ]
     },
     {
       "key": "Universal Volcano Bay|Attraction|Krakatau Aqua Coaster",
       "missing": [
-        "nameHe",
         "motionSicknessWarning",
         "airConditioned"
       ]
@@ -1636,7 +843,6 @@
     {
       "key": "Universal Volcano Bay|Entertainment|Meet Vol: the Spirit of Krakatau",
       "missing": [
-        "nameHe",
         "getsWet",
         "airConditioned"
       ]
@@ -1644,14 +850,12 @@
     {
       "key": "Universal Volcano Bay|Attraction|Hammerhead Beach",
       "missing": [
-        "nameHe",
         "airConditioned"
       ]
     },
     {
       "key": "Universal Volcano Bay|Attraction|Kala and Tai Nui Serpentine Body Slides",
       "missing": [
-        "nameHe",
         "motionSicknessWarning",
         "airConditioned"
       ]
@@ -1659,7 +863,6 @@
     {
       "key": "Universal Volcano Bay|Attraction|Maku of Maku Puihi Round Raft Rides",
       "missing": [
-        "nameHe",
         "motionSicknessWarning",
         "airConditioned"
       ]
@@ -1667,7 +870,6 @@
     {
       "key": "Universal Volcano Bay|Attraction|Ohno of Ohyah and Ohno Drop Slides",
       "missing": [
-        "nameHe",
         "motionSicknessWarning",
         "airConditioned"
       ]
@@ -1675,7 +877,6 @@
     {
       "key": "Universal Volcano Bay|Attraction|Ohyah of Ohyah and Ohno Drop Slides",
       "missing": [
-        "nameHe",
         "motionSicknessWarning",
         "airConditioned"
       ]
@@ -1683,7 +884,6 @@
     {
       "key": "Universal Volcano Bay|Attraction|Puihi of Maku Puihi Round Raft Rides",
       "missing": [
-        "nameHe",
         "motionSicknessWarning",
         "airConditioned"
       ]
@@ -1691,21 +891,18 @@
     {
       "key": "Universal Volcano Bay|Attraction|Puka Uli Lagoon",
       "missing": [
-        "nameHe",
         "airConditioned"
       ]
     },
     {
       "key": "Universal Volcano Bay|Attraction|Punga Racers",
       "missing": [
-        "nameHe",
         "airConditioned"
       ]
     },
     {
       "key": "Universal Volcano Bay|Attraction|Taniwha Tubes",
       "missing": [
-        "nameHe",
         "motionSicknessWarning",
         "airConditioned"
       ]
@@ -1713,35 +910,30 @@
     {
       "key": "Universal Volcano Bay|Attraction|TeAwa The Fearless River",
       "missing": [
-        "nameHe",
         "airConditioned"
       ]
     },
     {
       "key": "Universal Volcano Bay|Attraction|Kopiko Wai Winding River",
       "missing": [
-        "nameHe",
         "airConditioned"
       ]
     },
     {
       "key": "Universal Volcano Bay|Attraction|Runamukka Reef",
       "missing": [
-        "nameHe",
         "airConditioned"
       ]
     },
     {
       "key": "Universal Volcano Bay|Attraction|Tot Tiki Reef",
       "missing": [
-        "nameHe",
         "airConditioned"
       ]
     },
     {
       "key": "Universal Volcano Bay|Attraction|Honu of Honu ika Moana",
       "missing": [
-        "nameHe",
         "motionSicknessWarning",
         "airConditioned"
       ]
@@ -1749,7 +941,6 @@
     {
       "key": "Universal Volcano Bay|Attraction|ika Moana of Honu ika Moana",
       "missing": [
-        "nameHe",
         "motionSicknessWarning",
         "airConditioned"
       ]
@@ -1757,14 +948,12 @@
     {
       "key": "Universal Volcano Bay|Attraction|The Reef",
       "missing": [
-        "nameHe",
         "airConditioned"
       ]
     },
     {
       "key": "Universal Volcano Bay|Attraction|Waturi Beach",
       "missing": [
-        "nameHe",
         "airConditioned"
       ]
     }

@@ -155,6 +155,28 @@ describe("the closed vocabulary", () => {
   });
 });
 
+/** Quote-aware, because several columns hold sentences with commas in them. */
+function parseCsv(text: string): string[][] {
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let field = "";
+  let quoted = false;
+  const src = text.replace(/^\ufeff/, "").replace(/\r\n/g, "\n");
+  for (let i = 0; i < src.length; i += 1) {
+    const c = src[i];
+    if (quoted) {
+      if (c === '"') {
+        if (src[i + 1] === '"') { field += '"'; i += 1; } else quoted = false;
+      } else field += c;
+    } else if (c === '"') quoted = true;
+    else if (c === ",") { row.push(field); field = ""; }
+    else if (c === "\n") { row.push(field); rows.push(row); row = []; field = ""; }
+    else field += c;
+  }
+  if (field || row.length) { row.push(field); rows.push(row); }
+  return rows.filter((r) => r.some((v) => v.trim()));
+}
+
 describe("what must never be inferred", () => {
   it("leaves every sensitivity flag untagged rather than derived", () => {
     // They are not in the export yet. Absent must read as "not tagged", never as
@@ -176,13 +198,35 @@ describe("what must never be inferred", () => {
     expect(darkRides.every((e) => e.sensEnclosedDark === null)).toBe(true);
   });
 
-  it("reports a fractional duration instead of rounding it into an integer column", () => {
-    // 2.583 is a real ride time, not a typo. Rounding is a content decision and
-    // belongs in the master, so the importer keeps the value and flags it.
-    const fractional = experiences.filter(
-      (e) => e.durationMinutes !== null && !Number.isInteger(e.durationMinutes),
-    );
-    expect(fractional.length).toBeGreaterThan(0);
-    expect(fractional.some((e) => e.durationMinutes === 2.583)).toBe(true);
+  it("copies numbers from the export instead of transforming them", () => {
+    // Rounding is a content decision and belongs in the master, so the importer
+    // must never adjust a value on the way in.
+    //
+    // This compares against the export itself rather than asserting that some
+    // fractional value exists. Durations happen to be whole numbers now that the
+    // master was corrected, and a test that depended on 2.583 still being there
+    // would have stopped guarding anything the moment it was fixed.
+    const csv = readFileSync(join(process.cwd(), "data/source/product_export.csv"), "utf8");
+    const rows = parseCsv(csv);
+    const [headers] = rows;
+    const keyAt = headers!.indexOf("Key");
+    const durationAt = headers!.indexOf("duration_minutes");
+    expect(keyAt).toBeGreaterThan(-1);
+    expect(durationAt).toBeGreaterThan(-1);
+
+    const fromCsv = new Map<string, string>();
+    for (const cells of rows.slice(1)) {
+      if (cells.length <= durationAt) continue;
+      fromCsv.set(cells[keyAt]!.trim(), (cells[durationAt] ?? "").trim());
+    }
+
+    let compared = 0;
+    for (const e of experiences) {
+      const raw = fromCsv.get(e.key);
+      if (raw === undefined || raw === "") continue;
+      compared += 1;
+      expect(e.durationMinutes).toBe(Number(raw));
+    }
+    expect(compared).toBeGreaterThan(0);
   });
 });

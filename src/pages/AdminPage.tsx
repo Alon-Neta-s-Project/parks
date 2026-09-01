@@ -17,11 +17,15 @@ import { experiences } from "../data";
  */
 const BLOCKER = "nameHe";
 
-/** Blocker first, then emptiest first. Alphabetical order buries the thing that matters. */
+/**
+ * Emptiest first, with the structural blocker pinned to the top while it is
+ * still incomplete. Alphabetical order buried the one field that mattered.
+ */
 function orderedCoverage<T extends { field: string; filled: number; total: number }>(rows: T[]): T[] {
+  const blocking = (r: T) => r.field === BLOCKER && r.filled < r.total;
   return [...rows].sort((a, b) => {
-    if (a.field === BLOCKER) return -1;
-    if (b.field === BLOCKER) return 1;
+    if (blocking(a)) return -1;
+    if (blocking(b)) return 1;
     return a.filled / a.total - b.filled / b.total;
   });
 }
@@ -55,9 +59,11 @@ export function AdminPage() {
 
       <section className="block">
         <h2>{t("admin.coverage")}</h2>
-        <p className="muted" style={{ marginBlockEnd: "var(--pw-s4)" }}>
-          {t("admin.blockerWhy")}
-        </p>
+        {r.fieldCoverage.some((c) => c.field === BLOCKER && c.filled < c.total) && (
+          <p className="muted" style={{ marginBlockEnd: "var(--pw-s4)" }}>
+            {t("admin.blockerWhy")}
+          </p>
+        )}
         <table className="dtable">
           <thead>
             <tr><th>{t("admin.field")}</th><th>{t("admin.coverage")}</th><th /></tr>
@@ -66,10 +72,15 @@ export function AdminPage() {
             {orderedCoverage(r.fieldCoverage).map((c) => {
               const pct = Math.round((c.filled / c.total) * 100);
               return (
-                <tr key={c.field} className={c.field === BLOCKER ? "row--blocker" : undefined}>
+                <tr
+                  key={c.field}
+                  className={c.field === BLOCKER && c.filled < c.total ? "row--blocker" : undefined}
+                >
                   <td>
                     <span className="en">{c.field}</span>
-                    {c.field === BLOCKER && (
+                    {/* Only while it is actually holding pages back. A field
+                        that is complete is not a blocker any more. */}
+                    {c.field === BLOCKER && c.filled < c.total && (
                       <span className="chip chip--warn">{t("admin.blocker")}</span>
                     )}
                   </td>
