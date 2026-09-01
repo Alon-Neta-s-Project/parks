@@ -78,9 +78,9 @@ with checks as (
   select 7,
          'עמודות בטבלה experience',
          count(*)::text,
-         '40',
-         case when count(*) = 40 then '✅ תקין'
-              when count(*) <  40 then '❌ חסרות עמודות — 007 / 011 / 012 / 014 לא רצו במלואן'
+         '39',
+         case when count(*) = 39 then '✅ תקין'
+              when count(*) <  39 then '❌ חסרות עמודות — 007 / 011 / 012 / 014 לא רצו במלואן'
               else '⚠️ יותר מהצפוי' end
   from information_schema.columns
   where table_schema = 'public' and table_name = 'experience'

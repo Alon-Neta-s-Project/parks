@@ -493,7 +493,7 @@ TABLE_COLUMNS = [
     "id", "park_id", "land_id", "type", "status", "name", "name_i18n", "aliases",
     "aliases_i18n", "category", "opened_year", "duration_minutes", "intensity",
     "height_requirement_cm", "gets_wet", "environment", "air_conditioned",
-    "wheelchair", "skip_line_system", "skip_line_extra_cost", "popularity",
+    "wheelchair", "skip_line_system", "popularity",
     "sens_enclosed_dark", "sens_heights", "sens_loud_sudden", "sens_strobe",
     "intensity_factors", "type_data", "location", "verdict", "recommendation",
     "best_time_of_day", "volatility", "last_verified", "created_at", "updated_at",
