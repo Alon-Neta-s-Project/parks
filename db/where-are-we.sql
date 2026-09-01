@@ -1,0 +1,158 @@
+-- where-are-we.sql — "איפה אנחנו?" בשאילתה אחת.
+--
+-- להדביק ל-Supabase SQL Editor ולהריץ. קוראת בלבד — לא משנה כלום, אפשר
+-- להריץ שוב ושוב.
+--
+-- שום דבר כאן לא מניח שהטבלאות קיימות: הספירות עוברות דרך query_to_xml,
+-- כי "from experience" על טבלה חסרה מפיל את השאילתה כולה בזמן ניתוח —
+-- כלומר בדיוק במצב שהיא נועדה לאבחן.
+
+with
+c(name, n) as (
+  select v.name,
+         case when to_regclass('public.' || v.name) is null then null
+              else (xpath('/row/c/text()',
+                     query_to_xml('select count(*) as c from public.' || quote_ident(v.name),
+                                  false, true, '')))[1]::text::bigint end
+  from (values ('experience'), ('park'), ('land'), ('profile'), ('trip'),
+               ('conversation'), ('message'), ('knowledge_doc'), ('trip_member')) v(name)
+),
+x(k, n) as (
+  select v.k,
+         case when to_regclass('public.experience') is null then null
+              else (xpath('/row/c/text()',
+                     query_to_xml('select count(*) as c from public.experience where ' || v.w,
+                                  false, true, '')))[1]::text::bigint end
+  from (values
+    ('h_pos',  'height_requirement_cm > 0'),
+    ('h_zero', 'height_requirement_cm = 0'),
+    ('h_null', 'height_requirement_cm is null'),
+    ('wet_na', $q$gets_wet = 'na'$q$),
+    ('he_bad', $q$name_i18n->>'he' is null or name_i18n->>'he' = ''$q$),
+    ('closed', $q$status <> 'open'$q$)
+  ) v(k, w)
+),
+mig(n, ok) as (values
+  ( 1, (select exists (select 1 from pg_extension where extname = 'vector'))),
+  ( 2, to_regclass('public.experience') is not null),
+  ( 3, to_regclass('public.knowledge_doc') is not null),
+  ( 4, to_regclass('public.profile') is not null),
+  ( 5, to_regclass('public.conversation') is not null),
+  ( 6, (select count(*) from pg_policies where schemaname = 'public') >= 29),
+  ( 7, to_regclass('public.experience_motion_sickness_idx') is not null),
+  ( 8, (select exists (select 1 from pg_constraint where conname = 'experience_must_be_stated'))),
+  ( 9, to_regclass('public.plan_item_interest_idx') is not null),
+  (10, to_regclass('public.trip_member') is not null),
+  (11, (select exists (select 1 from information_schema.columns
+        where table_schema='public' and table_name='park' and column_name='park_kind'))),
+  (12, (select exists (select 1 from pg_constraint where conrelid = to_regclass('public.experience')
+        and conname = 'experience_height_requirement_cm_check'
+        and pg_get_constraintdef(oid) like '%= 0%'))),
+  (13, (select exists (select 1 from pg_constraint where conrelid = to_regclass('public.experience')
+        and conname = 'experience_category_check'
+        and pg_get_constraintdef(oid) like '%scenic_ride%'))),
+  (14, (select exists (select 1 from pg_constraint where conrelid = to_regclass('public.experience')
+        and conname = 'experience_gets_wet_check'
+        and pg_get_constraintdef(oid) like '%na%'))),
+  (15, (select exists (select 1 from information_schema.columns
+        where table_schema='public' and table_name='trip' and column_name='park_days')))
+),
+g(passed, missing) as (
+  select count(*) filter (where ok),
+         coalesce(string_agg(lpad(n::text, 3, '0'), ', ') filter (where not ok), '')
+  from mig
+),
+n(experience, park, land, profile, trip, conversation, knowledge_doc,
+  h_pos, h_zero, h_null, wet_na, he_bad, closed, tables, policies, passed, missing) as (
+  select (select n from c where name='experience'),
+         (select n from c where name='park'),
+         (select n from c where name='land'),
+         (select n from c where name='profile'),
+         (select n from c where name='trip'),
+         (select n from c where name='conversation'),
+         (select n from c where name='knowledge_doc'),
+         (select n from x where k='h_pos'),
+         (select n from x where k='h_zero'),
+         (select n from x where k='h_null'),
+         (select n from x where k='wet_na'),
+         (select n from x where k='he_bad'),
+         (select n from x where k='closed'),
+         (select count(*) from information_schema.tables
+            where table_schema='public' and table_type='BASE TABLE'),
+         (select count(*) from pg_policies where schemaname='public'),
+         (select passed from g), (select missing from g)
+),
+report(ord, "מה", "מצב") as (
+  select 1, 'מיגרציות',
+         case when passed = 15 then '15 מתוך 15 ✅'
+              else passed || ' מתוך 15 ❌  — חסרות: ' || missing end from n
+  union all
+  select 2, 'מבנה',
+         case when tables = 18 then '18 טבלאות ✅'
+              when tables = 0  then 'המסד ריק לגמרי ❌ — לא הורץ supabase-bundle.sql'
+              else tables || ' טבלאות מתוך 18 ❌' end from n
+  union all
+  select 3, 'הרשאות (RLS)',
+         case when policies >= 29 then policies || ' מדיניות ✅'
+              else policies || ' מתוך 29 ❌' end from n
+  union all
+  select 4, 'התוכן — מתקנים',
+         case when experience is null then 'הטבלה לא קיימת ❌'
+              when experience = 232 then '232 מתוך 232 ✅'
+              when experience = 0   then 'ריק ❌ — לא הורץ קובץ התוכן'
+              else experience || ' מתוך 232 ⚠️ — הטעינה לא הושלמה' end from n
+  union all
+  select 5, 'התוכן — פארקים',
+         case when park is null then 'הטבלה לא קיימת ❌'
+              when park = 10 then '10 מתוך 10 ✅'
+              when park = 7  then '7 מתוך 10 ⚠️ — חסרים פארקי המים'
+              else coalesce(park::text,'0') || ' מתוך 10 ❌' end from n
+  union all
+  select 6, 'שם עברי לכל מתקן',
+         case when experience is null or experience = 0 then 'אין תוכן עדיין'
+              when he_bad = 0 then 'לכולם יש ✅'
+              else he_bad || ' מתקנים בלי שם עברי ❌' end from n
+  union all
+  select 7, 'גובה — שלושת המצבים',
+         case when experience is null or experience = 0 then 'אין תוכן עדיין'
+              when h_pos = 78 and h_zero = 154 and h_null = 0
+                then '78 עם מגבלה · 154 בלי · 0 לא נבדקו ✅'
+              else h_pos || ' עם מגבלה · ' || h_zero || ' בלי · ' || h_null
+                   || ' לא נבדקו ⚠️ — לא תואם למאסטר' end from n
+  union all
+  select 8, 'gets_wet',
+         case when experience is null or experience = 0 then 'אין תוכן עדיין'
+              when wet_na = 66 then '66 שורות na ✅'
+              else wet_na || ' שורות na במקום 66 ⚠️ — הייצוא כותב תא ריק. פער תוכן, לא תקלה' end from n
+  union all
+  select 9, 'מתקנים שאינם פתוחים',
+         case when experience is null or experience = 0 then 'אין תוכן עדיין'
+              when closed > 0 then closed || ' מסומנים סגור/בקרוב ✅'
+              else 'הכל נטען כפתוח ❌ — סטטוס נמעך' end from n
+  union all
+  select 10, 'אזורים בפארקים (land)',
+         case when land is null then 'הטבלה לא קיימת ❌'
+              when land = 0 then 'ריק — בכוונה, לא נכנס ל-V1 ✅'
+              else land || ' אזורים' end from n
+  union all
+  select 11, 'מאגר הידע',
+         case when knowledge_doc is null then 'הטבלה לא קיימת ❌'
+              when knowledge_doc = 0 then 'ריק — עוד לא נבנה ⏳'
+              else knowledge_doc || ' מסמכים' end from n
+  union all
+  select 12, 'משתמשים רשומים',
+         case when profile is null then 'הטבלה לא קיימת ❌'
+              when profile = 0 then 'ריק — הרשמה עוד לא נבנתה ⏳'
+              else profile || ' משתמשים' end from n
+  union all
+  select 13, 'טיולים שנשמרו',
+         case when trip is null then 'הטבלה לא קיימת ❌'
+              when trip = 0 then 'ריק — האפליקציה עוד לא כותבת למסד ⏳'
+              else trip || ' טיולים' end from n
+  union all
+  select 14, 'שיחות שנשמרו',
+         case when conversation is null then 'הטבלה לא קיימת ❌'
+              when conversation = 0 then 'ריק — האפליקציה עוד לא כותבת למסד ⏳'
+              else conversation || ' שיחות' end from n
+)
+select "מה", "מצב" from report order by ord;
