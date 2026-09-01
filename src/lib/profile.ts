@@ -1,29 +1,46 @@
 import type { IntensityLevel } from "../data/schema";
+import type { Member } from "./group";
 
 /**
- * What Tim knows about this group.
+ * What Tim learns about this trip.
  *
- * Two things are deliberately absent. Ages and heights are never stored (brief
- * §9.4). And intensity is never inferred from who is in the group: a forty-year
- * old can hate roller coasters and a twelve-year old can love them, so the
- * comfortable level is asked directly. Age bears on height eligibility, which is
- * a hard fact about the ride, not a preference.
+ * Three onboarding questions, then he answers. The axes that only matter later
+ * — how thoroughly to work a park, where to stay — are asked in context, when
+ * the subject actually comes up. There is no reason to spend an opening question
+ * on a recommendation nobody is asking for yet.
  */
 export interface Profile {
+  /** What is worth planning in depth. "both" is a real answer, not a fallback. */
+  planningFocus: "fit" | "cost" | "both" | null;
+  members: Member[];
+  /** Been to this park or resort before. Saves explaining the basics to a veteran. */
+  visitedBefore: boolean | null;
+
   parks: string[];
   intensityMin: IntensityLevel | null;
   intensityMax: IntensityLevel | null;
   kinds: ("attraction" | "entertainment")[];
-  /** Holds a paid queue-skipping product. Asked in context, not up front. */
   hasFastAccess: boolean | null;
-  /** Opt-in only — see recommend.ts. */
   onlyIncludedInPass: boolean;
-  /** Short list per land rather than everything. */
   condensed: boolean;
   includeUnrated: boolean;
+
+  /**
+   * Which questions Tim has already asked twice and let go.
+   *
+   * Iron rule five is satisfied by asking, not by being answered. Someone who
+   * skips a question gets one more attempt, then a recommendation built from
+   * what is known with the gap stated outright — and Tim never raises it again.
+   * There is a segment that does not plan by choice and is happy that way, and
+   * pressing them is what drives them off.
+   */
+  askedAndDropped: string[];
 }
 
 export const emptyProfile: Profile = {
+  planningFocus: null,
+  members: [],
+  visitedBefore: null,
   parks: [],
   intensityMin: null,
   intensityMax: null,
@@ -32,6 +49,7 @@ export const emptyProfile: Profile = {
   onlyIncludedInPass: false,
   condensed: false,
   includeUnrated: false,
+  askedAndDropped: [],
 };
 
 export interface Option {
@@ -41,28 +59,45 @@ export interface Option {
 
 export interface Question {
   id: string;
+  /** Choices come from the dataset rather than the list below. */
   source?: "parks";
+  /** Answered by building rows rather than picking an option. */
+  kind?: "members";
   multi?: boolean;
+  /** Free text is always available beside the chips. */
+  freeText?: boolean;
   options?: Option[];
 }
 
 /**
- * Two questions, then an answer.
+ * The three opening questions, in this order.
  *
- * Everything else — queue-skipping, rides versus shows, a shorter list — is
- * asked in context once there is something to apply it to. Five questions before
- * any value is where people leave.
+ * Planning focus comes first deliberately: it is not personal at all, and it
+ * gives Tim a chance to show he understood — "so let's focus on which rides
+ * suit you" — before he asks anything about children. The same principle as
+ * fact before opinion, here as easy before personal.
+ *
+ * Marked as a product judgement rather than a research finding: no interview
+ * tested question order.
  */
 export const questions: Question[] = [
-  { id: "parks", source: "parks", multi: true },
   {
-    id: "intensity",
+    id: "planningFocus",
+    freeText: true,
     options: [
-      { id: "gentle", patch: { intensityMin: null, intensityMax: 1 } },
-      { id: "mild", patch: { intensityMin: null, intensityMax: 2 } },
-      { id: "medium", patch: { intensityMin: null, intensityMax: 3 } },
-      { id: "anything", patch: { intensityMin: null, intensityMax: 4 } },
-      { id: "thrillsOnly", patch: { intensityMin: 3, intensityMax: 4 } },
+      { id: "fit", patch: { planningFocus: "fit" } },
+      { id: "cost", patch: { planningFocus: "cost" } },
+      // Shown with exactly the weight of the other two: a common, legitimate
+      // answer, not the thing you land on by not choosing.
+      { id: "both", patch: { planningFocus: "both" } },
+    ],
+  },
+  { id: "group", kind: "members", freeText: true },
+  {
+    id: "visitedBefore",
+    options: [
+      { id: "yes", patch: { visitedBefore: true } },
+      { id: "no", patch: { visitedBefore: false } },
     ],
   },
 ];
@@ -71,3 +106,7 @@ export const applyPatch = (profile: Profile, patch: Partial<Profile>): Profile =
   ...profile,
   ...patch,
 });
+
+/** A question already asked twice and let go is never raised again. */
+export const isDropped = (profile: Profile, questionId: string) =>
+  profile.askedAndDropped.includes(questionId);

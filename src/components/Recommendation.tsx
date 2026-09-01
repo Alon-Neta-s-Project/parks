@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import type { Member } from "../lib/group";
 import type { Recommendation as Result } from "../lib/recommend";
 import { ExperienceCard } from "./ExperienceCard";
 
@@ -10,10 +11,12 @@ export function Recommendation({
   result,
   includeUnrated,
   onToggleUnrated,
+  members = [],
 }: {
   result: Result;
   includeUnrated: boolean;
   onToggleUnrated: () => void;
+  members?: Member[];
 }) {
   /** With one park the name is already known and repeating it is noise. */
   const multiPark = new Set(result.groups.map((g) => g.park)).size > 1;
@@ -52,7 +55,7 @@ export function Recommendation({
           </header>
           <ul>
             {group.items.map((experience) => (
-              <ExperienceCard key={experience.id} experience={experience} />
+              <ExperienceCard key={experience.id} experience={experience} members={members} />
             ))}
           </ul>
         </section>

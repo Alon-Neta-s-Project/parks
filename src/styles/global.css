@@ -256,6 +256,8 @@ button {
   color: var(--pw-on-way);
 }
 
+.option { white-space: nowrap; }
+
 .option small {
   display: block;
   font-size: 11.5px;
@@ -726,3 +728,33 @@ button {
   font-size: 13px; line-height: 1.5; font-weight: 500;
 }
 .ticket__flag > span { direction: ltr; text-align: start; unicode-bidi: isolate; }
+
+/* ---- group builder ------------------------------------------------------- */
+.group { display: flex; flex-direction: column; gap: var(--pw-s3); inline-size: 100%; }
+.group__list { display: flex; flex-direction: column; gap: var(--pw-s2); }
+
+.member {
+  display: flex; align-items: center; flex-wrap: wrap; gap: var(--pw-s2) var(--pw-s3);
+  padding: var(--pw-s3) var(--pw-s4);
+  background: var(--pw-surface); border: 1px solid var(--pw-hairline);
+  border-radius: var(--pw-r-md);
+}
+.member__who { font-weight: 600; font-size: 14px; }
+.member__height { display: flex; flex-direction: column; gap: 4px; flex: 1; min-inline-size: 160px; }
+.member__why { font: var(--pw-t-small); color: var(--pw-ink-3); }
+.member__x {
+  margin-inline-start: auto; appearance: none; border: 0; background: none;
+  color: var(--pw-ink-3); font-size: 15px; padding: 4px 6px; border-radius: var(--pw-r-xs);
+}
+.member__x:hover { color: var(--pw-urgent-600); }
+
+.group__add { display: flex; flex-wrap: wrap; gap: var(--pw-s2); align-items: center; }
+.group__age { display: flex; gap: var(--pw-s2); align-items: center; }
+
+.finput {
+  font: 500 14px var(--pw-font-ui);
+  min-block-size: 38px; inline-size: 100%; max-inline-size: 150px;
+  padding: 0 var(--pw-s3);
+  border: 1px solid var(--pw-hairline-strong); border-radius: var(--pw-r-sm);
+  background: var(--pw-surface); color: var(--pw-ink);
+}

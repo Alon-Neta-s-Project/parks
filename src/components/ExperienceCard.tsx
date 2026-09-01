@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import type { Experience } from "../data/schema";
+import type { Member } from "../lib/group";
+import { FitTag } from "./FitTag";
 import { Intensity } from "./Intensity";
 
 /**
@@ -12,7 +14,13 @@ import { Intensity } from "./Intensity";
  * No source is shown anywhere, by decision: the product says when something was
  * checked, never what it was checked against.
  */
-export function ExperienceCard({ experience }: { experience: Experience }) {
+export function ExperienceCard({
+  experience,
+  members = [],
+}: {
+  experience: Experience;
+  members?: Member[];
+}) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { fastAccess, status } = experience;
@@ -32,6 +40,7 @@ export function ExperienceCard({ experience }: { experience: Experience }) {
         </span>
         <span className="exp__tags">
           <Intensity value={experience.intensity.value} />
+          <FitTag experience={experience} members={members} />
 
           {fastAccess.singlePassRequired && (
             <span className="chip chip--warn">{t("card.singlePass")}</span>

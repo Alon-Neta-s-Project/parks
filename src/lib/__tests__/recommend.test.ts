@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { emptyProfile, questions, type Profile } from "../profile";
+import { emptyProfile, isDropped, questions, type Profile } from "../profile";
 import { experiences } from "../../data";
 import { matchesFilters, recommend, searchExperiences } from "../recommend";
 import { refinementById } from "../refine";
@@ -171,17 +171,38 @@ describe("more than one park", () => {
 });
 
 describe("opening questions", () => {
-  it("asks two questions before answering, not five", () => {
-    expect(questions.map((q) => q.id)).toEqual(["parks", "intensity"]);
+  it("asks three, in the order that puts the impersonal one first", () => {
+    // Planning focus before group composition: it is not personal at all, and
+    // it lets Tim show he understood before asking about children.
+    expect(questions.map((q) => q.id)).toEqual(["planningFocus", "group", "visitedBefore"]);
   });
 
-  it("asks for the comfortable intensity directly, never deriving it", () => {
-    const intensityQ = questions.find((q) => q.id === "intensity");
-    // Every option sets an intensity bound and nothing about who is in the group.
-    for (const option of intensityQ?.options ?? []) {
-      expect(Object.keys(option.patch).sort()).toEqual(["intensityMax", "intensityMin"]);
+  it("offers \"both\" as a real answer rather than a fallback", () => {
+    const focus = questions.find((q) => q.id === "planningFocus");
+    expect(focus?.options?.map((o) => o.id)).toEqual(["fit", "cost", "both"]);
+    // Same shape as the other two, so it carries the same weight on screen.
+    expect(focus?.options?.every((o) => Object.keys(o.patch).length === 1)).toBe(true);
+  });
+
+  it("keeps a free-text way out beside the chips", () => {
+    // Flagged in the handover as a low-confidence product guess, so it must stay
+    // cheap to change.
+    expect(questions.filter((q) => q.freeText).length).toBeGreaterThan(0);
+  });
+
+  it("never derives intensity from who is in the group", () => {
+    expect(JSON.stringify(emptyProfile)).not.toMatch(/intensityFromGroup|ageBand/i);
+    for (const q of questions) {
+      for (const option of q.options ?? []) {
+        expect(Object.keys(option.patch)).not.toContain("intensityMax");
+      }
     }
-    expect(JSON.stringify(emptyProfile)).not.toMatch(/group|age|height|planner/i);
+  });
+
+  it("starts with nothing dropped, and drops are recorded per question", () => {
+    expect(emptyProfile.askedAndDropped).toEqual([]);
+    expect(isDropped({ ...emptyProfile, askedAndDropped: ["group"] }, "group")).toBe(true);
+    expect(isDropped(emptyProfile, "group")).toBe(false);
   });
 });
 
