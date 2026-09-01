@@ -66,6 +66,21 @@ PARK_ID = {
 # Mirrors the CHECK constraints in db/migrations. If a migration changes one of
 # these, this list has to change with it — the conformance run catches a drift.
 STATUS = {"open": "open", "closed": "closed"}   # 'check' is deliberately absent
+
+# 'check' is not a status, it is an instruction to go and look. Two rows carry
+# it, and they do not mean the same thing, so there is no mapping for the value
+# itself — each row was checked against the operator's own site and decided.
+#
+# The guard is the 'check' in the key: the override applies only while the
+# export still says 'check' for that row. If a later export says 'open', the
+# row goes through the normal path and the stale decision here is ignored; if
+# it says something new and unknown, the row stops as any unmapped value does.
+STATUS_DECIDED = {
+    # Slush Gusher — סגור לשיפוץ. אומת מול אתר דיסני, 2026-09-01.
+    ("disney-s-blizzard-beach-slush-gusher", "check"): "temporarily_closed",
+    # The Magic of Disney Animation — נפתח 14.9.2026. אומת מול אתר דיסני, 2026-09-01.
+    ("disney-s-hollywood-studios-the-magic-of-disney-animation", "check"): "coming_soon",
+}
 TYPE = {"attraction", "show", "parade", "meet_greet", "walkthrough"}
 CATEGORY = {"dark_ride", "coaster", "simulator", "water_ride", "show",
             "walkthrough", "playground", "meet_greet", "scenic_ride", "360_film"}
@@ -119,6 +134,7 @@ def member(value, allowed, field, label):
 
 rows = []
 emitted = []          # the experiences that actually produced a row
+resolved_status: list[tuple[str, str]] = []
 for e in experiences:
     label = f"{e['park']} | {e['nameEn']}"
 
@@ -128,7 +144,9 @@ for e in experiences:
         continue
 
     state = e["status"]["state"]
-    if state not in STATUS:
+    decided = STATUS_DECIDED.get((e["id"], state))
+    status = STATUS.get(state) or decided
+    if status is None:
         note = e["status"].get("note") or ""
         skipped.append((label, f"status = {state!r} אינו באוצר המילים · {note}"))
         continue
@@ -160,12 +178,13 @@ for e in experiences:
         return "null" if v is None else ("true" if v else "false")
 
     emitted.append(e)
+    resolved_status.append((e["id"], status))
     rows.append((label, "(" + ", ".join([
         q(e["id"]),
         q(park_id),
         q(e["type"]),
         q(e["category"]),
-        q(STATUS[state]),
+        q(status),
         q(e["nameEn"]),
         jsonb({"he": e["nameHe"]}),
         jsonb({"he": e["aliasesHe"]}),
@@ -278,6 +297,9 @@ checks = [
           "✅ תקין — Tike's Peak, וזה נכון", ""),
 ]
 
+STATUS_TALLY = " · ".join(f"{n} {st}" for st, n in sorted(
+    Counter(r[1] for r in resolved_status).items(), key=lambda kv: -kv[1]))
+
 held_row = q('⚠️ ' + ' · '.join(f'{l} ({w.split(chr(183))[0].strip()})' for l, w in skipped)) if skipped else "'✅ תקין — שום שורה לא נעצרה'"
 
 extra = f"""  select 9,
@@ -294,7 +316,7 @@ extra = f"""  select 9,
          'status — לא הכל open',
          (select string_agg(status || ': ' || n, ' · ' order by status)
             from (select status, count(*) as n from experience group by status) s),
-         '{Counter(STATUS[e["status"]["state"]] for e in experiences if e["status"]["state"] in STATUS)["open"]} open · {Counter(STATUS[e["status"]["state"]] for e in experiences if e["status"]["state"] in STATUS)["closed"]} closed',
+         '{STATUS_TALLY}',
          '—',
          case when (select count(*) from experience where status = 'closed') > 0
                 then '✅ תקין — הסגורים נשמרו כסגורים'

@@ -14,9 +14,9 @@ with checks as (
   select 1 as ord,
          'שורות ב-experience' as "בדיקה",
          (select count(*) from experience)::text as "במסד",
-         '230' as "בייצוא",
+         '232' as "בייצוא",
          '—' as "אצלך",
-         case when (select count(*) from experience) <> 230 then '❌ נמעך במעבר — במסד יש משהו אחר ממה שיצא'
+         case when (select count(*) from experience) <> 232 then '❌ נמעך במעבר — במסד יש משהו אחר ממה שיצא'
               when false then ''
               else '✅ תקין' end as "מצב"
 
@@ -24,20 +24,20 @@ with checks as (
   select 2 as ord,
          'height > 0 (יש מגבלה)' as "בדיקה",
          (select count(*) from experience where height_requirement_cm > 0)::text as "במסד",
-         '77' as "בייצוא",
+         '78' as "בייצוא",
          '78' as "אצלך",
-         case when (select count(*) from experience where height_requirement_cm > 0) <> 77 then '❌ נמעך במעבר — במסד יש משהו אחר ממה שיצא'
-              when true then '⚠️ הפרש מול המאסטר, כי 2 שורות נעצרו בכוונה. לא נמעך במעבר — ראה את השורה האחרונה'
+         case when (select count(*) from experience where height_requirement_cm > 0) <> 78 then '❌ נמעך במעבר — במסד יש משהו אחר ממה שיצא'
+              when false then '⚠️ הפרש מול המאסטר, כי 0 שורות נעצרו בכוונה. לא נמעך במעבר — ראה את השורה האחרונה'
               else '✅ תקין' end as "מצב"
 
   union all
   select 3 as ord,
          'height = 0 (נבדק, אין מגבלה)' as "בדיקה",
          (select count(*) from experience where height_requirement_cm = 0)::text as "במסד",
-         '153' as "בייצוא",
+         '154' as "בייצוא",
          '154' as "אצלך",
-         case when (select count(*) from experience where height_requirement_cm = 0) <> 153 then '❌ נמעך במעבר — במסד יש משהו אחר ממה שיצא'
-              when true then '⚠️ הפרש מול המאסטר, כי 2 שורות נעצרו בכוונה. לא נמעך במעבר — ראה את השורה האחרונה'
+         case when (select count(*) from experience where height_requirement_cm = 0) <> 154 then '❌ נמעך במעבר — במסד יש משהו אחר ממה שיצא'
+              when false then '⚠️ הפרש מול המאסטר, כי 0 שורות נעצרו בכוונה. לא נמעך במעבר — ראה את השורה האחרונה'
               else '✅ תקין' end as "מצב"
 
   union all
@@ -105,7 +105,7 @@ with checks as (
          'status — לא הכל open',
          (select string_agg(status || ': ' || n, ' · ' order by status)
             from (select status, count(*) as n from experience group by status) s),
-         '208 open · 22 closed',
+         '208 open · 22 closed · 1 temporarily_closed · 1 coming_soon',
          '—',
          case when (select count(*) from experience where status = 'closed') > 0
                 then '✅ תקין — הסגורים נשמרו כסגורים'
@@ -123,10 +123,10 @@ with checks as (
   union all
   select 12,
          'שורות שנעצרו בכוונה',
-         '2',
-         '2',
          '0',
-         '⚠️ Disney''s Blizzard Beach | Slush Gusher (status = ''check'' אינו באוצר המילים) · Disney''s Hollywood Studios | The Magic of Disney Animation (status = ''check'' אינו באוצר המילים)'
+         '0',
+         '0',
+         '✅ תקין — שום שורה לא נעצרה'
 
 )
 select "בדיקה", "במסד", "בייצוא", "אצלך", "מצב" from checks order by ord;

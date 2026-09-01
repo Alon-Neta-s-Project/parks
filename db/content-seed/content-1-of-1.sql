@@ -2,7 +2,7 @@
 -- Park Day Companion — תוכן: חלק 1 מתוך 1
 -- ==========================================================================
 --
--- 230 מתקנים. להדביק ל-Supabase SQL Editor ולהריץ.
+-- 232 מתקנים. להדביק ל-Supabase SQL Editor ולהריץ.
 -- ⚠️ להריץ את החלקים לפי הסדר: 1, ואז 2.
 --
 -- נוצר על ידי scripts/build-content-seed.py מתוך src/data/experiences.json.
@@ -55,6 +55,7 @@ values
 ('disney-s-blizzard-beach-chairlift', 'bb', 'attraction', 'scenic_ride', 'open', 'Chairlift', '{"he": "צ''יירליפט"}'::jsonb, '{"he": []}'::jsonb, 1, 1995, null, 81, 'none', 'outdoor', null, 'transfer_ecv_to_wheelchair', 'false', 'false', 'false', 'false', 'false', null, null, null, null, '{"max_speed_kmh": null, "inversions": null}'::jsonb, '2026-08-24'),
 ('disney-s-blizzard-beach-downhill-double-dipper', 'bb', 'attraction', 'water_ride', 'open', 'Downhill Double Dipper', '{"he": "דאונהיל דאבל דיפר"}'::jsonb, '{"he": []}'::jsonb, 4, 1997, null, 122, 'may_get_soaked', 'outdoor', null, 'must_be_ambulatory', 'false', null, null, 'true', 'false', null, null, null, null, '{"max_speed_kmh": null, "inversions": null}'::jsonb, '2026-08-24'),
 ('disney-s-blizzard-beach-runoff-rapids', 'bb', 'attraction', 'water_ride', 'open', 'Runoff Rapids', '{"he": "ראנאוף ראפידס"}'::jsonb, '{"he": []}'::jsonb, 3, 1995, null, 0, 'may_get_soaked', 'outdoor', null, 'transfer_to_ride_vehicle', 'true', null, null, 'true', 'true', null, null, null, null, '{"max_speed_kmh": null, "inversions": null}'::jsonb, '2026-08-24'),
+('disney-s-blizzard-beach-slush-gusher', 'bb', 'attraction', 'water_ride', 'temporarily_closed', 'Slush Gusher', '{"he": "סלאש גאשר"}'::jsonb, '{"he": []}'::jsonb, 4, 1995, null, 122, 'may_get_soaked', 'outdoor', null, 'transfer_to_ride_vehicle', 'false', null, null, 'true', 'false', null, null, null, null, '{"max_speed_kmh": null, "inversions": null}'::jsonb, '2026-08-24'),
 ('disney-s-blizzard-beach-snow-stormers', 'bb', 'attraction', 'water_ride', 'open', 'Snow Stormers', '{"he": "סנואו סטורמרס"}'::jsonb, '{"he": []}'::jsonb, 2, 1995, null, 0, 'may_get_soaked', 'outdoor', null, 'transfer_to_ride_vehicle', 'false', null, null, 'false', 'true', null, null, null, null, '{"max_speed_kmh": null, "inversions": null}'::jsonb, '2026-08-24'),
 ('disney-s-blizzard-beach-summit-plummet', 'bb', 'attraction', 'water_ride', 'open', 'Summit Plummet', '{"he": "סאמיט פלאמט"}'::jsonb, '{"he": []}'::jsonb, 4, 1995, null, 122, 'may_get_soaked', 'outdoor', null, 'must_be_ambulatory', 'false', null, null, 'true', 'false', null, null, null, null, '{"max_speed_kmh": null, "inversions": null}'::jsonb, '2026-08-24'),
 ('disney-s-blizzard-beach-teamboat-springs', 'bb', 'attraction', 'water_ride', 'open', 'Teamboat Springs', '{"he": "טימבוט ספרינגס"}'::jsonb, '{"he": []}'::jsonb, 2, 1995, null, 0, 'may_get_soaked', 'outdoor', null, 'transfer_to_ride_vehicle', 'true', null, null, 'true', 'true', null, null, null, null, '{"max_speed_kmh": null, "inversions": null}'::jsonb, '2026-08-24'),
@@ -64,6 +65,7 @@ values
 ('disney-s-blizzard-beach-tike-s-peak', 'bb', 'attraction', 'water_ride', 'open', 'Tike''s Peak', '{"he": "טייקס פיק"}'::jsonb, '{"he": []}'::jsonb, 1, 1995, null, 122, 'may_get_soaked', 'outdoor', null, null, 'false', null, null, 'false', 'false', null, null, null, null, '{"max_speed_kmh": null, "inversions": null}'::jsonb, '2026-08-24'),
 ('disney-s-hollywood-studios-disney-jr-mickey-mouse-clubhouse-live', 'hs', 'show', 'show', 'open', 'Disney Jr. Mickey Mouse Clubhouse Live!', '{"he": "דיסני ג''וניור: מיקי מאוס קלאבהאוס לייב"}'::jsonb, '{"he": []}'::jsonb, 1, 2025, 20, 0, null, 'outdoor', 'false', 'remain_in_wheelchair', 'false', null, 'false', null, null, null, null, null, null, '{"max_speed_kmh": null, "inversions": null}'::jsonb, '2026-08-24'),
 ('disney-s-hollywood-studios-the-little-mermaid-a-musical-adventure', 'hs', 'show', 'show', 'open', 'The Little Mermaid – A Musical Adventure', '{"he": "דה ליטל מרמייד – מיוזיקל אדוונצ''ר"}'::jsonb, '{"he": []}'::jsonb, 1, 2025, 18, 0, null, 'indoor', 'true', 'remain_in_wheelchair', 'false', null, 'true', null, null, null, null, null, null, '{"max_speed_kmh": null, "inversions": null}'::jsonb, '2026-08-24'),
+('disney-s-hollywood-studios-the-magic-of-disney-animation', 'hs', 'walkthrough', 'walkthrough', 'coming_soon', 'The Magic of Disney Animation', '{"he": "דה מג''יק אוף דיסני אנימיישן"}'::jsonb, '{"he": []}'::jsonb, 1, 2026, null, 0, 'none', 'indoor', 'true', 'remain_in_wheelchair', 'false', null, 'true', null, null, null, null, null, null, '{"max_speed_kmh": null, "inversions": null}'::jsonb, '2026-08-24'),
 ('disney-s-hollywood-studios-vacation-fun', 'hs', 'attraction', '360_film', 'open', 'Vacation Fun', '{"he": "ויקיישן פאן"}'::jsonb, '{"he": []}'::jsonb, 1, 2020, 10, 0, 'none', 'indoor', 'true', 'remain_in_wheelchair', 'false', null, 'true', null, null, null, null, null, null, '{"max_speed_kmh": null, "inversions": null}'::jsonb, '2026-08-24'),
 ('disney-s-hollywood-studios-walt-disney-presents', 'hs', 'walkthrough', 'walkthrough', 'open', 'Walt Disney Presents', '{"he": "וולט דיסני פרזנטס"}'::jsonb, '{"he": []}'::jsonb, 1, 2001, null, 0, 'none', 'indoor', 'true', 'remain_in_wheelchair', 'false', null, 'true', null, null, null, null, null, null, '{"max_speed_kmh": null, "inversions": null}'::jsonb, '2026-08-25'),
 ('disney-s-hollywood-studios-disney-movie-magic', 'hs', 'attraction', '360_film', 'open', 'Disney Movie Magic', '{"he": "דיסני מובי מג''יק"}'::jsonb, '{"he": []}'::jsonb, 1, 2017, 10, 0, null, 'outdoor', 'false', 'remain_in_wheelchair', 'false', null, 'true', null, null, null, null, null, null, '{"max_speed_kmh": null, "inversions": null}'::jsonb, '2026-08-25'),
@@ -304,9 +306,9 @@ with checks as (
   select 1 as ord,
          'שורות ב-experience' as "בדיקה",
          (select count(*) from experience)::text as "במסד",
-         '230' as "בייצוא",
+         '232' as "בייצוא",
          '—' as "אצלך",
-         case when (select count(*) from experience) <> 230 then '❌ נמעך במעבר — במסד יש משהו אחר ממה שיצא'
+         case when (select count(*) from experience) <> 232 then '❌ נמעך במעבר — במסד יש משהו אחר ממה שיצא'
               when false then ''
               else '✅ תקין' end as "מצב"
 
@@ -314,20 +316,20 @@ with checks as (
   select 2 as ord,
          'height > 0 (יש מגבלה)' as "בדיקה",
          (select count(*) from experience where height_requirement_cm > 0)::text as "במסד",
-         '77' as "בייצוא",
+         '78' as "בייצוא",
          '78' as "אצלך",
-         case when (select count(*) from experience where height_requirement_cm > 0) <> 77 then '❌ נמעך במעבר — במסד יש משהו אחר ממה שיצא'
-              when true then '⚠️ הפרש מול המאסטר, כי 2 שורות נעצרו בכוונה. לא נמעך במעבר — ראה את השורה האחרונה'
+         case when (select count(*) from experience where height_requirement_cm > 0) <> 78 then '❌ נמעך במעבר — במסד יש משהו אחר ממה שיצא'
+              when false then '⚠️ הפרש מול המאסטר, כי 0 שורות נעצרו בכוונה. לא נמעך במעבר — ראה את השורה האחרונה'
               else '✅ תקין' end as "מצב"
 
   union all
   select 3 as ord,
          'height = 0 (נבדק, אין מגבלה)' as "בדיקה",
          (select count(*) from experience where height_requirement_cm = 0)::text as "במסד",
-         '153' as "בייצוא",
+         '154' as "בייצוא",
          '154' as "אצלך",
-         case when (select count(*) from experience where height_requirement_cm = 0) <> 153 then '❌ נמעך במעבר — במסד יש משהו אחר ממה שיצא'
-              when true then '⚠️ הפרש מול המאסטר, כי 2 שורות נעצרו בכוונה. לא נמעך במעבר — ראה את השורה האחרונה'
+         case when (select count(*) from experience where height_requirement_cm = 0) <> 154 then '❌ נמעך במעבר — במסד יש משהו אחר ממה שיצא'
+              when false then '⚠️ הפרש מול המאסטר, כי 0 שורות נעצרו בכוונה. לא נמעך במעבר — ראה את השורה האחרונה'
               else '✅ תקין' end as "מצב"
 
   union all
@@ -395,7 +397,7 @@ with checks as (
          'status — לא הכל open',
          (select string_agg(status || ': ' || n, ' · ' order by status)
             from (select status, count(*) as n from experience group by status) s),
-         '208 open · 22 closed',
+         '208 open · 22 closed · 1 temporarily_closed · 1 coming_soon',
          '—',
          case when (select count(*) from experience where status = 'closed') > 0
                 then '✅ תקין — הסגורים נשמרו כסגורים'
@@ -413,10 +415,10 @@ with checks as (
   union all
   select 12,
          'שורות שנעצרו בכוונה',
-         '2',
-         '2',
          '0',
-         '⚠️ Disney''s Blizzard Beach | Slush Gusher (status = ''check'' אינו באוצר המילים) · Disney''s Hollywood Studios | The Magic of Disney Animation (status = ''check'' אינו באוצר המילים)'
+         '0',
+         '0',
+         '✅ תקין — שום שורה לא נעצרה'
 
 )
 select "בדיקה", "במסד", "בייצוא", "אצלך", "מצב" from checks order by ord;
