@@ -11,6 +11,11 @@
 
 BEGIN;
 
+-- ההרחבות יושבות בסכמת extensions (ראה 001). הקובץ הזה משתמש בשמות
+-- לא-מוסמכים מתוכן, ולכן הוא קובע search_path בעצמו — כדי שיוכל לרוץ
+-- לבד, בסשן נפרד, ולא רק כחלק מ-supabase-bundle.sql.
+set local search_path = public, extensions;
+
 create table trip_member (
   id         uuid primary key default gen_random_uuid(),
   trip_id    uuid not null references trip(id) on delete cascade,

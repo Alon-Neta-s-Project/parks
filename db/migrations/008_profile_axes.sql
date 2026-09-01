@@ -9,6 +9,11 @@
 -- להמציא שדה פרופיל בשקט בקוד.
 BEGIN;
 
+-- ההרחבות יושבות בסכמת extensions (ראה 001). הקובץ הזה משתמש בשמות
+-- לא-מוסמכים מתוכן, ולכן הוא קובע search_path בעצמו — כדי שיוכל לרוץ
+-- לבד, בסשן נפרד, ולא רק כחלק מ-supabase-bundle.sql.
+set local search_path = public, extensions;
+
 alter table profile_fact drop constraint if exists profile_fact_key_check;
 alter table profile_fact add constraint profile_fact_key_check check (key in (
   -- קיימים

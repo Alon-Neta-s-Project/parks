@@ -7,6 +7,11 @@
 
 BEGIN;
 
+-- ההרחבות יושבות בסכמת extensions (ראה 001). הקובץ הזה משתמש בשמות
+-- לא-מוסמכים מתוכן, ולכן הוא קובע search_path בעצמו — כדי שיוכל לרוץ
+-- לבד, בסשן נפרד, ולא רק כחלק מ-supabase-bundle.sql.
+set local search_path = public, extensions;
+
 create or replace function is_admin() returns boolean
   language sql stable security definer set search_path = public as $$
   select exists (select 1 from profile where id = auth.uid() and role = 'admin');

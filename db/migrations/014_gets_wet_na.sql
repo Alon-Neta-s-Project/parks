@@ -15,6 +15,11 @@
 
 BEGIN;
 
+-- ההרחבות יושבות בסכמת extensions (ראה 001). הקובץ הזה משתמש בשמות
+-- לא-מוסמכים מתוכן, ולכן הוא קובע search_path בעצמו — כדי שיוכל לרוץ
+-- לבד, בסשן נפרד, ולא רק כחלק מ-supabase-bundle.sql.
+set local search_path = public, extensions;
+
 alter table experience drop constraint experience_gets_wet_check;
 alter table experience add constraint experience_gets_wet_check
   check (gets_wet in ('none','may_get_wet','may_get_soaked','na'));

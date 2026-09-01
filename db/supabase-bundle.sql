@@ -1,18 +1,71 @@
--- Park Day Companion — כל המיגרציות בקובץ אחד, לפי הסדר.
--- נוצר על ידי scripts/build-supabase-bundle.py מתוך 14 מיגרציות ו-2 seeds.
+-- ==========================================================================
+-- Park Day Companion — קובץ הקמה למסד הנתונים ב-Supabase
+-- ==========================================================================
 --
--- להדביק ל-Supabase Studio → SQL Editor ולהריץ פעם אחת.
+-- מה זה
+--   כל המיגרציות והנתונים הקבועים, בקובץ אחד, בסדר הנכון. להדביק ל-
+--   Supabase Studio ← SQL Editor ← New query, וללחוץ Run פעם אחת.
+--   נוצר אוטומטית על ידי scripts/build-supabase-bundle.py. אין לערוך אותו
+--   ביד — לערוך את הקבצים ב-db/migrations ולהריץ את הסקריפט מחדש.
 --
--- ⚠️ db/local/000_auth_shim.sql אינו כאן, בכוונה. ב-Supabase סכמת auth
---    שייכת לפלטפורמה, והפיגום המקומי היה מתנגש בה.
+-- הסדר
+--   1. מיגרציה 001_extensions_and_taxonomy.sql
+--   2. מיגרציה 002_content.sql
+--   3. מיגרציה 003_knowledge.sql
+--   4. מיגרציה 004_users_trips.sql
+--   5. מיגרציה 005_conversations.sql
+--   6. מיגרציה 006_rls.sql
+--   7. מיגרציה 007_content_fields.sql
+--   8. מיגרציה 008_profile_axes.sql
+--   9. מיגרציה 009_plan_item_interest.sql
+--   10. מיגרציה 010_trip_members.sql
+--   11. מיגרציה 011_conformance_fixes.sql
+--   12. מיגרציה 012_height_none.sql
+--   13. מיגרציה 013_scenic_ride.sql
+--   14. מיגרציה 014_gets_wet_na.sql
+--   15. seed 010_reference.sql
+--   16. seed 011_water_parks.sql
+--   17. בלוק אימות — שאילתה אחת שמדווחת מה נוצר בפועל.
 --
--- כל קובץ עטוף ב-BEGIN/COMMIT משלו, ולכן כישלון עוצר בנקודה מוגדרת
--- ואינו משאיר מיגרציה חצי-מיושמת.
+-- מה שאין כאן, בכוונה
+--   db/local/000_auth_shim.sql. הוא מפגם מקומי לסכמת auth. ב-Supabase
+--   הסכמה הזו שייכת לפלטפורמה וכבר קיימת, והפיגום היה מתנגש בה.
+--
+-- אם משהו נופל
+--   כל קובץ עטוף ב-BEGIN/COMMIT משלו, ולכן כישלון מגלגל אחורה רק את הקובץ
+--   שנפל. אין מצב של מיגרציה חצי-מיושמת.
+--
+--   1. ב-Supabase Studio, הודעת השגיאה מופיעה למטה. הקובץ שנפל הוא הקובץ
+--      שכותרתו האחרונה מופיעה מעל השגיאה — כל בלוק פותח בשורת
+--      "-- מיגרציה: NNN_...". לשלוח לי את שם הקובץ ואת נוסח השגיאה.
+--   2. כל מה שלפניו כבר בוצע והוא תקין. אין צורך להתחיל מהתחלה.
+--   3. אחרי תיקון — להדביק רק את הבלוק שנפל ואת כל מה שאחריו.
+--   4. אפשר תמיד להריץ את בלוק האימות שבסוף הקובץ לבדו, כדי לראות מה קיים.
+--
+--   ⚠️ אין להריץ את הקובץ כולו פעמיים. הרצה שנייה נעצרת מיד ב-001 עם
+--   ERROR: type "authority_tier" already exists. זה לא נזק — הבלוק
+--   התגלגל אחורה ושום דבר לא השתנה. זו פשוט הדרך של המסד להגיד
+--   "אני כבר מותקן". במקרה כזה מריצים רק את בלוק האימות שבסוף.
+--
+-- ההרחבות
+--   ב-Supabase ההרחבות יושבות בסכמת extensions ולא ב-public. מיגרציה 001
+--   יוצרת את הסכמה אם היא חסרה, מתקינה לתוכה, ומוסיפה את extensions ל-
+--   search_path — כי 002 משתמש ב-gin_trgm_ops ו-003 בטיפוס vector(1024)
+--   בלי הסמכת סכמה. ב-Supabase pgcrypto כבר מותקנת שם, ו-
+--   create extension if not exists פשוט מדלג עליה.
+--
+-- ==========================================================================
+
+-- search_path מוגדר גם כאן, לפני הכול, כדי שהקובץ יעבוד גם אם מדביקים
+-- אותו מאמצע. הוא נקבע שוב לפני כל בלוק, מאותה סיבה.
+set search_path = public, extensions;
 
 
 -- ==========================================================================
--- migration: 001_extensions_and_taxonomy.sql
+-- מיגרציה: 001_extensions_and_taxonomy.sql
 -- ==========================================================================
+
+set search_path = public, extensions;
 
 -- 001_extensions_and_taxonomy.sql
 -- Park Day Companion — הרחבות ודומיינים
@@ -24,9 +77,31 @@
 
 BEGIN;
 
-create extension if not exists "pgcrypto";   -- gen_random_uuid()
-create extension if not exists "vector";     -- pgvector
-create extension if not exists "pg_trgm";    -- דמיון תווים, פתרון חלקי להיעדר stemmer עברי
+-- ── הרחבות ──────────────────────────────────────────────────────────
+-- ב-Supabase ההרחבות יושבות בסכמת extensions ולא ב-public. מקומית הסכמה
+-- הזו אינה קיימת, ולכן היא נוצרת כאן. הבדיקה נעשית ב-DO ולא ב-
+-- create schema if not exists, כי האחרון בודק הרשאת CREATE על מסד הנתונים
+-- לפני שהוא בודק קיום, ולכן היה יכול ליפול על סכמה שכבר קיימת.
+do $$
+begin
+  if not exists (select 1 from pg_namespace where nspname = 'extensions') then
+    create schema extensions;
+  end if;
+end
+$$;
+
+-- create extension if not exists מתעלם מ-with schema כשההרחבה כבר קיימת
+-- (הודעת notice, לא שגיאה). לכן שלוש השורות בטוחות גם ב-Supabase, שבו
+-- pgcrypto כבר מותקנת ב-extensions, וגם מקומית, שבו אף אחת לא מותקנת.
+create extension if not exists "pgcrypto" with schema extensions;  -- gen_random_uuid()
+create extension if not exists "vector"   with schema extensions;  -- pgvector
+create extension if not exists "pg_trgm"  with schema extensions;  -- דמיון תווים, פתרון חלקי להיעדר stemmer עברי
+
+-- 002 כותב gin_trgm_ops ו-003 כותב vector(1024) בלי הסמכת סכמה. הם נפתרים
+-- רק אם extensions נמצאת ב-search_path. ב-Supabase היא שם כברירת מחדל,
+-- אבל ברירת מחדל אינה ערובה — כאן זה מפורש.
+-- SET רגיל (לא SET LOCAL) שורד את ה-COMMIT ותקף לשאר הסשן.
+set search_path = public, extensions;
 
 -- ── דומיינים משותפים ────────────────────────────────────────────────
 -- שימוש ב-domain ולא ב-CHECK חוזר: הגדרה אחת, נאכפת בכל טבלה שמשתמשת בה.
@@ -53,8 +128,10 @@ COMMIT;
 
 
 -- ==========================================================================
--- migration: 002_content.sql
+-- מיגרציה: 002_content.sql
 -- ==========================================================================
+
+set search_path = public, extensions;
 
 -- 002_content.sql
 -- שכבת התוכן: destination → resort → park → land → experience
@@ -66,6 +143,11 @@ COMMIT;
 --   האלה (אינטנסיביות, גובה, רגישויות) הם מה שמייצר את הערך של המוצר.
 
 BEGIN;
+
+-- ההרחבות יושבות בסכמת extensions (ראה 001). הקובץ הזה משתמש בשמות
+-- לא-מוסמכים מתוכן, ולכן הוא קובע search_path בעצמו — כדי שיוכל לרוץ
+-- לבד, בסשן נפרד, ולא רק כחלק מ-supabase-bundle.sql.
+set local search_path = public, extensions;
 
 create table destination (
   id            text primary key,
@@ -237,8 +319,10 @@ COMMIT;
 
 
 -- ==========================================================================
--- migration: 003_knowledge.sql
+-- מיגרציה: 003_knowledge.sql
 -- ==========================================================================
+
+set search_path = public, extensions;
 
 -- 003_knowledge.sql
 -- מאגר הידע הלא-מובנה: מה שנשלף ב-RAG.
@@ -250,6 +334,11 @@ COMMIT;
 -- ממד ה-embedding נגזר מהמודל. 1024 = Cohere embed-multilingual-v3.0.
 -- שינוי מודל בעל ממד אחר מחייב מיגרציה — להכריע לפני שנבנים על זה.
 BEGIN;
+
+-- ההרחבות יושבות בסכמת extensions (ראה 001). הקובץ הזה משתמש בשמות
+-- לא-מוסמכים מתוכן, ולכן הוא קובע search_path בעצמו — כדי שיוכל לרוץ
+-- לבד, בסשן נפרד, ולא רק כחלק מ-supabase-bundle.sql.
+set local search_path = public, extensions;
 
 create table knowledge_doc (
   id            text primary key,               -- מזהה יציב מה-frontmatter. ingest אידמפוטנטי לפיו.
@@ -334,13 +423,20 @@ COMMIT;
 
 
 -- ==========================================================================
--- migration: 004_users_trips.sql
+-- מיגרציה: 004_users_trips.sql
 -- ==========================================================================
+
+set search_path = public, extensions;
 
 -- 004_users_trips.sql
 -- משתמשים, זיכרון פרופיל, וטיולים.
 
 BEGIN;
+
+-- ההרחבות יושבות בסכמת extensions (ראה 001). הקובץ הזה משתמש בשמות
+-- לא-מוסמכים מתוכן, ולכן הוא קובע search_path בעצמו — כדי שיוכל לרוץ
+-- לבד, בסשן נפרד, ולא רק כחלק מ-supabase-bundle.sql.
+set local search_path = public, extensions;
 
 create table profile (
   id         uuid primary key references auth.users(id) on delete cascade,
@@ -436,8 +532,10 @@ COMMIT;
 
 
 -- ==========================================================================
--- migration: 005_conversations.sql
+-- מיגרציה: 005_conversations.sql
 -- ==========================================================================
+
+set search_path = public, extensions;
 
 -- 005_conversations.sql
 -- שיחות טים + יומן השאלות שלא נענו.
@@ -447,6 +545,11 @@ COMMIT;
 -- אמיתיים בזמן שהם באמת מתכננים.
 
 BEGIN;
+
+-- ההרחבות יושבות בסכמת extensions (ראה 001). הקובץ הזה משתמש בשמות
+-- לא-מוסמכים מתוכן, ולכן הוא קובע search_path בעצמו — כדי שיוכל לרוץ
+-- לבד, בסשן נפרד, ולא רק כחלק מ-supabase-bundle.sql.
+set local search_path = public, extensions;
 
 create table conversation (
   id         uuid primary key default gen_random_uuid(),
@@ -502,8 +605,10 @@ COMMIT;
 
 
 -- ==========================================================================
--- migration: 006_rls.sql
+-- מיגרציה: 006_rls.sql
 -- ==========================================================================
+
+set search_path = public, extensions;
 
 -- 006_rls.sql
 -- הרשאות ברמת המסד, לא בבדיקות ב-UI. יותר בטוח ופחות קוד.
@@ -513,6 +618,11 @@ COMMIT;
 -- אדמין אינו רואה טיולים או שיחות של משתמשים אחרים — החלטה מודעת.
 
 BEGIN;
+
+-- ההרחבות יושבות בסכמת extensions (ראה 001). הקובץ הזה משתמש בשמות
+-- לא-מוסמכים מתוכן, ולכן הוא קובע search_path בעצמו — כדי שיוכל לרוץ
+-- לבד, בסשן נפרד, ולא רק כחלק מ-supabase-bundle.sql.
+set local search_path = public, extensions;
 
 create or replace function is_admin() returns boolean
   language sql stable security definer set search_path = public as $$
@@ -584,8 +694,10 @@ COMMIT;
 
 
 -- ==========================================================================
--- migration: 007_content_fields.sql
+-- מיגרציה: 007_content_fields.sql
 -- ==========================================================================
+
+set search_path = public, extensions;
 
 -- 007_content_fields.sql
 -- שדות התוכן שנגזרו מהמחקר ומהחלטות איסוף המידע.
@@ -596,6 +708,11 @@ COMMIT;
 -- האזהרה הכללי שדיסני מדביקה למחלקת מתקנים שלמה, ולכן לא אמרה דבר על
 -- הסיכוי לבחילה. השדה הנוכחי נקבע משני מקורות איכותיים שמדרגים בחילה בפועל.
 BEGIN;
+
+-- ההרחבות יושבות בסכמת extensions (ראה 001). הקובץ הזה משתמש בשמות
+-- לא-מוסמכים מתוכן, ולכן הוא קובע search_path בעצמו — כדי שיוכל לרוץ
+-- לבד, בסשן נפרד, ולא רק כחלק מ-supabase-bundle.sql.
+set local search_path = public, extensions;
 
 alter table experience drop column if exists sens_motion_sickness;
 
@@ -644,8 +761,10 @@ COMMIT;
 
 
 -- ==========================================================================
--- migration: 008_profile_axes.sql
+-- מיגרציה: 008_profile_axes.sql
 -- ==========================================================================
+
+set search_path = public, extensions;
 
 -- 008_profile_axes.sql
 -- צירי הפרופיל מהמחקר (park-day-companion-user-profile-axes.md).
@@ -657,6 +776,11 @@ COMMIT;
 -- הרשימה היא allowlist בכוונה: מפתח חדש מחייב מיגרציה, ולכן אי אפשר
 -- להמציא שדה פרופיל בשקט בקוד.
 BEGIN;
+
+-- ההרחבות יושבות בסכמת extensions (ראה 001). הקובץ הזה משתמש בשמות
+-- לא-מוסמכים מתוכן, ולכן הוא קובע search_path בעצמו — כדי שיוכל לרוץ
+-- לבד, בסשן נפרד, ולא רק כחלק מ-supabase-bundle.sql.
+set local search_path = public, extensions;
 
 alter table profile_fact drop constraint if exists profile_fact_key_check;
 alter table profile_fact add constraint profile_fact_key_check check (key in (
@@ -717,8 +841,10 @@ COMMIT;
 
 
 -- ==========================================================================
--- migration: 009_plan_item_interest.sql
+-- מיגרציה: 009_plan_item_interest.sql
 -- ==========================================================================
+
+set search_path = public, extensions;
 
 -- 009_plan_item_interest.sql
 -- כן / לא / אולי — כוונת המשתמש לגבי מתקן.
@@ -728,6 +854,11 @@ COMMIT;
 -- שמנוע המסלול חייב לכבד, אחרת הוא יציע שוב את מה שכבר נדחה.
 
 BEGIN;
+
+-- ההרחבות יושבות בסכמת extensions (ראה 001). הקובץ הזה משתמש בשמות
+-- לא-מוסמכים מתוכן, ולכן הוא קובע search_path בעצמו — כדי שיוכל לרוץ
+-- לבד, בסשן נפרד, ולא רק כחלק מ-supabase-bundle.sql.
+set local search_path = public, extensions;
 
 alter table plan_item
   add column interest text check (interest in ('yes','maybe','no'));
@@ -749,8 +880,10 @@ COMMIT;
 
 
 -- ==========================================================================
--- migration: 010_trip_members.sql
+-- מיגרציה: 010_trip_members.sql
 -- ==========================================================================
+
+set search_path = public, extensions;
 
 -- 010_trip_members.sql
 -- הרכב הקבוצה: שורה לכל חבר/ה, לא מערך בתוך שדה אחד.
@@ -764,6 +897,11 @@ COMMIT;
 -- הם נגזרים בזמן ריצה מהשורות כאן, כדי שלא ייווצר מקור אמת כפול.
 
 BEGIN;
+
+-- ההרחבות יושבות בסכמת extensions (ראה 001). הקובץ הזה משתמש בשמות
+-- לא-מוסמכים מתוכן, ולכן הוא קובע search_path בעצמו — כדי שיוכל לרוץ
+-- לבד, בסשן נפרד, ולא רק כחלק מ-supabase-bundle.sql.
+set local search_path = public, extensions;
 
 create table trip_member (
   id         uuid primary key default gen_random_uuid(),
@@ -818,14 +956,21 @@ COMMIT;
 
 
 -- ==========================================================================
--- migration: 011_conformance_fixes.sql
+-- מיגרציה: 011_conformance_fixes.sql
 -- ==========================================================================
+
+set search_path = public, extensions;
 
 -- 011_conformance_fixes.sql
 -- ארבעה ממצאים שהתגלו כשנטענו 232 שורות אמיתיות למסד ונדחו 125.
 -- הבדיקה הזו — לתת למסד לפסוק במקום להשוות בעין — היא שמצאה אותם.
 
 BEGIN;
+
+-- ההרחבות יושבות בסכמת extensions (ראה 001). הקובץ הזה משתמש בשמות
+-- לא-מוסמכים מתוכן, ולכן הוא קובע search_path בעצמו — כדי שיוכל לרוץ
+-- לבד, בסשן נפרד, ולא רק כחלק מ-supabase-bundle.sql.
+set local search_path = public, extensions;
 
 -- 1 ─ intensity מותר להיות NULL --------------------------------------------
 -- הכלל שסוכם: "מתקן בלי דירוג מוצג עם עובדות וציון מפורש שאין דירוג".
@@ -866,8 +1011,10 @@ COMMIT;
 
 
 -- ==========================================================================
--- migration: 012_height_none.sql
+-- מיגרציה: 012_height_none.sql
 -- ==========================================================================
+
+set search_path = public, extensions;
 
 -- 012_height_none.sql
 -- "אין מגבלת גובה" הוא ערך, לא היעדר ערך.
@@ -882,6 +1029,11 @@ COMMIT;
 
 BEGIN;
 
+-- ההרחבות יושבות בסכמת extensions (ראה 001). הקובץ הזה משתמש בשמות
+-- לא-מוסמכים מתוכן, ולכן הוא קובע search_path בעצמו — כדי שיוכל לרוץ
+-- לבד, בסשן נפרד, ולא רק כחלק מ-supabase-bundle.sql.
+set local search_path = public, extensions;
+
 alter table experience drop constraint experience_height_requirement_cm_check;
 alter table experience add constraint experience_height_requirement_cm_check
   check (height_requirement_cm = 0
@@ -894,8 +1046,10 @@ COMMIT;
 
 
 -- ==========================================================================
--- migration: 013_scenic_ride.sql
+-- מיגרציה: 013_scenic_ride.sql
 -- ==========================================================================
+
+set search_path = public, extensions;
 
 -- 013_scenic_ride.sql
 -- שינוי שם קטגוריה: transport → scenic_ride.
@@ -918,6 +1072,11 @@ COMMIT;
 
 BEGIN;
 
+-- ההרחבות יושבות בסכמת extensions (ראה 001). הקובץ הזה משתמש בשמות
+-- לא-מוסמכים מתוכן, ולכן הוא קובע search_path בעצמו — כדי שיוכל לרוץ
+-- לבד, בסשן נפרד, ולא רק כחלק מ-supabase-bundle.sql.
+set local search_path = public, extensions;
+
 alter table experience drop constraint experience_category_check;
 update experience set category = 'scenic_ride' where category = 'transport';
 alter table experience add constraint experience_category_check
@@ -936,8 +1095,10 @@ COMMIT;
 
 
 -- ==========================================================================
--- migration: 014_gets_wet_na.sql
+-- מיגרציה: 014_gets_wet_na.sql
 -- ==========================================================================
+
+set search_path = public, extensions;
 
 -- 014_gets_wet_na.sql
 -- `gets_wet` מקבל ערך רביעי: 'na'.
@@ -956,6 +1117,11 @@ COMMIT;
 
 BEGIN;
 
+-- ההרחבות יושבות בסכמת extensions (ראה 001). הקובץ הזה משתמש בשמות
+-- לא-מוסמכים מתוכן, ולכן הוא קובע search_path בעצמו — כדי שיוכל לרוץ
+-- לבד, בסשן נפרד, ולא רק כחלק מ-supabase-bundle.sql.
+set local search_path = public, extensions;
+
 alter table experience drop constraint experience_gets_wet_check;
 alter table experience add constraint experience_gets_wet_check
   check (gets_wet in ('none','may_get_wet','may_get_soaked','na'));
@@ -969,6 +1135,10 @@ COMMIT;
 -- ==========================================================================
 -- seed: 010_reference.sql
 -- ==========================================================================
+
+set search_path = public, extensions;
+
+BEGIN;
 
 -- 010_reference.sql — נתוני ייחוס יציבים בלבד.
 --
@@ -1007,10 +1177,14 @@ on conflict (id) do update set
   short_name = excluded.short_name, name_i18n = excluded.name_i18n,
   park_kind = excluded.park_kind, sort_order = excluded.sort_order;
 
+COMMIT;
+
 
 -- ==========================================================================
 -- seed: 011_water_parks.sql
 -- ==========================================================================
+
+set search_path = public, extensions;
 
 -- 011_water_parks.sql — שלושת פארקי המים, שנשמטו מה-seed הראשון.
 -- אידמפוטנטי.
@@ -1027,4 +1201,170 @@ on conflict (id) do update set
   park_kind = excluded.park_kind, sort_order = excluded.sort_order;
 
 COMMIT;
+
+
+-- ==========================================================================
+-- אימות — מה נוצר בפועל
+-- ==========================================================================
+
+-- verify.sql — בדיקת אימות אחרי הרצת כל המיגרציות.
+--
+-- שאילתה אחת. כל שורה היא בדיקה אחת: מה נמצא בפועל, למה ציפינו, ומצב.
+-- אין צורך לדעת SQL כדי לקרוא אותה — אם בעמודה "מצב" כל השורות ✅,
+-- ההרצה הצליחה במלואה.
+--
+-- המספרים כאן נמדדו מהרצה אמיתית של הקובץ על מסד ריק, ולא נכתבו מהזיכרון.
+-- אם מוסיפים מיגרציה, צריך לעדכן אותם כאן.
+--
+-- אפשר להריץ את השאילתה הזו שוב בכל רגע, לבד, בלי המיגרציות.
+
+with checks as (
+
+  select 1 as ord,
+         'טבלאות שנוצרו' as "בדיקה",
+         count(*)::text  as "נמצא",
+         '18'            as "ציפינו",
+         case when count(*) = 18 then '✅ תקין'
+              when count(*) >  18 then '⚠️ יותר מהצפוי — יש טבלאות נוספות ב-public'
+              else '❌ חסרות טבלאות — ראי איזו מיגרציה נפלה' end as "מצב"
+  from information_schema.tables
+  where table_schema = 'public' and table_type = 'BASE TABLE'
+
+  union all
+  select 2,
+         'Views שנוצרו',
+         count(*)::text,
+         '3',
+         case when count(*) = 3 then '✅ תקין'
+              else '❌ חסר view — 008_profile_axes או 011_conformance_fixes לא רצו' end
+  from information_schema.views where table_schema = 'public'
+
+  union all
+  select 3,
+         'מדיניות RLS',
+         count(*)::text,
+         '29',
+         case when count(*) = 29 then '✅ תקין'
+              when count(*) >  29 then '⚠️ יותר מהצפוי'
+              else '❌ חסרה מדיניות — 006_rls או 010_trip_members לא הושלמו' end
+  from pg_policies where schemaname = 'public'
+
+  union all
+  select 4,
+         'טבלאות עם RLS פעיל',
+         "עם"::text,
+         '18',
+         case when "בלי" > 0
+                then '❌ ' || "בלי" || ' טבלאות חשופות. זו דליפת מידע, לא אי-נוחות'
+              when "עם" = 18 then '✅ תקין — RLS פעיל על כל 18 הטבלאות'
+              else '❌ לא כל הטבלאות נוצרו, ולכן אי אפשר לומר ש-RLS שלם' end
+  from (
+    select count(*) filter (where rowsecurity)     as "עם",
+           count(*) filter (where not rowsecurity) as "בלי"
+    from pg_tables where schemaname = 'public'
+  ) r
+
+  union all
+  select 5,
+         'אינדקסים',
+         count(*)::text,
+         '50',
+         case when count(*) = 50 then '✅ תקין'
+              when count(*) <  50 then '❌ חסרים אינדקסים'
+              else '⚠️ יותר מהצפוי' end
+  from pg_indexes where schemaname = 'public'
+
+  union all
+  select 6,
+         'הטבלה experience קיימת',
+         case when to_regclass('public.experience') is null then 'לא' else 'כן' end,
+         'כן',
+         case when to_regclass('public.experience') is null
+              then '❌ חסרה — 002_content לא רץ'
+              else '✅ תקין' end
+
+  union all
+  select 7,
+         'עמודות בטבלה experience',
+         count(*)::text,
+         '40',
+         case when count(*) = 40 then '✅ תקין'
+              when count(*) <  40 then '❌ חסרות עמודות — 007 / 011 / 012 / 014 לא רצו במלואן'
+              else '⚠️ יותר מהצפוי' end
+  from information_schema.columns
+  where table_schema = 'public' and table_name = 'experience'
+
+  union all
+  select 8,
+         'הטבלה park קיימת',
+         case when to_regclass('public.park') is null then 'לא' else 'כן' end,
+         'כן',
+         case when to_regclass('public.park') is null
+              then '❌ חסרה — 002_content לא רץ'
+              else '✅ תקין' end
+
+  union all
+  -- הספירה עוברת דרך query_to_xml ולא דרך "from park", כי טבלה שאינה קיימת
+  -- מפילה את השאילתה כולה בזמן ניתוח — כלומר בדיוק במצב שהבדיקה נועדה
+  -- לאבחן. ה-CASE נבדק בזמן ריצה, ולכן לא נוגע בטבלה חסרה.
+  select 9,
+         'פארקים שנשתלו',
+         coalesce(park_count::text, 'אין טבלה'),
+         '10',
+         case when park_count is null then '❌ הטבלה park לא קיימת בכלל'
+              when park_count = 10 then '✅ תקין — 7 פארקי נושא ו-3 פארקי מים'
+              when park_count = 7  then '❌ חסרים פארקי המים — 011_water_parks לא רץ'
+              else '❌ ה-seed לא הושלם' end
+  from (
+    select case when to_regclass('public.park') is null then null
+                else (xpath('/row/c/text()',
+                       query_to_xml('select count(*) as c from public.park',
+                                    false, true, '')))[1]::text::int
+           end as park_count
+  ) p
+
+  union all
+  select 10,
+         'הרחבות מותקנות',
+         coalesce(string_agg(extname, ', ' order by extname), 'אין'),
+         'pg_trgm, pgcrypto, vector',
+         case when count(*) = 3 then '✅ תקין'
+              else '❌ חסרה הרחבה — 001 לא הושלמה' end
+  from pg_extension where extname in ('vector','pg_trgm','pgcrypto')
+
+  union all
+  select 11,
+         'gets_wet מקבל na',
+         case when exists (
+                select 1 from pg_constraint
+                where conrelid = to_regclass('public.experience')
+                  and pg_get_constraintdef(oid) like '%gets_wet%'
+                  and pg_get_constraintdef(oid) like '%na%'
+              ) then 'כן' else 'לא' end,
+         'כן',
+         case when exists (
+                select 1 from pg_constraint
+                where conrelid = to_regclass('public.experience')
+                  and pg_get_constraintdef(oid) like '%gets_wet%'
+                  and pg_get_constraintdef(oid) like '%na%'
+              ) then '✅ תקין' else '❌ 014_gets_wet_na לא רץ' end
+
+  union all
+  select 12,
+         'height_requirement_cm מרשה 0',
+         case when exists (
+                select 1 from pg_constraint
+                where conrelid = to_regclass('public.experience')
+                  and pg_get_constraintdef(oid) like '%height_requirement_cm%'
+                  and pg_get_constraintdef(oid) like '%0%'
+              ) then 'כן' else 'לא' end,
+         'כן',
+         case when exists (
+                select 1 from pg_constraint
+                where conrelid = to_regclass('public.experience')
+                  and pg_get_constraintdef(oid) like '%height_requirement_cm%'
+                  and pg_get_constraintdef(oid) like '%0%'
+              ) then '✅ תקין' else '❌ 012_height_none לא רץ' end
+)
+select "בדיקה", "נמצא", "ציפינו", "מצב" from checks order by ord;
 

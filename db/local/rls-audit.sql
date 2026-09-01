@@ -34,7 +34,10 @@ insert into trip_member (trip_id, member_key, role, age, height_cm)
   values ('22222222-2222-2222-2222-222222222222','m1','child',7,118) on conflict do nothing;
 
 -- 3 ─ מה anon רואה בפועל
-set local role anon;
+-- ⚠️ set role, לא set local role. הקובץ רץ מחוץ לטרנזקציה, ושם
+--    set local רק מוציא WARNING ולא עושה דבר — הבדיקה הייתה
+--    ממשיכה לרוץ כ-postgres, שעוקף RLS, ומדווחת מספרים חסרי משמעות.
+set role anon;
 select 'experience'  as t, count(*) as anon_sees from experience
 union all select 'park', count(*) from park
 union all select 'profile', count(*) from profile

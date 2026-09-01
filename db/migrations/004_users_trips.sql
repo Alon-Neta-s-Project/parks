@@ -3,6 +3,11 @@
 
 BEGIN;
 
+-- ההרחבות יושבות בסכמת extensions (ראה 001). הקובץ הזה משתמש בשמות
+-- לא-מוסמכים מתוכן, ולכן הוא קובע search_path בעצמו — כדי שיוכל לרוץ
+-- לבד, בסשן נפרד, ולא רק כחלק מ-supabase-bundle.sql.
+set local search_path = public, extensions;
+
 create table profile (
   id         uuid primary key references auth.users(id) on delete cascade,
   role       text not null default 'user' check (role in ('user','admin')),

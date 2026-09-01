@@ -8,9 +8,31 @@
 
 BEGIN;
 
-create extension if not exists "pgcrypto";   -- gen_random_uuid()
-create extension if not exists "vector";     -- pgvector
-create extension if not exists "pg_trgm";    -- דמיון תווים, פתרון חלקי להיעדר stemmer עברי
+-- ── הרחבות ──────────────────────────────────────────────────────────
+-- ב-Supabase ההרחבות יושבות בסכמת extensions ולא ב-public. מקומית הסכמה
+-- הזו אינה קיימת, ולכן היא נוצרת כאן. הבדיקה נעשית ב-DO ולא ב-
+-- create schema if not exists, כי האחרון בודק הרשאת CREATE על מסד הנתונים
+-- לפני שהוא בודק קיום, ולכן היה יכול ליפול על סכמה שכבר קיימת.
+do $$
+begin
+  if not exists (select 1 from pg_namespace where nspname = 'extensions') then
+    create schema extensions;
+  end if;
+end
+$$;
+
+-- create extension if not exists מתעלם מ-with schema כשההרחבה כבר קיימת
+-- (הודעת notice, לא שגיאה). לכן שלוש השורות בטוחות גם ב-Supabase, שבו
+-- pgcrypto כבר מותקנת ב-extensions, וגם מקומית, שבו אף אחת לא מותקנת.
+create extension if not exists "pgcrypto" with schema extensions;  -- gen_random_uuid()
+create extension if not exists "vector"   with schema extensions;  -- pgvector
+create extension if not exists "pg_trgm"  with schema extensions;  -- דמיון תווים, פתרון חלקי להיעדר stemmer עברי
+
+-- 002 כותב gin_trgm_ops ו-003 כותב vector(1024) בלי הסמכת סכמה. הם נפתרים
+-- רק אם extensions נמצאת ב-search_path. ב-Supabase היא שם כברירת מחדל,
+-- אבל ברירת מחדל אינה ערובה — כאן זה מפורש.
+-- SET רגיל (לא SET LOCAL) שורד את ה-COMMIT ותקף לשאר הסשן.
+set search_path = public, extensions;
 
 -- ── דומיינים משותפים ────────────────────────────────────────────────
 -- שימוש ב-domain ולא ב-CHECK חוזר: הגדרה אחת, נאכפת בכל טבלה שמשתמשת בה.
