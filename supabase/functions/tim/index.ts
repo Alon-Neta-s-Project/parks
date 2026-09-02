@@ -269,7 +269,7 @@ export async function handle(req: Request, env: Record<string, string | undefine
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: SYSTEM }] },
         contents: [{ role: "user", parts: [{ text: question }] }],
-        generationConfig: { temperature: 0.3, maxOutputTokens: 800 },
+        generationConfig: { temperature: 0.3, maxOutputTokens: 2048 },
       }),
     });
   } catch {
@@ -288,11 +288,51 @@ export async function handle(req: Request, env: Record<string, string | undefine
     }, 502);
   }
 
-  const data = await res.json();
-  const answer = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (typeof answer !== "string") return json({ error: "empty_answer" }, 502);
+  const data = await res.json().catch(() => null);
+  const candidate = data?.candidates?.[0];
+  // מודלים חדשים מחזירים כמה חלקים, וחלקם אינם טקסט (למשל "מחשבה").
+  // לקיחת parts[0] בלבד החזירה ריק על תשובה תקינה לחלוטין.
+  const answer = (candidate?.content?.parts ?? [])
+    .map((part: { text?: string }) => part?.text)
+    .filter((t: unknown): t is string => typeof t === "string" && t !== "")
+    .join("\n")
+    .trim();
+
+  if (!answer) {
+    // finishReason הוא ההסבר: MAX_TOKENS פירושו שהתקציב נגמר לפני הטקסט,
+    // SAFETY פירושו סינון. בלעדיו "ריק" הוא תשובה בלי סיבה.
+    return json({
+      error: "empty_answer",
+      model,
+      finish_reason: candidate?.finishReason ?? null,
+      had_candidates: Array.isArray(data?.candidates) ? data.candidates.length : 0,
+    }, 502);
+  }
 
   return json({ answer });
 }
 
-Deno.serve((req) => handle(req, Deno.env.toObject()));
+/**
+ * ⚠️ העטיפה הזו היא מה שהיה חסר.
+ *
+ * בניתי טיפול שגיאות בכל שכבה פנימית, והשארתי את החיצונית פתוחה: חריגה
+ * לא-מטופלת ברחה ל-runtime, סופאבייס החזירה 500 גולמי בלי גוף, ולוח
+ * הבדיקה נפל בניסיון לפרסר אותו — "Cannot read properties of undefined".
+ * שגיאה בלי גוף אינה ניתנת לאבחון, וזו בדיוק הנפילה השקטה בגרסתה הרועשת.
+ *
+ * ההודעה שמוחזרת היא של הקוד שלנו. מפתחות אינם מופיעים בהודעות חריגה של
+ * JavaScript, ולכן זה בטוח — ומה שנחסך הוא סבב ניחושים נוסף.
+ */
+Deno.serve(async (req) => {
+  try {
+    return await handle(req, Deno.env.toObject());
+  } catch (err) {
+    return new Response(
+      JSON.stringify({
+        error: "unhandled",
+        detail: err instanceof Error ? err.message : String(err),
+      }),
+      { status: 500, headers: { "Content-Type": "application/json; charset=utf-8" } },
+    );
+  }
+});

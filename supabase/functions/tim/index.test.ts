@@ -27,6 +27,15 @@ const geminiOk = () =>
     candidates: [{ content: { parts: [{ text: "שלום, אני מחובר." }] } }],
   }), { status: 200 });
 
+/** מודל חדש מחזיר כמה חלקים, והראשון אינו בהכרח הטקסט. */
+const geminiMultiPart = () =>
+  new Response(JSON.stringify({
+    candidates: [{
+      content: { parts: [{ thought: true }, { text: "חלק" }, { text: "שני" }] },
+      finishReason: "STOP",
+    }],
+  }), { status: 200 });
+
 Deno.test("סוד חסר וסוד פגום הם שתי שגיאות שונות", async () => {
   const missing = await handle(ask({ question: "היי" }), {});
   assertEquals(missing.status, 500);
@@ -228,4 +237,43 @@ Deno.test("404 מגוגל מסביר שהשם אינו קיים, ומצביע ע
   assertEquals(r.status, 502);
   assertEquals(b.model, "no-such-model");
   assertEquals(b.hint.includes("diagnose"), true);
+});
+
+
+Deno.test("תשובה בכמה חלקים נאספת, ולא רק parts[0]", async () => {
+  const s = stub((url) =>
+    url.includes("/rpc/") ? new Response("true", { status: 200 }) : geminiMultiPart()
+  );
+  const r = await handle(ask({ question: "היי" }), FULL);
+  s.restore();
+  assertEquals(r.status, 200);
+  // parts[0] הוא "מחשבה" בלי טקסט. הגרסה הקודמת הייתה מחזירה empty_answer
+  // על תשובה תקינה לחלוטין.
+  assertEquals((await r.json()).answer, "חלק\nשני");
+});
+
+Deno.test("תשובה ריקה מסבירה למה, ולא רק שהיא ריקה", async () => {
+  const s = stub((url) =>
+    url.includes("/rpc/")
+      ? new Response("true", { status: 200 })
+      : new Response(JSON.stringify({ candidates: [{ finishReason: "MAX_TOKENS" }] }), { status: 200 })
+  );
+  const r = await handle(ask({ question: "היי" }), FULL);
+  s.restore();
+  const b = await r.json();
+  assertEquals(r.status, 502);
+  assertEquals(b.error, "empty_answer");
+  assertEquals(b.finish_reason, "MAX_TOKENS");
+});
+
+Deno.test("גוף שאינו JSON מגוגל אינו מפיל את הפונקציה", async () => {
+  const s = stub((url) =>
+    url.includes("/rpc/") ? new Response("true", { status: 200 }) : new Response("<html>", { status: 200 })
+  );
+  const r = await handle(ask({ question: "היי" }), FULL);
+  s.restore();
+  // הפרסור הזה היה היחיד שנשאר בלי catch, וחריגה ממנו הייתה יוצאת כ-500
+  // גולמי בלי גוף — שגיאה שאי אפשר לאבחן.
+  assertEquals(r.status, 502);
+  assertEquals((await r.json()).error, "empty_answer");
 });
