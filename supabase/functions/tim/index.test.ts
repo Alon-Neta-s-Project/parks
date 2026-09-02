@@ -177,3 +177,23 @@ Deno.test("הדלי הוא גיבוב — כתובת ה-IP עצמה אינה נ�
   assertEquals(a === c, false);              // מפריד בין כתובות
   assertEquals(a.includes("203.0.113"), false);  // ולא ניתן לקרוא ממנו את הכתובת
 });
+
+
+Deno.test("האבחון מחזיר נוכחות ואורך, ולעולם לא ערך", async () => {
+  const env = { GEMINI_API_KEY: KEY, SUPABASE_URL: "http://db", MY_OWN_SECRET: "hunter2" };
+  const r = await handle(
+    new Request("http://x/tim", { method: "POST", body: JSON.stringify({ diagnose: true }) }),
+    env,
+  );
+  assertEquals(r.status, 200);
+  const text = await r.text();
+  // ⚠️ העיקר בבדיקה הזו: שום ערך אינו חוזר, גם לא של סוד שאיני מכיר בשמו.
+  assertEquals(text.includes(KEY), false);
+  assertEquals(text.includes("hunter2"), false);
+  assertEquals(text.includes("http://db"), false);
+
+  const b = JSON.parse(text);
+  assertEquals(b.known.GEMINI_API_KEY, `קיים · ${KEY.length} תווים`);
+  assertEquals(b.known.SUPABASE_SERVICE_ROLE_KEY, "חסר");
+  assertEquals(b.other_names.includes("MY_OWN_SECRET"), true, "השם כן, הערך לא");
+});

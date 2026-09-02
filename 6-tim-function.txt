@@ -61,6 +61,38 @@ export async function bucketKey(ip: string, salt: string): Promise<string> {
   return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+
+/**
+ * אבחון. מחזיר אילו משתני סביבה קיימים — **שמות, נוכחות ואורך בלבד,
+ * לעולם לא ערכים.**
+ *
+ * למה זה קבוע ולא זמני: אני חסום ברשת מסופאבייס ואיני יכול לראות אילו
+ * משתנים היא מזריקה לפונקציה. בלי זה, כל תקלת הרשאה הופכת לסבב ניחושים
+ * שבו נטע מדביקה קוד ומדווחת, שוב ושוב. שם ואורך אינם סוד — הערך הוא.
+ */
+function diagnose(env: Record<string, string | undefined>) {
+  const watched = [
+    "GEMINI_API_KEY",
+    "SUPABASE_URL",
+    "SUPABASE_ANON_KEY",
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "SUPABASE_PUBLISHABLE_KEY",
+    "SUPABASE_SECRET_KEY",
+    "SUPABASE_DB_URL",
+    "ALLOWED_ORIGIN",
+  ];
+  const known: Record<string, string> = {};
+  for (const name of watched) {
+    const v = env[name];
+    known[name] = typeof v === "string" && v !== ""
+      ? `קיים · ${v.trim().length} תווים`
+      : "חסר";
+  }
+  // גם כל שם אחר שהוזרק ושאיני מכיר — שמות בלבד.
+  const others = Object.keys(env).filter((k) => !watched.includes(k)).sort();
+  return { known, other_names: others };
+}
+
 /**
  * `*` נכון כל עוד אין דומיין. ברגע שיהיה — להגדיר את הסוד ALLOWED_ORIGIN
  * לדומיין שלנו, וזה מצטמצם מעצמו בלי שינוי קוד. מקור שאינו תואם לא מקבל
@@ -106,12 +138,17 @@ export async function handle(req: Request, env: Record<string, string | undefine
     }, 500);
   }
 
-  let question: unknown;
+  let body: Record<string, unknown>;
   try {
-    question = (await req.json())?.question;
+    body = (await req.json()) ?? {};
   } catch {
     return json({ error: "bad_json" }, 400);
   }
+
+  // {"diagnose": true} — לפני כל בדיקה אחרת, כדי שיעבוד גם כשמשהו שבור.
+  if (body.diagnose === true) return json(diagnose(env));
+
+  const question: unknown = body.question;
   if (typeof question !== "string" || question.trim() === "") {
     return json({ error: "empty_question" }, 400);
   }
