@@ -277,3 +277,46 @@ Deno.test("גוף שאינו JSON מגוגל אינו מפיל את הפונקצ
   assertEquals(r.status, 502);
   assertEquals((await r.json()).error, "empty_answer");
 });
+
+
+Deno.test("503 מגוגל מקבל ניסיון חוזר אחד, ומצליח בו", async () => {
+  let geminiCalls = 0;
+  const s = stub((url) => {
+    if (url.includes("/rpc/")) return new Response("true", { status: 200 });
+    geminiCalls += 1;
+    return geminiCalls === 1 ? new Response("", { status: 503 }) : geminiOk();
+  });
+  const r = await handle(ask({ question: "היי" }), FULL);
+  s.restore();
+  assertEquals(r.status, 200);
+  assertEquals(geminiCalls, 2, "ניסיון אחד ועוד אחד");
+  assertEquals((await r.json()).answer, "שלום, אני מחובר.");
+});
+
+Deno.test("503 שחוזר גם בניסיון השני מוחזר עם הסבר, ובלי ניסיון שלישי", async () => {
+  let geminiCalls = 0;
+  const s = stub((url) => {
+    if (url.includes("/rpc/")) return new Response("true", { status: 200 });
+    geminiCalls += 1;
+    return new Response("", { status: 503 });
+  });
+  const r = await handle(ask({ question: "היי" }), FULL);
+  s.restore();
+  const b = await r.json();
+  assertEquals(r.status, 502);
+  assertEquals(geminiCalls, 2, "בדיוק שניים — לא לולאה");
+  assertEquals(b.status, 503);
+  assertEquals(b.hint.includes("עמוסה"), true);
+});
+
+Deno.test("404 אינו זמני, ולכן אינו מנוסה שוב", async () => {
+  let geminiCalls = 0;
+  const s = stub((url) => {
+    if (url.includes("/rpc/")) return new Response("true", { status: 200 });
+    geminiCalls += 1;
+    return new Response("", { status: 404 });
+  });
+  await handle(ask({ question: "היי" }), FULL);
+  s.restore();
+  assertEquals(geminiCalls, 1, "שם מודל שגוי לא מתקן את עצמו בניסיון חוזר");
+});

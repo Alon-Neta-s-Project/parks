@@ -25,7 +25,12 @@
  * ⚠️ אין כאן ברירת מחדל "בטוחה". השם הזה הוא ניחוש מושכל בלבד; מה שקובע
  * הוא מה ש-{"diagnose":"models"} מחזיר עבור המפתח בפועל.
  */
-const DEFAULT_MODEL = "gemini-3.7-flash";
+const DEFAULT_MODEL = "gemini-3.5-flash";
+//
+// ירדנו מ-3.7 ל-3.5 אחרי 503 חוזר. 503 אינו "המודל לא קיים" — הוא
+// "המודל עמוס כרגע", והמודל החדש ביותר הוא גם העמוס ביותר. 3.5 מיושב
+// יותר. אם גם הוא יחזיר 503 — GEMINI_MODEL מאפשר לרדת ל-gemini-2.5-flash
+// בלי נגיעה בקוד.
 //
 // ⛔ ובמפורש **לא** `gemini-flash-latest`, אף שהוא נוח יותר.
 //
@@ -261,9 +266,19 @@ export async function handle(req: Request, env: Record<string, string | undefine
   const model = env.GEMINI_MODEL?.trim() || DEFAULT_MODEL;
   const endpoint =
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+  /**
+   * 503 ו-429 מגוגל הם זמניים בהגדרה — "עמוס", לא "שגוי". ניסיון חוזר
+   * אחד עם המתנה קצרה פותר את רובם.
+   *
+   * ⚠️ אחד בלבד, ובכוונה: אנחנו כבר בתוך נקודת קצה מוגבלת-קצב, וההמתנה
+   * היא זמן שהמשתמשת מחכה מול מסך. עדיף להחזיר שגיאה מפורשת מלנסות שוב
+   * ושוב ולהיראות תקוע.
+   */
+  const transient = (code: number) => code === 503 || code === 429 || code >= 500;
+
   let res: Response;
-  try {
-    res = await fetch(endpoint, {
+  const call = () =>
+    fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-goog-api-key": key! },
       body: JSON.stringify({
@@ -272,6 +287,13 @@ export async function handle(req: Request, env: Record<string, string | undefine
         generationConfig: { temperature: 0.3, maxOutputTokens: 2048 },
       }),
     });
+
+  try {
+    res = await call();
+    if (transient(res.status)) {
+      await new Promise((r) => setTimeout(r, 700));
+      res = await call();
+    }
   } catch {
     return json({ error: "upstream_unreachable" }, 502);
   }
@@ -284,6 +306,8 @@ export async function handle(req: Request, env: Record<string, string | undefine
       model,
       hint: res.status === 404
         ? `גוגל אינה מכירה את המודל "${model}". לשלוח {"diagnose":"models"} כדי לראות מה זמין למפתח הזה, ואז להגדיר סוד GEMINI_MODEL עם שם מהרשימה.`
+        : transient(res.status)
+        ? `גוגל עמוסה כרגע עבור "${model}" — זו תקלה זמנית ולא שגיאה בהגדרה. כבר ניסינו פעמיים. אם זה חוזר, להגדיר סוד GEMINI_MODEL עם דגם מיושב יותר, למשל gemini-2.5-flash.`
         : undefined,
     }, 502);
   }
