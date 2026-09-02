@@ -27,11 +27,21 @@ const geminiOk = () =>
     candidates: [{ content: { parts: [{ text: "שלום, אני מחובר." }] } }],
   }), { status: 200 });
 
-Deno.test("מפתח חסר → נאמר בדיוק מה חסר, בלי לדלוף כלום", async () => {
-  const r = await handle(ask({ question: "היי" }), {});
-  assertEquals(r.status, 500);
-  const b = await r.json();
-  assertEquals(b.error, "missing_api_key");
+Deno.test("סוד חסר וסוד פגום הם שתי שגיאות שונות", async () => {
+  const missing = await handle(ask({ question: "היי" }), {});
+  assertEquals(missing.status, 500);
+  assertEquals((await missing.json()).error, "missing_api_key");
+
+  const blank = await handle(ask({ question: "היי" }), { GEMINI_API_KEY: "   " });
+  assertEquals((await blank.json()).error, "missing_api_key");
+
+  // הדבקה חלקית — הסוג הנפוץ ביותר של תקלה, ושונה לגמרי מ"לא הוגדר"
+  const partial = await handle(ask({ question: "היי" }), { GEMINI_API_KEY: "AIzaSy" });
+  assertEquals(partial.status, 500);
+  const b = await partial.json();
+  assertEquals(b.error, "malformed_api_key");
+  assertEquals(b.detail.includes("6"), true, "האורך שהתקבל צריך להופיע");
+  assertEquals(b.detail.includes("AIzaSy"), false, "אבל לא הערך עצמו");
 });
 
 Deno.test("מפתח שאינו נראה כמו מפתח Gemini נדחה לפני שמנסים לקרוא איתו", () => {

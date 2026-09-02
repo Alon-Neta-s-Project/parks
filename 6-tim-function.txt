@@ -77,11 +77,21 @@ export async function handle(req: Request, env: Record<string, string | undefine
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
 
+  // שתי תקלות שונות לגמרי, ולכן שתי הודעות שונות. "לא הוגדר או לא מתחיל
+  // ב-AIza" שלח את נטע לבדוק את שתי האפשרויות בלי לדעת באיזו היא נמצאת.
+  // שום חלק מהמפתח אינו מוחזר — רק אורכו, שמספיק כדי לזהות הדבקה חלקית.
   const key = env.GEMINI_API_KEY;
+  if (key === undefined || key.trim() === "") {
+    return json({
+      error: "missing_api_key",
+      detail: "הסוד GEMINI_API_KEY אינו קיים. לבדוק את השם המדויק ב-Edge Functions ← Secrets, ואז Deploy מחדש — סוד חדש נכנס לפונקציה רק בפריסה הבאה.",
+    }, 500);
+  }
   if (!looksLikeGeminiKey(key)) {
-    // בכוונה מפורש: זו השגיאה היחידה שנטע תראה אם הסוד לא נשמר נכון, והיא
-    // צריכה לדעת בדיוק מה חסר. שום חלק מהמפתח אינו מוחזר.
-    return json({ error: "missing_api_key", detail: "GEMINI_API_KEY לא הוגדר בסודות הפונקציה, או שאינו מתחיל ב-AIza" }, 500);
+    return json({
+      error: "malformed_api_key",
+      detail: `הסוד קיים, אבל הערך אינו נראה כמו מפתח Gemini: אמור להתחיל ב-AIza ולהיות באורך 39 תווים בערך. האורך שהתקבל: ${key.trim().length}. סביר שההדבקה הייתה חלקית.`,
+    }, 500);
   }
 
   let question: unknown;
