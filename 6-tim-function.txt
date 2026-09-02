@@ -164,72 +164,54 @@ export async function handle(req: Request, env: Record<string, string | undefine
   // כלומר: תקלה בהגדרה הייתה הופכת את נקודת הקצה לפתוחה לגמרי, בשקט,
   // בדיוק במצב שבו אימות הטוקן כבוי. עדיף שגיאה שרואים מנקודת קצה פתוחה
   // שאיש לא יודע עליה — זה אותו כלל של "אין נפילה שקטה" ב-CLAUDE.md.
+  // ⚠️ מפתח anon ולא service_role, ובכוונה. PostgREST החזיר 403 ולא 401 —
+  // כלומר המפתח כן התקבל, והתפקיד שהוא נפתר אליו אינו service_role.
+  // check_rate_limit היא security definer ומוענקת ל-anon, ולכן היא עובדת
+  // ללא תלות בתפקיד. הטבלה עצמה נשארת סגורה לחלוטין.
   const url = env.SUPABASE_URL;
-  const serviceKey = env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !serviceKey) {
+  const dbKey = env.SUPABASE_ANON_KEY ?? env.SUPABASE_PUBLISHABLE_KEY
+    ?? env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !dbKey) {
     return json({
       error: "rate_limit_unavailable",
-      detail: "SUPABASE_URL או SUPABASE_SERVICE_ROLE_KEY חסרים, ולכן אי אפשר לאכוף גג קריאות",
+      detail: "SUPABASE_URL או מפתח גישה למסד חסרים, ולכן אי אפשר לאכוף גג קריאות",
     }, 500);
   }
   {
     const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-    const bucket = await bucketKey(ip, env.RATE_LIMIT_SALT ?? serviceKey.slice(0, 16));
-    const since = new Date(Date.now() - WINDOW_MINUTES * 60_000).toISOString();
+    const bucket = await bucketKey(ip, env.RATE_LIMIT_SALT ?? dbKey.slice(0, 16));
     const auth = {
-      apikey: serviceKey,
-      Authorization: `Bearer ${serviceKey}`,
+      apikey: dbKey,
+      Authorization: `Bearer ${dbKey}`,
       "Content-Type": "application/json",
     };
 
-    let counted: Response;
+    let res: Response;
     try {
-      counted = await fetch(
-        `${url}/rest/v1/api_call?select=id&bucket=eq.${bucket}&created_at=gt.${since}`,
-        { headers: { ...auth, Prefer: "count=exact", Range: "0-0" } },
-      );
+      res = await fetch(`${url}/rest/v1/rpc/check_rate_limit`, {
+        method: "POST",
+        headers: auth,
+        body: JSON.stringify({ p_bucket: bucket, p_window: WINDOW_MINUTES, p_max: MAX_PER_WINDOW }),
+      });
     } catch {
       return json({ error: "rate_limit_unavailable", detail: "המסד לא נענה" }, 500);
     }
-    // PostgREST מחזיר את הסך הכל בכותרת content-range, בצורה "0-0/17".
-    // כותרת חסרה פירושה שהספירה לא התקבלה — לא שהיא אפס.
-    const header = counted.headers.get("content-range");
-    const total = Number(header?.split("/")[1]);
-    if (!counted.ok || !Number.isFinite(total)) {
-      return json({ error: "rate_limit_unavailable", detail: `ספירה נכשלה (${counted.status})` }, 500);
+
+    if (!res.ok) {
+      return json({
+        error: "rate_limit_unavailable",
+        detail: `check_rate_limit החזירה ${res.status}. אם 404 — לא הורצה מיגרציה 020.`,
+      }, 500);
     }
 
-    if (total >= MAX_PER_WINDOW) {
+    // הפונקציה מחזירה בוליאני. כל דבר אחר פירושו שלא הבנו את התשובה, וזה
+    // כישלון — לא היתר.
+    const allowed = await res.json().catch(() => null);
+    if (typeof allowed !== "boolean") {
+      return json({ error: "rate_limit_unavailable", detail: "תשובה לא צפויה מ-check_rate_limit" }, 500);
+    }
+    if (!allowed) {
       return json({ error: "rate_limited", retry_after_minutes: WINDOW_MINUTES }, 429);
-    }
-
-    // רישום הקריאה. גם כאן סגור: אם לא נרשמה, הגג אינו ניתן לאכיפה
-    // בקריאה הבאה, ולכן אין טעם להמשיך.
-    let logged: Response;
-    try {
-      logged = await fetch(`${url}/rest/v1/api_call`, {
-        method: "POST",
-        headers: auth,
-        body: JSON.stringify({ bucket }),
-      });
-    } catch {
-      return json({ error: "rate_limit_unavailable", detail: "רישום הקריאה נכשל" }, 500);
-    }
-    if (!logged.ok) {
-      return json({ error: "rate_limit_unavailable", detail: `רישום הקריאה נכשל (${logged.status})` }, 500);
-    }
-
-    // ניקוי. הטבלה גדלה לנצח אחרת, ושורות ישנות מהחלון חסרות ערך — הספירה
-    // ממילא מסננת אותן. רץ באחוזים כדי לא להוסיף בקשה לכל קריאה; החלופה
-    // הנקייה היא pg_cron, והיא דורשת עוד הגדרה בסופאבייס.
-    // ⚠️ ובכוונה בלי await ובלי בדיקת תוצאה: ניקוי שנכשל אינו סיבה
-    //    לדחות משתמשת, בשונה מספירה שנכשלה.
-    if (Math.random() < 0.02) {
-      const stale = new Date(Date.now() - 2 * WINDOW_MINUTES * 60_000).toISOString();
-      fetch(`${url}/rest/v1/api_call?created_at=lt.${stale}`, {
-        method: "DELETE",
-        headers: auth,
-      }).catch(() => {});
     }
   }
 

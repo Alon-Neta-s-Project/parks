@@ -67,15 +67,16 @@ Deno.test("GET נדחה, OPTIONS מקבל CORS", async () => {
   assertEquals(o.headers.get("Access-Control-Allow-Origin"), "*");
 });
 
-const FULL = { GEMINI_API_KEY: KEY, SUPABASE_URL: "http://db", SUPABASE_SERVICE_ROLE_KEY: "svc" };
+const FULL = { GEMINI_API_KEY: KEY, SUPABASE_URL: "http://db", SUPABASE_ANON_KEY: "anon-key-value" };
 /** מסד שמאפשר לעבור: ספירה נמוכה, ורישום שמצליח. */
-const dbOk = (n = 0) => (url: string) =>
-  url.startsWith("http://db/rest")
-    ? new Response("[]", { status: 200, headers: { "content-range": `0-0/${n}` } })
+/** המסד מרשה (true) או חוסם (false) — זה כל מה ש-check_rate_limit מחזירה. */
+const dbSays = (allowed: boolean) => (url: string) =>
+  url.includes("/rpc/check_rate_limit")
+    ? new Response(JSON.stringify(allowed), { status: 200 })
     : geminiOk();
 
 Deno.test("מסלול תקין — המפתח נשלח לגוגל ואינו חוזר לדפדפן", async () => {
-  const s = stub(dbOk());
+  const s = stub(dbSays(true));
   const r = await handle(ask({ question: "היי" }), FULL);
   s.restore();
   assertEquals(r.status, 200);
@@ -88,8 +89,8 @@ Deno.test("מסלול תקין — המפתח נשלח לגוגל ואינו ח�
 
 Deno.test("שגיאה מגוגל מוחזרת כקוד בלבד, בלי גוף התשובה שלה", async () => {
   const s = stub((url) =>
-    url.startsWith("http://db/rest")
-      ? new Response("[]", { status: 200, headers: { "content-range": "0-0/0" } })
+    url.includes("/rpc/check_rate_limit")
+      ? new Response("true", { status: 200 })
       : new Response("quota exceeded for key AIzaSECRET", { status: 429 })
   );
   const r = await handle(ask({ question: "היי" }), FULL);
@@ -101,11 +102,11 @@ Deno.test("שגיאה מגוגל מוחזרת כקוד בלבד, בלי גוף �
 });
 
 Deno.test("הגבלת קצב חוסמת מעל הגג ולא מתחתיו", async () => {
-  const under = stub(dbOk(19));
+  const under = stub(dbSays(true));
   assertEquals((await handle(ask({ question: "היי" }), FULL)).status, 200);
   under.restore();
 
-  const over = stub(dbOk(20));
+  const over = stub(dbSays(false));
   const blocked = await handle(ask({ question: "היי" }), FULL);
   over.restore();
   assertEquals(blocked.status, 429);
@@ -124,13 +125,14 @@ Deno.test("בלי הגדרות מסד — נעצר, ולא ממשיך למודל
   assertEquals(s.calls.length, 0, "אסור שתהיה ולו קריאה אחת החוצה");
 });
 
-Deno.test("ספירה שנכשלה נחשבת ככישלון, לא כאפס", async () => {
+Deno.test("תשובה שאינה בוליאני נחשבת ככישלון, לא כהיתר", async () => {
   for (const bad of [
-    new Response("", { status: 500 }),                                  // המסד שגה
-    new Response("[]", { status: 200 }),                                // בלי content-range
-    new Response("[]", { status: 200, headers: { "content-range": "*/*" } }), // לא מספר
+    new Response("", { status: 500 }),                    // המסד שגה
+    new Response("", { status: 404 }),                    // מיגרציה 020 לא רצה
+    new Response("not json", { status: 200 }),            // גוף שאינו JSON
+    new Response(JSON.stringify({ ok: 1 }), { status: 200 }), // JSON, אבל לא בוליאני
   ]) {
-    const s = stub((url) => (url.startsWith("http://db/rest") ? bad.clone() : geminiOk()));
+    const s = stub((url) => (url.includes("/rpc/") ? bad.clone() : geminiOk()));
     const r = await handle(ask({ question: "היי" }), FULL);
     const outbound = s.calls.filter((c) => c.url.includes("generativelanguage")).length;
     s.restore();
@@ -140,18 +142,14 @@ Deno.test("ספירה שנכשלה נחשבת ככישלון, לא כאפס", as
   }
 });
 
-Deno.test("רישום שנכשל עוצר גם הוא — אחרת הגג לא ניתן לאכיפה בקריאה הבאה", async () => {
-  let first = true;
-  const s = stub((url) => {
-    if (!url.startsWith("http://db/rest")) return geminiOk();
-    if (first) { first = false; return new Response("[]", { status: 200, headers: { "content-range": "0-0/0" } }); }
-    return new Response("", { status: 403 });   // ה-INSERT נכשל
-  });
-  const r = await handle(ask({ question: "היי" }), FULL);
-  const outbound = s.calls.filter((c) => c.url.includes("generativelanguage")).length;
+Deno.test("הספירה וההכנסה אטומיות — קריאה אחת למסד, לא שתיים", async () => {
+  const s = stub(dbSays(true));
+  await handle(ask({ question: "היי" }), FULL);
+  const dbCalls = s.calls.filter((c) => c.url.includes("http://db")).length;
   s.restore();
-  assertEquals(r.status, 500);
-  assertEquals(outbound, 0);
+  // בגרסה הקודמת היו שתי בקשות — ספירה ואז הכנסה — ושתי קריאות במקביל
+  // יכלו לעבור את הגג יחד.
+  assertEquals(dbCalls, 1);
 });
 
 Deno.test("CORS מצטמצם לדומיין ברגע ש-ALLOWED_ORIGIN מוגדר", async () => {
