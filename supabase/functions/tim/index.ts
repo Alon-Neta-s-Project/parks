@@ -17,7 +17,15 @@
  * ולהריץ במלואו מקומית, וזה קובץ שנטע מדביקה ביד לתוך הדפדפן. תלות שאי
  * אפשר לאמת בקובץ כזה היא בדיוק מה שנופל אצלה ולא אצלי.
  */
-const MODEL = "gemini-2.0-flash";
+/**
+ * שם המודל. ניתן לשינוי בסוד GEMINI_MODEL בלי לגעת בקוד — רשימת המודלים
+ * של גוגל משתנה, ושם שהיה תקף נעלם בלי הודעה. 404 מגוגל על נתיב תקין
+ * פירושו כמעט תמיד שהשם כאן כבר לא קיים.
+ *
+ * ⚠️ אין כאן ברירת מחדל "בטוחה". השם הזה הוא ניחוש מושכל בלבד; מה שקובע
+ * הוא מה ש-{"diagnose":"models"} מחזיר עבור המפתח בפועל.
+ */
+const DEFAULT_MODEL = "gemini-2.0-flash";
 const MAX_QUESTION_CHARS = 1000;
 
 /** חלון וגג. הגבלת קצב בשרת היא ההגנה האמיתית על נקודת קצה שעולה כסף —
@@ -80,6 +88,7 @@ function diagnose(env: Record<string, string | undefined>) {
     "SUPABASE_SECRET_KEY",
     "SUPABASE_DB_URL",
     "ALLOWED_ORIGIN",
+    "GEMINI_MODEL",
   ];
   const known: Record<string, string> = {};
   for (const name of watched) {
@@ -147,6 +156,28 @@ export async function handle(req: Request, env: Record<string, string | undefine
 
   // {"diagnose": true} — לפני כל בדיקה אחרת, כדי שיעבוד גם כשמשהו שבור.
   if (body.diagnose === true) return json(diagnose(env));
+
+  // {"diagnose":"models"} — שואל את גוגל אילו מודלים זמינים למפתח הזה.
+  // שמות מודלים אינם סוד, והמפתח אינו חוזר בתשובה.
+  if (body.diagnose === "models") {
+    const k = env.GEMINI_API_KEY;
+    if (!k) return json({ error: "missing_api_key" }, 500);
+    let r: Response;
+    try {
+      r = await fetch("https://generativelanguage.googleapis.com/v1beta/models", {
+        headers: { "x-goog-api-key": k },
+      });
+    } catch {
+      return json({ error: "upstream_unreachable" }, 502);
+    }
+    if (!r.ok) return json({ error: "upstream_error", status: r.status }, 502);
+    const list = await r.json().catch(() => null);
+    const usable = (list?.models ?? [])
+      .filter((m: { supportedGenerationMethods?: string[] }) =>
+        m.supportedGenerationMethods?.includes("generateContent"))
+      .map((m: { name: string }) => m.name.replace(/^models\//, ""));
+    return json({ current: env.GEMINI_MODEL?.trim() || DEFAULT_MODEL, usable });
+  }
 
   const question: unknown = body.question;
   if (typeof question !== "string" || question.trim() === "") {
@@ -216,8 +247,9 @@ export async function handle(req: Request, env: Record<string, string | undefine
   }
 
   // ── הקריאה למודל ─────────────────────────────────────────────────────
+  const model = env.GEMINI_MODEL?.trim() || DEFAULT_MODEL;
   const endpoint =
-    `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
   let res: Response;
   try {
     res = await fetch(endpoint, {
@@ -235,7 +267,14 @@ export async function handle(req: Request, env: Record<string, string | undefine
 
   if (!res.ok) {
     // גוף התשובה של גוגל עלול לשקף בחזרה חלקים מהבקשה. מוחזר קוד בלבד.
-    return json({ error: "upstream_error", status: res.status }, 502);
+    return json({
+      error: "upstream_error",
+      status: res.status,
+      model,
+      hint: res.status === 404
+        ? `גוגל אינה מכירה את המודל "${model}". לשלוח {"diagnose":"models"} כדי לראות מה זמין למפתח הזה, ואז להגדיר סוד GEMINI_MODEL עם שם מהרשימה.`
+        : undefined,
+    }, 502);
   }
 
   const data = await res.json();

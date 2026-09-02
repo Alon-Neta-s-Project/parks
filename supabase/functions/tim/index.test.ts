@@ -195,3 +195,37 @@ Deno.test("האבחון מחזיר נוכחות ואורך, ולעולם לא ע
   assertEquals(b.known.SUPABASE_SERVICE_ROLE_KEY, "חסר");
   assertEquals(b.other_names.includes("MY_OWN_SECRET"), true, "השם כן, הערך לא");
 });
+
+
+Deno.test("אבחון מודלים מחזיר שמות בלבד, ומסנן לפי generateContent", async () => {
+  const s = stub(() =>
+    new Response(JSON.stringify({
+      models: [
+        { name: "models/gemini-x-flash", supportedGenerationMethods: ["generateContent"] },
+        { name: "models/text-embedding-y", supportedGenerationMethods: ["embedContent"] },
+      ],
+    }), { status: 200 })
+  );
+  const r = await handle(
+    new Request("http://x/tim", { method: "POST", body: JSON.stringify({ diagnose: "models" }) }),
+    { GEMINI_API_KEY: KEY },
+  );
+  const text = await r.text();
+  s.restore();
+  assertEquals(r.status, 200);
+  assertEquals(text.includes(KEY), false, "המפתח לא חוזר");
+  const b = JSON.parse(text);
+  assertEquals(b.usable, ["gemini-x-flash"]);   // רק מה שיודע generateContent
+});
+
+Deno.test("404 מגוגל מסביר שהשם אינו קיים, ומצביע על האבחון", async () => {
+  const s = stub((url) =>
+    url.includes("/rpc/") ? new Response("true", { status: 200 }) : new Response("", { status: 404 })
+  );
+  const r = await handle(ask({ question: "היי" }), { ...FULL, GEMINI_MODEL: "no-such-model" });
+  s.restore();
+  const b = await r.json();
+  assertEquals(r.status, 502);
+  assertEquals(b.model, "no-such-model");
+  assertEquals(b.hint.includes("diagnose"), true);
+});
