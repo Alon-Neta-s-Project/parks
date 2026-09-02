@@ -178,7 +178,8 @@ pre{margin:0; padding:1rem; overflow-x:auto; direction:ltr; text-align:left; bac
     <h3>ליצור את הפונקציה</h3>
     <p>בסרגל הצד — <b>Edge Functions</b>. ואז כפתור בנוסח <b>Deploy a new function</b> או <b>Create function</b>.</p>
     <p>אם מוצעות אפשרויות, לבחור את זו שמאפשרת <b>לכתוב בדפדפן</b> (<span class="mono">Via Editor</span> / <span class="mono">Create via editor</span>) ולא את זו שדורשת התקנת תוכנה במחשב.</p>
-    <dl class="field"><dt>שם הפונקציה</dt><dd>tim</dd></dl>
+    <dl class="field"><dt>Name</dt><dd>Tim</dd></dl>
+    <div class="note"><b>ה-Name הוא שם התצוגה.</b> סופאבייס מייצרת בנפרד <b>כתובת</b> לפונקציה (ה-<span class="mono">slug</span>), והיא נשארת כפי שנוצרה גם אם משנים את השם. זה תקין — הכתובת היא כתובת, לא שם המוצר. רק צריך לזכור מה היא כשמחברים את האפליקציה.</div>
     <div class="warn"><b>אם אין אפשרות לכתוב בדפדפן</b> ורק מוצע להתקין <span class="mono">Supabase CLI</span> — <b>לעצור ולכתוב לי.</b> יש דרך אחרת, ואין טעם שתתקיני כלי פיתוח.</div>
     <div class="expect"><b>אמור לקרות:</b> נפתח עורך קוד עם קובץ לדוגמה.</div>
   </div></div>
@@ -413,7 +414,7 @@ Deno.serve((req) =&gt; handle(req, Deno.env.toObject()));
   <div class="step"><div class="step__n">9</div><div class="step__body">
     <h3>לאפשר קריאה לפונקציה בלי טוקן</h3>
     <p>סופאבייס דורשת כברירת מחדל טוקן התחברות לכל קריאה לפונקציה. עדיין אין לנו הרשמה, ולכן צריך לכבות את זה — <b>לעכשיו</b>.</p>
-    <p>בדף של הפונקציה <span class="mono">tim</span>, לחפש הגדרה בנוסח <b>Verify JWT</b> / <b>Enforce JWT verification</b> ולכבות אותה.</p>
+    <p>בדף של הפונקציה <span class="mono">Tim</span>, לחפש הגדרה בנוסח <b>Verify JWT</b> / <b>Enforce JWT verification</b> ולכבות אותה.</p>
     <div class="warn"><b>אם אין הגדרה כזו בממשק</b> — לעצור ולכתוב לי. אפשר גם לעקוף את זה בבדיקה עצמה, ואסביר.</div>
     <div class="note">זה בטוח <b>רק</b> מפני שהגבלת הקצב מצעד 6 כבר עומדת — והיא <b>נכשלת סגור</b>: אם הפונקציה לא מצליחה לספור קריאות, היא מחזירה שגיאה ולא פונה למודל. בלי זה, פונקציה פתוחה שקוראת למודל בתשלום היא חשבון פתוח.</div>
     <div class="note"><b>ולעתיד, לא עכשיו:</b> הפונקציה מקבלת קריאות מכל דומיין, כי עדיין אין לנו אחד. ברגע שיהיה — מוסיפים סוד בשם <code>ALLOWED_ORIGIN</code> עם כתובת האתר, והיא מצטמצמת אליו לבדו. בלי שינוי קוד.</div>
