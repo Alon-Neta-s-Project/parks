@@ -27,9 +27,10 @@
 --   16. מיגרציה 016_skip_line_neutral.sql
 --   17. מיגרציה 017_drop_skip_line_extra_cost.sql
 --   18. מיגרציה 018_rate_limit.sql
---   19. seed 010_reference.sql
---   20. seed 011_water_parks.sql
---   21. בלוק אימות — שאילתה אחת שמדווחת מה נוצר בפועל.
+--   19. מיגרציה 019_content_fields_from_export.sql
+--   20. seed 010_reference.sql
+--   21. seed 011_water_parks.sql
+--   22. בלוק אימות — שאילתה אחת שמדווחת מה נוצר בפועל.
 --
 -- מה שאין כאן, בכוונה
 --   db/local/000_auth_shim.sql. הוא מפגם מקומי לסכמת auth. ב-Supabase
@@ -1311,6 +1312,51 @@ alter table api_call enable row level security;
 
 comment on table api_call is
   'דלי הגבלת קצב. bucket הוא גיבוב של כתובת עם מלח, לא הכתובת. שורות ישנות מ-24 שעות חסרות ערך וניתן למחוק אותן.';
+
+COMMIT;
+
+
+-- ==========================================================================
+-- מיגרציה: 019_content_fields_from_export.sql
+-- ==========================================================================
+
+set search_path = public, extensions;
+
+-- 019_content_fields_from_export.sql
+-- שבע העמודות שהאפליקציה מציגה ולמסד לא היה בית עבורן.
+--
+-- נמדד: מתוך 38 השדות הסקלריים בסכמת האפליקציה, 31 היו מכוסים ושבעה לא.
+-- בלעדיהן "האפליקציה קוראת מהמסד" אינו אפשרי — חלק מהמסך היה ממשיך להגיע
+-- מקובץ שקפא בזמן הבנייה, וזו נפילה שקטה בלבוש של הצלחה.
+--
+-- ⚠️ כולן nullable ובלי ברירת מחדל. NOT NULL DEFAULT על שדה שמגיע מאיסוף
+-- חיצוני הוא הצהרה שאיש לא בדק — התבנית שנתפסה שבע פעמים בפרויקט הזה.
+-- ריק כאן פירושו "לא הגיע בייצוא", ולא ערך.
+
+BEGIN;
+
+set local search_path = public, extensions;
+
+alter table experience add column if not exists key text;
+alter table experience add column if not exists kind text
+  check (kind in ('attraction','entertainment'));
+alter table experience add column if not exists subtype text;
+alter table experience add column if not exists admission text;
+alter table experience add column if not exists reservation text;
+alter table experience add column if not exists included_with_admission text;
+alter table experience add column if not exists status_note text;
+
+-- מפתח היציבות של הייצוא בין ייבואים. ייחודי כשהוא קיים, ומרשה NULL
+-- לשורות שטרם נטענו מחדש.
+create unique index if not exists experience_key_uidx on experience (key)
+  where key is not null;
+
+comment on column experience.key is
+  'ה-Key מהייצוא. מפתח היציבות בין ייבואים — id נגזר משם, וזה לא.';
+comment on column experience.kind is
+  'attraction / entertainment. ⚠️ אינו נגזר מ-type: הייצוא מתפלג 166/66 בעוד type מתפלג 161/41/13/13/4.';
+comment on column experience.status_note is
+  'המשפט של הייצוא על הסטטוס. נושא תאריכים — "Opens Sep 14, 2026" — ובלעדיו coming_soon הוא סטטוס בלי מתי.';
 
 COMMIT;
 

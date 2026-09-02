@@ -148,7 +148,9 @@ SKIP_LINE = {
 # Columns the export owns. Everything else on the table keeps its default and
 # is never touched by this file — see the report printed at the end.
 COLUMNS = [
-    "id", "park_id", "type", "category", "status", "name", "name_i18n",
+    "id", "key", "park_id", "land_id", "kind", "type", "category", "status",
+    "status_note", "admission", "reservation", "included_with_admission",
+    "subtype", "name", "name_i18n",
     "aliases_i18n", "intensity", "opened_year", "duration_minutes",
     "height_requirement_cm", "gets_wet", "environment", "air_conditioned",
     "wheelchair", "motion_sickness_warning", "is_motion_simulator",
@@ -160,6 +162,20 @@ COLUMNS = [
 
 experiences = json.loads(SRC.read_text(encoding="utf-8"))
 skipped: list[tuple[str, str]] = []
+
+
+
+import re as _re
+
+def land_id(park_id: str, name: str) -> str:
+    """מזהה יציב לאזור. נגזר מהפארק ומהשם, ולכן זהה בקובץ האזורים ובשורות
+    המתקנים — בלי טבלת תרגום ובלי סיכון שהשניים ייפרדו."""
+    slug = _re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+    return f"{park_id}-{slug}"
+
+def text(v):
+    """NULL נשאר NULL. מחרוזת ריקה אינה NULL, וגם לא להפך."""
+    return "null" if v is None else q(v)
 
 
 def q(s):
@@ -231,9 +247,6 @@ for e in experiences:
         skipped.append((label, f"fastAccess.summary אינו באוצר המילים: {(summary or '')[:60]!r}"))
         continue
 
-    def text(v):
-        return "null" if v is None else q(v)
-
     def boolean(v):
         return "null" if v is None else ("true" if v else "false")
 
@@ -241,10 +254,18 @@ for e in experiences:
     resolved_status.append((e["id"], status))
     rows.append((label, "(" + ", ".join([
         q(e["id"]),
+        q(e["key"]),
         q(park_id),
+        q(land_id(park_id, e["land"])),
+        q(e["kind"]),
         q(e["type"]),
         q(e["category"]),
         q(status),
+        text(e["status"].get("note")),
+        text(e["admission"]),
+        text(e["reservation"]),
+        text(e["includedWithAdmission"]),
+        text(e["subtype"]),
         q(e["nameEn"]),
         jsonb({"he": e["nameHe"]}),
         jsonb({"he": e["aliasesHe"]}),
@@ -441,11 +462,57 @@ with checks as (
 select "בדיקה", "במסד", "בייצוא", "אצלך", "מצב" from checks order by ord;
 """
 
-# ── write ────────────────────────────────────────────────────────────────
-OUTDIR.mkdir(parents=True, exist_ok=True)
-for old in OUTDIR.glob("*.sql"):
-    old.unlink()
 
+OUTDIR.mkdir(parents=True, exist_ok=True)
+for _old in OUTDIR.glob("*.sql"):
+    _old.unlink()
+RULE = "-- " + "=" * 74
+
+# ── האזורים ──────────────────────────────────────────────────────────
+# experience.land_id הוא מפתח זר ל-land, ולכן השורות האלה חייבות להיטען
+# לפני התוכן — אחרת כל 232 השורות נדחות.
+#
+# ⚠️ 79 שורות ולא 77. "Park-wide" מופיע בשלושה פארקים, ונספר פעם אחת
+# ברשימת השמות הייחודיים. והוא גם אינו אזור אלא היעדרו — מצעד או נגן
+# מסתובב אינם נמצאים באזור מסוים. הוא נשמר כשורה משלו ולא כ-NULL, כי
+# NULL כאן פירושו "לא נבדק", וזה נבדק.
+lands = sorted({(PARK_ID[e["park"]], e["land"]) for e in emitted if e["park"] in PARK_ID})
+land_rows = ",\n".join(
+    "(" + ", ".join([q(land_id(pid, name)), q(pid), q(name), jsonb({})]) + ")"
+    for pid, name in lands
+)
+LAND_SQL = f"""{RULE}
+-- Park Day Companion — אזורים בפארקים ({len(lands)} שורות)
+{RULE}
+--
+-- ⚠️ להריץ **לפני** קובצי התוכן. experience.land_id הוא מפתח זר לטבלה
+--    הזו, ובלעדיה כל שורות המתקנים נדחות.
+--
+-- נוצר על ידי scripts/build-content-seed.py. אין לערוך ביד.
+--
+-- המזהה נגזר מהפארק ומשם האזור, ולכן הוא זהה כאן ובשורות המתקנים בלי
+-- טבלת תרגום ובלי סיכון שהשניים ייפרדו.
+--
+-- zone ו-sort_order אינם נכתבים: הייצוא אינו נושא אותם. sort_order נשאר
+-- בברירת המחדל 0, כלומר "בלי סדר", ולא כהצהרה על סדר.
+{RULE}
+
+BEGIN;
+
+set local search_path = public, extensions;
+
+insert into land (id, park_id, name, name_i18n)
+values
+{land_rows}
+on conflict (id) do update set
+  park_id = excluded.park_id,
+  name = excluded.name;
+
+COMMIT;
+"""
+(OUTDIR / "land.sql").write_text(LAND_SQL, encoding="utf-8")
+
+# ── write ────────────────────────────────────────────────────────────────
 n = len(parts)
 RULE = "-- " + "=" * 74
 for i, chunk in enumerate(parts, 1):
@@ -502,7 +569,9 @@ if skipped:
 # Derived, not restated: a hand-kept list goes stale the moment a column moves
 # into COLUMNS, and then the report quietly says the opposite of the truth.
 TABLE_COLUMNS = [
-    "id", "park_id", "land_id", "type", "status", "name", "name_i18n", "aliases",
+    "id", "key", "park_id", "land_id", "kind", "type", "status", "status_note",
+    "admission", "reservation", "included_with_admission", "subtype",
+    "name", "name_i18n", "aliases",
     "aliases_i18n", "category", "opened_year", "duration_minutes", "intensity",
     "height_requirement_cm", "gets_wet", "environment", "air_conditioned",
     "wheelchair", "skip_line_system", "popularity",

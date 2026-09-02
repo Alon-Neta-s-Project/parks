@@ -44,10 +44,14 @@ Deno.test("סוד חסר וסוד פגום הם שתי שגיאות שונות",
   assertEquals(b.detail.includes("AIzaSy"), false, "אבל לא הערך עצמו");
 });
 
-Deno.test("מפתח שאינו נראה כמו מפתח Gemini נדחה לפני שמנסים לקרוא איתו", () => {
-  assertEquals(looksLikeGeminiKey("sk-proj-abc"), false);
+Deno.test("בדיקת השפיות תופסת הדבקה חלקית, ולא מניחה פורמט של ספק", () => {
   assertEquals(looksLikeGeminiKey(undefined), false);
+  assertEquals(looksLikeGeminiKey("AIzaSy"), false, "קצר מדי — הדבקה חלקית");
+  assertEquals(looksLikeGeminiKey("AIza with a space in it xxxxxxxxxxxxxxx"), false, "רווח");
   assertEquals(looksLikeGeminiKey(KEY), true);
+  // ⚠️ העיקר: מפתח באורך תקין שאינו מתחיל ב-AIza **אינו** נחסם. גוגל היא
+  //    הסמכות על הפורמט, ולא ניחוש מקומי שחוסם מפתח תקין.
+  assertEquals(looksLikeGeminiKey("x".repeat(39)), true);
 });
 
 Deno.test("שאלה ריקה, ארוכה מדי, ו-JSON פגום — כל אחת עם קוד משלה", async () => {
