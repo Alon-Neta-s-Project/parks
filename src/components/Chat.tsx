@@ -33,6 +33,14 @@ export function Chat() {
   const [profile, setProfile] = useState<Profile>(restored?.profile ?? emptyProfile);
   const [turns, setTurns] = useState<Turn[]>([]);
   const [draftParks, setDraftParks] = useState<string[]>(restored?.profile.parks ?? []);
+  /**
+   * מה שנבחר עד כה בשאלת בחירה-מרובה, לפני האישור.
+   *
+   * ⚠️ טיוטה ולא פרופיל. בחירה-מרובה נשמרת רק כשהמשתמשת מאשרת: לחיצה על
+   * צ'יפ שנייה מבטלת אותו, ואם כל לחיצה הייתה נכתבת לפרופיל, ביטול היה
+   * משאיר ערך שהיא כבר הסירה.
+   */
+  const [draftMulti, setDraftMulti] = useState<string[]>([]);
   /** How many times each question has been put. Two is the ceiling. */
   const [asked, setAsked] = useState<Record<string, number>>({});
   const [draft, setDraft] = useState("");
@@ -360,6 +368,60 @@ export function Chat() {
                 onSkip={() => skip("group")}
               />
             </div>
+          ) : question.multi ? (
+            /* ⚠️ בחירה מרובה. `multi` היה מוגדר בטיפוס ולא ממומש בשום מקום —
+               שאלה שסומנה כך הייתה מתנהגת כבחירה יחידה בשקט, כלומר משפחה
+               שאוהבת גם רכבות וגם מתקנים קלילים הייתה מאבדת אחת מהשתיים. */
+            <div className="options" ref={optionsRef}>
+              {question.options?.map((option) => {
+                const chosen = draftMulti.includes(option.id);
+                return (
+                  <button
+                    type="button"
+                    key={option.id}
+                    className="option"
+                    aria-pressed={chosen}
+                    onClick={() =>
+                      setDraftMulti((current) =>
+                        chosen
+                          ? current.filter((id) => id !== option.id)
+                          : [...current, option.id],
+                      )
+                    }
+                  >
+                    {t(`questions.${question.id}.${option.id}`)}
+                  </button>
+                );
+              })}
+              <button
+                type="button"
+                className="option option--go"
+                disabled={draftMulti.length === 0}
+                onClick={() => {
+                  // ⚠️ ה-patch נבנה מכל מה שנבחר, ולא מהאופציה האחרונה.
+                  // כל אופציה נושאת מערך בן איבר אחד, ואיחודם הוא התשובה.
+                  const merged: Record<string, string[]> = {};
+                  for (const id of draftMulti) {
+                    const patch = question.options?.find((o) => o.id === id)?.patch ?? {};
+                    for (const [field, value] of Object.entries(patch)) {
+                      if (Array.isArray(value)) {
+                        merged[field] = [...(merged[field] ?? []), ...(value as string[])];
+                      }
+                    }
+                  }
+                  const label = draftMulti
+                    .map((id) => t(`questions.${question.id}.${id}`))
+                    .join(" · ");
+                  setDraftMulti([]);
+                  answer(question.id, label, merged as Partial<Profile>);
+                }}
+              >
+                {t(`questions.${question.id}.confirm`)}
+              </button>
+              <button type="button" className="ghost" onClick={() => skip(question.id)}>
+                {t("questions.skip")}
+              </button>
+            </div>
           ) : question.source === "parks" ? (
             <div className="options" ref={optionsRef}>
               {offeredParks.map((park) => {
@@ -405,12 +467,11 @@ export function Chat() {
                       question.id,
                       t(`questions.${question.id}.${option.id}`),
                       option.patch,
-                      // The first answer is the one Tim acknowledges, so the
-                      // user sees he understood before being asked anything
-                      // personal.
-                      question.id === "planningFocus"
-                        ? t(`questions.planningFocus.ack_${option.id}`)
-                        : undefined,
+                      // ⚠️ שאלת planningFocus ירדה, ואיתה משפט האישור שנלווה
+                      // אליה. השארתי כאן undefined ולא ניסוח חלופי: אישור על
+                      // שאלה שלא נבדק שהוא מוסיף בה משהו הוא רעש, וכשדנה
+                      // תפרסם ניסוח סופי הוא ייכנס דרך he.json.
+                      undefined,
                     )
                   }
                 >

@@ -171,17 +171,48 @@ describe("more than one park", () => {
 });
 
 describe("opening questions", () => {
-  it("asks three, in the order that puts the impersonal one first", () => {
-    // Planning focus before group composition: it is not personal at all, and
-    // it lets Tim show he understood before asking about children.
-    expect(questions.map((q) => q.id)).toEqual(["planningFocus", "group", "visitedBefore"]);
+  // ⚠️ שש ולא שלוש. הסדר נקבע במוצר (פולה, 03.09) ואינו נתון לשינוי כאן —
+  // הבדיקה נועלת אותו, כדי ששינוי סדר יהיה החלטה ולא תופעת לוואי של refactor.
+  it("asks six, in the order product fixed", () => {
+    expect(questions.map((q) => q.id)).toEqual([
+      "group",
+      "attractionTypes",
+      "worlds",
+      "parkDays",
+      "visitStyle",
+      "dates",
+    ]);
   });
 
-  it("offers \"both\" as a real answer rather than a fallback", () => {
-    const focus = questions.find((q) => q.id === "planningFocus");
-    expect(focus?.options?.map((o) => o.id)).toEqual(["fit", "cost", "both"]);
-    // Same shape as the other two, so it carries the same weight on screen.
-    expect(focus?.options?.every((o) => Object.keys(o.patch).length === 1)).toBe(true);
+  // ⚠️ שלושת סוגי האטרקציות אינם סולם. משפחה יכולה לרצות גם רכבות מהירות וגם
+  // מתקנים קלילים ולהתכוון לשניהם, ולכן הם בחירה מרובה ולא טווח.
+  it("lets a family want thrill and gentle at once", () => {
+    const q = questions.find((q) => q.id === "attractionTypes");
+    expect(q?.multi).toBe(true);
+    expect(q?.options?.map((o) => o.id)).toEqual(["thrill", "family", "gentle"]);
+  });
+
+  // ⚠️ "עוד לא סגור" הוא תשובה ולא דילוג. אם הוא היה נחשב כחוסר מענה, טים
+  // היה שואל שוב על משהו שכבר נענה.
+  it("treats \"not settled yet\" as an answer, not a skip", () => {
+    const q = questions.find((q) => q.id === "parkDays");
+    const unsure = q?.options?.find((o) => o.id === "unsure");
+    expect(unsure?.patch).toEqual({ parkDays: "unsure" });
+  });
+
+  // ⚠️ רשימת העולמות פתוחה. משפחה שאומרת "Encanto" לא צריכה לבחור את הצ'יפ
+  // הקרוב ביותר.
+  it("keeps worlds open-ended beside the chips", () => {
+    const q = questions.find((q) => q.id === "worlds");
+    expect(q?.multi && q?.freeText).toBe(true);
+  });
+
+  it("asks a child's height in the same question as their age", () => {
+    // ⚠️ הגובה הוא מה שקובע מה בכלל פתוח לילד/ה, והפרדתו לשאלה נפרדת גורמת
+    // לו להיקרא כסינון. פולה קבעה: באותה נשימה.
+    const group = questions.find((q) => q.id === "group");
+    expect(group?.kind).toBe("members");
+    expect(questions.some((q) => q.id.toLowerCase().includes("height"))).toBe(false);
   });
 
   it("keeps a free-text way out beside the chips", () => {

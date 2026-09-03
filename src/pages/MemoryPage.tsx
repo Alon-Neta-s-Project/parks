@@ -36,8 +36,11 @@ export function MemoryPage() {
 
   const nothingKnown =
     profile.members.length === 0 &&
-    profile.planningFocus === null &&
-    profile.visitedBefore === null &&
+    profile.attractionTypes.length === 0 &&
+    profile.worlds.length === 0 &&
+    profile.parkDays === null &&
+    profile.visitStyle === null &&
+    profile.dates === null &&
     profile.parks.length === 0;
 
   return (
@@ -113,22 +116,53 @@ export function MemoryPage() {
           </section>
 
           <section className="block">
-            <h2>{t("memory.focus")}</h2>
+            <h2>{t("memory.preferences")}</h2>
             <div className="facts">
+              {/* ⚠️ כל שדה שלא נענה מוצג כ"עוד לא נאמר" ולא מוסתר. מסך
+                  שמראה רק את מה שידוע נראה מלא גם כשהוא ריק, והמשתמשת אינה
+                  יכולה לדעת מה טים בכלל שאל. */}
               <div className="fact">
-                <span className="fact__k">{t("memory.focus")}</span>
+                <span className="fact__k">{t("memory.attractionTypes")}</span>
                 <span className="fact__v">
-                  {profile.planningFocus
-                    ? t(`memory.focus_${profile.planningFocus}`)
+                  {profile.attractionTypes.length
+                    ? profile.attractionTypes
+                        .map((id) => t(`questions.attractionTypes.${id}`))
+                        .join(" · ")
                     : t("memory.unset")}
                 </span>
               </div>
               <div className="fact">
-                <span className="fact__k">{t("memory.visited")}</span>
+                <span className="fact__k">{t("memory.worlds")}</span>
                 <span className="fact__v">
-                  {profile.visitedBefore === null
+                  {profile.worlds.length
+                    ? profile.worlds
+                        .map((id) => t(`questions.worlds.${id}`, { defaultValue: id }))
+                        .join(" · ")
+                    : t("memory.unset")}
+                </span>
+              </div>
+              <div className="fact">
+                <span className="fact__k">{t("memory.parkDays")}</span>
+                <span className="fact__v">
+                  {profile.parkDays === null
                     ? t("memory.unset")
-                    : t(profile.visitedBefore ? "memory.visited_yes" : "memory.visited_no")}
+                    : profile.parkDays === "unsure"
+                      ? t("questions.parkDays.unsure")
+                      : t("memory.parkDays_n", { days: profile.parkDays })}
+                </span>
+              </div>
+              <div className="fact">
+                <span className="fact__k">{t("memory.visitStyle")}</span>
+                <span className="fact__v">
+                  {profile.visitStyle
+                    ? t(`questions.visitStyle.${profile.visitStyle}`)
+                    : t("memory.unset")}
+                </span>
+              </div>
+              <div className="fact">
+                <span className="fact__k">{t("memory.dates")}</span>
+                <span className="fact__v">
+                  {profile.dates ? t(`questions.dates.${profile.dates}`) : t("memory.unset")}
                 </span>
               </div>
               <div className="fact">
