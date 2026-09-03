@@ -77,7 +77,9 @@ mig(n, ok) as (values
         where ns.nspname='public' and p.proname='check_rate_limit'))),
   (21, (select exists (select 1 from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
         where ns.nspname='public' and p.proname='check_rate_limit'
-          and p.pronargs = 4 and p.prorettype = 'text'::regtype)))
+          and p.pronargs = 4 and p.prorettype = 'text'::regtype))),
+  (22, (select exists (select 1 from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
+        where ns.nspname='public' and p.proname='estimated_cost_per_message')))
 ),
 g(passed, missing) as (
   select count(*) filter (where ok),
@@ -109,8 +111,8 @@ n(experience, park, land, profile, trip, conversation, knowledge_doc,
 ),
 report(ord, "מה", "מצב") as (
   select 1, 'מיגרציות',
-         case when passed = 21 then '21 מתוך 21 ✅'
-              else passed || ' מתוך 21 ❌  — חסרות: ' || missing end from n
+         case when passed = 22 then '22 מתוך 22 ✅'
+              else passed || ' מתוך 22 ❌  — חסרות: ' || missing end from n
   union all
   select 2, 'מבנה',
          case when tables = 19 then '19 טבלאות ✅'
