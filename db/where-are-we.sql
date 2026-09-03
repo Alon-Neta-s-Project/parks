@@ -168,9 +168,12 @@ report(ord, "מה", "מצב") as (
   union all
   select 10, 'אזורים בפארקים (land)',
          case when land is null then 'הטבלה לא קיימת ❌'
-              when land = 0 then 'ריק — 77 האזורים עוד לא נשתלו ⏳'
-              when land = 77 then '77 אזורים ✅'
-              else land || ' אזורים מתוך 77 ⚠️' end from n
+              -- ⚠️ 79 ולא 77. "Park-wide" מופיע בשלושה פארקים, ונספר פעם
+              -- אחת ברשימת השמות הייחודיים. הציפייה כאן אמרה 77 והשתילה
+              -- הצליחה — כלומר הבדיקה דיווחה ⚠️ על מסד תקין לחלוטין.
+              when land = 0 then 'ריק — 79 האזורים עוד לא נשתלו ⏳'
+              when land = 79 then '79 אזורים ✅'
+              else land || ' אזורים מתוך 79 ⚠️' end from n
   union all
   select 11, 'מאגר הידע',
          case when knowledge_doc is null then 'הטבלה לא קיימת ❌'
