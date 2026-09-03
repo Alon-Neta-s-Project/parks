@@ -5,7 +5,7 @@ doc_type: guide
 authority_tier: T1
 scope_resort: wdw
 volatility: static
-source_url: https://disneyworld.disney.go.com/faq/parks/strollers/
+source_url: https://disneyworld.disney.go.com/faq/parks/strollers/, https://disneyworld.disney.go.com/guest-services/bus-transportation/
 last_verified: 2026-09-01
 product_family: park_logistics
 audience: international_guest
@@ -19,7 +19,7 @@ purchase_type: N/A
 
 ## האם אפשר לשכור עגלה?
 
-ניתן לשכור עגלות בפארקי השעשועים וב-Disney Springs, בכפוף לזמינות ולתנאי ההשכרה. `[לבדוק: האם עגלה שכורה יכולה לצאת משערי המיקום שבו הושכרה, ומהו תהליך קבלת עגלה חלופית במעבר בין פארקים.]`
+ניתן לשכור עגלות בפארקי השעשועים וב-Disney Springs, בכפוף לזמינות ולתנאי ההשכרה.
 
 ## מה עושים בתחבורה של דיסני?
 
@@ -27,8 +27,6 @@ purchase_type: N/A
 
 ## איפה משאירים את העגלה?
 
-עגלות אינן מורשות ברוב המתקנים ויש להשתמש באזורי חניית העגלות המסומנים כאשר צוות הפארק מפנה אליהם. צוות דיסני עשוי להזיז עגלות בתוך אזור החניה לצורכי תפעול. אין להשאיר חפצים אישיים בעגלה ללא השגחה. `[לבדוק: נוסח רשמי מרוכז ועדכני לגבי הזזת עגלות ואזורי החניה בכל הפארקים.]`
+עגלות אינן מורשות ברוב המתקנים ויש להשתמש באזורי חניית העגלות המסומנים כאשר צוות הפארק מפנה אליהם. צוות דיסני עשוי להזיז עגלות בתוך אזור החניה לצורכי תפעול. אין להשאיר חפצים אישיים בעגלה ללא השגחה.
 
 עגלות אינן מותרות במדרגות נעות. ניתן להשתמש במעליות וברמפות הזמינות במיקומים המיועדים לכך. כאשר עגלה מסומנת לשימוש רפואי, עשויים לחול עליה כללי נגישות אחרים ויש להסדיר זאת מול Guest Relations.
-
-מקור רשמי נוסף: https://disneyworld.disney.go.com/guest-services/bus-transportation/

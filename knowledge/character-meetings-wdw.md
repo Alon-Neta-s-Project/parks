@@ -5,7 +5,7 @@ doc_type: guide
 authority_tier: T1
 scope_resort: wdw
 volatility: seasonal
-source_url: https://disneyworld.disney.go.com/faq/parks/meeting-disney-characters/
+source_url: https://disneyworld.disney.go.com/faq/parks/meeting-disney-characters/, https://disneyworld.disney.go.com/faq/dining-reservations/character-dining/
 last_verified: 2026-09-01
 product_family: characters
 audience: international_guest
@@ -19,7 +19,7 @@ purchase_type: N/A
 
 ## האם צריך לעמוד בתור?
 
-מפגש במיקום מוגדר הוא חוויה שאליה מגיעים כמו לכל פעילות אחרת בפארק, וייתכן שתהיה המתנה. זמני ההופעה, הדמויות והזמינות עשויים להשתנות. דף החוויה או האפליקציה הם המקור העדכני למקום ולשעות. `[לבדוק: האם כל מפגש מסוים משתמש בתור רגיל, Lightning Lane או מנגנון אחר — לפי דף החוויה העדכני.]`
+מפגש במיקום מוגדר הוא חוויה שאליה מגיעים כמו לכל פעילות אחרת בפארק, וייתכן שתהיה המתנה. זמני ההופעה, הדמויות והזמינות עשויים להשתנות. דף החוויה או האפליקציה הם המקור העדכני למקום ולשעות.
 
 ## מהו Character Dining?
 
@@ -30,5 +30,3 @@ Character Dining הוא ארוחה במסעדה שבה מופיעות דמויו
 יש להשתמש ברשימת הבידור והדמויות באתר או באפליקציה, לבחור את הפארק ולבדוק את המיקום ואת שעות הפעילות ביום הביקור. מידע על דמות, שעה ומקום הוא מידע משתנה ואינו נשמר כאן כרשימה קבועה.
 
 מפגש עם דמות אינו כלול אוטומטית בכל מסעדה או בכל אירוע. רק חוויה שמסומנת רשמית כ-Character Experience או Character Dining צריכה להיות מוצגת ככזו, וההרכב עשוי להשתנות ללא התחייבות לדמות מסוימת.
-
-מקור רשמי נוסף: https://disneyworld.disney.go.com/faq/dining-reservations/character-dining/

@@ -5,7 +5,7 @@ doc_type: policy
 authority_tier: T1
 scope_resort: wdw
 volatility: seasonal
-source_url: https://disneyworld.disney.go.com/experience-updates/weather-updates/
+source_url: https://disneyworld.disney.go.com/experience-updates/weather-updates/, https://disneyworld.disney.go.com/faq/tickets/cancel-change-ticket/
 last_verified: 2026-09-01
 product_family: weather
 audience: international_guest
@@ -19,7 +19,7 @@ purchase_type: N/A
 
 ## האם ביטול חוויה מזכה בהחזר?
 
-כרטיסים וחבילות של וולט דיסני וורלד אינם ניתנים בדרך כלל לביטול או להחזר. דיסני מאפשרת במקרים מסוימים לשנות את תאריך השימוש בכרטיס שטרם נוצל. באתר הרשמי לא נמצאה התחייבות להחזר כאשר מתקן, תהלוכה, מופע או חוויה מסוימת מתבטלים בגלל מזג האוויר. `[לבדוק: האם קיימת מדיניות רשמית נפרדת לפיצוי עקב ביטול תהלוכה או מופע יחיד.]`
+כרטיסים וחבילות של וולט דיסני וורלד אינם ניתנים בדרך כלל לביטול או להחזר. דיסני מאפשרת במקרים מסוימים לשנות את תאריך השימוש בכרטיס שטרם נוצל. באתר הרשמי לא נמצאה התחייבות להחזר כאשר מתקן, תהלוכה, מופע או חוויה מסוימת מתבטלים בגלל מזג האוויר.
 
 ## מה קורה בסופת הוריקן או מזג אוויר חריג?
 
@@ -28,5 +28,3 @@ purchase_type: N/A
 ## מה צריך לבדוק ביום הביקור?
 
 יש לבדוק את עדכוני מזג האוויר הרשמיים ואת מצב החוויות באפליקציה. שעות, הופעות וזמינות מתקנים הן מידע חי, ולכן מסמך זה אינו קובע מראש איזו אטרקציה תפעל בזמן גשם.
-
-מקור רשמי נוסף: https://disneyworld.disney.go.com/faq/tickets/cancel-change-ticket/

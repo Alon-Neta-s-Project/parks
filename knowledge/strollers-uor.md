@@ -5,7 +5,7 @@ doc_type: guide
 authority_tier: T1
 scope_resort: uor
 volatility: static
-source_url: https://www.universalorlando.com/web/en/us/plan-your-visit/hours-information/childcare-services
+source_url: https://www.universalorlando.com/web/en/us/plan-your-visit/hours-information/childcare-services, https://www.universalorlando.com/webdata/k2/en/us/files/Documents/UOR_Cognitive_Disability_Guide.pdf
 last_verified: 2026-09-01
 product_family: park_logistics
 audience: international_guest
@@ -23,12 +23,10 @@ purchase_type: N/A
 
 ## איפה משאירים את העגלה?
 
-יש להשאיר את העגלה באזור החניה הייעודי הקרוב לכניסת המתקן ולא בכניסה, במעבר או במקום שאינו מסומן. `[לבדוק: האם האתר הרשמי מפרסם מדיניות לגבי הזזת עגלות בידי צוות הפארק וחפצים שנותרו בעגלה.]`
+יש להשאיר את העגלה באזור החניה הייעודי הקרוב לכניסת המתקן ולא בכניסה, במעבר או במקום שאינו מסומן.
 
 ## האם צריך לקפל עגלה בתחבורה?
 
-לא נמצא בעמודים הרשמיים שנבדקו כלל גורף ומעודכן לכל אמצעי התחבורה של Universal Orlando לגבי קיפול עגלות. `[לבדוק: כללי קיפול עגלות בשאטלים של מלונות יוניברסל, באוטובוסים ל-Volcano Bay ובכל אמצעי תחבורה פנימי נוסף.]` עד לאימות, אין להציג למשתמש כלל אחיד כאילו הוא חל על כל קו או כלי רכב.
+לא נמצא בעמודים הרשמיים שנבדקו כלל גורף ומעודכן לכל אמצעי התחבורה של Universal Orlando לגבי קיפול עגלות. עד לאימות, אין להציג למשתמש כלל אחיד כאילו הוא חל על כל קו או כלי רכב.
 
 אם עגלה משמשת כציוד ניידות בגלל מוגבלות, יש לפנות ל-Guest Services בכניסה כדי לברר אם נדרש סימון מתאים ומהם הכללים החלים עליה בתורים ובמתקנים. אין להסיק שעגלת נגישות כפופה לאותם כללים כמו עגלה רגילה.
-
-מקור רשמי נוסף: https://www.universalorlando.com/webdata/k2/en/us/files/Documents/UOR_Cognitive_Disability_Guide.pdf

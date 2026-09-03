@@ -5,7 +5,7 @@ doc_type: faq
 authority_tier: T1
 scope_resort: uor
 volatility: static
-source_url: https://www.universalorlando.com/web/en/us/plan-your-visit/hours-information/childcare-services
+source_url: https://www.universalorlando.com/web/en/us/plan-your-visit/hours-information/childcare-services, https://www.universalorlando.com/web/en/us/plan-your-visit/hours-information/theme-park-services
 last_verified: 2026-09-01
 product_family: guest_services
 audience: international_guest
@@ -27,10 +27,8 @@ Child Swap מיועד למשפחה שבה ילד קטן מדי או אינו מ�
 
 ## מי רשאי להצטרף לסבב השני?
 
-העמוד הרשמי שנבדק אינו מפרט כלל אחיד ומלא לגבי מספר המלווים שיכולים לעלות שוב עם המבוגר שהמתין. `[לבדוק: מספר האורחים שמורשים להצטרף לסבב השני בכל מתקן, והאם קיימת מגבלה כלל-ריזורט עדכנית.]`
+העמוד הרשמי שנבדק אינו מפרט כלל אחיד ומלא לגבי מספר המלווים שיכולים לעלות שוב עם המבוגר שהמתין.
 
 ## האם השירות זמין בכל מתקן?
 
 יוניברסל מציגה Child Swap כשירות במתקנים מתאימים, אך אין להניח שהוא חל על כל פעילות. יש לבדוק בדף המתקן או לשאול Team Member. השירות אינו מקצר את ההמתנה של הקבוצה הראשונה.
-
-מקור רשמי נוסף: https://www.universalorlando.com/web/en/us/plan-your-visit/hours-information/theme-park-services

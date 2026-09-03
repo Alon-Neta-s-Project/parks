@@ -5,12 +5,12 @@ doc_type: guide
 authority_tier: T1
 scope_resort: wdw
 volatility: volatile
-source_url: https://disneyworld.disney.go.com/guest-services/photopass-service/
+source_url: https://disneyworld.disney.go.com/guest-services/photopass-service/, https://disneyworld.disney.go.com/faq/photopass/missing-photos/
 last_verified: 2026-09-01
 product_family: photo
 audience: international_guest
 v1_priority: core
-purchase_type: N/A
+purchase_type: paid_addon
 ---
 
 ## מהו Disney PhotoPass?
@@ -32,5 +32,3 @@ Memory Maker הוא מוצר שמאפשר להוריד את התמונות וה�
 ## האם התמונות נשמרות ללא הגבלה?
 
 לא. לתמונות יש תקופת זמינות מוגבלת בהתאם לתנאים העדכניים. יש לבדוק בחשבון ולהוריד אותן לפני מועד התפוגה המוצג.
-
-מקור רשמי נוסף: https://disneyworld.disney.go.com/faq/photopass/missing-photos/

@@ -5,12 +5,12 @@ doc_type: guide
 authority_tier: T1
 scope_resort: uor
 volatility: volatile
-source_url: https://www.universalorlando.com/web/en/us/My-Universal-Photo
+source_url: https://www.universalorlando.com/web/en/us/My-Universal-Photo, https://www.universalorlando.com/web/en/us/plan-your-visit/hours-information/contact-us
 last_verified: 2026-09-01
 product_family: photo
 audience: international_guest
 v1_priority: core
-purchase_type: N/A
+purchase_type: paid_addon
 ---
 
 ## מהו My Universal Photos?
@@ -19,7 +19,7 @@ My Universal Photos הוא שירות הצילום של Universal Orlando. הא�
 
 ## אילו תמונות נכללות?
 
-העמוד הרשמי מציין שכל חבילות My Universal Photos כוללות הורדות דיגיטליות ללא הגבלה במסגרת תנאי החבילה. `[לבדוק: רשימה רשמית ועדכנית של מתקנים, מפגשי דמויות ומיקומי צילום הכלולים בכל חבילה; משך ההפעלה; והאם קיימות החרגות בין הפארקים.]` אין להציג רשימת מתקנים קבועה עד שהכיסוי יאומת מול תנאי המוצר הפעילים.
+העמוד הרשמי מציין שכל חבילות My Universal Photos כוללות הורדות דיגיטליות ללא הגבלה במסגרת תנאי החבילה. אין להציג רשימת מתקנים קבועה עד שהכיסוי יאומת מול תנאי המוצר הפעילים.
 
 ## האם השירות פועל בכל הריזורט?
 
@@ -27,10 +27,8 @@ My Universal Photos הוא שירות הצילום של Universal Orlando. הא�
 
 ## מה עושים אם תמונה לא עלתה?
 
-לא נמצא בעמודי המקור הרשמיים שנבדקו תהליך מפורט לדיווח על תמונה חסרה, המקביל לטופס הייעודי של Disney PhotoPass. `[לבדוק: ערוץ התמיכה הרשמי לתמונה חסרה, המידע שיש לצרף לבקשה ומגבלת הזמן לדיווח.]` עד לאימות, יש להפנות לעמוד Contact Us הרשמי או לדלפק My Universal Photos בפארק, בלי להבטיח שניתן לשחזר כל צילום.
+לא נמצא בעמודי המקור הרשמיים שנבדקו תהליך מפורט לדיווח על תמונה חסרה, המקביל לטופס הייעודי של Disney PhotoPass. עד לאימות, יש להפנות לעמוד Contact Us הרשמי או לדלפק My Universal Photos בפארק, בלי להבטיח שניתן לשחזר כל צילום.
 
 ## מה צריך לבדוק לפני רכישה?
 
 יש לבדוק אילו פארקים ומיקומים מכוסים, מהו חלון השימוש, מי בקבוצה יכול לקשר ולהוריד תמונות, ומהו מועד התפוגה. פרטים אלה עשויים להשתנות ולכן אינם נשמרים כאן כערכים קבועים.
-
-מקור רשמי נוסף: https://www.universalorlando.com/web/en/us/plan-your-visit/hours-information/contact-us

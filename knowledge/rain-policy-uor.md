@@ -5,7 +5,7 @@ doc_type: policy
 authority_tier: T1
 scope_resort: uor
 volatility: seasonal
-source_url: https://www.universalorlando.com/web/en/us/plan-your-visit/weather-updates/severe-weather.html
+source_url: https://www.universalorlando.com/web/en/us/plan-your-visit/weather-updates/severe-weather.html, https://www.universalorlando.com/web/en/us/faqs/tickets-and-packages
 last_verified: 2026-09-01
 product_family: weather
 audience: international_guest
@@ -19,7 +19,7 @@ purchase_type: N/A
 
 ## האם גשם רגיל מזכה בהחזר?
 
-הרכישות ביוניברסל הן בדרך כלל סופיות ואינן ניתנות להחזר, בכפוף לתנאים של המוצר שנרכש. באתר הרשמי לא נמצאה התחייבות כללית להחזר בגלל גשם או בגלל ביטול של מתקן, מופע או תהלוכה בודדים. `[לבדוק: האם קיימת מדיניות רשמית כללית לפיצוי עקב ביטול בידור או מתקן יחיד, מעבר לתנאי הכרטיס.]`
+הרכישות ביוניברסל הן בדרך כלל סופיות ואינן ניתנות להחזר, בכפוף לתנאים של המוצר שנרכש. באתר הרשמי לא נמצאה התחייבות כללית להחזר בגלל גשם או בגלל ביטול של מתקן, מופע או תהלוכה בודדים.
 
 ## מהי מדיניות מזג האוויר החריג?
 
@@ -28,5 +28,3 @@ purchase_type: N/A
 ## מה צריך לבדוק לפני שמבקשים שינוי?
 
 יש לזהות אם נרכשה חבילה, כרטיס בלבד או מוצר אחר, ולבדוק את תנאיו. אם מדובר במזג אוויר חריג, יש לפנות לערוץ השירות הרשמי המופיע במדיניות. שעות, זמינות מתקנים וביטולי מופעים הם מידע חי ואינם נשמרים במסמך זה.
-
-מקור רשמי נוסף: https://www.universalorlando.com/web/en/us/faqs/tickets-and-packages

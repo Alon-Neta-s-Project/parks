@@ -5,7 +5,7 @@ doc_type: guide
 authority_tier: T1
 scope_resort: uor
 volatility: seasonal
-source_url: https://www.universalorlando.com/web/en/us/things-to-do/character-sightings
+source_url: https://www.universalorlando.com/web/en/us/things-to-do/character-sightings, https://www.universalorlando.com/webdata/k2/en/us/files/Documents/UOR_Cognitive_Disability_Guide.pdf
 last_verified: 2026-09-01
 product_family: characters
 audience: international_guest
@@ -23,12 +23,10 @@ purchase_type: N/A
 
 ## האם צריך לעמוד בתור?
 
-מפגש מוגדר עשוי לכלול המתנה או תור. בדף הרשמי של כל Encounter מופיעים סוג החוויה והמיקום, ולעיתים הנחיה לבדוק את שעות ההופעה באפליקציה. `[לבדוק: אופן התור המדויק לכל מפגש ביום הביקור.]`
+מפגש מוגדר עשוי לכלול המתנה או תור. בדף הרשמי של כל Encounter מופיעים סוג החוויה והמיקום, ולעיתים הנחיה לבדוק את שעות ההופעה באפליקציה.
 
 ## האם יש ארוחות עם דמויות?
 
-האתר הרשמי מציג חוויות ואירועים מסוימים שבהם עשויים להופיע מפגשי דמויות, אך לא נמצאה בעמודי המקור שנבדקו רשימה יציבה ומלאה של Character Dining לכל הריזורט. `[לבדוק: רשימת ארוחות הדמויות הפעילות והאם נדרשת הזמנה מראש, לפי האתר הרשמי בעת הפרסום.]`
+האתר הרשמי מציג חוויות ואירועים מסוימים שבהם עשויים להופיע מפגשי דמויות, אך לא נמצאה בעמודי המקור שנבדקו רשימה יציבה ומלאה של Character Dining לכל הריזורט.
 
 הופעת דמות אינה מובטחת רק משום שהדמות מזוהה עם אזור מסוים בפארק. דפי המפגש והאפליקציה הם המקור לזמינות באותו יום, וגם הופעה שפורסמה עשויה להשתנות או להתבטל.
-
-מקור רשמי נוסף: https://www.universalorlando.com/webdata/k2/en/us/files/Documents/UOR_Cognitive_Disability_Guide.pdf
