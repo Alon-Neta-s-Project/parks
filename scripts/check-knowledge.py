@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
-"""בדיקת מסמכי הידע לפני ingest.
+"""בדיקת מסמכי הידע לפני ingest — לפי חוקי v2.
+
+⚠️ נכון לכתיבת השורות האלה התיקייה מכילה את **v1**, ולכן הבדיקה **נכשלת
+ב-63 בעיות, בכוונה**: 14 מסמכים בלי ארבעת שדות הטקסונומיה ושבעה עם
+source_url_2 שבוטל. זה בדיוק מה שהיא נועדה להראות. היא תעבור ברגע
+ש-knowledge_base_v2 ייכנס לתיקייה, ואם לא — היא אומרת מה חסר, קובץ בקובץ.
+בדיקה שמותאמת לתוכן הקיים כדי "לעבור" אינה בדיקה.
+
 
 ⚠️ למה סקריפט ולא עין: 17 מסמכים נוספים (נושא 16) ייכנסו לאותה תיקייה,
 ומסמך שאחד השדות שלו חסר או מחוץ לאוצר המילים ייכנס לאינדקס בשקט ויישלף
@@ -22,11 +29,37 @@ VOCAB = {
     "authority_tier": {"T1", "T2", "T3", "T4", "T5"},
     "volatility": {"static", "seasonal", "volatile"},
     "scope_resort": {"wdw", "uor"},
+    "product_family": {
+        # מקבוצה ב' — הכרטיסים, שדרשו ניתוב
+        "queue_access", "admission", "park_hopping", "hotel_benefit",
+        "eligibility_program", "event_ticket",
+        # חמישה שנוספו לקבוצה א' (פולה, v2)
+        "characters", "guest_services", "photo", "weather", "park_logistics",
+    },
+    "audience": {
+        "international_guest", "hotel_guest", "annual_passholder",
+        "florida_resident", "military",
+    },
+    "v1_priority": {"core", "appendix"},
+    # ⚠️ N/A הוא ערך ולא היעדרו. שלושת המצבים באותה שכבה: ריק = לא בדקנו,
+    # N/A = השאלה לא קיימת (לעגלות ולגשם אין סוג רכישה), וכל השאר = תשובה.
+    "purchase_type": {
+        "ticket", "paid_addon", "included_benefit", "reservation_mechanism", "N/A",
+    },
 }
+# ⚠️ 12 שדות ב-53 מתוך 53, אפס חריגים (פולה, v2). קבוצה א' מולאה: שדה
+# שמסננים עליו וחסר בו ערך אינו חוסר מידע אלא **הדרה שקטה** — 14 המסמכים
+# שהיו חסרים audience הם דמויות, גשם, עגלות והחלפת הורים, כלומר בדיוק מה
+# שמשפחה שואלת.
 REQUIRED = ["id", "title", "doc_type", "authority_tier", "scope_resort",
-            "volatility", "source_url", "last_verified"]
-# ⚠️ ארבעת אלה קיימים ב-39 מתוך 53 ואינם ב-14 האחרים. חסר כאן אינו ערך.
-OPTIONAL = ["product_family", "audience", "v1_priority", "purchase_type", "source_url_2"]
+            "volatility", "source_url", "last_verified",
+            "product_family", "audience", "v1_priority", "purchase_type"]
+OPTIONAL: list[str] = []
+# ⛔ source_url_2 בוטל ואינו מתקבל כתמיכה לאחור. שתי דרכים לאותו דבר הן
+# שני מקורות אמת — הכלל שכבר תפס אותנו שבע פעמים. הוא נשבר ממילא ברגע
+# שיש מקור שלישי, ו-source_url_3 אינו פתרון. source_url הוא **רשימה**
+# מופרדת בפסיק, שגדלה בלי לשנות סכמה.
+RETIRED = {"source_url_2": "מוזג ל-source_url כרשימה מופרדת בפסיק (v2)"}
 
 problems: list[str] = []
 
@@ -43,6 +76,7 @@ def main() -> int:
 
     seen_ids: dict[str, str] = {}
     tiers: Counter[str] = Counter()
+    sources = [0]
 
     for path in files:
         name = path.name
@@ -62,7 +96,9 @@ def main() -> int:
             if not fm.get(field):
                 fail(name, f"חסר {field}")
         for field in fm:
-            if field not in REQUIRED and field not in OPTIONAL:
+            if field in RETIRED:
+                fail(name, f"{field} בוטל — {RETIRED[field]}")
+            elif field not in REQUIRED and field not in OPTIONAL:
                 fail(name, f"שדה שאינו מוכר: {field}")
         for field, allowed in VOCAB.items():
             if field in fm and fm[field] not in allowed:
@@ -76,6 +112,12 @@ def main() -> int:
             fail(name, f"id כפול, מופיע גם ב-{seen_ids[fm['id']]}")
         elif fm.get("id"):
             seen_ids[fm["id"]] = name
+
+        # ⚠️ source_url הוא רשימה גם כשיש בה אחד. כל איבר חייב להיות URL —
+        # פסיק שנשאר בסוף או ערך ריק בין שני פסיקים ייכנס כמקור ריק.
+        for url in [u.strip() for u in fm.get("source_url", "").split(",")]:
+            if not url.startswith("http"):
+                fail(name, f"source_url מכיל איבר שאינו כתובת: {url!r}")
 
         if fm.get("last_verified") and not re.fullmatch(r"\d{4}-\d{2}-\d{2}", fm["last_verified"]):
             fail(name, f"last_verified={fm['last_verified']!r} אינו תאריך")
@@ -91,8 +133,10 @@ def main() -> int:
 
         if fm.get("authority_tier"):
             tiers[fm["authority_tier"]] += 1
+        sources[0] += len([u for u in fm.get("source_url", "").split(",") if u.strip()])
 
-    print(f"{len(files)} מסמכים · " + " · ".join(f"{k} {v}" for k, v in sorted(tiers.items())))
+    print(f"{len(files)} מסמכים · " + " · ".join(f"{k} {v}" for k, v in sorted(tiers.items()))
+          + f" · {sources[0]} קישורים")
     if problems:
         print(f"\n❌ {len(problems)} בעיות:")
         for p in problems:
