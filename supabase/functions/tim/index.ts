@@ -276,6 +276,28 @@ export async function handle(req: Request, env: Record<string, string | undefine
 
   // ── הקריאה למודל ─────────────────────────────────────────────────────
   const model = env.GEMINI_MODEL?.trim() || DEFAULT_MODEL;
+
+  /**
+   * תקציב החשיבה — הידית היקרה ביותר שיש לנו, וזה נמדד ולא הוערך.
+   *
+   * במדידה אמיתית: קלט 275 · תשובה 154 · **חשיבה 505**. אסימוני חשיבה
+   * מחויבים כפלט, כלומר הם היו **72% מעלות ההודעה** — פי שלושה מהתשובה
+   * עצמה, בשביל לומר "אין לי עדיין נתונים". לשם השוואה: מעבר ל-3.6
+   * חוסך 16%, וקאשינג של כל הקלט חוסך 5%.
+   *
+   * ⚠️ **opt-in בכוונה.** בלי הסוד נשלח בדיוק מה שנשלח היום, כלומר
+   * ההתנהגות שכבר עובדת אינה משתנה מעצם הפריסה. השדה אינו מתועד אחיד
+   * בין דורות המודלים, וסיכון של 400 על שדה לא מוכר אינו סיכון שלוקחים
+   * בשקט על נתיב שעובד. מגדירים סוד, מודדים, ואם נשבר — מוחקים אותו
+   * וחוזרים אחורה בלי לגעת בקוד.
+   *
+   * ערך לא-מספרי מתעלמים ממנו במקום לשלוח אותו: סוד עם שגיאת הקלדה
+   * שמפיל את טים לגמרי הוא מחיר גבוה מדי על ידית אופציונלית.
+   */
+  const budget = Number(env.GEMINI_THINKING_BUDGET);
+  const thinking = Number.isFinite(budget) && env.GEMINI_THINKING_BUDGET?.trim()
+    ? { thinkingConfig: { thinkingBudget: budget } }
+    : {};
   const endpoint =
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
   /**
@@ -296,7 +318,16 @@ export async function handle(req: Request, env: Record<string, string | undefine
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: SYSTEM }] },
         contents: [{ role: "user", parts: [{ text: question }] }],
-        generationConfig: { temperature: 0.3, maxOutputTokens: 2048 },
+        generationConfig: {
+          temperature: 0.3,
+          // ⚠️ 2048 ולא פחות. אסימוני החשיבה נספרים לתוך התקציב הזה,
+          // ובמדידה אמיתית הם היו 505 מול תשובה של 154. הצעתי קודם
+          // להוריד ל-1000 — זה היה מקצץ את התשובה באמצע ומחזיר
+          // MAX_TOKENS ריק, כלומר שובר במקום לחסוך. הידית הנכונה היא
+          // תקציב החשיבה למטה, לא הגג.
+          maxOutputTokens: 2048,
+          ...thinking,
+        },
       }),
     });
 

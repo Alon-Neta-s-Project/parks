@@ -414,3 +414,56 @@ Deno.test("בלי usageMetadata התשובה עדיין נמסרת, והמדיד
   assertEquals(b.answer, "שלום, אני מחובר.");
   assertEquals(b.usage, null);
 });
+
+// ── תקציב החשיבה ─────────────────────────────────────────────────────
+// נמדד: חשיבה 505 מול תשובה 154 — 72% מעלות ההודעה. הידית היקרה ביותר.
+// היא opt-in כדי שפריסה לא תשנה התנהגות שכבר עובדת.
+
+/** הגוף שנשלח לגוגל, כאובייקט. */
+const sentToGemini = (calls: { url: string; init?: RequestInit }[]) =>
+  // deno-lint-ignore no-explicit-any
+  JSON.parse(calls.find((c) => c.url.includes("generativelanguage"))!.init!.body as any);
+
+Deno.test("בלי הסוד — לא נשלח thinkingConfig כלל", async () => {
+  const s = stub(dbSays("ok"));
+  await handle(ask({ question: "היי" }), FULL);
+  s.restore();
+  const body = sentToGemini(s.calls);
+  assertEquals("thinkingConfig" in body.generationConfig, false);
+  assertEquals(body.generationConfig.maxOutputTokens, 2048);
+});
+
+Deno.test("עם הסוד — התקציב נשלח כמספר", async () => {
+  const s = stub(dbSays("ok"));
+  await handle(ask({ question: "היי" }), { ...FULL, GEMINI_THINKING_BUDGET: "128" });
+  s.restore();
+  assertEquals(sentToGemini(s.calls).generationConfig.thinkingConfig, { thinkingBudget: 128 });
+});
+
+Deno.test("אפס הוא תקציב, לא 'לא הוגדר'", async () => {
+  const s = stub(dbSays("ok"));
+  await handle(ask({ question: "היי" }), { ...FULL, GEMINI_THINKING_BUDGET: "0" });
+  s.restore();
+  assertEquals(sentToGemini(s.calls).generationConfig.thinkingConfig, { thinkingBudget: 0 });
+});
+
+// סוד עם שגיאת הקלדה שמפיל את טים לגמרי הוא מחיר גבוה מדי על ידית
+// אופציונלית. ערך שאינו מספר מתעלמים ממנו, ולא שולחים אותו הלאה.
+Deno.test("ערך פגום בסוד אינו נשלח, וטים ממשיך לעבוד", async () => {
+  for (const bad of ["", "   ", "הרבה", "NaN"]) {
+    const s = stub(dbSays("ok"));
+    const r = await handle(ask({ question: "היי" }), { ...FULL, GEMINI_THINKING_BUDGET: bad });
+    s.restore();
+    assertEquals(r.status, 200, `נשבר על ${JSON.stringify(bad)}`);
+    assertEquals("thinkingConfig" in sentToGemini(s.calls).generationConfig, false);
+  }
+});
+
+// המודל יושב בסוד ולא בקוד, כדי שמעבר ל-3.6 לא ידרוש פריסת קוד.
+Deno.test("שם המודל מגיע מהסוד, ומוחזר בתשובה", async () => {
+  const s = stub(dbSays("ok"));
+  const r = await handle(ask({ question: "היי" }), { ...FULL, GEMINI_MODEL: "gemini-3.6-flash" });
+  s.restore();
+  assertEquals((await r.json()).model, "gemini-3.6-flash");
+  assertEquals(s.calls.some((c) => c.url.includes("gemini-3.6-flash")), true);
+});
