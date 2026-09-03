@@ -7,6 +7,10 @@ scope_resort: wdw
 volatility: volatile
 source_url: https://disneyworld.disney.go.com/guest-services/photopass-service/
 last_verified: 2026-09-01
+product_family: photo
+audience: international_guest
+v1_priority: core
+purchase_type: N/A
 ---
 
 ## מהו Disney PhotoPass?

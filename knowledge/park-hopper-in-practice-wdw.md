@@ -5,8 +5,7 @@ doc_type: tip
 authority_tier: T3
 scope_resort: wdw
 volatility: seasonal
-source_url: https://www.disneytouristblog.com/park-hopping-disney-world-tips/
-source_url_2: https://www.mousehacking.com/blog/how-to-park-hop-at-disney-world
+source_url: https://www.disneytouristblog.com/park-hopping-disney-world-tips/, https://www.mousehacking.com/blog/how-to-park-hop-at-disney-world
 last_verified: 2026-09-01
 product_family: park_hopping
 audience: international_guest

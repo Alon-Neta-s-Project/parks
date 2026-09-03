@@ -5,8 +5,7 @@ doc_type: tip
 authority_tier: T3
 scope_resort: uor
 volatility: volatile
-source_url: https://www.reddit.com/r/UniversalOrlando/comments/1sol625/
-source_url_2: https://touringplans.com/universal-orlando/universal-express
+source_url: https://www.reddit.com/r/UniversalOrlando/comments/1sol625/, https://touringplans.com/universal-orlando/universal-express
 last_verified: 2026-09-01
 product_family: queue_access
 audience: international_guest

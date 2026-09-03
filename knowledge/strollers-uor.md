@@ -7,6 +7,10 @@ scope_resort: uor
 volatility: static
 source_url: https://www.universalorlando.com/web/en/us/plan-your-visit/hours-information/childcare-services
 last_verified: 2026-09-01
+product_family: park_logistics
+audience: international_guest
+v1_priority: core
+purchase_type: N/A
 ---
 
 ## האם אפשר לשכור עגלה?

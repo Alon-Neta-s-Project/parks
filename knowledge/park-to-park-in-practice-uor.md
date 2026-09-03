@@ -5,8 +5,7 @@ doc_type: tip
 authority_tier: T3
 scope_resort: uor
 volatility: seasonal
-source_url: https://themeparkpro.com/universal-orlando-park-to-park-ticket-worth-it/
-source_url_2: https://www.reddit.com/r/UniversalOrlando/comments/tyhva9/is_park_to_park_worth_it_for_hogwarts_express/
+source_url: https://themeparkpro.com/universal-orlando-park-to-park-ticket-worth-it/, https://www.reddit.com/r/UniversalOrlando/comments/tyhva9/is_park_to_park_worth_it_for_hogwarts_express/
 last_verified: 2026-09-01
 product_family: park_hopping
 audience: international_guest

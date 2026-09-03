@@ -7,6 +7,10 @@ scope_resort: wdw
 volatility: static
 source_url: https://disneyworld.disney.go.com/faq/parks/strollers/
 last_verified: 2026-09-01
+product_family: park_logistics
+audience: international_guest
+v1_priority: core
+purchase_type: N/A
 ---
 
 ## איזו עגלה מותר להכניס?

@@ -7,6 +7,10 @@ scope_resort: uor
 volatility: seasonal
 source_url: https://orlandoinformer.com/universal/orlando-characters
 last_verified: 2026-09-01
+product_family: characters
+audience: international_guest
+v1_priority: core
+purchase_type: N/A
 ---
 
 ## האם הדמויות עומדות רק במקום קבוע?

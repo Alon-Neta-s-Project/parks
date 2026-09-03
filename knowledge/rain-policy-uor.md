@@ -7,6 +7,10 @@ scope_resort: uor
 volatility: seasonal
 source_url: https://www.universalorlando.com/web/en/us/plan-your-visit/weather-updates/severe-weather.html
 last_verified: 2026-09-01
+product_family: weather
+audience: international_guest
+v1_priority: core
+purchase_type: N/A
 ---
 
 ## מה עלול להשתנות בגלל מזג האוויר?

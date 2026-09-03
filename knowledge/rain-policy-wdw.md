@@ -7,6 +7,10 @@ scope_resort: wdw
 volatility: seasonal
 source_url: https://disneyworld.disney.go.com/experience-updates/weather-updates/
 last_verified: 2026-09-01
+product_family: weather
+audience: international_guest
+v1_priority: core
+purchase_type: N/A
 ---
 
 ## מה עלול להשתנות בגלל מזג האוויר?

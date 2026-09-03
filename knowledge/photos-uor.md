@@ -7,6 +7,10 @@ scope_resort: uor
 volatility: volatile
 source_url: https://www.universalorlando.com/web/en/us/My-Universal-Photo
 last_verified: 2026-09-01
+product_family: photo
+audience: international_guest
+v1_priority: core
+purchase_type: N/A
 ---
 
 ## מהו My Universal Photos?

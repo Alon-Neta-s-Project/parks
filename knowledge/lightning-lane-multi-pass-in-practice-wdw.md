@@ -5,8 +5,7 @@ doc_type: tip
 authority_tier: T3
 scope_resort: wdw
 volatility: volatile
-source_url: https://www.reddit.com/r/WaltDisneyWorld/comments/1sksdbd/
-source_url_2: https://www.disneytouristblog.com/lightning-lane-multi-pass-worth-money-disney-world-lower-crowds/
+source_url: https://www.reddit.com/r/WaltDisneyWorld/comments/1sksdbd/, https://www.disneytouristblog.com/lightning-lane-multi-pass-worth-money-disney-world-lower-crowds/
 last_verified: 2026-09-01
 product_family: queue_access
 audience: international_guest

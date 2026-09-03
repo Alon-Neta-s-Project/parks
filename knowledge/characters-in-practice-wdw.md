@@ -7,6 +7,10 @@ scope_resort: wdw
 volatility: seasonal
 source_url: https://www.newyorker.com/magazine/2022/05/30/larping-goes-to-disney-world
 last_verified: 2026-09-01
+product_family: characters
+audience: international_guest
+v1_priority: core
+purchase_type: N/A
 ---
 
 ## האם פוגשים דמויות במקרה ברחוב?

@@ -5,8 +5,7 @@ doc_type: tip
 authority_tier: T3
 scope_resort: wdw
 volatility: volatile
-source_url: https://www.undercovertourist.com/blog/disney-lightning-lane-faq/
-source_url_2: https://www.mousehacking.com/blog/magic-kingdom-lightning-lanes-rides-and-strategy
+source_url: https://www.undercovertourist.com/blog/disney-lightning-lane-faq/, https://www.mousehacking.com/blog/magic-kingdom-lightning-lanes-rides-and-strategy
 last_verified: 2026-09-01
 product_family: queue_access
 audience: international_guest

@@ -5,8 +5,7 @@ doc_type: tip
 authority_tier: T3
 scope_resort: wdw
 volatility: volatile
-source_url: https://www.reddit.com/r/WaltDisneyWorld/comments/1n9fej3/
-source_url_2: https://www.disneytouristblog.com/lightning-lane-premier-pass-disney-world-guide-faq/
+source_url: https://www.reddit.com/r/WaltDisneyWorld/comments/1n9fej3/, https://www.disneytouristblog.com/lightning-lane-premier-pass-disney-world-guide-faq/
 last_verified: 2026-09-01
 product_family: queue_access
 audience: international_guest
