@@ -247,18 +247,30 @@ export async function handle(req: Request, env: Record<string, string | undefine
     if (!res.ok) {
       return json({
         error: "rate_limit_unavailable",
-        detail: `check_rate_limit החזירה ${res.status}. אם 404 — לא הורצה מיגרציה 020.`,
+        detail: `check_rate_limit החזירה ${res.status}. אם 404 — לא הורצו מיגרציות 020/021.`,
       }, 500);
     }
 
-    // הפונקציה מחזירה בוליאני. כל דבר אחר פירושו שלא הבנו את התשובה, וזה
-    // כישלון — לא היתר.
-    const allowed = await res.json().catch(() => null);
-    if (typeof allowed !== "boolean") {
-      return json({ error: "rate_limit_unavailable", detail: "תשובה לא צפויה מ-check_rate_limit" }, 500);
+    // מיגרציה 021 החליפה את הבוליאני בטקסט: 'ok' | 'user' | 'global'.
+    // כל דבר אחר פירושו שלא הבנו את התשובה, וזה כישלון — לא היתר.
+    // ⚠️ בוליאני נחשב כאן **לא מובן**, ובכוונה: מסד שעדיין על 020 יחזיר
+    // true, ו-true שמתפרש כ"מותר" הוא בדיוק גדר שנעלמה בלי שאיש ראה.
+    const verdict = await res.json().catch(() => null);
+    if (verdict !== "ok" && verdict !== "user" && verdict !== "global") {
+      return json({
+        error: "rate_limit_unavailable",
+        detail: typeof verdict === "boolean"
+          ? "check_rate_limit החזירה בוליאני — לא הורצה מיגרציה 021"
+          : "תשובה לא צפויה מ-check_rate_limit",
+      }, 500);
     }
-    if (!allowed) {
-      return json({ error: "rate_limited", retry_after_minutes: WINDOW_MINUTES }, 429);
+    // ⚠️ שני הגדרות אינם אותה הודעה. "נסי בעוד שעה" כשהמכסה היומית
+    // נגמרה הוא שקר שהמבקרת תגלה רק אחרי שעה של המתנה.
+    if (verdict === "user") {
+      return json({ error: "rate_limited", scope: "user", retry_after_minutes: WINDOW_MINUTES }, 429);
+    }
+    if (verdict === "global") {
+      return json({ error: "rate_limited", scope: "global", retry_after_minutes: 60 * 24 }, 429);
     }
   }
 
@@ -333,7 +345,28 @@ export async function handle(req: Request, env: Record<string, string | undefine
     }, 502);
   }
 
-  return json({ answer });
+  // ── מדידה, כדי להפסיק לנחש ────────────────────────────────────────
+  //
+  // עלות ההודעה, יחס קלט/פלט, וכמה מהקלט הגיע מקאש — כל אלה היו עד כה
+  // הערכה שלי מתוך שתי מחרוזות שמדדתי. גוגל מחזירה את המספרים האמיתיים
+  // ב-usageMetadata, וההערכה עלתה לנו כבר פעם אחת בפי עשרים.
+  //
+  // ⚠️ לא נשמר במסד ולא מוצג למבקרת — רק מוחזר, כדי שאפשר יהיה לקרוא
+  // אותו בבדיקה ידנית. לוג של שימוש לכל שיחה הוא מסלול קצר לדליפת תוכן.
+  const u = data?.usageMetadata;
+  const usage = u && typeof u === "object"
+    ? {
+      input: u.promptTokenCount ?? null,
+      output: u.candidatesTokenCount ?? null,
+      // הפלט מחויב כולל אסימוני חשיבה, ולכן הם נספרים בנפרד ולא נבלעים.
+      thinking: u.thoughtsTokenCount ?? 0,
+      // 0 או null פירושו שהקאש לא נגע. זה מה שמכריע אם קאשינג הקשר שווה
+      // משהו כאן, במקום להסיק את זה מטבלת מחירים.
+      cached_input: u.cachedContentTokenCount ?? 0,
+    }
+    : null;
+
+  return json({ answer, model, usage });
 }
 
 /**

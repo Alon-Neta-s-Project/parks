@@ -67,7 +67,17 @@ mig(n, ok) as (values
   (17, (select not exists (select 1 from information_schema.columns
         where table_schema='public' and table_name='experience'
           and column_name='skip_line_extra_cost'))),
-  (18, to_regclass('public.api_call') is not null)
+  (18, to_regclass('public.api_call') is not null),
+  (19, (select exists (select 1 from information_schema.columns
+        where table_schema='public' and table_name='experience' and column_name='status_note'))),
+  -- 020 ו-021 שתיהן יוצרות check_rate_limit. ההבדל אינו בשם אלא בחתימה:
+  -- 020 מחזירה בוליאני משלושה ארגומנטים, 021 טקסט מארבעה. בדיקה לפי שם
+  -- בלבד הייתה מדווחת ✅ על מסד שאין בו גדר יומי כלל.
+  (20, (select exists (select 1 from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
+        where ns.nspname='public' and p.proname='check_rate_limit'))),
+  (21, (select exists (select 1 from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
+        where ns.nspname='public' and p.proname='check_rate_limit'
+          and p.pronargs = 4 and p.prorettype = 'text'::regtype)))
 ),
 g(passed, missing) as (
   select count(*) filter (where ok),
@@ -99,8 +109,8 @@ n(experience, park, land, profile, trip, conversation, knowledge_doc,
 ),
 report(ord, "מה", "מצב") as (
   select 1, 'מיגרציות',
-         case when passed = 18 then '18 מתוך 18 ✅'
-              else passed || ' מתוך 18 ❌  — חסרות: ' || missing end from n
+         case when passed = 21 then '21 מתוך 21 ✅'
+              else passed || ' מתוך 21 ❌  — חסרות: ' || missing end from n
   union all
   select 2, 'מבנה',
          case when tables = 19 then '19 טבלאות ✅'

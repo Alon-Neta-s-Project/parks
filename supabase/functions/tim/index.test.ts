@@ -78,14 +78,14 @@ Deno.test("GET נדחה, OPTIONS מקבל CORS", async () => {
 
 const FULL = { GEMINI_API_KEY: KEY, SUPABASE_URL: "http://db", SUPABASE_ANON_KEY: "anon-key-value" };
 /** מסד שמאפשר לעבור: ספירה נמוכה, ורישום שמצליח. */
-/** המסד מרשה (true) או חוסם (false) — זה כל מה ש-check_rate_limit מחזירה. */
-const dbSays = (allowed: boolean) => (url: string) =>
+/** check_rate_limit מחזירה 'ok' | 'user' | 'global' — הגדר שנגע, לא רק אם. */
+const dbSays = (verdict: "ok" | "user" | "global") => (url: string) =>
   url.includes("/rpc/check_rate_limit")
-    ? new Response(JSON.stringify(allowed), { status: 200 })
+    ? new Response(JSON.stringify(verdict), { status: 200 })
     : geminiOk();
 
 Deno.test("מסלול תקין — המפתח נשלח לגוגל ואינו חוזר לדפדפן", async () => {
-  const s = stub(dbSays(true));
+  const s = stub(dbSays("ok"));
   const r = await handle(ask({ question: "היי" }), FULL);
   s.restore();
   assertEquals(r.status, 200);
@@ -99,7 +99,7 @@ Deno.test("מסלול תקין — המפתח נשלח לגוגל ואינו ח�
 Deno.test("שגיאה מגוגל מוחזרת כקוד בלבד, בלי גוף התשובה שלה", async () => {
   const s = stub((url) =>
     url.includes("/rpc/check_rate_limit")
-      ? new Response("true", { status: 200 })
+      ? new Response('"ok"', { status: 200 })
       : new Response("quota exceeded for key AIzaSECRET", { status: 429 })
   );
   const r = await handle(ask({ question: "היי" }), FULL);
@@ -111,14 +111,49 @@ Deno.test("שגיאה מגוגל מוחזרת כקוד בלבד, בלי גוף �
 });
 
 Deno.test("הגבלת קצב חוסמת מעל הגג ולא מתחתיו", async () => {
-  const under = stub(dbSays(true));
+  const under = stub(dbSays("ok"));
   assertEquals((await handle(ask({ question: "היי" }), FULL)).status, 200);
   under.restore();
 
-  const over = stub(dbSays(false));
+  const over = stub(dbSays("user"));
   const blocked = await handle(ask({ question: "היי" }), FULL);
   over.restore();
   assertEquals(blocked.status, 429);
+});
+
+// שני הגדרות אינם אותה הודעה. מבקרת שנשלחה לחכות שעה בזמן שהמכסה
+// היומית נגמרה תגלה את זה רק בעוד שעה — וזה כשל שקט.
+Deno.test("הגדר האישי והגלובלי נבדלים בתשובה, לא רק בקוד", async () => {
+  const u = stub(dbSays("user"));
+  const user = await handle(ask({ question: "היי" }), FULL);
+  u.restore();
+  const g = stub(dbSays("global"));
+  const global = await handle(ask({ question: "היי" }), FULL);
+  g.restore();
+
+  assertEquals(user.status, 429);
+  assertEquals(global.status, 429);
+  const ub = await user.json(), gb = await global.json();
+  assertEquals(ub.scope, "user");
+  assertEquals(gb.scope, "global");
+  assertEquals(ub.retry_after_minutes, 60);
+  assertEquals(gb.retry_after_minutes, 60 * 24);
+});
+
+// מסד שנשאר על 020 מחזיר true. אם true ייקרא כ"מותר", הגדר היומי נעלם
+// בלי שאיש יראה — ולכן בוליאני הוא כישלון מפורש, לא היתר.
+Deno.test("בוליאני מ-020 אינו נחשב היתר", async () => {
+  const s = stub((url) =>
+    url.includes("/rpc/") ? new Response("true", { status: 200 }) : geminiOk()
+  );
+  const r = await handle(ask({ question: "היי" }), FULL);
+  const outbound = s.calls.filter((c) => c.url.includes("generativelanguage")).length;
+  s.restore();
+  assertEquals(r.status, 500);
+  const b = await r.json();
+  assertEquals(b.error, "rate_limit_unavailable");
+  assertEquals(b.detail.includes("021"), true, "השגיאה חייבת לומר איזו מיגרציה חסרה");
+  assertEquals(outbound, 0);
 });
 
 // ── כישלון סגור ──────────────────────────────────────────────────────
@@ -134,12 +169,13 @@ Deno.test("בלי הגדרות מסד — נעצר, ולא ממשיך למודל
   assertEquals(s.calls.length, 0, "אסור שתהיה ולו קריאה אחת החוצה");
 });
 
-Deno.test("תשובה שאינה בוליאני נחשבת ככישלון, לא כהיתר", async () => {
+Deno.test("תשובה שאינה 'ok'/'user'/'global' נחשבת ככישלון, לא כהיתר", async () => {
   for (const bad of [
     new Response("", { status: 500 }),                    // המסד שגה
-    new Response("", { status: 404 }),                    // מיגרציה 020 לא רצה
+    new Response("", { status: 404 }),                    // המיגרציה לא רצה
     new Response("not json", { status: 200 }),            // גוף שאינו JSON
-    new Response(JSON.stringify({ ok: 1 }), { status: 200 }), // JSON, אבל לא בוליאני
+    new Response(JSON.stringify({ ok: 1 }), { status: 200 }), // JSON, אבל לא הפסק
+    new Response('"maybe"', { status: 200 }),             // טקסט שאינו במילון
   ]) {
     const s = stub((url) => (url.includes("/rpc/") ? bad.clone() : geminiOk()));
     const r = await handle(ask({ question: "היי" }), FULL);
@@ -152,7 +188,7 @@ Deno.test("תשובה שאינה בוליאני נחשבת ככישלון, לא 
 });
 
 Deno.test("הספירה וההכנסה אטומיות — קריאה אחת למסד, לא שתיים", async () => {
-  const s = stub(dbSays(true));
+  const s = stub(dbSays("ok"));
   await handle(ask({ question: "היי" }), FULL);
   const dbCalls = s.calls.filter((c) => c.url.includes("http://db")).length;
   s.restore();
@@ -229,7 +265,7 @@ Deno.test("אבחון מודלים מחזיר שמות בלבד, ומסנן לפ
 
 Deno.test("404 מגוגל מסביר שהשם אינו קיים, ומצביע על האבחון", async () => {
   const s = stub((url) =>
-    url.includes("/rpc/") ? new Response("true", { status: 200 }) : new Response("", { status: 404 })
+    url.includes("/rpc/") ? new Response('"ok"', { status: 200 }) : new Response("", { status: 404 })
   );
   const r = await handle(ask({ question: "היי" }), { ...FULL, GEMINI_MODEL: "no-such-model" });
   s.restore();
@@ -242,7 +278,7 @@ Deno.test("404 מגוגל מסביר שהשם אינו קיים, ומצביע ע
 
 Deno.test("תשובה בכמה חלקים נאספת, ולא רק parts[0]", async () => {
   const s = stub((url) =>
-    url.includes("/rpc/") ? new Response("true", { status: 200 }) : geminiMultiPart()
+    url.includes("/rpc/") ? new Response('"ok"', { status: 200 }) : geminiMultiPart()
   );
   const r = await handle(ask({ question: "היי" }), FULL);
   s.restore();
@@ -255,7 +291,7 @@ Deno.test("תשובה בכמה חלקים נאספת, ולא רק parts[0]", asy
 Deno.test("תשובה ריקה מסבירה למה, ולא רק שהיא ריקה", async () => {
   const s = stub((url) =>
     url.includes("/rpc/")
-      ? new Response("true", { status: 200 })
+      ? new Response('"ok"', { status: 200 })
       : new Response(JSON.stringify({ candidates: [{ finishReason: "MAX_TOKENS" }] }), { status: 200 })
   );
   const r = await handle(ask({ question: "היי" }), FULL);
@@ -268,7 +304,7 @@ Deno.test("תשובה ריקה מסבירה למה, ולא רק שהיא ריק�
 
 Deno.test("גוף שאינו JSON מגוגל אינו מפיל את הפונקציה", async () => {
   const s = stub((url) =>
-    url.includes("/rpc/") ? new Response("true", { status: 200 }) : new Response("<html>", { status: 200 })
+    url.includes("/rpc/") ? new Response('"ok"', { status: 200 }) : new Response("<html>", { status: 200 })
   );
   const r = await handle(ask({ question: "היי" }), FULL);
   s.restore();
@@ -282,7 +318,7 @@ Deno.test("גוף שאינו JSON מגוגל אינו מפיל את הפונקצ
 Deno.test("503 מגוגל מקבל ניסיון חוזר אחד, ומצליח בו", async () => {
   let geminiCalls = 0;
   const s = stub((url) => {
-    if (url.includes("/rpc/")) return new Response("true", { status: 200 });
+    if (url.includes("/rpc/")) return new Response('"ok"', { status: 200 });
     geminiCalls += 1;
     return geminiCalls === 1 ? new Response("", { status: 503 }) : geminiOk();
   });
@@ -296,7 +332,7 @@ Deno.test("503 מגוגל מקבל ניסיון חוזר אחד, ומצליח ב
 Deno.test("503 שחוזר גם בניסיון השני מוחזר עם הסבר, ובלי ניסיון שלישי", async () => {
   let geminiCalls = 0;
   const s = stub((url) => {
-    if (url.includes("/rpc/")) return new Response("true", { status: 200 });
+    if (url.includes("/rpc/")) return new Response('"ok"', { status: 200 });
     geminiCalls += 1;
     return new Response("", { status: 503 });
   });
@@ -312,11 +348,69 @@ Deno.test("503 שחוזר גם בניסיון השני מוחזר עם הסבר,
 Deno.test("404 אינו זמני, ולכן אינו מנוסה שוב", async () => {
   let geminiCalls = 0;
   const s = stub((url) => {
-    if (url.includes("/rpc/")) return new Response("true", { status: 200 });
+    if (url.includes("/rpc/")) return new Response('"ok"', { status: 200 });
     geminiCalls += 1;
     return new Response("", { status: 404 });
   });
   await handle(ask({ question: "היי" }), FULL);
   s.restore();
   assertEquals(geminiCalls, 1, "שם מודל שגוי לא מתקן את עצמו בניסיון חוזר");
+});
+
+// ── מדידת שימוש ──────────────────────────────────────────────────────
+// ההערכה שלי לעלות הודעה שגתה פעם אחת בפי עשרים. המספרים של גוגל
+// חוזרים ב-usageMetadata, ומכאן ההחלטות נשענות עליהם ולא על טבלה.
+
+Deno.test("usageMetadata מוחזר, כולל אסימוני חשיבה וקאש", async () => {
+  const s = stub((url) =>
+    url.includes("/rpc/")
+      ? new Response('"ok"', { status: 200 })
+      : new Response(
+        JSON.stringify({
+          candidates: [{ content: { parts: [{ text: "שלום" }] } }],
+          usageMetadata: {
+            promptTokenCount: 180,
+            candidatesTokenCount: 90,
+            thoughtsTokenCount: 40,
+            cachedContentTokenCount: 128,
+          },
+        }),
+        { status: 200 },
+      )
+  );
+  const r = await handle(ask({ question: "היי" }), FULL);
+  s.restore();
+  const b = await r.json();
+  assertEquals(b.usage, { input: 180, output: 90, thinking: 40, cached_input: 128 });
+});
+
+// ⚠️ גוגל אינה מחזירה cachedContentTokenCount כשהקאש לא נגע. אם החֶסֶר
+// היה חוזר כ-null, "לא ידוע" היה נקרא כ"אולי כן" — ואנחנו שוקלים על סמך
+// המספר הזה אם קאשינג שווה משהו. חסר = 0, במפורש.
+Deno.test("קאש שלא נגע נספר כאפס, לא כלא-ידוע", async () => {
+  const s = stub((url) =>
+    url.includes("/rpc/")
+      ? new Response('"ok"', { status: 200 })
+      : new Response(
+        JSON.stringify({
+          candidates: [{ content: { parts: [{ text: "שלום" }] } }],
+          usageMetadata: { promptTokenCount: 180, candidatesTokenCount: 90 },
+        }),
+        { status: 200 },
+      )
+  );
+  const r = await handle(ask({ question: "היי" }), FULL);
+  s.restore();
+  const b = await r.json();
+  assertEquals(b.usage.cached_input, 0);
+  assertEquals(b.usage.thinking, 0);
+});
+
+Deno.test("בלי usageMetadata התשובה עדיין נמסרת, והמדידה null", async () => {
+  const s = stub(dbSays("ok"));
+  const r = await handle(ask({ question: "היי" }), FULL);
+  s.restore();
+  const b = await r.json();
+  assertEquals(b.answer, "שלום, אני מחובר.");
+  assertEquals(b.usage, null);
 });
