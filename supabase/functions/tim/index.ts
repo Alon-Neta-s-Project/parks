@@ -94,6 +94,30 @@ export async function bucketKey(ip: string, salt: string): Promise<string> {
  * משתנים היא מזריקה לפונקציה. בלי זה, כל תקלת הרשאה הופכת לסבב ניחושים
  * שבו נטע מדביקה קוד ומדווחת, שוב ושוב. שם ואורך אינם סוד — הערך הוא.
  */
+/**
+ * הגדרות החשיבה, במקום אחד.
+ *
+ * ⚠️ נגזר פעם אחת ומשמש גם את הקריאה למודל וגם את האבחון. כשהיו שני
+ * חישובים, האבחון היה יכול לדווח על מה שאיננו נשלח — כלומר לוח בקרה
+ * שמראה מתג במצב שאינו המצב בפועל.
+ *
+ * שני שמות, כי דורות המודלים אינם מסכימים ביניהם:
+ *   GEMINI_THINKING_BUDGET — מספר אסימונים (2.5)
+ *   GEMINI_THINKING_LEVEL  — "low" / "high" (3.x)
+ * 3.5 קיבל budget=128 **בלי שגיאה ובלי השפעה** — 505 אסימוני חשיבה
+ * לפני, 507 אחרי. שדה שמתעלמים ממנו בשקט הוא בדיוק סוג הכשל שאנחנו
+ * נמנעים ממנו, ולכן האבחון מראה מה נשלח בפועל.
+ */
+export function thinkingConfig(env: Record<string, string | undefined>) {
+  const raw = env.GEMINI_THINKING_BUDGET?.trim();
+  const budget = Number(raw);
+  const level = env.GEMINI_THINKING_LEVEL?.trim();
+  const cfg: Record<string, unknown> = {};
+  if (raw && Number.isFinite(budget)) cfg.thinkingBudget = budget;
+  if (level) cfg.thinkingLevel = level;
+  return Object.keys(cfg).length ? { thinkingConfig: cfg } : {};
+}
+
 function diagnose(env: Record<string, string | undefined>) {
   const watched = [
     "GEMINI_API_KEY",
@@ -105,6 +129,8 @@ function diagnose(env: Record<string, string | undefined>) {
     "SUPABASE_DB_URL",
     "ALLOWED_ORIGIN",
     "GEMINI_MODEL",
+    "GEMINI_THINKING_BUDGET",
+    "GEMINI_THINKING_LEVEL",
   ];
   const known: Record<string, string> = {};
   for (const name of watched) {
@@ -115,7 +141,10 @@ function diagnose(env: Record<string, string | undefined>) {
   }
   // גם כל שם אחר שהוזרק ושאיני מכיר — שמות בלבד.
   const others = Object.keys(env).filter((k) => !watched.includes(k)).sort();
-  return { known, other_names: others };
+  // ⚠️ מה שבאמת נשלח, ולא מה שהוגדר. אלה שתי שאלות שונות: סוד שלא הגיע
+  // לפונקציה וסוד שהגיע והמודל התעלם ממנו נראים זהים מבחוץ, ורק זה
+  // מפריד ביניהם.
+  return { known, other_names: others, sent_to_model: thinkingConfig(env) };
 }
 
 /**
@@ -294,10 +323,7 @@ export async function handle(req: Request, env: Record<string, string | undefine
    * ערך לא-מספרי מתעלמים ממנו במקום לשלוח אותו: סוד עם שגיאת הקלדה
    * שמפיל את טים לגמרי הוא מחיר גבוה מדי על ידית אופציונלית.
    */
-  const budget = Number(env.GEMINI_THINKING_BUDGET);
-  const thinking = Number.isFinite(budget) && env.GEMINI_THINKING_BUDGET?.trim()
-    ? { thinkingConfig: { thinkingBudget: budget } }
-    : {};
+  const thinking = thinkingConfig(env);
   const endpoint =
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
   /**

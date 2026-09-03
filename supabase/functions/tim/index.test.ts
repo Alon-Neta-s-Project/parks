@@ -3,7 +3,7 @@ function assertEquals<T>(actual: T, expected: T, msg?: string) {
   const a = JSON.stringify(actual), b = JSON.stringify(expected);
   if (a !== b) throw new Error(`${msg ?? "לא זהה"}\n  התקבל : ${a}\n  ציפינו: ${b}`);
 }
-import { handle, looksLikeGeminiKey, bucketKey } from "./index.ts";
+import { handle, thinkingConfig, looksLikeGeminiKey, bucketKey } from "./index.ts";
 
 const KEY = "AIza" + "x".repeat(35);
 const ask = (body: unknown, method = "POST") =>
@@ -466,4 +466,55 @@ Deno.test("שם המודל מגיע מהסוד, ומוחזר בתשובה", asyn
   s.restore();
   assertEquals((await r.json()).model, "gemini-3.6-flash");
   assertEquals(s.calls.some((c) => c.url.includes("gemini-3.6-flash")), true);
+});
+
+Deno.test("GEMINI_THINKING_LEVEL נשלח כשהוא מוגדר, ולצד budget", async () => {
+  const s = stub(dbSays("ok"));
+  await handle(ask({ question: "היי" }), { ...FULL, GEMINI_THINKING_LEVEL: "low" });
+  s.restore();
+  assertEquals(sentToGemini(s.calls).generationConfig.thinkingConfig, { thinkingLevel: "low" });
+
+  const s2 = stub(dbSays("ok"));
+  await handle(ask({ question: "היי" }), {
+    ...FULL,
+    GEMINI_THINKING_BUDGET: "128",
+    GEMINI_THINKING_LEVEL: "low",
+  });
+  s2.restore();
+  assertEquals(sentToGemini(s2.calls).generationConfig.thinkingConfig, {
+    thinkingBudget: 128,
+    thinkingLevel: "low",
+  });
+});
+
+// ⚠️ סוד שלא הגיע לפונקציה, וסוד שהגיע והמודל התעלם ממנו, נראים זהים
+// מבחוץ. האבחון חייב להראות את מה שנשלח בפועל — ומאותו חישוב, אחרת הוא
+// לוח בקרה שמראה מתג במצב שאינו המצב.
+Deno.test("האבחון מראה את מה שנשלח בפועל, ומאותו מקור", async () => {
+  const env = { ...FULL, GEMINI_THINKING_LEVEL: "low" };
+  const r = await handle(
+    new Request("http://x", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ diagnose: true }),
+    }),
+    env,
+  );
+  const b = await r.json();
+  assertEquals(b.sent_to_model, thinkingConfig(env));
+  assertEquals(b.sent_to_model, { thinkingConfig: { thinkingLevel: "low" } });
+  assertEquals(b.known.GEMINI_THINKING_LEVEL, "קיים · 3 תווים");
+  assertEquals(b.known.GEMINI_THINKING_BUDGET, "חסר");
+});
+
+Deno.test("בלי שום סוד חשיבה — האבחון מראה ריק, לא ניחוש", async () => {
+  const r = await handle(
+    new Request("http://x", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ diagnose: true }),
+    }),
+    FULL,
+  );
+  assertEquals((await r.json()).sent_to_model, {});
 });
