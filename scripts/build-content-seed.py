@@ -157,7 +157,7 @@ COLUMNS = [
     "uses_large_screens_or_3d", "big_drops", "spinning",
     "skip_line_system",
     "sens_enclosed_dark", "sens_heights", "sens_loud_sudden", "sens_strobe",
-    "intensity_factors", "last_verified",
+    "max_speed_kmh", "inversions", "last_verified",
 ]
 
 experiences = json.loads(SRC.read_text(encoding="utf-8"))
@@ -287,7 +287,11 @@ for e in experiences:
         boolean(e["sensHeights"]),
         boolean(e["sensLoudSudden"]),
         boolean(e["sensStrobe"]),
-        jsonb({"max_speed_kmh": e["maxSpeedKmh"], "inversions": e["inversions"]}),
+        # ⚠️ עמודות, לא שק. intensity_factors ירדה ב-023: היא הייתה
+        # not null default '{}', כלומר "נבדק, אין מה לדווח" על 210 שורות
+        # שאיש לא בדק. NULL כאן אומר לא נבדק, ו-0 היפוכים אומר נבדק ואין.
+        num(e["maxSpeedKmh"]),
+        num(e["inversions"]),
         q(e["lastVerified"]),
     ]) + ")"))
 
@@ -576,7 +580,7 @@ TABLE_COLUMNS = [
     "height_requirement_cm", "gets_wet", "environment", "air_conditioned",
     "wheelchair", "skip_line_system", "popularity",
     "sens_enclosed_dark", "sens_heights", "sens_loud_sudden", "sens_strobe",
-    "intensity_factors", "type_data", "location", "verdict", "recommendation",
+    "max_speed_kmh", "inversions", "type_data", "location", "verdict", "recommendation",
     "best_time_of_day", "volatility", "last_verified", "created_at", "updated_at",
     "motion_sickness_warning", "is_motion_simulator", "uses_large_screens_or_3d",
     "big_drops", "spinning",

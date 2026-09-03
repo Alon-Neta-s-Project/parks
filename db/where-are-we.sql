@@ -79,7 +79,15 @@ mig(n, ok) as (values
         where ns.nspname='public' and p.proname='check_rate_limit'
           and p.pronargs = 4 and p.prorettype = 'text'::regtype))),
   (22, (select exists (select 1 from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
-        where ns.nspname='public' and p.proname='estimated_cost_per_message')))
+        where ns.nspname='public' and p.proname='estimated_cost_per_message'))),
+  -- לא לפי קיום העמודות החדשות בלבד: 023 גם מורידה את השק, וזה החלק
+  -- שאפשר לשכוח. שני התנאים יחד הם המיגרציה.
+  (23, (select exists (select 1 from information_schema.columns
+          where table_schema='public' and table_name='experience'
+            and column_name='max_speed_kmh')
+        and not exists (select 1 from information_schema.columns
+          where table_schema='public' and table_name='experience'
+            and column_name='intensity_factors')))
 ),
 g(passed, missing) as (
   select count(*) filter (where ok),
@@ -111,8 +119,8 @@ n(experience, park, land, profile, trip, conversation, knowledge_doc,
 ),
 report(ord, "מה", "מצב") as (
   select 1, 'מיגרציות',
-         case when passed = 22 then '22 מתוך 22 ✅'
-              else passed || ' מתוך 22 ❌  — חסרות: ' || missing end from n
+         case when passed = 23 then '23 מתוך 23 ✅'
+              else passed || ' מתוך 23 ❌  — חסרות: ' || missing end from n
   union all
   select 2, 'מבנה',
          case when tables = 19 then '19 טבלאות ✅'
