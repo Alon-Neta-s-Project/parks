@@ -1,0 +1,309 @@
+[
+    {
+        "id": "disney-s-animal-kingdom-animal-care-at-conservation-station",
+        "key": "Disney's Animal Kingdom|Attraction|Animal Care at Conservation Station",
+        "kind": "attraction",
+        "land": {
+            "name": "Rafiki's Planet Watch"
+        },
+        "name": "Animal Care at Conservation Station",
+        "park": {
+            "park_kind": "theme",
+            "resort_id": "wdw"
+        },
+        "type": "walkthrough",
+        "status": "open",
+        "land_id": "ak-rafiki-s-planet-watch",
+        "park_id": "ak",
+        "subtype": "Walk-through",
+        "category": "walkthrough",
+        "gets_wet": "none",
+        "spinning": null,
+        "admission": "Valid admission to Disney's Animal Kingdom. Park Hopper is NOT required unless you plan to visit another Disney theme park the same day.",
+        "big_drops": null,
+        "intensity": 1,
+        "name_i18n": {
+            "he": "אנימל קר אט קונסרביישן סטיישן"
+        },
+        "inversions": null,
+        "wheelchair": "remain_in_wheelchair",
+        "environment": "indoor",
+        "opened_year": 1999,
+        "reservation": "No separate attraction reservation required. Disney currently lists no active virtual queues; check My Disney Experience just before the visit because this can change.",
+        "sens_strobe": null,
+        "status_note": null,
+        "aliases_i18n": {
+            "he": [
+            ]
+        },
+        "sens_heights": null,
+        "last_verified": "2026-08-24",
+        "max_speed_kmh": null,
+        "air_conditioned": "true",
+        "duration_minutes": null,
+        "sens_loud_sudden": null,
+        "skip_line_system": "none",
+        "sens_enclosed_dark": null,
+        "is_motion_simulator": null,
+        "height_requirement_cm": 0,
+        "included_with_admission": "Yes",
+        "motion_sickness_warning": "false",
+        "uses_large_screens_or_3d": null
+    },
+    {
+        "id": "disney-s-animal-kingdom-avatar-flight-of-passage",
+        "key": "Disney's Animal Kingdom|Attraction|Avatar Flight of Passage",
+        "kind": "attraction",
+        "land": {
+            "name": "Pandora – The World of Avatar"
+        },
+        "name": "Avatar Flight of Passage",
+        "park": {
+            "park_kind": "theme",
+            "resort_id": "wdw"
+        },
+        "type": "attraction",
+        "status": "open",
+        "land_id": "ak-pandora-the-world-of-avatar",
+        "park_id": "ak",
+        "subtype": "Flying theater",
+        "category": "simulator",
+        "gets_wet": "none",
+        "spinning": "false",
+        "admission": "Valid admission to Disney's Animal Kingdom. Park Hopper is NOT required unless you plan to visit another Disney theme park the same day.",
+        "big_drops": "false",
+        "intensity": 3,
+        "name_i18n": {
+            "he": "אווטאר פלייט אוף פסג'"
+        },
+        "inversions": null,
+        "wheelchair": "transfer_to_ride_vehicle",
+        "environment": "indoor",
+        "opened_year": 2017,
+        "reservation": "No separate attraction reservation required. Disney currently lists no active virtual queues; check My Disney Experience just before the visit because this can change.",
+        "sens_strobe": null,
+        "status_note": null,
+        "aliases_i18n": {
+            "he": [
+            ]
+        },
+        "sens_heights": null,
+        "last_verified": "2026-08-24",
+        "max_speed_kmh": null,
+        "air_conditioned": "true",
+        "duration_minutes": 5,
+        "sens_loud_sudden": null,
+        "skip_line_system": "single_pass",
+        "sens_enclosed_dark": null,
+        "is_motion_simulator": "true",
+        "height_requirement_cm": 112,
+        "included_with_admission": "Yes",
+        "motion_sickness_warning": "true",
+        "uses_large_screens_or_3d": "true"
+    },
+    {
+        "id": "disney-s-animal-kingdom-expedition-everest-legend-of-the-forbidden-mountain",
+        "key": "Disney's Animal Kingdom|Attraction|Expedition Everest – Legend of the Forbidden Mountain",
+        "kind": "attraction",
+        "land": {
+            "name": "Asia"
+        },
+        "name": "Expedition Everest – Legend of the Forbidden Mountain",
+        "park": {
+            "park_kind": "theme",
+            "resort_id": "wdw"
+        },
+        "type": "attraction",
+        "status": "open",
+        "land_id": "ak-asia",
+        "park_id": "ak",
+        "subtype": "Roller coaster",
+        "category": "coaster",
+        "gets_wet": "none",
+        "spinning": "false",
+        "admission": "Valid admission to Disney's Animal Kingdom. Park Hopper is NOT required unless you plan to visit another Disney theme park the same day.",
+        "big_drops": "true",
+        "intensity": 4,
+        "name_i18n": {
+            "he": "אקספדישן אוורסט"
+        },
+        "inversions": 0,
+        "wheelchair": "transfer_to_ride_vehicle",
+        "environment": "mixed",
+        "opened_year": 2006,
+        "reservation": "No separate attraction reservation required. Disney currently lists no active virtual queues; check My Disney Experience just before the visit because this can change.",
+        "sens_strobe": null,
+        "status_note": null,
+        "aliases_i18n": {
+            "he": [
+                "אוורסט"
+            ]
+        },
+        "sens_heights": null,
+        "last_verified": "2026-08-24",
+        "max_speed_kmh": "80",
+        "air_conditioned": "true",
+        "duration_minutes": 3,
+        "sens_loud_sudden": null,
+        "skip_line_system": "multi_pass",
+        "sens_enclosed_dark": null,
+        "is_motion_simulator": "false",
+        "height_requirement_cm": 112,
+        "included_with_admission": "Yes",
+        "motion_sickness_warning": "true",
+        "uses_large_screens_or_3d": "false"
+    },
+    {
+        "id": "disney-s-blizzard-beach-slush-gusher",
+        "key": "Disney's Blizzard Beach|Attraction|Slush Gusher",
+        "kind": "attraction",
+        "land": {
+            "name": "Mount Gushmore"
+        },
+        "name": "Slush Gusher",
+        "park": {
+            "park_kind": "water",
+            "resort_id": "wdw"
+        },
+        "type": "attraction",
+        "status": "temporarily_closed",
+        "land_id": "bb-mount-gushmore",
+        "park_id": "bb",
+        "subtype": "Body slide",
+        "category": "water_ride",
+        "gets_wet": "may_get_soaked",
+        "spinning": "false",
+        "admission": "Valid Disney water-park admission/entitlement for Disney's Blizzard Beach (e.g. 1-Day Water Park Ticket or eligible water-park option).",
+        "big_drops": "true",
+        "intensity": 4,
+        "name_i18n": {
+            "he": "סלאש גאשר"
+        },
+        "inversions": null,
+        "wheelchair": "transfer_to_ride_vehicle",
+        "environment": "outdoor",
+        "opened_year": 1995,
+        "reservation": "No separate attraction reservation required. Disney currently lists no active virtual queues; check My Disney Experience just before the visit because this can change.",
+        "sens_strobe": null,
+        "status_note": "Check current Disney calendar before visit; refurbishment status can change.",
+        "aliases_i18n": {
+            "he": [
+            ]
+        },
+        "sens_heights": null,
+        "last_verified": "2026-08-24",
+        "max_speed_kmh": null,
+        "air_conditioned": null,
+        "duration_minutes": null,
+        "sens_loud_sudden": null,
+        "skip_line_system": "none",
+        "sens_enclosed_dark": null,
+        "is_motion_simulator": null,
+        "height_requirement_cm": 122,
+        "included_with_admission": "Yes",
+        "motion_sickness_warning": "false",
+        "uses_large_screens_or_3d": null
+    },
+    {
+        "id": "disney-s-hollywood-studios-rock-n-roller-coaster-starring-the-muppets",
+        "key": "Disney's Hollywood Studios|Attraction|Rock 'n' Roller Coaster Starring The Muppets",
+        "kind": "attraction",
+        "land": {
+            "name": "Sunset Boulevard"
+        },
+        "name": "Rock 'n' Roller Coaster Starring The Muppets",
+        "park": {
+            "park_kind": "theme",
+            "resort_id": "wdw"
+        },
+        "type": "attraction",
+        "status": "open",
+        "land_id": "hs-sunset-boulevard",
+        "park_id": "hs",
+        "subtype": "Launch coaster",
+        "category": "coaster",
+        "gets_wet": "none",
+        "spinning": "false",
+        "admission": "Valid admission to Disney's Hollywood Studios. Park Hopper is NOT required unless you plan to visit another Disney theme park the same day.",
+        "big_drops": "true",
+        "intensity": 4,
+        "name_i18n": {
+            "he": "רוק אנד רולר קוסטר – דה מאפטס"
+        },
+        "inversions": 3,
+        "wheelchair": "transfer_to_ride_vehicle",
+        "environment": "indoor",
+        "opened_year": 2026,
+        "reservation": "No separate attraction reservation required. Disney currently lists no active virtual queues; check My Disney Experience just before the visit because this can change.",
+        "sens_strobe": null,
+        "status_note": null,
+        "aliases_i18n": {
+            "he": [
+            ]
+        },
+        "sens_heights": null,
+        "last_verified": "2026-08-24",
+        "max_speed_kmh": "92",
+        "air_conditioned": "true",
+        "duration_minutes": 2,
+        "sens_loud_sudden": null,
+        "skip_line_system": "multi_pass",
+        "sens_enclosed_dark": null,
+        "is_motion_simulator": "false",
+        "height_requirement_cm": 122,
+        "included_with_admission": "Yes",
+        "motion_sickness_warning": "true",
+        "uses_large_screens_or_3d": "false"
+    },
+    {
+        "id": "universal-epic-universe-astronomica",
+        "key": "Universal Epic Universe|Attraction|Astronomica",
+        "kind": "attraction",
+        "land": {
+            "name": "Celestial Park"
+        },
+        "name": "Astronomica",
+        "park": {
+            "park_kind": "theme",
+            "resort_id": "uor"
+        },
+        "type": "attraction",
+        "status": "open",
+        "land_id": "epic-celestial-park",
+        "park_id": "epic",
+        "subtype": "Water play area",
+        "category": "water_ride",
+        "gets_wet": "none",
+        "spinning": null,
+        "admission": "Valid admission to Universal Epic Universe (1-Day Epic Universe ticket or eligible multi-day/pass product that includes Epic Universe).",
+        "big_drops": null,
+        "intensity": 1,
+        "name_i18n": {
+            "he": "אסטרונומיקה"
+        },
+        "inversions": null,
+        "wheelchair": "remain_in_wheelchair",
+        "environment": "outdoor",
+        "opened_year": 2025,
+        "reservation": "No separate ride reservation normally required; use standby/approved access options. Check Universal app for day-of changes.",
+        "sens_strobe": null,
+        "status_note": null,
+        "aliases_i18n": {
+            "he": [
+            ]
+        },
+        "sens_heights": null,
+        "last_verified": "2026-08-24",
+        "max_speed_kmh": null,
+        "air_conditioned": "false",
+        "duration_minutes": null,
+        "sens_loud_sudden": null,
+        "skip_line_system": null,
+        "sens_enclosed_dark": null,
+        "is_motion_simulator": null,
+        "height_requirement_cm": 0,
+        "included_with_admission": "Yes",
+        "motion_sickness_warning": "false",
+        "uses_large_screens_or_3d": null
+    }
+]
