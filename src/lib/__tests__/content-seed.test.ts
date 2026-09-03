@@ -26,11 +26,11 @@ describe("content seed", () => {
   for (const { name, sql } of parts) {
     describe(name, () => {
       const inserted = sql
-        .match(/insert into experience\s*\n\s*\(([^)]+)\)/)![1]
+        .match(/insert into experience\s*\n\s*\(([^)]+)\)/)![1]!
         .split(",")
         .map((c) => c.trim());
 
-      const refreshed = [...sql.matchAll(/(\w+) = excluded\.\1/g)].map((m) => m[1]);
+      const refreshed = [...sql.matchAll(/(\w+) = excluded\.\1/g)].map((m) => m[1]!);
 
       it("refreshes every inserted column except the conflict key", () => {
         const missing = inserted.filter((c) => c !== "id" && !refreshed.includes(c));
