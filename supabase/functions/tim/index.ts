@@ -44,10 +44,18 @@ const DEFAULT_MODEL = "gemini-3.5-flash";
 // ומה שהוביל אותנו לרשימה האמיתית.
 const MAX_QUESTION_CHARS = 1000;
 
-/** חלון וגג. הגבלת קצב בשרת היא ההגנה האמיתית על נקודת קצה שעולה כסף —
- *  הרשמה עם מייל אינה הגנה מבוטים. */
-const WINDOW_MINUTES = 60;
-const MAX_PER_WINDOW = 20;
+/**
+ * ⚠️ **הגגות אינם נשלחים למסד יותר.** הם יושבים במסד, ומספר אחד כאן
+ * משמש **רק** להודעה למשתמשת ("נסי בעוד שעה").
+ *
+ * 🔴 קודם הם נשלחו כארגומנטים ל-check_rate_limit, והפונקציה מוענקת
+ * ל-anon — מפתח ציבורי בהגדרה, שנשלח לכל דפדפן. כלומר כל מי שפותחת את
+ * כלי המפתחים יכלה לקרוא ישירות ל-RPC עם p_max: 999999 ולעבור את שני
+ * הגגות, בלי לגעת בפונקציה הזו בכלל (נמצא על ידי גיא, מיגרציה 026).
+ *
+ * הלקח הכללי: ערך שנשלח מהקוראת אינו הגבלה על הקוראת.
+ */
+const RETRY_AFTER_MINUTES = 60;
 
 const SYSTEM = `אתה טים, עוזר לתכנון יום בפארקים באורלנדו. אתה עונה בעברית.
 
@@ -286,7 +294,8 @@ export async function handle(req: Request, env: Record<string, string | undefine
       res = await fetch(`${url}/rest/v1/rpc/check_rate_limit`, {
         method: "POST",
         headers: auth,
-        body: JSON.stringify({ p_bucket: bucket, p_window: WINDOW_MINUTES, p_max: MAX_PER_WINDOW }),
+        // ⚠️ דלי בלבד. כל ערך נוסף כאן הוא גג שהקוראת בוחרת לעצמה.
+        body: JSON.stringify({ p_bucket: bucket }),
       });
     } catch {
       return json({ error: "rate_limit_unavailable", detail: "המסד לא נענה" }, 500);
@@ -295,7 +304,7 @@ export async function handle(req: Request, env: Record<string, string | undefine
     if (!res.ok) {
       return json({
         error: "rate_limit_unavailable",
-        detail: `check_rate_limit החזירה ${res.status}. אם 404 — לא הורצו מיגרציות 020/021.`,
+        detail: `check_rate_limit החזירה ${res.status}. אם 404 — לא הורצה מיגרציה 026 (החתימה השתנתה לארגומנט אחד).`,
       }, 500);
     }
 
@@ -315,7 +324,7 @@ export async function handle(req: Request, env: Record<string, string | undefine
     // ⚠️ שני הגדרות אינם אותה הודעה. "נסי בעוד שעה" כשהמכסה היומית
     // נגמרה הוא שקר שהמבקרת תגלה רק אחרי שעה של המתנה.
     if (verdict === "user") {
-      return json({ error: "rate_limited", scope: "user", retry_after_minutes: WINDOW_MINUTES }, 429);
+      return json({ error: "rate_limited", scope: "user", retry_after_minutes: RETRY_AFTER_MINUTES }, 429);
     }
     if (verdict === "global") {
       return json({ error: "rate_limited", scope: "global", retry_after_minutes: 60 * 24 }, 429);

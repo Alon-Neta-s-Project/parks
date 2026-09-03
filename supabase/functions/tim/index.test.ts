@@ -568,3 +568,30 @@ Deno.test("סיבה ארוכה נחתכת ל-300 תווים", async () => {
   s.restore();
   assertEquals((await r.json()).upstream_detail.length, 300);
 });
+
+// ── 🔴 הפרצה שגיא מצא ────────────────────────────────────────────────
+// הגגות נשלחו כארגומנטים לפונקציה שמוענקת ל-anon — מפתח ציבורי בהגדרה.
+// כל מי שפתחה את כלי המפתחים יכלה לקרוא ישירות ל-RPC עם p_max: 999999
+// ולעבור את שני הגגות, בלי לגעת בפונקציה הזו בכלל.
+//
+// הבדיקה נועלת את התיקון: **דלי בלבד נשלח.** כל שדה נוסף כאן הוא גג
+// שהקוראת בוחרת לעצמה, וזה בדיוק מה שהיה.
+
+Deno.test("נשלח דלי בלבד — שום גג אינו נשלח מהקוד למסד", async () => {
+  const s = stub(dbSays("ok"));
+  await handle(ask({ question: "היי" }), FULL);
+  s.restore();
+  const rpc = s.calls.find((c) => c.url.includes("/rpc/check_rate_limit"))!;
+  // deno-lint-ignore no-explicit-any
+  const sent = JSON.parse(rpc.init!.body as any);
+  assertEquals(Object.keys(sent), ["p_bucket"]);
+});
+
+Deno.test("404 מהמסד מפנה למיגרציה 026, לא לחתימה הישנה", async () => {
+  const s = stub((url) =>
+    url.includes("/rpc/") ? new Response("", { status: 404 }) : geminiOk()
+  );
+  const r = await handle(ask({ question: "היי" }), FULL);
+  s.restore();
+  assertEquals((await r.json()).detail.includes("026"), true);
+});

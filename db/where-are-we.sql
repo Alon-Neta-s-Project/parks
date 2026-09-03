@@ -81,9 +81,13 @@ mig(n, ok) as (values
   -- בלבד הייתה מדווחת ✅ על מסד שאין בו גדר יומי כלל.
   (20, (select exists (select 1 from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
         where ns.nspname='public' and p.proname='check_rate_limit'))),
+  -- ⚠️ 021 נזהתה קודם לפי חתימה של ארבעה ארגומנטים — וזו בדיוק החתימה
+  -- ש-026 מסירה כדי לסגור את הפרצה. כלומר הגלאי היה מדווח שמיגרציה
+  -- **חסרה** אחרי שסגרנו את החור, ומי שהיה מריץ אותה שוב היה פותח אותו
+  -- מחדש. גלאי חייב למדוד את מה שהמיגרציה **הביאה**, לא את הצורה שהיא
+  -- לבשה: מה ש-021 הביאה הוא הגדר היומי הגלובלי.
   (21, (select exists (select 1 from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
-        where ns.nspname='public' and p.proname='check_rate_limit'
-          and p.pronargs = 4 and p.prorettype = 'text'::regtype))),
+        where ns.nspname='public' and p.proname='rate_limit_daily_cap'))),
   (22, (select exists (select 1 from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
         where ns.nspname='public' and p.proname='estimated_cost_per_message'))),
   -- לא לפי קיום העמודות החדשות בלבד: 023 גם מורידה את השק, וזה החלק
@@ -111,7 +115,14 @@ mig(n, ok) as (values
             and column_name='source_urls')
         and exists (select 1 from information_schema.columns
           where table_schema='public' and table_name='knowledge_chunk'
-            and column_name='embedding_model' and is_nullable='YES')))
+            and column_name='embedding_model' and is_nullable='YES'))),
+  -- 🔴 026 סוגרת פרצה, ולכן היא נבדקת כהיעדר ולא כנוכחות: **אסור** שתהיה
+  -- גרסה של check_rate_limit עם יותר מארגומנט אחד. גרסה כזו מוענקת
+  -- ל-anon ומאפשרת לשלוח גג משלך — כלומר הפרצה חוזרת בשקט.
+  (26, (select exists (select 1 from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
+          where ns.nspname='public' and p.proname='check_rate_limit' and p.pronargs = 1)
+        and not exists (select 1 from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
+          where ns.nspname='public' and p.proname='check_rate_limit' and p.pronargs <> 1)))
 ),
 g(passed, missing) as (
   select count(*) filter (where ok),
@@ -145,8 +156,8 @@ n(experience, park, land, profile, trip, conversation, knowledge_doc, chunks, ve
 ),
 report(ord, "מה", "מצב") as (
   select 1, 'מיגרציות',
-         case when passed = 25 then '25 מתוך 25 ✅'
-              else passed || ' מתוך 25 ❌  — חסרות: ' || missing end from n
+         case when passed = 26 then '26 מתוך 26 ✅'
+              else passed || ' מתוך 26 ❌  — חסרות: ' || missing end from n
   union all
   select 2, 'מבנה',
          case when tables = 19 then '19 טבלאות ✅'
