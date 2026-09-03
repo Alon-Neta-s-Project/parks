@@ -518,3 +518,53 @@ Deno.test("בלי שום סוד חשיבה — האבחון מראה ריק, ל�
   );
   assertEquals((await r.json()).sent_to_model, {});
 });
+
+// ── סיבת השגיאה מגוגל ────────────────────────────────────────────────
+// "400" בלי סיבה עלה לנו סבב שלם: לא ידענו איזה שדה נדחה. מוחזר
+// error.message בלבד — משפט על הבקשה, לא תוכן שלה.
+
+Deno.test("סיבת 400 מוחזרת, והמפתח לא נוסע איתה", async () => {
+  const s = stub((url) =>
+    url.includes("/rpc/") ? new Response('"ok"', { status: 200 }) : new Response(
+      JSON.stringify({
+        error: {
+          message: 'Invalid JSON payload received. Unknown name "thinkingLevel" at ' +
+            "'generation_config.thinking_config'. key=AIzaSyDEADBEEFdeadbeef123456789",
+        },
+      }),
+      { status: 400 },
+    )
+  );
+  const r = await handle(ask({ question: "היי" }), FULL);
+  s.restore();
+  const b = await r.json();
+  assertEquals(b.status, 400);
+  assertEquals(b.upstream_detail.includes("thinkingLevel"), true, "הסיבה חייבת לשרוד");
+  assertEquals(b.upstream_detail.includes("AIzaSyDEADBEEF"), false, "המפתח אסור שישרוד");
+});
+
+Deno.test("גוף שאינו JSON, או בלי error.message — לא ממציאים סיבה", async () => {
+  for (const bad of ["<html>502</html>", "{}", '{"error":{}}', '{"error":{"message":123}}']) {
+    const s = stub((url) =>
+      url.includes("/rpc/")
+        ? new Response('"ok"', { status: 200 })
+        : new Response(bad, { status: 400 })
+    );
+    const r = await handle(ask({ question: "היי" }), FULL);
+    s.restore();
+    assertEquals((await r.json()).upstream_detail, null, `על ${bad}`);
+  }
+});
+
+// הודעה ארוכה עלולה לגרור איתה חלקים מהבקשה. נחתכת.
+Deno.test("סיבה ארוכה נחתכת ל-300 תווים", async () => {
+  const s = stub((url) =>
+    url.includes("/rpc/") ? new Response('"ok"', { status: 200 }) : new Response(
+      JSON.stringify({ error: { message: "ש".repeat(5000) } }),
+      { status: 400 },
+    )
+  );
+  const r = await handle(ask({ question: "היי" }), FULL);
+  s.restore();
+  assertEquals((await r.json()).upstream_detail.length, 300);
+});

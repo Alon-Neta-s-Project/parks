@@ -152,6 +152,25 @@ function diagnose(env: Record<string, string | undefined>) {
  * לדומיין שלנו, וזה מצטמצם מעצמו בלי שינוי קוד. מקור שאינו תואם לא מקבל
  * כותרת CORS כלל, והדפדפן חוסם אותו.
  */
+/**
+ * הסיבה שגוגל נתנה, בלי מה ששלחנו אליה.
+ *
+ * ⚠️ מחרוזות ארוכות שנראות כמו מפתח נמחקות לפני ההחזרה. הן אינן אמורות
+ * להופיע בהודעת שגיאה, אבל "אמור" אינו אכיפה, וזו הודעה שנוסעת לדפדפן.
+ */
+async function upstreamReason(res: Response): Promise<string | null> {
+  const body = await res.text().catch(() => "");
+  let message: unknown = null;
+  try {
+    message = JSON.parse(body)?.error?.message;
+  } catch { /* גוף שאינו JSON — אין ממה לגזור סיבה */ }
+  if (typeof message !== "string" || !message) return null;
+  return message
+    .replace(/AIza[\w-]{10,}/g, "‹מפתח›")
+    .replace(/[A-Za-z0-9_-]{40,}/g, "‹מוסתר›")
+    .slice(0, 300);
+}
+
 function corsFor(req: Request, env: Record<string, string | undefined>) {
   const allowed = env.ALLOWED_ORIGIN;
   const origin = req.headers.get("origin");
@@ -368,11 +387,18 @@ export async function handle(req: Request, env: Record<string, string | undefine
   }
 
   if (!res.ok) {
-    // גוף התשובה של גוגל עלול לשקף בחזרה חלקים מהבקשה. מוחזר קוד בלבד.
+    // גוף התשובה של גוגל עלול לשקף בחזרה חלקים מהבקשה, ולכן לא הוחזר
+    // כלל — אבל "400" בלי סיבה אינו ניתן לאבחון, וזו הייתה נפילה שקטה
+    // בפני עצמה: העברנו סבב שלם בלי לדעת איזה שדה נדחה.
+    //
+    // מוחזר **רק** error.message מהמבנה של גוגל — משפט על הבקשה, לא
+    // תוכן שלה — חתוך ל-300 תווים, ואחרי סינון של כל מה שנראה כמו
+    // מפתח. אם המבנה אינו כצפוי, לא מוחזר דבר.
     return json({
       error: "upstream_error",
       status: res.status,
       model,
+      upstream_detail: await upstreamReason(res),
       hint: res.status === 404
         ? `גוגל אינה מכירה את המודל "${model}". לשלוח {"diagnose":"models"} כדי לראות מה זמין למפתח הזה, ואז להגדיר סוד GEMINI_MODEL עם שם מהרשימה.`
         : transient(res.status)
