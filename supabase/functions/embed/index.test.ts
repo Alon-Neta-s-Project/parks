@@ -10,7 +10,7 @@ const SECRET = "ingest-secret-value";
 const FULL = {
   INGEST_SECRET: SECRET,
   SUPABASE_URL: "http://db",
-  SUPABASE_SERVICE_ROLE_KEY: "service-key",
+  SUPABASE_ANON_KEY: "anon-key",
   GEMINI_API_KEY: "AIzaSyTESTKEY0000000000000000000000000000",
 };
 
@@ -33,16 +33,16 @@ const chunk = (id: string) => ({ id, content: "## שאלה\n\nתשובה ארו�
 const vec = (n = 1536) => Array.from({ length: n }, () => 0.01);
 
 /** מסד שמחזיר `pending` קטעים, ומקבל כתיבות. */
-const db = (pending: unknown[], remaining = "0-0/0") => (url: string) => {
+const db = (pending: unknown[], remaining: unknown = 0) => (url: string) => {
   if (url.includes("generativelanguage")) {
     return new Response(
       JSON.stringify({ embeddings: (pending as unknown[]).map(() => ({ values: vec() })) }),
       { status: 200 },
     );
   }
-  if (url.includes("id=eq.")) return new Response(null, { status: 204 });
-  if (url.includes("select=id&") || url.endsWith("select=id")) {
-    return new Response("[]", { status: 200, headers: { "content-range": remaining } });
+  if (url.endsWith("/ingest_set_embedding")) return new Response("true", { status: 200 });
+  if (url.endsWith("/ingest_remaining")) {
+    return new Response(JSON.stringify(remaining), { status: 200 });
   }
   return new Response(JSON.stringify(pending), { status: 200 });
 };
@@ -86,9 +86,9 @@ Deno.test("מסלול תקין — הווקטור ושם המודל נכתבים
 
   // ⚠️ ה-check במסד אוכף שהשניים ריקים או מלאים יחד. כתיבה של אחד מהם
   // בלבד הייתה נדחית, וזו בדיוק ההגנה — אז הבדיקה מוודאת שהיא נשמרת.
-  const write = s.calls.find((c) => c.url.includes("id=eq."))!;
+  const write = s.calls.find((c) => c.url.endsWith("/ingest_set_embedding"))!;
   const sent = JSON.parse(write.init!.body as string);
-  assertEquals(Object.keys(sent).sort(), ["embedding", "embedding_model"]);
+  assertEquals(Object.keys(sent).sort(), ["p_id", "p_model", "p_secret", "p_vector"]);
 });
 
 // ⚠️ המסמכים והשאלה מקודדים בתפקידים שונים. קידוד שניהם באותו תפקיד
@@ -110,7 +110,7 @@ Deno.test("המפתח של ג'מיני אינו נשלח למסד, ולהיפך"
   for (const call of s.calls) {
     const headers = JSON.stringify(call.init?.headers ?? {});
     if (call.url.includes("generativelanguage")) {
-      assertEquals(headers.includes("service-key"), false, "מפתח המסד הגיע לגוגל");
+      assertEquals(headers.includes("anon-key"), false, "מפתח המסד הגיע לגוגל");
     } else {
       assertEquals(headers.includes("AIza"), false, "מפתח ג'מיני הגיע למסד");
     }
@@ -140,7 +140,7 @@ Deno.test("פחות וקטורים מקטעים — לא נכתב דבר", async
   s.restore();
   assertEquals(r.status, 502);
   assertEquals((await r.json()).error, "count_mismatch");
-  assertEquals(s.calls.some((c) => c.url.includes("id=eq.")), false, "אסור שתהיה כתיבה");
+  assertEquals(s.calls.some((c) => c.url.endsWith("/ingest_set_embedding")), false, "אסור שתהיה כתיבה");
 });
 
 Deno.test("ממד שגוי — לא נכתב דבר", async () => {
@@ -155,19 +155,20 @@ Deno.test("ממד שגוי — לא נכתב דבר", async () => {
   const body = await r.json();
   assertEquals(body.error, "wrong_dimension");
   assertEquals(body.received, 768);
-  assertEquals(s.calls.some((c) => c.url.includes("id=eq.")), false);
+  assertEquals(s.calls.some((c) => c.url.endsWith("/ingest_set_embedding")), false);
 });
 
 // ⚠️ "לא הצלחתי לספור" ו"אפס נשארו" הם שני דברים, ואחד מהם אומר
 // "סיימנו" בטעות. זה בדיוק הבאג שכבר נתפס פעם אחת בהגבלת הקצב.
 Deno.test("ספירה שנכשלה מוחזרת כ-null ולא כאפס", async () => {
   const pending = [chunk("a")];
+  // ⚠️ ingest_remaining שנכשלת — "לא הצלחתי לספור", לא "אפס".
   const s = stub((url) => {
     if (url.includes("generativelanguage")) {
       return new Response(JSON.stringify({ embeddings: [{ values: vec() }] }), { status: 200 });
     }
-    if (url.includes("id=eq.")) return new Response(null, { status: 204 });
-    if (url.endsWith("select=id")) return new Response("[]", { status: 200 }); // בלי content-range
+    if (url.endsWith("/ingest_set_embedding")) return new Response("true", { status: 200 });
+    if (url.endsWith("/ingest_remaining")) return new Response("", { status: 500 });
     return new Response(JSON.stringify(pending), { status: 200 });
   });
   const r = await handle(post(), FULL);
@@ -177,13 +178,52 @@ Deno.test("ספירה שנכשלה מוחזרת כ-null ולא כאפס", async 
   assertEquals(body.done, false, "בלי ספירה אסור לדווח שסיימנו");
 });
 
-Deno.test("403 מהמסד מסביר שהמפתח אינו service_role", async () => {
-  const s = stub(() => new Response("", { status: 403 }));
+// ⚠️ שלוש תקלות שנראות זהות מבחוץ — מיגרציה חסרה, סוד לא תואם, וכל השאר.
+// בלי הפרדה, כל אחת מהן שולחת לחיפוש בשלושה מקומות.
+Deno.test("404 מפנה למיגרציה 027, וסוד שגוי מפנה ל-ingest_set_key", async () => {
+  const missing = stub(() => new Response("", { status: 404 }));
+  const a = await handle(post(), FULL);
+  missing.restore();
+  assertEquals((await a.json()).detail.includes("027"), true);
+
+  const wrong = stub(() =>
+    new Response(JSON.stringify({ message: "סוד שגוי" }), { status: 400 })
+  );
+  const b = await handle(post(), FULL);
+  wrong.restore();
+  assertEquals((await b.json()).detail.includes("ingest_set_key"), true);
+});
+
+// ⚠️ עדכון שלא פגע בשום שורה מוחזר כ-false. 200 בלבד היה סופר אותו
+// כהצלחה, והקטע היה נשאר בלי וקטור בלי שאיש יראה.
+Deno.test("כתיבה שלא פגעה בשורה נעצרת ואינה נספרת כהצלחה", async () => {
+  const s = stub((url) => {
+    if (url.includes("generativelanguage")) {
+      return new Response(JSON.stringify({ embeddings: [{ values: vec() }] }), { status: 200 });
+    }
+    if (url.endsWith("/ingest_set_embedding")) return new Response("false", { status: 200 });
+    return new Response(JSON.stringify([chunk("a")]), { status: 200 });
+  });
   const r = await handle(post(), FULL);
   s.restore();
   const body = await r.json();
-  assertEquals(body.error, "db_unreachable");
-  assertEquals(body.detail.includes("service_role"), true);
+  assertEquals(body.error, "write_missed");
+  assertEquals(body.written, 0);
+});
+
+// ⚠️ הסוד נשלח בגוף לכל קריאה למסד, ולעולם לא לגוגל.
+Deno.test("הסוד נשלח למסד בלבד", async () => {
+  const s = stub(db([chunk("a")]));
+  await handle(post(), FULL);
+  s.restore();
+  for (const call of s.calls) {
+    const body = String(call.init?.body ?? "");
+    if (call.url.includes("generativelanguage")) {
+      assertEquals(body.includes(SECRET), false, "הסוד הגיע לגוגל");
+    } else {
+      assertEquals(body.includes(SECRET), true, "הסוד חסר בקריאה למסד");
+    }
+  }
 });
 
 Deno.test("שגיאת גוגל מוחזרת בלי המפתח", async () => {

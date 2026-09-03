@@ -122,7 +122,9 @@ mig(n, ok) as (values
   (26, (select exists (select 1 from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
           where ns.nspname='public' and p.proname='check_rate_limit' and p.pronargs = 1)
         and not exists (select 1 from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
-          where ns.nspname='public' and p.proname='check_rate_limit' and p.pronargs <> 1)))
+          where ns.nspname='public' and p.proname='check_rate_limit' and p.pronargs <> 1))),
+  (27, (select exists (select 1 from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
+          where ns.nspname='public' and p.proname='ingest_set_embedding')))
 ),
 g(passed, missing) as (
   select count(*) filter (where ok),
@@ -156,8 +158,8 @@ n(experience, park, land, profile, trip, conversation, knowledge_doc, chunks, ve
 ),
 report(ord, "מה", "מצב") as (
   select 1, 'מיגרציות',
-         case when passed = 26 then '26 מתוך 26 ✅'
-              else passed || ' מתוך 26 ❌  — חסרות: ' || missing end from n
+         case when passed = 27 then '27 מתוך 27 ✅'
+              else passed || ' מתוך 27 ❌  — חסרות: ' || missing end from n
   union all
   select 2, 'מבנה',
          case when tables = 19 then '19 טבלאות ✅'
@@ -231,6 +233,13 @@ report(ord, "מה", "מצב") as (
                 then vectors || ' מתוך ' || chunks || ' קטעים חושבו ⏳'
               else knowledge_doc || ' מסמכים · ' || chunks || ' קטעים · כולם חושבו ✅'
               end from n
+  union all
+  select 17, 'סוד הטעינה',
+         case when to_regclass('public.ingest_key') is null
+                then 'לא הורצה מיגרציה 027 ⏳'
+              when not exists (select 1 from ingest_key) then
+                'לא נקבע ⏳ — להריץ select ingest_set_key(...)'
+              else 'נקבע ✅' end
   union all
   select 12, 'משתמשים רשומים',
          case when profile is null then 'הטבלה לא קיימת ❌'

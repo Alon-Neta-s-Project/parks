@@ -10,11 +10,18 @@
  * לה לחשב מחדש 259 קטעים, ולכן היא דורשת `INGEST_SECRET` ונכשלת סגור
  * כשהוא חסר — בדיוק כמו הגדר של טים, ומאותה סיבה.
  *
- * ⚠️ ומדוע `service_role` דווקא כאן: הפונקציה **כותבת** לטבלה שסגורה
- * ב-RLS. אצל טים בחרנו במפתח anon עם פונקציית `security definer`, כי שם
- * משטח החשיפה היה חייב להישאר מחרוזת אחת שנכנסת וכן/לא שיוצא. כאן
- * הפעולה היא ניהולית מעצם טבעה, ו-`service_role` בסביבת שרת הוא בדיוק
- * מה שהוא נועד לו. הוא לעולם אינו מגיע לדפדפן.
+ * ⚠️ **בניתי את זה קודם על service_role, וזה לא עבד.** ההרצה הראשונה
+ * החזירה 403 — אותו 403 שקיבלנו במיגרציה 020: המפתח כן מתקבל, והתפקיד
+ * שהוא נפתר אליו אינו service_role. הפרויקט על מערכת המפתחות החדשה,
+ * ואיני יכול לאמת מכאן לאיזה תפקיד כל מפתח נפתר.
+ *
+ * לכן אותו פתרון שכבר עבד פעם אחת: **פונקציות security definer**, שאינן
+ * תלויות בתפקיד. ההבדל מ-check_rate_limit הוא שכאן נדרש **סוד** — גדר
+ * קצב מקבלת מחרוזת ומחזירה כן/לא, ואילו כתיבת embedding שרירותי יכולה
+ * לגרום לטים לשלוף את הקטע הלא נכון לכל שאלה. הרעלת אינדקס שליפה אינה
+ * נראית על המסך כתקלה — היא נראית כתשובה.
+ *
+ * הסוד נשמר במסד כ-sha256 ונשלח בכל קריאה, ולא מוחזק בשום מקום אחר.
  */
 
 const MODEL = "gemini-embedding-001";
@@ -55,40 +62,48 @@ export async function handle(
   }
 
   const url = env.SUPABASE_URL;
-  const serviceKey = env.SUPABASE_SERVICE_ROLE_KEY ?? env.SUPABASE_SECRET_KEY;
+  // ⚠️ anon, לא service_role. ההרשאה מגיעה מ-security definer ומהסוד,
+  // ולא מהתפקיד — כי התפקיד הוא בדיוק מה שלא נפתר כאן.
+  const dbKey = env.SUPABASE_ANON_KEY ?? env.SUPABASE_PUBLISHABLE_KEY;
   const geminiKey = env.GEMINI_API_KEY;
-  if (!url || !serviceKey || !geminiKey) {
+  if (!url || !dbKey || !geminiKey) {
     return json({
       error: "not_configured",
       // ⚠️ נוכחות בלבד, לעולם לא ערך.
       detail: {
         SUPABASE_URL: Boolean(url),
-        SUPABASE_SERVICE_ROLE_KEY: Boolean(serviceKey),
+        SUPABASE_ANON_KEY: Boolean(dbKey),
         GEMINI_API_KEY: Boolean(geminiKey),
       },
     }, 500);
   }
 
   const db = {
-    apikey: serviceKey,
-    Authorization: `Bearer ${serviceKey}`,
+    apikey: dbKey,
+    Authorization: `Bearer ${dbKey}`,
     "Content-Type": "application/json",
   };
+  const rpc = (name: string, body: unknown) =>
+    fetch(`${url}/rest/v1/rpc/${name}`, {
+      method: "POST",
+      headers: db,
+      body: JSON.stringify(body),
+    });
 
   // ── מה עוד לא חושב ──────────────────────────────────────────────────
   let pending: PendingChunk[];
   try {
-    const res = await fetch(
-      `${url}/rest/v1/knowledge_chunk?embedding=is.null&select=id,content&limit=${BATCH}`,
-      { headers: db },
-    );
+    const res = await rpc("ingest_pending", { p_secret: secret, p_limit: BATCH });
     if (!res.ok) {
+      const body = await res.text().catch(() => "");
       return json({
         error: "db_unreachable",
         status: res.status,
-        detail: res.status === 401 || res.status === 403
-          ? "המפתח אינו נפתר ל-service_role. הפונקציה כותבת לטבלה שסגורה ב-RLS."
-          : undefined,
+        detail: res.status === 404
+          ? "לא הורצה מיגרציה 027 (ingest_pending אינה קיימת)."
+          : body.includes("סוד שגוי")
+          ? "הסוד שב-INGEST_SECRET אינו תואם למה שנשמר במסד. להריץ ingest_set_key."
+          : body.slice(0, 200),
       }, 500);
     }
     pending = await res.json();
@@ -168,16 +183,13 @@ export async function handle(
   let written = 0;
   for (let i = 0; i < pending.length; i++) {
     const chunk = pending[i]!;
-    const res = await fetch(`${url}/rest/v1/knowledge_chunk?id=eq.${chunk.id}`, {
-      method: "PATCH",
-      headers: { ...db, Prefer: "return=minimal" },
-      // ⚠️ שם המודל נכתב **יחד** עם הווקטור, ולא לפניו ולא אחריו.
-      // ה-check במסד אוכף שהם ריקים או מלאים יחד, ושליחה נפרדת הייתה
-      // נדחית — וזו בדיוק ההגנה שרצינו.
-      body: JSON.stringify({
-        embedding: JSON.stringify(vectors[i]),
-        embedding_model: MODEL,
-      }),
+    // ⚠️ שם המודל נכתב **יחד** עם הווקטור. ה-check ב-025 אוכף שהם ריקים
+    // או מלאים יחד, והפונקציה במסד דוחה שם ריק.
+    const res = await rpc("ingest_set_embedding", {
+      p_secret: secret,
+      p_id: chunk.id,
+      p_vector: JSON.stringify(vectors[i]),
+      p_model: MODEL,
     });
     if (!res.ok) {
       return json({
@@ -185,7 +197,17 @@ export async function handle(
         written,
         chunk: chunk.id,
         status: res.status,
-        detail: await res.text().catch(() => ""),
+        detail: (await res.text().catch(() => "")).slice(0, 200),
+      }, 500);
+    }
+    // ⚠️ הפונקציה מחזירה false כשהעדכון לא פגע בשום שורה. "נכתב" ו"לא
+    // נמצא" הם שני דברים, ו-200 בלבד היה סופר את השני כראשון.
+    if ((await res.json().catch(() => null)) !== true) {
+      return json({
+        error: "write_missed",
+        written,
+        chunk: chunk.id,
+        detail: "העדכון לא פגע בשום שורה. הקטע היה נשאר בלי וקטור בלי שאיש יראה.",
       }, 500);
     }
     written++;
@@ -194,14 +216,11 @@ export async function handle(
   // כמה נשארו, כדי שהקוראת תדע אם לקרוא שוב.
   let remaining: number | null = null;
   try {
-    const res = await fetch(
-      `${url}/rest/v1/knowledge_chunk?embedding=is.null&select=id`,
-      { headers: { ...db, Prefer: "count=exact", Range: "0-0" } },
-    );
-    const range = res.headers.get("content-range");
+    const res = await rpc("ingest_remaining", { p_secret: secret });
+    const value = res.ok ? await res.json().catch(() => null) : null;
     // ⚠️ בלי `?? 0`. "לא הצלחתי לספור" ו"אפס נשארו" הם שני דברים, ואחד
     // מהם אומר "סיימנו" בטעות. זה בדיוק הבאג שכבר תפסנו בהגבלת הקצב.
-    remaining = range ? Number(range.split("/")[1]) : null;
+    remaining = typeof value === "number" ? value : null;
   } catch { /* הספירה היא נוחות, לא תנאי */ }
 
   return json({
