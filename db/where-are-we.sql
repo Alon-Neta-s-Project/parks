@@ -88,10 +88,15 @@ mig(n, ok) as (values
         and not exists (select 1 from information_schema.columns
           where table_schema='public' and table_name='experience'
             and column_name='intensity_factors'))),
-  (24, (select format_type(atttypid, atttypmod) = 'extensions.vector(1536)'
-        from pg_attribute
-        where attrelid = to_regclass('public.knowledge_chunk')
-          and attname = 'embedding'))
+  -- ⚠️ לא לפי format_type. הפלט שלו תלוי ב-search_path: אצלנו הוא
+  -- 'extensions.vector(1536)' ובסופאבייס, ששמה את extensions בנתיב,
+  -- הוא 'vector(1536)'. הגלאי דיווח ❌ על מסד שהמיגרציה רצה בו בהצלחה.
+  -- זה הגלאי השלישי שלי שנשבר על אותו דבר. atttypmod הוא הממד עצמו,
+  -- והוא אינו תלוי בשום נתיב.
+  (24, (select t.typname = 'vector' and a.atttypmod = 1536
+        from pg_attribute a join pg_type t on t.oid = a.atttypid
+        where a.attrelid = to_regclass('public.knowledge_chunk')
+          and a.attname = 'embedding'))
 ),
 g(passed, missing) as (
   select count(*) filter (where ok),
