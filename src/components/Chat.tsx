@@ -8,6 +8,7 @@ import { HEIGHT_ASK_BELOW_AGE, type Member } from "../lib/group";
 import { GroupBuilder } from "./GroupBuilder";
 import { FactAnswer } from "./FactAnswer";
 import { classify, findExperience, whichFact, type FactKey } from "../lib/intent";
+import { askTim, type TimReply } from "../lib/tim";
 import type { Experience } from "../data/schema";
 import { recommend } from "../lib/recommend";
 import { refinements } from "../lib/refine";
@@ -131,6 +132,16 @@ export function Chat() {
    * because a generic plan handed back to "plan me a day" is a failure rather
    * than a reasonable default.
    */
+  /**
+   * מה שטים ענה על שאלה פתוחה, לפי מזהה השאלה.
+   *
+   * ⚠️ נשמר לצד התמלול ולא בתוכו: התמלול הוא מה שהמשתמשת אמרה ומה
+   * שהנתונים ענו — שניהם מיידיים וּודאיים. תשובת המודל מגיעה מאוחר יותר
+   * ועשויה לא להגיע כלל, ומיזוג השניים היה מטשטש איזה חלק מהמסך הוא
+   * עובדה מהטבלה ואיזה הוא תשובה של מודל.
+   */
+  const [timAnswers, setTimAnswers] = useState<Record<string, TimReply | "asking">>({});
+
   const submit = () => {
     const text = draft.trim();
     if (!text) return;
@@ -147,15 +158,22 @@ export function Chat() {
       return;
     }
 
+    const experience = findExperience(text);
+    const id = `q${answered.length}`;
     setAnswered((current) => [
       ...current,
-      {
-        id: `q${current.length}`,
-        question: text,
-        experience: findExperience(text),
-        fact: whichFact(text),
-      },
+      { id, question: text, experience, fact: whichFact(text) },
     ]);
+
+    // ⚠️ טים נשאל **רק** את מה שהנתונים לא ענו עליו. עובדה על מתקן מסוים
+    // נענית מהטבלה — מיידית, בחינם, ומדויקת יותר ממה שמודל היה אומר.
+    // שליחת "מה גובה המינימום ב-X" למודל הייתה תשלום על תשובה פחות טובה.
+    if (!experience) {
+      setTimAnswers((current) => ({ ...current, [id]: "asking" }));
+      askTim(text).then((reply) =>
+        setTimAnswers((current) => ({ ...current, [id]: reply })),
+      );
+    }
   };
 
   const answer = (key: string, label: string, patch: Partial<Profile>, reply?: string) => {
@@ -226,11 +244,7 @@ export function Chat() {
             {a.experience ? (
               <FactAnswer experience={a.experience} fact={a.fact} />
             ) : (
-              <div className="bubble bubble--tim">
-                {a.fact === null && a.experience === null && classify(a.question) === "planning"
-                  ? t("ask.planningFirst")
-                  : t("ask.notFound")}
-              </div>
+              <TimBubble question={a.question} state={timAnswers[a.id]} />
             )}
           </div>
         </div>
@@ -491,4 +505,32 @@ function summariseGroup(members: Member[], t: TFunction): string {
   if (adults) parts.push(`${adults} ${t("questions.group.addAdult")}`);
   for (const c of children) parts.push(t("questions.group.member_child", { age: c.age }));
   return parts.join(" · ");
+}
+
+/**
+ * מה שמופיע כשהנתונים לא ענו.
+ *
+ * ⚠️ כישלון נראה, ואינו נופל בשקט אל "לא מצאתי". לכל סיבה טקסט משלה, כי
+ * "אין לי את זה" ו"נגמרה המכסה להיום" מובילים את המשתמשת לשני דברים
+ * שונים לגמרי. זה אותו כלל שהמסד אוכף: אין נפילה שקטה.
+ */
+function TimBubble({ question, state }: { question: string; state?: TimReply | "asking" }) {
+  const { t } = useTranslation();
+  if (classify(question) === "planning") {
+    return <div className="bubble bubble--tim">{t("ask.planningFirst")}</div>;
+  }
+  if (state === "asking") {
+    return (
+      <div className="bubble bubble--tim" aria-live="polite">{t("ask.thinking")}</div>
+    );
+  }
+  if (state?.status === "ok") {
+    return <div className="bubble bubble--tim">{state.answer}</div>;
+  }
+  if (state?.status === "failed") {
+    return (
+      <div className="bubble bubble--tim">{t(`ask.timFailed.${state.reason}`)}</div>
+    );
+  }
+  return <div className="bubble bubble--tim">{t("ask.notFound")}</div>;
 }
