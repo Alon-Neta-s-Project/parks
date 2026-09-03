@@ -87,7 +87,11 @@ mig(n, ok) as (values
             and column_name='max_speed_kmh')
         and not exists (select 1 from information_schema.columns
           where table_schema='public' and table_name='experience'
-            and column_name='intensity_factors')))
+            and column_name='intensity_factors'))),
+  (24, (select format_type(atttypid, atttypmod) = 'extensions.vector(1536)'
+        from pg_attribute
+        where attrelid = to_regclass('public.knowledge_chunk')
+          and attname = 'embedding'))
 ),
 g(passed, missing) as (
   select count(*) filter (where ok),
@@ -119,8 +123,8 @@ n(experience, park, land, profile, trip, conversation, knowledge_doc,
 ),
 report(ord, "מה", "מצב") as (
   select 1, 'מיגרציות',
-         case when passed = 23 then '23 מתוך 23 ✅'
-              else passed || ' מתוך 23 ❌  — חסרות: ' || missing end from n
+         case when passed = 24 then '24 מתוך 24 ✅'
+              else passed || ' מתוך 24 ❌  — חסרות: ' || missing end from n
   union all
   select 2, 'מבנה',
          case when tables = 19 then '19 טבלאות ✅'
