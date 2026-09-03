@@ -17,22 +17,28 @@ c(name, n) as (
   from (values ('experience'), ('park'), ('land'), ('profile'), ('trip'),
                ('conversation'), ('message'), ('knowledge_doc'), ('trip_member')) v(name)
 ),
+-- ⚠️ שם הטבלה הוא חלק מהשורה ולא קבוע. קודם כל הספירות היו על
+-- experience, וספירת קטעי ידע דרשה CTE שני שמעתיק את אותה הגנה של
+-- query_to_xml — שתי הגנות זהות נפרדות זו הצורה שבה אחת מהן נשכחת.
 x(k, n) as (
   select v.k,
-         case when to_regclass('public.experience') is null then null
+         case when to_regclass('public.' || v.tbl) is null then null
               else (xpath('/row/c/text()',
-                     query_to_xml('select count(*) as c from public.experience where ' || v.w,
+                     query_to_xml('select count(*) as c from public.' || v.tbl
+                                  || ' where ' || v.w,
                                   false, true, '')))[1]::text::bigint end
   from (values
-    ('h_pos',  'height_requirement_cm > 0'),
-    ('h_zero', 'height_requirement_cm = 0'),
-    ('h_null', 'height_requirement_cm is null'),
-    ('wet_na', $q$gets_wet = 'na'$q$),
-    ('he_bad', $q$name_i18n->>'he' is null or name_i18n->>'he' = ''$q$),
-    ('closed',   $q$status <> 'open'$q$),
-    ('skip_null', 'skip_line_system is null'),
-    ('skip_none', $q$skip_line_system = 'none'$q$)
-  ) v(k, w)
+    ('chunks',  'knowledge_chunk', 'true'),
+    ('vectors', 'knowledge_chunk', 'embedding is not null'),
+    ('h_pos',  'experience', 'height_requirement_cm > 0'),
+    ('h_zero', 'experience', 'height_requirement_cm = 0'),
+    ('h_null', 'experience', 'height_requirement_cm is null'),
+    ('wet_na', 'experience', $q$gets_wet = 'na'$q$),
+    ('he_bad', 'experience', $q$name_i18n->>'he' is null or name_i18n->>'he' = ''$q$),
+    ('closed', 'experience', $q$status <> 'open'$q$),
+    ('skip_null', 'experience', 'skip_line_system is null'),
+    ('skip_none', 'experience', $q$skip_line_system = 'none'$q$)
+  ) v(k, tbl, w)
 ),
 mig(n, ok) as (values
   ( 1, (select exists (select 1 from pg_extension where extname = 'vector'))),
@@ -96,14 +102,23 @@ mig(n, ok) as (values
   (24, (select t.typname = 'vector' and a.atttypmod = 1536
         from pg_attribute a join pg_type t on t.oid = a.atttypid
         where a.attrelid = to_regclass('public.knowledge_chunk')
-          and a.attname = 'embedding'))
+          and a.attname = 'embedding')),
+  -- ⚠️ שני תנאים, לא אחד: 025 גם מוסיפה טקסונומיה וגם משחררת את
+  -- embedding_model מ-NOT NULL. בלי השני הטעינה נעצרת, ובדיקה שרואה רק
+  -- את הראשון הייתה מדווחת ✅ על מסד שלא ניתן לטעון אליו.
+  (25, (select exists (select 1 from information_schema.columns
+          where table_schema='public' and table_name='knowledge_doc'
+            and column_name='source_urls')
+        and exists (select 1 from information_schema.columns
+          where table_schema='public' and table_name='knowledge_chunk'
+            and column_name='embedding_model' and is_nullable='YES')))
 ),
 g(passed, missing) as (
   select count(*) filter (where ok),
          coalesce(string_agg(lpad(n::text, 3, '0'), ', ') filter (where not ok), '')
   from mig
 ),
-n(experience, park, land, profile, trip, conversation, knowledge_doc,
+n(experience, park, land, profile, trip, conversation, knowledge_doc, chunks, vectors,
   h_pos, h_zero, h_null, wet_na, he_bad, closed, skip_null, skip_none,
   tables, policies, passed, missing) as (
   select (select n from c where name='experience'),
@@ -113,6 +128,8 @@ n(experience, park, land, profile, trip, conversation, knowledge_doc,
          (select n from c where name='trip'),
          (select n from c where name='conversation'),
          (select n from c where name='knowledge_doc'),
+         (select n from x where k='chunks'),
+         (select n from x where k='vectors'),
          (select n from x where k='h_pos'),
          (select n from x where k='h_zero'),
          (select n from x where k='h_null'),
@@ -128,8 +145,8 @@ n(experience, park, land, profile, trip, conversation, knowledge_doc,
 ),
 report(ord, "מה", "מצב") as (
   select 1, 'מיגרציות',
-         case when passed = 24 then '24 מתוך 24 ✅'
-              else passed || ' מתוך 24 ❌  — חסרות: ' || missing end from n
+         case when passed = 25 then '25 מתוך 25 ✅'
+              else passed || ' מתוך 25 ❌  — חסרות: ' || missing end from n
   union all
   select 2, 'מבנה',
          case when tables = 19 then '19 טבלאות ✅'
@@ -194,8 +211,15 @@ report(ord, "מה", "מצב") as (
   union all
   select 11, 'מאגר הידע',
          case when knowledge_doc is null then 'הטבלה לא קיימת ❌'
-              when knowledge_doc = 0 then 'ריק — עוד לא נבנה ⏳'
-              else knowledge_doc || ' מסמכים' end from n
+              when knowledge_doc = 0 then 'ריק — עוד לא נטען ⏳'
+              when chunks = 0 then knowledge_doc || ' מסמכים, ואפס קטעים ❌'
+              when vectors = 0
+                then knowledge_doc || ' מסמכים · ' || chunks
+                     || ' קטעים · אף אחד עדיין בלי וקטור ⏳ — טים לא ישלוף מהם'
+              when vectors < chunks
+                then vectors || ' מתוך ' || chunks || ' קטעים חושבו ⏳'
+              else knowledge_doc || ' מסמכים · ' || chunks || ' קטעים · כולם חושבו ✅'
+              end from n
   union all
   select 12, 'משתמשים רשומים',
          case when profile is null then 'הטבלה לא קיימת ❌'
