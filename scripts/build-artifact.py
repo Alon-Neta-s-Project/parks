@@ -18,7 +18,7 @@ OUT = ROOT / "design" / "preview" / "tim.html"
 
 FONTS = (
     "https://fonts.googleapis.com/css2?"
-    "family=Assistant:wght@400;500;600;700&family=Archivo:wght@400;500;600;700&display=swap"
+    "family=Secular+One&family=Rubik:wght@400;500;600;700;800&display=swap"
 )
 
 
