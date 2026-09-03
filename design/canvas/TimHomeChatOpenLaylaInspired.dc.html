@@ -1,0 +1,105 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Rubik', 'Segoe UI', Arial, sans-serif; }
+    ::placeholder { color: #B0A493; }
+  </style>
+</helmet>
+
+<!-- Layla-inspired, added 03.09 (second pass): the conversation window that opens when a topic card on TimHomeLaylaInspired is tapped - Neta pointed out this was missing (the cards say "start a conversation about this with Tim" but no artboard showed what that conversation looks like). Follows TimHomeLaylaInspired directly in the canvas, mirroring how Onboarding follows TimHome in the original pilot page. Demonstrates the corrected, decided 3-question flow (park-day-companion-onboarding-flow-decisions.md) after tapping the first card, "מג'יק קינגדום עם ילדים קטנים" - not a skip-to-plan shortcut. -->
+<div dir="rtl" lang="he" style="width:390px;height:1120px;background:#FBF6EF;color:#2B2420;display:flex;flex-direction:column;overflow:hidden;position:relative;">
+
+  <div style="flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid #ECE3D8;background:#fff;">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2B2420" stroke-width="2"><path d="M5 12h14M5 12l6-6M5 12l6 6"/></svg>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div style="width:26px;height:26px;border-radius:50%;background:#FBF6EF;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+        <svg width="19" height="19" viewBox="0 0 100 100">
+          <defs><linearGradient id="tmgthc1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#FFD98A"/><stop offset="100%" stop-color="#E8894A"/></linearGradient></defs>
+          <path d="M50 14 C70 14 82 32 82 52 C82 72 68 88 50 88 C32 88 18 72 18 52 C18 32 30 14 50 14 Z" fill="url(#tmgthc1)"/>
+          <path d="M32 20 L38 4 L42 22 Z" fill="#FFD98A"/>
+          <path d="M68 20 L62 4 L58 22 Z" fill="#FFD98A"/>
+          <path d="M32 40 Q38 34 44 40" stroke="#3B2A1E" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+          <path d="M56 40 Q62 34 68 40" stroke="#3B2A1E" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+          <path d="M38 62 Q50 72 62 62" stroke="#3B2A1E" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+          <circle cx="28" cy="54" r="6" fill="#F0653A" opacity="0.4"/><circle cx="72" cy="54" r="6" fill="#F0653A" opacity="0.4"/>
+        </svg>
+      </div>
+      <span style="font-weight:700;font-size:14.5px;">טים</span>
+    </div>
+    <span style="font-size:11.5px;color:#8A8074;text-decoration:underline;">דלגו</span>
+  </div>
+
+  <div style="flex:1;overflow-y:auto;padding:18px 16px;display:flex;flex-direction:column;gap:12px;">
+
+    <div style="align-self:flex-start;max-width:78%;background:#F1E9DC;color:#2B2420;border-radius:16px 16px 16px 4px;padding:11px 14px;font-size:13px;">
+      מג'יק קינגדום עם ילדים קטנים
+    </div>
+
+    <div style="align-self:flex-end;max-width:85%;background:#fff;border:1px solid #ECE3D8;border-radius:16px 16px 4px 16px;padding:12px 14px;font-size:14px;line-height:1.55;">
+      נשמע מעולה! כדי שהתוכנית תתאים באמת — מה יותר חשוב לכם לתכנן לעומק מראש: אילו אטרקציות יתאימו לכם, כרטיסים/תקציב/איפה לישון, או שניהם באותה מידה?
+    </div>
+    <div style="align-self:flex-start;max-width:78%;background:#F1E9DC;color:#2B2420;border-radius:16px 16px 16px 4px;padding:11px 14px;font-size:13px;">
+      שניהם, אבל בעיקר אילו מתקנים יתאימו לילד שלנו
+    </div>
+
+    <div style="align-self:flex-end;max-width:85%;background:#fff;border:1px solid #ECE3D8;border-radius:16px 16px 4px 16px;padding:12px 14px;font-size:14px;line-height:1.55;">
+      מתי אתם טסים וכמה ימי-פארק מתכננים? ומי בא איתכם, ובני כמה — כולל הגובה, כדי שנדע מיד אילו מתקנים פתוחים לו.
+    </div>
+    <div style="align-self:flex-start;max-width:78%;background:#F1E9DC;color:#2B2420;border-radius:16px 16px 16px 4px;padding:11px 14px;font-size:13px;">
+      באוקטובר, 4 ימי-פארק. אני, בן זוגי, וילד בן 5 בגובה 108 ס"מ
+    </div>
+
+    <div style="align-self:flex-end;max-width:85%;background:#FBF0DC;border:1px solid #EEDBAF;border-radius:16px 16px 4px 16px;padding:11px 14px;font-size:12.5px;line-height:1.55;color:#8A6A2E;">
+      💡 רשמתי את הגובה שלו — אסמן בדיוק אילו ממתקני-העוגן כבר פתוחים לו.
+    </div>
+
+    <div style="align-self:flex-end;max-width:85%;background:#fff;border:1px solid #ECE3D8;border-radius:16px 16px 4px 16px;padding:12px 14px;font-size:14px;line-height:1.55;">
+      כבר ביקרתם ב-Magic Kingdom בעבר?
+    </div>
+    <div style="align-self:flex-start;max-width:78%;background:#F1E9DC;color:#2B2420;border-radius:16px 16px 16px 4px;padding:11px 14px;font-size:13px;">
+      לא, פעם ראשונה
+    </div>
+
+    <div style="align-self:flex-end;max-width:88%;background:#fff;border:1px solid #ECE3D8;border-radius:16px 16px 4px 16px;padding:12px 14px;font-size:14px;line-height:1.6;">
+      מעולה, זה כל מה שאני צריך. הכנתי לכם את המדריך המלא, מותאם לילד בן 5 ולביקור ראשון:
+    </div>
+
+    <div style="align-self:flex-end;max-width:88%;">
+      <div style="background:#fff;border:1px solid #ECE3D8;border-radius:16px;padding:13px 14px;display:flex;align-items:center;gap:12px;">
+        <div style="flex-shrink:0;width:44px;height:44px;border-radius:12px;overflow:hidden;"><img src="data:image/jpeg;base64,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" style="width:44px;height:44px;object-fit:cover;display:block;"/></div>
+        <div style="flex:1;">
+          <div style="font-size:13.5px;font-weight:700;color:#2B2420;">מדריך Magic Kingdom</div>
+          <div style="font-size:11px;color:#8A8074;margin-top:2px;">25 מתקנים · עובדות + טיפים מגולשים</div>
+        </div>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#C9BEAF" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg>
+      </div>
+    </div>
+
+    <div style="align-self:flex-end;max-width:85%;background:#FBF0DC;border:1px solid #EEDBAF;border-radius:16px 16px 4px 16px;padding:11px 14px;font-size:12.5px;line-height:1.55;color:#8A6A2E;">
+      💡 אני נשאר איתכם גם שם — יש לי בועה קטנה בצד הדף אם תרצו לשאול משהו תוך כדי שאתם קוראים.
+    </div>
+
+  </div>
+
+  <div style="flex-shrink:0;padding:10px 12px 14px;border-top:1px solid #ECE3D8;background:#fff;">
+    <div style="background:#FBF6EF;border:1px solid #ECE3D8;border-radius:999px;padding:9px 14px;display:flex;align-items:center;gap:8px;">
+      <div style="flex:1;font-size:13px;color:#B0A493;">שאלו את טים...</div>
+      <div style="width:28px;height:28px;border-radius:50%;background:#2E9FD6;display:flex;align-items:center;justify-content:center;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+      </div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>
