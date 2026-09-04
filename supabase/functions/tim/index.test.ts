@@ -3,7 +3,7 @@ function assertEquals<T>(actual: T, expected: T, msg?: string) {
   const a = JSON.stringify(actual), b = JSON.stringify(expected);
   if (a !== b) throw new Error(`${msg ?? "לא זהה"}\n  התקבל : ${a}\n  ציפינו: ${b}`);
 }
-import { handle, thinkingConfig, looksLikeGeminiKey, bucketKey } from "./index.ts";
+import { handle, thinkingConfig, formatChunks, looksLikeGeminiKey, bucketKey } from "./index.ts";
 
 const KEY = "AIza" + "x".repeat(35);
 const ask = (body: unknown, method = "POST") =>
@@ -92,7 +92,7 @@ Deno.test("מסלול תקין — המפתח נשלח לגוגל ואינו ח�
   const body = await r.text();
   assertEquals(body.includes(KEY), false);          // המפתח לא בגוף התשובה
   assertEquals(JSON.parse(body).answer, "שלום, אני מחובר.");
-  const gemini = s.calls.find((c) => c.url.includes("generativelanguage"))!;
+  const gemini = s.calls.find((c) => c.url.includes("generateContent"))!;
   assertEquals((gemini.init?.headers as Record<string, string>)["x-goog-api-key"], KEY);
 });
 
@@ -319,6 +319,7 @@ Deno.test("503 מגוגל מקבל ניסיון חוזר אחד, ומצליח ב
   let geminiCalls = 0;
   const s = stub((url) => {
     if (url.includes("/rpc/")) return new Response('"ok"', { status: 200 });
+    if (url.includes(":embedContent")) return new Response("", { status: 500 });
     geminiCalls += 1;
     return geminiCalls === 1 ? new Response("", { status: 503 }) : geminiOk();
   });
@@ -333,6 +334,7 @@ Deno.test("503 שחוזר גם בניסיון השני מוחזר עם הסבר,
   let geminiCalls = 0;
   const s = stub((url) => {
     if (url.includes("/rpc/")) return new Response('"ok"', { status: 200 });
+    if (url.includes(":embedContent")) return new Response("", { status: 500 });
     geminiCalls += 1;
     return new Response("", { status: 503 });
   });
@@ -349,6 +351,7 @@ Deno.test("404 אינו זמני, ולכן אינו מנוסה שוב", async ()
   let geminiCalls = 0;
   const s = stub((url) => {
     if (url.includes("/rpc/")) return new Response('"ok"', { status: 200 });
+    if (url.includes(":embedContent")) return new Response("", { status: 500 });
     geminiCalls += 1;
     return new Response("", { status: 404 });
   });
@@ -422,7 +425,7 @@ Deno.test("בלי usageMetadata התשובה עדיין נמסרת, והמדיד
 /** הגוף שנשלח לגוגל, כאובייקט. */
 const sentToGemini = (calls: { url: string; init?: RequestInit }[]) =>
   // deno-lint-ignore no-explicit-any
-  JSON.parse(calls.find((c) => c.url.includes("generativelanguage"))!.init!.body as any);
+  JSON.parse(calls.find((c) => c.url.includes("generateContent"))!.init!.body as any);
 
 Deno.test("בלי הסוד — לא נשלח thinkingConfig כלל", async () => {
   const s = stub(dbSays("ok"));
@@ -594,4 +597,102 @@ Deno.test("404 מהמסד מפנה למיגרציה 026, לא לחתימה הי�
   const r = await handle(ask({ question: "היי" }), FULL);
   s.restore();
   assertEquals((await r.json()).detail.includes("026"), true);
+});
+
+// ── השליפה ────────────────────────────────────────────────────────────
+// ⚠️ הסימון בכל קטע מגיע מ-volatility ולא מהטקסט. פסקת סייג בגוף כל
+// מסמך הייתה מקרבת את כולם זה לזה במרחב ה-embedding וכופלת שדה קיים.
+
+Deno.test("כל קטע מסומן לפי volatility, ולא לפי הטקסט שלו", () => {
+  const out = formatChunks([
+    { content: "אלף", volatility: "volatile", last_verified: "2026-09-01" },
+    { content: "בית", volatility: "seasonal", last_verified: null },
+    { content: "גימל", volatility: "static", last_verified: "2026-08-01" },
+  ]);
+  assertEquals(out.includes("· משתנה · נבדק 2026-09-01"), true);
+  assertEquals(out.includes("· עונתי]"), true);
+  assertEquals(out.includes("· יציב · נבדק 2026-08-01"), true);
+});
+
+// ⚠️ ברירת המחדל היא לכיוון הבטוח. קטע בלי סימון נאמר בזהירות, לא
+// בביטחון — "לא ידוע" אינו "יציב".
+Deno.test("volatility חסר נקרא כמשתנה ולא כיציב", () => {
+  const out = formatChunks([{ content: "x", volatility: null, last_verified: null }]);
+  assertEquals(out.includes("משתנה"), true);
+  assertEquals(out.includes("יציב"), false);
+});
+
+Deno.test("ערך שאינו באוצר המילים אינו הופך ליציב", () => {
+  const out = formatChunks([{ content: "x", volatility: "unknown-value", last_verified: null }]);
+  assertEquals(out.includes("משתנה"), true);
+});
+
+/** מסד שמחזיר קטעים, וגוגל שמחזירה גם embedding וגם תשובה. */
+const withChunks = (rows: unknown[]) => (url: string) => {
+  if (url.includes(":embedContent")) {
+    return new Response(
+      JSON.stringify({ embedding: { values: Array.from({ length: 1536 }, () => 0.01) } }),
+      { status: 200 },
+    );
+  }
+  if (url.includes("/rpc/match_knowledge")) {
+    return new Response(JSON.stringify(rows), { status: 200 });
+  }
+  if (url.includes("/rpc/check_rate_limit")) return new Response('"ok"', { status: 200 });
+  return geminiOk();
+};
+
+Deno.test("הקטעים נכנסים להקשר, לפני השאלה", async () => {
+  const s = stub(withChunks([
+    { content: "Multi Pass עולה כך וכך", volatility: "volatile", last_verified: "2026-09-01" },
+  ]));
+  const r = await handle(ask({ question: "כמה עולה?" }), FULL);
+  s.restore();
+  const call = s.calls.find((c) => c.url.includes("generateContent"))!;
+  // deno-lint-ignore no-explicit-any
+  const sent = JSON.parse(call.init!.body as any);
+  const text = sent.contents[0].parts[0].text;
+  assertEquals(text.indexOf("Multi Pass עולה") < text.indexOf("השאלה: כמה עולה?"), true);
+  assertEquals((await r.json()).retrieval, "ok");
+});
+
+// ⚠️ השאלה מקודדת בתפקיד אחר מהמסמכים. קידוד בתפקיד הלא נכון עובד
+// ומחזיר תוצאות גרועות יותר בלי שום שגיאה.
+Deno.test("השאלה מקודדת כ-RETRIEVAL_QUERY", async () => {
+  const s = stub(withChunks([]));
+  await handle(ask({ question: "היי" }), FULL);
+  s.restore();
+  const call = s.calls.find((c) => c.url.includes(":embedContent"))!;
+  // deno-lint-ignore no-explicit-any
+  const sent = JSON.parse(call.init!.body as any);
+  assertEquals(sent.taskType, "RETRIEVAL_QUERY");
+  assertEquals(sent.outputDimensionality, 1536);
+});
+
+// ⚠️ שליפה שנכשלת אינה עוצרת את התשובה — בניגוד לגדר הקצב. גדר שנופלת
+// משאירה נקודת קצה פתוחה; שליפה שנופלת רק משאירה את טים בלי ידע,
+// וההוראות שלו כבר אוסרות עליו להמציא.
+Deno.test("שליפה שנכשלה מדווחת, ואינה מונעת תשובה", async () => {
+  const s = stub((url) => {
+    if (url.includes("/rpc/check_rate_limit")) return new Response('"ok"', { status: 200 });
+    if (url.includes(":embedContent")) return new Response("", { status: 500 });
+    return geminiOk();
+  });
+  const r = await handle(ask({ question: "היי" }), FULL);
+  s.restore();
+  const body = await r.json();
+  assertEquals(r.status, 200);
+  assertEquals(body.retrieval, "failed");
+  assertEquals(body.answer, "שלום, אני מחובר.");
+});
+
+// ⚠️ "אין קטעים מתאימים" ו"השליפה נפלה" נראים זהים על המסך, והראשון הוא
+// תשובה בעוד השני הוא תקלה.
+Deno.test("אין קטעים ותקלת שליפה הם שתי סיבות שונות", async () => {
+  const s = stub(withChunks([]));
+  const r = await handle(ask({ question: "היי" }), FULL);
+  s.restore();
+  const body = await r.json();
+  assertEquals(body.retrieval, "empty");
+  assertEquals(body.chunks, 0);
 });

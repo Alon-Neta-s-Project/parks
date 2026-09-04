@@ -57,6 +57,14 @@ const MAX_QUESTION_CHARS = 1000;
  */
 const RETRY_AFTER_MINUTES = 60;
 
+/**
+ * ⚠️ **כלל הזהירות יושב כאן, ולא בגוף המסמכים** (CLAUDE.md, וסעיף 8
+ * במסמך השליפה). פסקת סייג בתוך כל מסמך הייתה מקרבת את כל המסמכים זה
+ * לזה במרחב ה-embedding — ככל שהשאלה כללית יותר, כך המשקל של הפסקה
+ * המשותפת גדל — וגם כופלת את מה ש-volatility כבר אומר.
+ *
+ * ולכן הכלל נכתב פעם אחת, ומופעל מ-volatility שמגיע עם כל קטע.
+ */
 const SYSTEM = `אתה טים, עוזר לתכנון יום בפארקים באורלנדו. אתה עונה בעברית.
 
 כללי הזהירות שלך, ושלושתם מחייבים:
@@ -64,10 +72,17 @@ const SYSTEM = `אתה טים, עוזר לתכנון יום בפארקים בא�
 2. אינך מבטיח זמינות, החזר כספי, או חיסכון בזמן.
 3. כשפרט עשוי להשתנות — אתה אומר זאת ומפנה לאימות במקור הרשמי.
 
-⛔ וכרגע, במיוחד: עדיין לא חוברת למאגר המידע של הפארקים. אין לך שום נתון על
-מתקנים, מגבלות גובה, שעות פתיחה או מחירים. על כל שאלה עובדתית כזו ענה
-במפורש שאתה עדיין לא מחובר למאגר ולכן אינך יכול לענות — ואל תנחש, גם לא
-"בערך". שיחה כללית וברכות מותרות.`;
+איך להשתמש בקטעים שיצורפו לשאלה:
+· ענה **רק** ממה שכתוב בהם. אם התשובה אינה שם — אמור שאין לך אותה, ואל תנחש.
+· קטע שמסומן "משתנה" — אמור שהפרט עשוי להשתנות והפנה לאימות באתר או
+  באפליקציה הרשמית. קטע שמסומן "עונתי" — אמור שזה תלוי בעונה ובתאריך.
+· קטע שמסומן "יציב" אינו דורש הסתייגות.
+· **אל תזכיר קישורים, כתובות אתרים או שמות מקורות.** הפנה "לאתר הרשמי"
+  או "לאפליקציה הרשמית" בלבד.
+· אל תזכיר שקיבלת קטעים, ואל תתאר את המנגנון. ענה כאילו אתה יודע.
+
+אין לך נתונים על מתקנים ספציפיים — מגבלות גובה, עוצמה, הרטבה — אלא אם הם
+מופיעים בקטעים. על שאלה כזו בלי קטע מתאים, אמור שאין לך את הנתון.`;
 
 /**
  * בדיקת שפיות בלבד, לפני שמנסים לקרוא עם הערך.
@@ -177,6 +192,41 @@ async function upstreamReason(res: Response): Promise<string | null> {
     .replace(/AIza[\w-]{10,}/g, "‹מפתח›")
     .replace(/[A-Za-z0-9_-]{40,}/g, "‹מוסתר›")
     .slice(0, 300);
+}
+
+/** קטע כפי שהוא חוזר מ-match_knowledge. */
+export interface KnowledgeChunk {
+  content: string;
+  volatility: string | null;
+  last_verified: string | null;
+}
+
+/**
+ * הקטעים, כפי שהם נכנסים להקשר של המודל.
+ *
+ * ⚠️ **הסימון מגיע מ-volatility ולא מהטקסט.** זה כל הרעיון של סעיף 8:
+ * פסקת סייג בגוף כל מסמך הייתה מקרבת את כל המסמכים זה לזה במרחב
+ * ה-embedding — ככל שהשאלה כללית יותר כך משקלה של הפסקה המשותפת גדל —
+ * וגם כופלת מידע שכבר קיים כשדה. כאן הוא נכתב פעם אחת, לכל קטע, מהשדה.
+ *
+ * ⚠️ ובלי מקורות. match_knowledge אינה מחזירה source_urls, ומה שאינו
+ * מגיע לכאן אינו יכול לדלוף לתשובה.
+ */
+export function formatChunks(chunks: KnowledgeChunk[]): string {
+  const mark: Record<string, string> = {
+    volatile: "משתנה",
+    seasonal: "עונתי",
+    static: "יציב",
+  };
+  return chunks
+    .map((c, i) => {
+      // ⚠️ volatility חסר אינו "יציב". קטע בלי סימון נאמר בזהירות ולא
+      // בביטחון — ברירת המחדל היא לכיוון הבטוח, לא לכיוון הנוח.
+      const tag = c.volatility ? mark[c.volatility] ?? "משתנה" : "משתנה";
+      const when = c.last_verified ? ` · נבדק ${c.last_verified}` : "";
+      return `[קטע ${i + 1} · ${tag}${when}]\n${c.content}`;
+    })
+    .join("\n\n");
 }
 
 function corsFor(req: Request, env: Record<string, string | undefined>) {
@@ -331,6 +381,52 @@ export async function handle(req: Request, env: Record<string, string | undefine
     }
   }
 
+  // ── השליפה ───────────────────────────────────────────────────────────
+  //
+  // ⚠️ **נפילה רכה, בכוונה, ובניגוד לגדר הקצב.** גדר שנכשלת חייבת לעצור,
+  // כי בלעדיה נקודת הקצה פתוחה. שליפה שנכשלת אינה פותחת דבר — היא רק
+  // מותירה את טים בלי ידע, וההוראות שלו כבר אוסרות עליו להמציא. לכן
+  // כישלון כאן מדווח בתשובה ואינו מונע ממנה לצאת.
+  let chunks: KnowledgeChunk[] = [];
+  let retrieval: "ok" | "empty" | "failed" = "empty";
+  try {
+    // ⚠️ השאלה מקודדת כ-RETRIEVAL_QUERY ולא כ-RETRIEVAL_DOCUMENT. שני
+    // התפקידים אינם סימטריים, וקידוד בתפקיד הלא נכון **עובד** ומחזיר
+    // תוצאות גרועות יותר בלי שום שגיאה — אותה מלכודת כמו בצד הטעינה.
+    const emb = await fetch(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-goog-api-key": key! },
+        body: JSON.stringify({
+          model: "models/gemini-embedding-001",
+          content: { parts: [{ text: question }] },
+          taskType: "RETRIEVAL_QUERY",
+          outputDimensionality: 1536,
+        }),
+      },
+    );
+    const vector = emb.ok ? (await emb.json())?.embedding?.values : null;
+    if (Array.isArray(vector) && vector.length === 1536) {
+      const res = await fetch(`${url}/rest/v1/rpc/match_knowledge`, {
+        method: "POST",
+        headers: {
+          apikey: dbKey,
+          Authorization: `Bearer ${dbKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ p_embedding: JSON.stringify(vector), p_limit: 5 }),
+      });
+      const rows = res.ok ? await res.json() : null;
+      chunks = Array.isArray(rows) ? rows : [];
+      retrieval = res.ok ? (chunks.length > 0 ? "ok" : "empty") : "failed";
+    } else {
+      retrieval = "failed";
+    }
+  } catch {
+    retrieval = "failed";
+  }
+
   // ── הקריאה למודל ─────────────────────────────────────────────────────
   const model = env.GEMINI_MODEL?.trim() || DEFAULT_MODEL;
 
@@ -371,7 +467,17 @@ export async function handle(req: Request, env: Record<string, string | undefine
       headers: { "Content-Type": "application/json", "x-goog-api-key": key! },
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: SYSTEM }] },
-        contents: [{ role: "user", parts: [{ text: question }] }],
+        // ⚠️ הקטעים לפני השאלה. מודל שמקבל קודם שאלה ואז מקור נוטה לענות
+        // מתוך מה שהוא כבר "יודע" ולהשתמש במקור כאישור; הסדר ההפוך מייצר
+        // תשובה שנשענת על המקור.
+        contents: [{
+          role: "user",
+          parts: [{
+            text: chunks.length
+              ? `${formatChunks(chunks)}\n\n---\n\nהשאלה: ${question}`
+              : question,
+          }],
+        }],
         generationConfig: {
           temperature: 0.3,
           // ⚠️ 2048 ולא פחות. אסימוני החשיבה נספרים לתוך התקציב הזה,
@@ -458,7 +564,9 @@ export async function handle(req: Request, env: Record<string, string | undefine
     }
     : null;
 
-  return json({ answer, model, usage });
+  // ⚠️ retrieval מוחזר תמיד. בלעדיו "טים לא יודע" ו"השליפה נפלה" נראים
+  // זהים על המסך — והראשון הוא תשובה, השני הוא תקלה.
+  return json({ answer, model, usage, retrieval, chunks: chunks.length });
 }
 
 /**

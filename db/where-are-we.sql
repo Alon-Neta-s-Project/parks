@@ -124,7 +124,9 @@ mig(n, ok) as (values
         and not exists (select 1 from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
           where ns.nspname='public' and p.proname='check_rate_limit' and p.pronargs <> 1))),
   (27, (select exists (select 1 from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
-          where ns.nspname='public' and p.proname='ingest_set_embedding')))
+          where ns.nspname='public' and p.proname='ingest_set_embedding'))),
+  (28, (select exists (select 1 from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
+          where ns.nspname='public' and p.proname='match_knowledge')))
 ),
 g(passed, missing) as (
   select count(*) filter (where ok),
@@ -158,8 +160,8 @@ n(experience, park, land, profile, trip, conversation, knowledge_doc, chunks, ve
 ),
 report(ord, "מה", "מצב") as (
   select 1, 'מיגרציות',
-         case when passed = 27 then '27 מתוך 27 ✅'
-              else passed || ' מתוך 27 ❌  — חסרות: ' || missing end from n
+         case when passed = 28 then '28 מתוך 28 ✅'
+              else passed || ' מתוך 28 ❌  — חסרות: ' || missing end from n
   union all
   select 2, 'מבנה',
          case when tables = 19 then '19 טבלאות ✅'
