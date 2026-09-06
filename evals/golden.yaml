@@ -1,0 +1,99 @@
+# evals/golden.yaml — סט הזהב
+#
+# ⚠️ **שני סוגי מקרים, ואסור לערבב ביניהם.**
+#
+#   kind: retrieval  — שליפה סמנטית ממאגר הידע. נמדדת ב-recall@5, וזה
+#                      השער של M4 (docs/park-day-companion-tim-build-plan.md).
+#   kind: tool       — קריאה לכלי שמחזיר עובדות מהטבלה. **דטרמיניסטית.**
+#                      לא recall@5 — או שהשורה הנכונה חזרה או שלא.
+#
+# מקרה שנכשל כאן אינו בהכרח באג בקוד. עמודת `gap` אומרת של מי זה:
+#   code    — הקוד. קודי מטפל.
+#   content — התוכן (שם נרדף חסר, ניסוח). פולה מחליטה.
+#
+# ⚠️ **המקרים שמסומנים `measured` נמדדו מול 232 השורות במסד אמיתי**,
+# ולא נוסחו מהראש. תאריך המדידה בשדה.
+
+version: 1
+
+cases:
+  # ── עובדות על מתקנים ────────────────────────────────────────────────
+  # 🔴 המקרה שגילה את הבאג של 029. הוא נשאר בסט לנצח.
+  - id: ride.everest.height
+    kind: tool
+    ask: "הבת שלי בגובה 112 סנטימטר, היא יכולה לעלות על אקספדישן אוורסט?"
+    expect:
+      ride: "Expedition Everest – Legend of the Forbidden Mountain"
+      height_cm: 112
+      fits: true
+    status: pass
+    measured: 2026-09-06
+    note: >-
+      השאלה שהחזירה "אין לי את המידע" לפני מיגרציה 030. החיפוש התאים
+      ביטוי, והשאלה היא משפט.
+
+  - id: ride.space-mountain.exact
+    kind: tool
+    ask: "כדאי ללכת לספייס מאונטיין?"
+    expect: { ride: "Space Mountain" }
+    status: pass
+    measured: 2026-09-06
+
+  # ── פערי תוכן, לא פערי קוד ─────────────────────────────────────────
+  - id: ride.space-mountain.short-spelling
+    kind: tool
+    ask: "כמה זמן התור לספייס מאונטן?"
+    expect: { ride: "Space Mountain" }
+    status: partial
+    gap: content
+    owner: paula
+    measured: 2026-09-06
+    note: >-
+      ⚠️ חוזרות חמש שורות מהמשפחה (Space Mountain, Spaceship Earth,
+      Mission SPACE ועוד) כי במסד הכתיב "מאונטיין" והמשפחה כתבה
+      "מאונטן". אות אחת. הנכונה ברשימה, אבל טים מקבל ארבעה מתקנים
+      מיותרים בהקשר. **שם נרדף אחד סוגר את זה.**
+
+  - id: ride.everest.descriptive-hebrew
+    kind: tool
+    ask: "מה גובה המינימום במסע אל ההר האסור?"
+    expect: { ride: "Expedition Everest – Legend of the Forbidden Mountain" }
+    status: fail
+    gap: content
+    owner: paula
+    measured: 2026-09-06
+    note: >-
+      ⚠️ אפס שורות. "Legend of the Forbidden Mountain" מתורגם, וזה
+      ניסוח שמשפחה ישראלית אומרת. אינו באליאסים.
+
+  - id: ride.velocicoaster.spelling
+    kind: tool
+    ask: "ולוצירפטור מתאים לילד בן 10?"
+    expect: { ride: "Jurassic World VelociCoaster" }
+    status: fail
+    gap: content
+    owner: paula
+    measured: 2026-09-06
+    note: >-
+      ⚠️ אפס שורות. במסד "ולוסיקוסטר" (ס), והכתיב הנפוץ הוא בצ׳.
+
+  # ── מה שחייב להחזיר אפס ─────────────────────────────────────────────
+  # ⚠️ שורת מתקן שנכנסת להקשר על שאלה שאינה על מתקן היא עובדה זרה
+  # שטים עלול לענות עליה. אפס הוא התשובה הנכונה, לא כישלון.
+  - id: ride.none.weather
+    kind: tool
+    ask: "מה קורה אם יורד גשם?"
+    expect: { rows: 0 }
+    status: pass
+    measured: 2026-09-06
+
+  - id: ride.none.greeting
+    kind: tool
+    ask: "שלום, מה שלומך?"
+    expect: { rows: 0 }
+    status: pass
+    measured: 2026-09-06
+
+  # ── שליפה סמנטית (M4) ───────────────────────────────────────────────
+  # ממתין ל-40–60 מקרים לפי תוכנית הבנייה. המקרים משישה הריאיונות
+  # נכנסים כאן.
