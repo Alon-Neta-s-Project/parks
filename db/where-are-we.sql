@@ -136,7 +136,8 @@ mig(n, ok) as (values
   -- את הגוף עצמו ומחפש את המילה שקיימת רק בגרסה המתוקנת.
   (30, (select pg_get_functiondef(p.oid) like '%regexp_split_to_table%'
         from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
-        where ns.nspname='public' and p.proname='find_experiences'))
+        where ns.nspname='public' and p.proname='find_experiences')),
+  (31, (select to_regclass('public.alias_candidate') is not null))
 ),
 g(passed, missing) as (
   select count(*) filter (where ok),
@@ -170,18 +171,19 @@ n(experience, park, land, profile, trip, conversation, knowledge_doc, chunks, ve
 ),
 report(ord, "מה", "מצב") as (
   select 1, 'מיגרציות',
-         case when passed = 30 then '30 מתוך 30 ✅'
-              else passed || ' מתוך 30 ❌  — חסרות: ' || missing end from n
+         case when passed = 31 then '31 מתוך 31 ✅'
+              else passed || ' מתוך 31 ❌  — חסרות: ' || missing end from n
   union all
   select 2, 'מבנה',
          -- ⚠️ 20 ולא 19: מיגרציה 027 הוסיפה את ingest_key. גלאי שנשאר על
               -- המספר הישן מדווח ❌ על מסד תקין, וזה בדיוק סוג הדיווח שגורם
               -- לחפש תקלה שלא קיימת.
-              case when tables = 20 then '20 טבלאות ✅'
+              case when tables = 21 then '21 טבלאות ✅'
+              when tables = 20 then '20 טבלאות — חסרה alias_candidate, לא הורץ קובץ 031 ❌'
               when tables = 19 then '19 טבלאות — חסרה ingest_key, לא הורץ קובץ 027 ❌'
               when tables = 18 then '18 טבלאות — חסרה api_call, לא הורץ קובץ 018 ❌'
               when tables = 0  then 'המסד ריק לגמרי ❌ — לא הורץ supabase-bundle.sql'
-              else tables || ' טבלאות מתוך 20 ❌' end from n
+              else tables || ' טבלאות מתוך 21 ❌' end from n
   union all
   select 3, 'הרשאות (RLS)',
          case when policies >= 29 then policies || ' מדיניות ✅'
