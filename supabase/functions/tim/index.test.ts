@@ -3,7 +3,10 @@ function assertEquals<T>(actual: T, expected: T, msg?: string) {
   const a = JSON.stringify(actual), b = JSON.stringify(expected);
   if (a !== b) throw new Error(`${msg ?? "לא זהה"}\n  התקבל : ${a}\n  ציפינו: ${b}`);
 }
-import { handle, thinkingConfig, formatChunks, looksLikeGeminiKey, bucketKey } from "./index.ts";
+import {
+  handle, thinkingConfig, formatChunks, formatExperiences,
+  extractHeight, extractRideName, looksLikeGeminiKey, bucketKey,
+} from "./index.ts";
 
 const KEY = "AIza" + "x".repeat(35);
 const ask = (body: unknown, method = "POST") =>
@@ -190,11 +193,13 @@ Deno.test("תשובה שאינה 'ok'/'user'/'global' נחשבת ככישלון,
 Deno.test("הספירה וההכנסה אטומיות — קריאה אחת למסד, לא שתיים", async () => {
   const s = stub(dbSays("ok"));
   await handle(ask({ question: "היי" }), FULL);
-  const dbCalls = s.calls.filter((c) => c.url.includes("http://db")).length;
+  // ⚠️ הבדיקה על **גדר הקצב** בלבד. מאז השליפה יש עוד קריאות למסד,
+  // וספירה של "כל מה שהולך למסד" הפכה למדידה של משהו אחר.
+  const gate = s.calls.filter((c) => c.url.includes("/rpc/check_rate_limit")).length;
   s.restore();
   // בגרסה הקודמת היו שתי בקשות — ספירה ואז הכנסה — ושתי קריאות במקביל
   // יכלו לעבור את הגג יחד.
-  assertEquals(dbCalls, 1);
+  assertEquals(gate, 1);
 });
 
 Deno.test("CORS מצטמצם לדומיין ברגע ש-ALLOWED_ORIGIN מוגדר", async () => {
@@ -695,4 +700,143 @@ Deno.test("אין קטעים ותקלת שליפה הם שתי סיבות שונ
   const body = await r.json();
   assertEquals(body.retrieval, "empty");
   assertEquals(body.chunks, 0);
+});
+
+// ── המתקנים ───────────────────────────────────────────────────────────
+// ⚠️ עובדה על מתקן נשלפת מהטבלה ולא מחיפוש סמנטי. "מה גובה המינימום"
+// צריכה את המספר מהשורה, לא את הקטע שנשמע דומה.
+
+Deno.test("גובה נשלף מהשאלה רק כשהוא באמת גובה", () => {
+  assertEquals(extractHeight("הילדה בגובה 105"), 105);
+  assertEquals(extractHeight('היא 112 ס"מ'), 112);
+  // ⚠️ מספר בלי הקשר אינו גובה.
+  assertEquals(extractHeight("אנחנו 3 ימים בפארק"), null);
+  assertEquals(extractHeight("בן 7"), null);
+  // ⚠️ מחוץ לטווח שהמסד אוכף על העמודה.
+  assertEquals(extractHeight('היא 300 ס"מ'), null);
+  assertEquals(extractHeight('הוא 20 ס"מ'), null);
+});
+
+// ⚠️ מילות ברכה ושיחה אינן שם מתקן. "היי" עבר קודם, ופנה לטבלה על כל
+// ברכה — קריאה מיותרת בכל שיחה.
+Deno.test("ברכה אינה שם מתקן", () => {
+  assertEquals(extractRideName("היי"), null);
+  assertEquals(extractRideName("שלום, מה שלומך?"), null);
+  assertEquals(extractRideName("מה זה"), null);
+});
+
+Deno.test("שם המתקן נשלף גם כשהוא עטוף במילות שאלה", () => {
+  assertEquals(extractRideName("מה גובה המינימום באקספדישן אוורסט?")?.includes("אוורסט"), true);
+  // ⚠️ שאלת מחיר על מתקן ספציפי — ולכן הזיהוי אינו לפי רשימת מילות מפתח.
+  assertEquals(extractRideName("כמה עולה אוורסט")?.includes("אוורסט"), true);
+});
+
+// ⚠️ שלושת מצבי הגובה, במילים שונות. מודל שמקבל 0 עלול לכתוב
+// "גובה מינימום 0 ס\"מ", וזה בדיוק מה שהכלל אוסר.
+Deno.test("שלושת מצבי הגובה נכתבים כשלוש אמירות שונות", () => {
+  const base = {
+    name: "X", name_he: null, park: "P", land: null, status: "open",
+    status_note: null, intensity: 3, gets_wet: null, skip_line: null,
+    last_verified: "2026-09-01", fits: null,
+  };
+  const limit = formatExperiences([{ ...base, height_cm: 112 }]);
+  const none = formatExperiences([{ ...base, height_cm: 0 }]);
+  const unchecked = formatExperiences([{ ...base, height_cm: null }]);
+
+  assertEquals(limit.includes('גובה מינימום: 112 ס"מ'), true);
+  assertEquals(none.includes("אין מגבלת גובה"), true);
+  // ⚠️ הבדיקה מכוונת לכלל עצמו ולא לתו "0": בשורה יש גם "עוצמה 3" וגם
+  // תאריך אימות, ושניהם מכילים 0 בלי שום קשר לגובה.
+  assertEquals(none.includes('0 ס"מ'), false, '0 ס"מ אסור שיגיע למסך');
+  assertEquals(none.includes("גובה מינימום"), false, "0 אינו מגבלת גובה");
+  assertEquals(unchecked.includes("לא נבדקה"), true);
+  assertEquals(unchecked.includes("אין מגבלת גובה"), false);
+});
+
+// ⚠️ fits === null אינו נאמר כ"מתאים". הוא פשוט לא נאמר.
+Deno.test("התאמה לא ידועה אינה נאמרת כהתאמה", () => {
+  const base = {
+    name: "X", name_he: null, park: "P", land: null, status: "open",
+    status_note: null, intensity: 3, gets_wet: null, skip_line: null,
+    last_verified: null, height_cm: null,
+  };
+  assertEquals(formatExperiences([{ ...base, fits: null }]).includes("מתאים"), false);
+  assertEquals(formatExperiences([{ ...base, fits: true }]).includes("מתאים לגובה"), true);
+  assertEquals(formatExperiences([{ ...base, fits: false }]).includes("לא מתאים"), true);
+});
+
+Deno.test("מתקן סגור מסומן, עם המשפט שלו", () => {
+  const out = formatExperiences([{
+    name: "Slush Gusher", name_he: null, park: "P", land: null,
+    status: "temporarily_closed", status_note: "Closed for refurbishment",
+    intensity: 4, height_cm: 122, gets_wet: null, skip_line: null,
+    last_verified: null, fits: null,
+  }]);
+  assertEquals(out.includes("אינו פתוח כרגע"), true);
+  assertEquals(out.includes("Closed for refurbishment"), true);
+});
+
+// ⚠️ עוצמה שלא דורגה אינה "עוצמה 0". מתקן בלי דירוג לעולם אינו נכנס
+// לתוצאות של פילטר עוצמה, וגם כאן הוא נאמר כלא-מדורג.
+Deno.test("עוצמה שלא דורגה נאמרת ככזו", () => {
+  const out = formatExperiences([{
+    name: "X", name_he: null, park: "P", land: null, status: "open",
+    status_note: null, intensity: null, height_cm: 0, gets_wet: null,
+    skip_line: null, last_verified: null, fits: null,
+  }]);
+  assertEquals(out.includes("לא דורגה"), true);
+});
+
+/** מסד שמחזיר מתקנים, קטעים, ותשובה. */
+const withRides = (rows: unknown[]) => (url: string) => {
+  if (url.includes(":embedContent")) {
+    return new Response(
+      JSON.stringify({ embedding: { values: Array.from({ length: 1536 }, () => 0.01) } }),
+      { status: 200 },
+    );
+  }
+  if (url.includes("/rpc/find_experiences")) {
+    return new Response(JSON.stringify(rows), { status: 200 });
+  }
+  if (url.includes("/rpc/match_knowledge")) return new Response("[]", { status: 200 });
+  if (url.includes("/rpc/check_rate_limit")) return new Response('"ok"', { status: 200 });
+  return geminiOk();
+};
+
+Deno.test("שאלה על מתקן פונה לטבלה, והמתקנים לפני המסמכים", async () => {
+  const s = stub(withRides([{
+    name: "Expedition Everest", name_he: "אקספדישן אוורסט", park: "Disney's Animal Kingdom",
+    land: "Asia", status: "open", status_note: null, intensity: 4, height_cm: 112,
+    gets_wet: "none", skip_line: "multi_pass", last_verified: "2026-09-01", fits: false,
+  }]));
+  const r = await handle(ask({ question: "הילדה בגובה 105, מותר לה על אוורסט?" }), FULL);
+  s.restore();
+
+  const call = s.calls.find((c) => c.url.includes("/rpc/find_experiences"))!;
+  // deno-lint-ignore no-explicit-any
+  const sent = JSON.parse(call.init!.body as any);
+  assertEquals(sent.p_height_cm, 105);
+  assertEquals((await r.json()).rides, 1);
+
+  // deno-lint-ignore no-explicit-any
+  const prompt = JSON.parse(
+    s.calls.find((c) => c.url.includes("generateContent"))!.init!.body as any,
+  ).contents[0].parts[0].text;
+  assertEquals(prompt.includes('גובה מינימום: 112 ס"מ'), true);
+  assertEquals(prompt.includes("לא מתאים לגובה"), true);
+});
+
+// ⚠️ שאלה שאינה על מתקן **כן** פונה לטבלה, ומקבלת אפס שורות. זו בחירה:
+// המסד מכריע, לא היוריסטיקה. המחיר הוא קריאה מיותרת; החלופה — לנחש
+// בעצמנו — הייתה מדלגת יום אחד על שאלה אמיתית.
+Deno.test("שאלה שאינה על מתקן מחזירה אפס שורות ואינה מזהמת את ההקשר", async () => {
+  const s = stub(withRides([]));
+  const r = await handle(ask({ question: "מה קורה אם יורד גשם" }), FULL);
+  s.restore();
+  assertEquals((await r.json()).rides, 0);
+  // deno-lint-ignore no-explicit-any
+  const prompt = JSON.parse(
+    s.calls.find((c) => c.url.includes("generateContent"))!.init!.body as any,
+  ).contents[0].parts[0].text;
+  assertEquals(prompt.includes("[מתקן:"), false, "אסור ששורת מתקן תיכנס להקשר");
 });

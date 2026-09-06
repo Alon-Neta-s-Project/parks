@@ -81,8 +81,15 @@ const SYSTEM = `אתה טים, עוזר לתכנון יום בפארקים בא�
   או "לאפליקציה הרשמית" בלבד.
 · אל תזכיר שקיבלת קטעים, ואל תתאר את המנגנון. ענה כאילו אתה יודע.
 
-אין לך נתונים על מתקנים ספציפיים — מגבלות גובה, עוצמה, הרטבה — אלא אם הם
-מופיעים בקטעים. על שאלה כזו בלי קטע מתאים, אמור שאין לך את הנתון.`;
+איך להשתמש בשורות שמסומנות [מתקן: ...]:
+· אלה **עובדות מהמאגר שלנו**, והן גוברות על כל דבר אחר. אל תתקן אותן ואל
+  תשלים אותן ממה שאתה יודע ממקום אחר, גם אם נראה לך שהן ישנות.
+· "מגבלת גובה: לא נבדקה" פירושו **שאיננו יודעים** — לא שאין מגבלה. אמור
+  שהנתון חסר, ולעולם אל תסיק שהמתקן מתאים.
+· "אין מגבלת גובה" פירושו שנבדק ואין. **אל תכתוב "גובה מינימום 0".**
+· מתקן שמסומן "אינו פתוח כרגע" — אמור זאת מיד, לפני כל פרט אחר.
+· אם לא צורפה שורת מתקן והשאלה עוסקת במתקן ספציפי — אמור שאין לך את
+  הנתון, ואל תנחש. גם לא "בערך" וגם לא ממה שאתה זוכר.`;
 
 /**
  * בדיקת שפיות בלבד, לפני שמנסים לקרוא עם הערך.
@@ -192,6 +199,123 @@ async function upstreamReason(res: Response): Promise<string | null> {
     .replace(/AIza[\w-]{10,}/g, "‹מפתח›")
     .replace(/[A-Za-z0-9_-]{40,}/g, "‹מוסתר›")
     .slice(0, 300);
+}
+
+/**
+ * הגובה שנמסר בשאלה, בסנטימטרים.
+ *
+ * ⚠️ **מספר בלי הקשר אינו גובה.** "אקספדישן אוורסט" מכיל ספרות בשמות
+ * אחרים, ו"3 ימים" הוא לא 3 ס"מ. נדרשת מילה שמסמנת גובה, והטווח מוגבל
+ * ל-50–200 — אותו טווח שהמסד אוכף על העמודה.
+ */
+export function extractHeight(q: string): number | null {
+  const m = q.match(/(\d{2,3})\s*(?:ס"מ|סמ|ס״מ|cm)/i) ??
+    q.match(/(?:גובה|בגובה|גובהה?|גובהו)\s*(?:של\s*)?(\d{2,3})/);
+  const n = m ? Number(m[1]) : NaN;
+  return Number.isFinite(n) && n >= 50 && n <= 200 ? n : null;
+}
+
+/**
+ * שם המתקן שהשאלה עוסקת בו, אם היא עוסקת במתקן.
+ *
+ * ⚠️ **זו הסרה של מילות שאלה, ולא זיהוי כוונה.** ניסיתי לזהות "האם
+ * השאלה על מתקן" לפי מילות מפתח, וזה נכשל על "כמה עולה אוורסט" — שאלת
+ * מחיר על מתקן ספציפי. מה שנשאר הוא הפוך: מסירים את מה שבוודאות אינו
+ * שם, **ונותנים למסד להכריע.**
+ *
+ * ⚠️ **`\b` אינו עובד כאן, ולכן הוא אינו בשימוש.** ב-JavaScript `\b`
+ * הוא הגבול בין `\w` לבין מה שאינו — ו-`\w` הוא `[A-Za-z0-9_]` בלבד.
+ * אות עברית אינה `\w`, ולכן `\b(מה)\b` **לעולם אינו מתאים**, ורשימת
+ * מילות השאלה כולה לא עשתה דבר: הביטוי רץ, לא זרק שגיאה, ולא סינן כלום.
+ * זה בדיוק הכשל השקט — קוד שנראה כאילו הוא עובד. הגבולות נכתבים כאן
+ * במפורש כרווח או קצה מחרוזת.
+ *
+ * ⚠️ והיא מחזירה מחרוזת גם על "קורה אם יורד גשם", ו**זה בסדר**:
+ * `ilike '%קורה אם יורד גשם%'` אינו מתאים לאף מתקן, המסד מחזיר אפס
+ * שורות, ולהקשר לא נכנס דבר. המחיר הוא קריאה אחת מיותרת למסד; החלופה —
+ * היוריסטיקה שמחליטה בעצמה — הייתה מדלגת יום אחד על שאלה אמיתית, וזה
+ * כשל יקר בהרבה. **עדיף לשאול לחינם מאשר להחמיץ.**
+ */
+export function extractRideName(q: string): string | null {
+  const stripped = q
+    .replace(/[?!.,:;"'״׳]/g, " ")
+    .replace(
+      /(?<=^|\s)(מה|מהו|מהי|האם|כמה|איפה|מתי|למה|איך|יש|אין|של|על|את|זה|זו|הוא|היא|אני|אנחנו|לי|לנו|עם|בלי|גובה|גובהה|בגובה|מינימום|המינימום|עוצמה|מרטיב|נגיש|נגישות|בחילה|ילד|ילדה|בן|בת|שנים|ס"מ|סמ|cm|עולה|כלול|צריך|אפשר|מומלץ|טוב|רע|כדאי|באיזה|לאיזה|איזה|כל|הכי|יותר|פחות|וגם|או|גם|שלום|היי|הי|היייי|אהלן|בוקר|ערב|טוב|תודה|אוקיי|אוקי|בבקשה|סליחה|שלומך|נעים|להכיר)(?=\s|$)/gi,
+      " ",
+    )
+    .replace(/\d+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  // ⚠️ שתי אותיות אינן שם מתקן. הן שאריות של מילת קישור שלא הוסרה,
+  // וחיפוש עליהן מחזיר חצי מהטבלה.
+  return stripped.length >= 3 ? stripped : null;
+}
+
+/** מתקן כפי שהוא חוזר מ-find_experiences. */
+export interface ExperienceRow {
+  name: string;
+  name_he: string | null;
+  park: string;
+  land: string | null;
+  status: string;
+  status_note: string | null;
+  intensity: number | null;
+  height_cm: number | null;
+  gets_wet: string | null;
+  skip_line: string | null;
+  last_verified: string | null;
+  fits: boolean | null;
+}
+
+/**
+ * מתקנים, כפי שהם נכנסים להקשר.
+ *
+ * ⚠️ **שלושת מצבי הגובה נשמרים עד המסך** (CLAUDE.md): מספר הוא מגבלה,
+ * `0` הוא "נבדק ואין מגבלה", ו-NULL הוא "לא נבדק". שלושתם נכתבים במילים
+ * שונות, כי מודל שמקבל `0` עלול לכתוב "גובה מינימום 0 ס\"מ" — וזה בדיוק
+ * מה שהכלל אוסר.
+ */
+export function formatExperiences(rows: ExperienceRow[]): string {
+  const wet: Record<string, string> = {
+    none: "לא מרטיב",
+    may_get_wet: "עלול להרטיב",
+    may_get_soaked: "עלול להרטיב מאוד",
+    na: "לא רלוונטי — זה מופע",
+  };
+  const skip: Record<string, string> = {
+    multi_pass: "כלול ב-Multi Pass",
+    single_pass: "דורש Single Pass בתשלום נפרד",
+    express: "זמין ב-Express Pass",
+    none: "אין מוצר דילוג בתור",
+  };
+  return rows
+    .map((r) => {
+      const bits: string[] = [];
+      // ⚠️ שלושת המצבים, ולעולם לא "0 ס\"מ".
+      bits.push(
+        r.height_cm === null
+          ? "מגבלת גובה: לא נבדקה"
+          : r.height_cm === 0
+          ? "אין מגבלת גובה"
+          : `גובה מינימום: ${r.height_cm} ס"מ`,
+      );
+      if (r.fits === true) bits.push("מתאים לגובה שנמסר");
+      if (r.fits === false) bits.push("לא מתאים לגובה שנמסר");
+      // ⚠️ fits === null אינו נאמר כ"מתאים". הוא פשוט לא נאמר.
+      if (r.intensity !== null) bits.push(`עוצמה ${r.intensity} מתוך 4`);
+      else bits.push("עוצמה: לא דורגה");
+      if (r.gets_wet) bits.push(wet[r.gets_wet] ?? r.gets_wet);
+      if (r.skip_line) bits.push(skip[r.skip_line] ?? r.skip_line);
+      else bits.push("מוצר דילוג בתור: לא נבדק");
+      if (r.status !== "open") {
+        bits.push(`⚠️ אינו פתוח כרגע${r.status_note ? ` — ${r.status_note}` : ""}`);
+      }
+      const he = r.name_he ? ` (${r.name_he})` : "";
+      const where = r.land ? ` · ${r.land}` : "";
+      const when = r.last_verified ? ` · נבדק ${r.last_verified}` : "";
+      return `[מתקן: ${r.name}${he} · ${r.park}${where}${when}]\n${bits.join(" · ")}`;
+    })
+    .join("\n\n");
 }
 
 /** קטע כפי שהוא חוזר מ-match_knowledge. */
@@ -381,12 +505,43 @@ export async function handle(req: Request, env: Record<string, string | undefine
     }
   }
 
-  // ── השליפה ───────────────────────────────────────────────────────────
+  // ⚠️ **שני המקורות שלמטה נופלים רכה, בכוונה, ובניגוד לגדר הקצב.** גדר
+  // שנכשלת חייבת לעצור, כי בלעדיה נקודת הקצה פתוחה. מקור ידע שנכשל אינו
+  // פותח דבר — הוא רק מותיר את טים בלי הנתון, וההוראות שלו כבר אוסרות
+  // עליו להמציא. לכן כישלון כאן מדווח בתשובה ואינו מונע ממנה לצאת.
+
+  // ── המתקנים ──────────────────────────────────────────────────────────
   //
-  // ⚠️ **נפילה רכה, בכוונה, ובניגוד לגדר הקצב.** גדר שנכשלת חייבת לעצור,
-  // כי בלעדיה נקודת הקצה פתוחה. שליפה שנכשלת אינה פותחת דבר — היא רק
-  // מותירה את טים בלי ידע, וההוראות שלו כבר אוסרות עליו להמציא. לכן
-  // כישלון כאן מדווח בתשובה ואינו מונע ממנה לצאת.
+  // ⚠️ **עובדה על מתקן נשלפת מהטבלה, לא מחיפוש סמנטי** — ההפרדה שהוגדרה
+  // ב-003: "ערבוב השניים הוא בדיוק הטעות שהארכיטקטורה נועדה למנוע".
+  // "מה גובה המינימום" צריכה את המספר מהשורה, לא את הקטע שנשמע דומה.
+  //
+  // ⚠️ וזה גם מה שמונע מטים לענות מהאימון שלו. הוא "יודע" גבהים מהרשת,
+  // והם עשויים להיות ישנים בשנתיים. כאן הוא מקבל את המספר **שלנו**, עם
+  // תאריך בדיקה.
+  let rides: ExperienceRow[] = [];
+  const asked = extractRideName(question);
+  if (asked) {
+    try {
+      const res = await fetch(`${url}/rest/v1/rpc/find_experiences`, {
+        method: "POST",
+        headers: {
+          apikey: dbKey,
+          Authorization: `Bearer ${dbKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          p_name: asked,
+          p_height_cm: extractHeight(question),
+          p_limit: 6,
+        }),
+      });
+      const rows = res.ok ? await res.json() : null;
+      rides = Array.isArray(rows) ? rows : [];
+    } catch { /* נפילה רכה, כמו השליפה */ }
+  }
+
+  // ── השליפה ───────────────────────────────────────────────────────────
   let chunks: KnowledgeChunk[] = [];
   let retrieval: "ok" | "empty" | "failed" = "empty";
   try {
@@ -473,9 +628,13 @@ export async function handle(req: Request, env: Record<string, string | undefine
         contents: [{
           role: "user",
           parts: [{
-            text: chunks.length
-              ? `${formatChunks(chunks)}\n\n---\n\nהשאלה: ${question}`
-              : question,
+            // ⚠️ המתקנים לפני המסמכים. עובדה מהטבלה גוברת על פרוזה, ומודל
+            // נוטה לתת משקל למה שהוא רואה קודם.
+            text: [
+              rides.length ? formatExperiences(rides) : null,
+              chunks.length ? formatChunks(chunks) : null,
+              `השאלה: ${question}`,
+            ].filter(Boolean).join("\n\n---\n\n"),
           }],
         }],
         generationConfig: {
@@ -566,7 +725,7 @@ export async function handle(req: Request, env: Record<string, string | undefine
 
   // ⚠️ retrieval מוחזר תמיד. בלעדיו "טים לא יודע" ו"השליפה נפלה" נראים
   // זהים על המסך — והראשון הוא תשובה, השני הוא תקלה.
-  return json({ answer, model, usage, retrieval, chunks: chunks.length });
+  return json({ answer, model, usage, retrieval, chunks: chunks.length, rides: rides.length });
 }
 
 /**

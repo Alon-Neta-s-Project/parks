@@ -126,7 +126,11 @@ mig(n, ok) as (values
   (27, (select exists (select 1 from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
           where ns.nspname='public' and p.proname='ingest_set_embedding'))),
   (28, (select exists (select 1 from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
-          where ns.nspname='public' and p.proname='match_knowledge')))
+          where ns.nspname='public' and p.proname='match_knowledge'))),
+  -- ⚠️ הכלי של טים. בלעדיו הוא עונה על מתקנים מהאימון שלו — נתונים
+  -- שעשויים להיות ישנים בשנתיים ואין להם תאריך אימות.
+  (29, (select exists (select 1 from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
+          where ns.nspname='public' and p.proname='find_experiences')))
 ),
 g(passed, missing) as (
   select count(*) filter (where ok),
@@ -160,14 +164,18 @@ n(experience, park, land, profile, trip, conversation, knowledge_doc, chunks, ve
 ),
 report(ord, "מה", "מצב") as (
   select 1, 'מיגרציות',
-         case when passed = 28 then '28 מתוך 28 ✅'
-              else passed || ' מתוך 28 ❌  — חסרות: ' || missing end from n
+         case when passed = 29 then '29 מתוך 29 ✅'
+              else passed || ' מתוך 29 ❌  — חסרות: ' || missing end from n
   union all
   select 2, 'מבנה',
-         case when tables = 19 then '19 טבלאות ✅'
+         -- ⚠️ 20 ולא 19: מיגרציה 027 הוסיפה את ingest_key. גלאי שנשאר על
+              -- המספר הישן מדווח ❌ על מסד תקין, וזה בדיוק סוג הדיווח שגורם
+              -- לחפש תקלה שלא קיימת.
+              case when tables = 20 then '20 טבלאות ✅'
+              when tables = 19 then '19 טבלאות — חסרה ingest_key, לא הורץ קובץ 027 ❌'
               when tables = 18 then '18 טבלאות — חסרה api_call, לא הורץ קובץ 018 ❌'
               when tables = 0  then 'המסד ריק לגמרי ❌ — לא הורץ supabase-bundle.sql'
-              else tables || ' טבלאות מתוך 19 ❌' end from n
+              else tables || ' טבלאות מתוך 20 ❌' end from n
   union all
   select 3, 'הרשאות (RLS)',
          case when policies >= 29 then policies || ' מדיניות ✅'
