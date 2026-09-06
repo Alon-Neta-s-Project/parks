@@ -130,7 +130,13 @@ mig(n, ok) as (values
   -- ⚠️ הכלי של טים. בלעדיו הוא עונה על מתקנים מהאימון שלו — נתונים
   -- שעשויים להיות ישנים בשנתיים ואין להם תאריך אימות.
   (29, (select exists (select 1 from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
-          where ns.nspname='public' and p.proname='find_experiences')))
+          where ns.nspname='public' and p.proname='find_experiences'))),
+  -- ⚠️ 030 מתקנת באג בגוף הפונקציה, ולא מוסיפה אובייקט חדש — ולכן
+  -- הנוכחות של find_experiences אינה מבדילה בין 029 ל-030. הגלאי קורא
+  -- את הגוף עצמו ומחפש את המילה שקיימת רק בגרסה המתוקנת.
+  (30, (select pg_get_functiondef(p.oid) like '%regexp_split_to_table%'
+        from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
+        where ns.nspname='public' and p.proname='find_experiences'))
 ),
 g(passed, missing) as (
   select count(*) filter (where ok),
@@ -164,8 +170,8 @@ n(experience, park, land, profile, trip, conversation, knowledge_doc, chunks, ve
 ),
 report(ord, "מה", "מצב") as (
   select 1, 'מיגרציות',
-         case when passed = 29 then '29 מתוך 29 ✅'
-              else passed || ' מתוך 29 ❌  — חסרות: ' || missing end from n
+         case when passed = 30 then '30 מתוך 30 ✅'
+              else passed || ' מתוך 30 ❌  — חסרות: ' || missing end from n
   union all
   select 2, 'מבנה',
          -- ⚠️ 20 ולא 19: מיגרציה 027 הוסיפה את ingest_key. גלאי שנשאר על
