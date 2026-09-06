@@ -274,7 +274,15 @@ export function Chat() {
               }}
             />
             <button type="button" className="send" onClick={submit} aria-label={t("ask.send")}>
-              ←
+              {/* ⚠️ אייקון כיווני, ולא תו חץ. חץ שנכתב כתו הוא החלטה
+                  קשיחה על שפה — חץ שמאלה נכון בעברית ושגוי באנגלית, ודפדפן
+                  אינו מהפך אותו לפי dir. הוא מצויר כאן בכיוון הקנוני
+                  (ימינה) ומתהפך ב-[dir="rtl"] דרך scaleX(-1) ב-CSS,
+                  כך שגרסה אנגלית לא תדרוש שינוי ברכיב. */}
+              <svg className="icon-dir" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                <path d="M2 8h11M9 4l4 4-4 4" fill="none" stroke="currentColor"
+                      strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
             </button>
           </div>
 

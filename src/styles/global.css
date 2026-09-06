@@ -773,3 +773,12 @@ button {
 .composer__input::placeholder { color: var(--pw-ink-3); }
 .composer__input:focus { outline: none; }
 .factanswer__he { color: var(--pw-ink-2); font-size: 14px; }
+
+/* ---- אייקונים כיווניים ---------------------------------------------------
+   ⚠️ dir מהפך טקסט ופריסה, ו**אינו מהפך אייקון**. חץ הוא הכיוון שלו,
+   והדפדפן אינו יודע ש"קדימה" בעברית הוא שמאלה. לכן כל אייקון כיווני
+   מצויר פעם אחת בכיוון הקנוני (ימינה) ומתהפך כאן — ולא מצויר פעמיים.
+   הכלל נאכף ב-src/styles/__tests__/logical-css.test.ts: תו חץ קשיח
+   ברכיב מפיל את הבדיקות.                                                  */
+.icon-dir { inline-size: 1em; block-size: 1em; display: inline-block; vertical-align: -0.125em; }
+[dir="rtl"] .icon-dir { transform: scaleX(-1); }
