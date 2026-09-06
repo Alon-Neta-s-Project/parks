@@ -137,7 +137,12 @@ mig(n, ok) as (values
   (30, (select pg_get_functiondef(p.oid) like '%regexp_split_to_table%'
         from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
         where ns.nspname='public' and p.proname='find_experiences')),
-  (31, (select to_regclass('public.alias_candidate') is not null))
+  (31, (select to_regclass('public.alias_candidate') is not null)),
+  -- ⚠️ 032 מחליפה את גוף alias_add ואינה מוסיפה אובייקט, ולכן הגלאי
+  -- קורא את הגוף — כמו 030. נוכחות הפונקציה אינה מבדילה בין הגרסאות.
+  (32, (select pg_get_functiondef(p.oid) like '%from park p%'
+        from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
+        where ns.nspname='public' and p.proname='alias_add'))
 ),
 g(passed, missing) as (
   select count(*) filter (where ok),
@@ -171,8 +176,8 @@ n(experience, park, land, profile, trip, conversation, knowledge_doc, chunks, ve
 ),
 report(ord, "מה", "מצב") as (
   select 1, 'מיגרציות',
-         case when passed = 31 then '31 מתוך 31 ✅'
-              else passed || ' מתוך 31 ❌  — חסרות: ' || missing end from n
+         case when passed = 32 then '32 מתוך 32 ✅'
+              else passed || ' מתוך 32 ❌  — חסרות: ' || missing end from n
   union all
   select 2, 'מבנה',
          -- ⚠️ 20 ולא 19: מיגרציה 027 הוסיפה את ingest_key. גלאי שנשאר על
