@@ -5,7 +5,12 @@ apt-get install -y postgresql-16 postgresql-16-pgvector
 
 export PGDATA=/tmp/pgdata PGPORT=55432
 rm -rf $PGDATA && mkdir -p $PGDATA && chown postgres:postgres $PGDATA /tmp
-su postgres -c "/usr/lib/postgresql/16/bin/initdb -D $PGDATA -A trust --locale=C --encoding=UTF8"
+# ⚠️ **en_US.UTF-8 ולא C.** ה-locale של סופהבייס הוא en_US.UTF-8, וההבדל
+# אינו קוסמטי: pg_trgm קובע "מהו תו אלפאנומרי" לפי LC_CTYPE, ובלוקאל C
+# אות עברית אינה נחשבת אות — כל דמיון הטריגרם מחזיר 0.00, גם על התאמה
+# מדויקת. כלומר שכבת ה-fuzzy עובדת בייצור ומתה בשקט מקומית.
+localedef -i en_US -f UTF-8 en_US.UTF-8
+su postgres -c "/usr/lib/postgresql/16/bin/initdb -D $PGDATA -A trust --locale=en_US.UTF-8 --encoding=UTF8"
 su postgres -c "/usr/lib/postgresql/16/bin/pg_ctl -D $PGDATA -o '-p $PGPORT -k /tmp' -l /tmp/pg.log start -w"
 su postgres -c "psql -h /tmp -p $PGPORT -d postgres -c 'create database pdc;'"
 
