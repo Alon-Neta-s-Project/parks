@@ -184,7 +184,17 @@ mig(n, ok) as (values
             and cmd in ('SELECT','ALL')
             and coalesce(qual,'') not like '%is_admin%')
         and (select relrowsecurity from pg_class
-              where oid = to_regclass('public.experience_source'))))
+              where oid = to_regclass('public.experience_source')))),
+  -- ⚠️ אותה תבנית, מקום שני. טבלאות הידע נשאו source_url, submitted_by
+  -- ו-embedding, וכולן היו קריאות לאנונימי.
+  (36, (select not exists (select 1 from pg_policies
+          where schemaname='public'
+            and tablename in ('knowledge_doc','knowledge_chunk')
+            and cmd in ('SELECT','ALL')
+            and coalesce(qual,'') not like '%is_admin%')
+        and (select bool_and(relrowsecurity) from pg_class
+              where oid in (to_regclass('public.knowledge_doc'),
+                            to_regclass('public.knowledge_chunk')))))
 ),
 -- ⚠️ הסה"כ נספר מרשימת הגלאים ואינו נכתב כמספר. "32" היה כתוב כאן
 -- ביד, ולכן הוספת הגלאי ה-33 הדליקה ❌ על מסד תקין לגמרי — הפעם
