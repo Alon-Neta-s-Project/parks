@@ -143,16 +143,28 @@ mig(n, ok) as (values
   -- קורא את הגוף — כמו 030. נוכחות הפונקציה אינה מבדילה בין הגרסאות.
   (32, (select pg_get_functiondef(p.oid) like '%from park p%'
         from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
-        where ns.nspname='public' and p.proname='alias_add'))
+        where ns.nspname='public' and p.proname='alias_add')),
+  -- ⚠️ הטריגר עצמו ולא הפונקציה שלו. פונקציה שקיימת ואינה מחוברת
+  -- לטבלה נראית זהה לטריגר שעובד — וזו בדיוק ההבחנה שהמיגרציה הזו
+  -- קיימת בשבילה.
+  (33, (select exists (select 1 from pg_trigger
+          where tgrelid = to_regclass('public.knowledge_chunk')
+            and tgname = 'knowledge_chunk_content_changed'
+            and not tgisinternal)))
 ),
-g(passed, missing) as (
+-- ⚠️ הסה"כ נספר מרשימת הגלאים ואינו נכתב כמספר. "32" היה כתוב כאן
+-- ביד, ולכן הוספת הגלאי ה-33 הדליקה ❌ על מסד תקין לגמרי — הפעם
+-- השביעית שציפייה קפואה מדווחת ככשל. עכשיו הוספת גלאי מעדכנת את
+-- הסה"כ מעצמה.
+g(passed, total, missing) as (
   select count(*) filter (where ok),
+         count(*),
          coalesce(string_agg(lpad(n::text, 3, '0'), ', ') filter (where not ok), '')
   from mig
 ),
 n(experience, park, land, profile, trip, conversation, knowledge_doc, chunks, vectors,
   h_pos, h_zero, h_null, wet_na, wet_null, he_bad, closed, skip_null, skip_none,
-  tables, policies, passed, missing) as (
+  tables, policies, passed, total, missing) as (
   select (select n from c where name='experience'),
          (select n from c where name='park'),
          (select n from c where name='land'),
@@ -174,12 +186,12 @@ n(experience, park, land, profile, trip, conversation, knowledge_doc, chunks, ve
          (select count(*) from information_schema.tables
             where table_schema='public' and table_type='BASE TABLE'),
          (select count(*) from pg_policies where schemaname='public'),
-         (select passed from g), (select missing from g)
+         (select passed from g), (select total from g), (select missing from g)
 ),
 report(ord, "מה", "מצב") as (
   select 1, 'מיגרציות',
-         case when passed = 32 then '32 מתוך 32 ✅'
-              else passed || ' מתוך 32 ❌  — חסרות: ' || missing end from n
+         case when passed = total then total || ' מתוך ' || total || ' ✅'
+              else passed || ' מתוך ' || total || ' ❌  — חסרות: ' || missing end from n
   union all
   select 2, 'מבנה',
          -- ⚠️ 20 ולא 19: מיגרציה 027 הוסיפה את ingest_key. גלאי שנשאר על
