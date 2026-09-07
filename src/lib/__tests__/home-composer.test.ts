@@ -35,6 +35,6 @@ describe("מסך הכניסה", () => {
   // הם חייבים להיות שם ולא ברכיב.
   it("הקיצורים הם תוכן ולא קוד", () => {
     expect(h.chip1).not.toBe(h.chip2);
-    expect(h.chip1.length).toBeGreaterThan(3);
+    expect((h.chip1 ?? "").length).toBeGreaterThan(3);
   });
 });
