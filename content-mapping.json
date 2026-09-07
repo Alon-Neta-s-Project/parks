@@ -40,6 +40,10 @@
     "gets_wet",
     "wheelchair",
     "motion_sickness_warning",
+    "sens_enclosed_dark",
+    "sens_heights",
+    "sens_loud_sudden",
+    "sens_strobe",
     "name_he",
     "aliases_he"
   ],

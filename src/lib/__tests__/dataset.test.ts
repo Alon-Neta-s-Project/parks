@@ -185,24 +185,42 @@ function parseCsv(text: string): string[][] {
 }
 
 describe("what must never be inferred", () => {
-  it("leaves every sensitivity flag untagged rather than derived", () => {
-    // They are not in the export yet. Absent must read as "not tagged", never as
-    // "checked and clear", and never as something worked out from the category.
-    for (const e of experiences) {
-      expect(e.sensEnclosedDark).toBeNull();
-      expect(e.sensHeights).toBeNull();
-      expect(e.sensLoudSudden).toBeNull();
-      expect(e.sensStrobe).toBeNull();
+  it("ארבעת דגלי הרגישות מגיעים מהמאסטר, ולא נשארים ריקים", () => {
+    // 🔴 הבדיקה הזו תיעדה פער ועכשיו היא אוכפת את סגירתו.
+    //
+    // היא אמרה "עדיין לא בייצוא", וזה היה נכון — לא כי הנתון חסר, אלא
+    // כי ארבע העמודות לא היו בחוזה הייצוא. במאסטר יש להן ערך כמעט
+    // לכל שורה, והן נזרקו בדרך. זהו המופע השני מתוך שבעה של התבנית,
+    // והוא נסגר כאן.
+    for (const f of ["sensEnclosedDark", "sensLoudSudden", "sensStrobe"] as const) {
+      const yes = experiences.filter((e) => e[f] === true).length;
+      const no = experiences.filter((e) => e[f] === false).length;
+      expect(yes, f).toBeGreaterThan(0);
+      expect(no, f).toBeGreaterThan(0);
     }
   });
 
+  it("'לא רלוונטי' נשאר ריק ואינו הופך ל-false", () => {
+    // ⚠️ sens_heights נושא N/A ב-77 שורות — מופעים, שאין להם "חשיפה
+    // לגובה". N/A הוא "לא חל", והוא **אינו** false. false פירושו נבדק
+    // ואין רגישות, וזו אמירה שמשפחה מסתמכת עליה.
+    const unchecked = experiences.filter((e) => e.sensHeights === null).length;
+    expect(unchecked).toBeGreaterThan(0);
+  });
+
   it("never lets dark_ride imply enclosed-and-dark", () => {
-    // The trap: dark_ride is an indoor tracked ride, not a frightening one.
-    // Peter Pan's Flight is one. Inferring the flag would mark a gentle family
-    // ride as a claustrophobia risk.
+    // 🔴 הכלל שחייב לשרוד גם עכשיו כשיש נתונים.
+    //
+    // dark_ride הוא מונח תעשייתי למתקן ממוסלל בתוך מבנה, לא למתקן
+    // מפחיד. Peter Pan's Flight הוא dark ride. גזירה של הדגל מהקטגוריה
+    // הייתה מסמנת מתקן משפחתי עדין כסיכון קלאוסטרופוביה.
+    //
+    // ⚠️ קודם נבדק ש**כולם** null; זה כבר לא נכון, ולכן הכלל נבדק
+    // אחרת: אילו הדגל היה נגזר מהקטגוריה, **כל** ה-dark rides היו
+    // מסומנים true. פיזור מעורב הוא ההוכחה שהערך מגיע מהמאסטר.
     const darkRides = experiences.filter((e) => e.category === "dark_ride");
     expect(darkRides.length).toBeGreaterThan(0);
-    expect(darkRides.every((e) => e.sensEnclosedDark === null)).toBe(true);
+    expect(darkRides.some((e) => e.sensEnclosedDark !== true)).toBe(true);
   });
 
   it("copies numbers from the export instead of transforming them", () => {

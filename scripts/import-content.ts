@@ -64,6 +64,24 @@ const textOrNull = (v: string) => (v === "" ? null : v);
 const list = (v: string) =>
   v === "" ? [] : v.split(/[;|]/).map((s) => s.trim()).filter(Boolean);
 
+/**
+ * דגל שהוא בוליאני או "לא נבדק".
+ *
+ * ⚠️ **שלושה מצבים ולא שניים.** ריק הוא "לא נבדק", ו-`N/A` הוא "לא
+ * רלוונטי" — ושניהם אינם `false`. `false` פירושו נבדק ואין רגישות,
+ * וזו אמירה שמשפחה מסתמכת עליה. הסכמה נושאת `boolean | null`, ולכן
+ * "לא נבדק" ו"לא רלוונטי" מתלכדים ל-null; מה שאסור הוא שיתלכדו
+ * ל-false.
+ */
+function boolFlag(v: string, key: string, col: string): boolean | null {
+  const t = v.trim().toLowerCase();
+  if (t === "" || t === "n/a" || t === "na") return null;
+  if (t === "true" || t === "yes") return true;
+  if (t === "false" || t === "no") return false;
+  note(key, `${col} has an unrecognised value ${JSON.stringify(v)} — left unknown`);
+  return null;
+}
+
 /** Four-state (spec §3.1). Empty means unknown, and stays unknown. */
 function quadState(v: string, key: string, col: string): QuadState {
   const t = v.trim().toLowerCase();
@@ -277,12 +295,21 @@ for (const row of rows) {
     motionSicknessWarning: quadState(
       row["motion_sickness_warning"] ?? "", key, "motion_sickness_warning"),
     lastVerified: row["Last Verified"] ?? "",
-    // Not in the export at all yet. Explicitly null rather than absent, so the
-    // UI renders "not tagged" instead of inferring anything.
-    sensEnclosedDark: null,
-    sensHeights: null,
-    sensLoudSudden: null,
-    sensStrobe: null,
+    /**
+     * ⚠️ **היו כתובות null בקוד עד עכשיו** — לא כי הן חסרו, אלא כי הן
+     * לא היו בחוזה הייצוא. במאסטר יש להן ערך ב-125 עד 181 מתקנים,
+     * והן נזרקו בדרך. זו התבנית שנספרה בפרויקט כמופע השני מתוך שבעה,
+     * וזו הפעם שבה היא נסגרת.
+     *
+     * ⚠️ **`sens_enclosed_dark` לעולם אינו נגזר מ-`category === "dark_ride"`.**
+     * "Dark ride" הוא מונח תעשייתי למתקן ממוסלל בתוך מבנה — Peter Pan's
+     * Flight הוא dark ride. גזירה כזו הייתה מסמנת אותו כסיכון
+     * קלאוסטרופוביה והורסת את האמון בפילטר הדגל.
+     */
+    sensEnclosedDark: boolFlag(row["sens_enclosed_dark"] ?? "", key, "sens_enclosed_dark"),
+    sensHeights: boolFlag(row["sens_heights"] ?? "", key, "sens_heights"),
+    sensLoudSudden: boolFlag(row["sens_loud_sudden"] ?? "", key, "sens_loud_sudden"),
+    sensStrobe: boolFlag(row["sens_strobe"] ?? "", key, "sens_strobe"),
     youtubeId: null,
     videoCreator: null,
     editorial: null,
