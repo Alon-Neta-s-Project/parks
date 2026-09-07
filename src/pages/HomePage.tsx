@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { coverage, parks } from "../data";
+import { useContent } from "../data/content";
 
 export function HomePage() {
+  const { coverage, parks } = useContent();
   const { t } = useTranslation();
   return (
     <main className="page">

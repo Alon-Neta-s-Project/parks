@@ -782,3 +782,20 @@ button {
    ברכיב מפיל את הבדיקות.                                                  */
 .icon-dir { inline-size: 1em; block-size: 1em; display: inline-block; vertical-align: -0.125em; }
 [dir="rtl"] .icon-dir { transform: scaleX(-1); }
+
+/* ---- מאיפה הגיע התוכן -----------------------------------------------------
+   ⚠️ אינה שגיאה ואינה מוסתרת. הקובץ המצורף הוא נפילה לגיטימית — אבל
+   ברגע שהוא מה שמוצג, זה חייב להיראות. תוכן ישן שנראה עדכני הוא הכשל
+   שהמוצר בנוי נגדו.                                                       */
+.notice {
+  margin-block: var(--pw-s3);
+  padding: var(--pw-s3) var(--pw-s4);
+  border-radius: var(--pw-r-sm);
+  font-size: 13px;
+  line-height: 1.55;
+}
+.notice--warn {
+  background: var(--pw-missing-bg, var(--pw-bg-2));
+  color: var(--pw-ink-2);
+  border-inline-start: 3px solid var(--pw-urgent-600, var(--pw-ink-3));
+}

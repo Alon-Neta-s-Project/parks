@@ -7,10 +7,13 @@ import { BrowsePage } from "./pages/BrowsePage";
 import { ExperiencePage } from "./pages/ExperiencePage";
 import { AdminPage } from "./pages/AdminPage";
 import { MemoryPage } from "./pages/MemoryPage";
+import { ContentProvider } from "./data/content";
+import { SourceNotice } from "./components/SourceNotice";
 
 export default function App() {
   const { t } = useTranslation();
   return (
+    <ContentProvider>
     <div className="app">
       <div className="app__inner">
         <header className="topbar">
@@ -25,6 +28,8 @@ export default function App() {
           </nav>
         </header>
 
+        <SourceNotice />
+
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/browse" element={<BrowsePage />} />
@@ -36,5 +41,6 @@ export default function App() {
         </Routes>
       </div>
     </div>
+    </ContentProvider>
   );
 }

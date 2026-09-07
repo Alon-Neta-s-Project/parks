@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { experiences as all, parkBySlug, parks } from "../data";
+import { useContent } from "../data/content";
 import type { Experience, IntensityLevel } from "../data/schema";
 import { Intensity } from "../components/Intensity";
 import { searchExperiences } from "../lib/recommend";
@@ -16,6 +16,7 @@ import { searchExperiences } from "../lib/recommend";
  * the reason, instead of quietly returning nothing.
  */
 export function BrowsePage() {
+  const { experiences: all, parkBySlug, parks } = useContent();
   const { t } = useTranslation();
   const { park: parkParam } = useParams();
   const parkName = parkParam ? decodeURIComponent(parkParam) : null;

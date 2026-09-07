@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { coverage, parks as allParks } from "../data";
+import { useContent } from "../data/content";
 import { clear, load, save } from "../lib/persist";
 import { applyPatch, emptyProfile, questions, type Profile } from "../lib/profile";
 import type { TFunction } from "i18next";
@@ -28,6 +28,7 @@ const restored = load();
 
 export function Chat() {
   const { t } = useTranslation();
+  const { coverage, parks: allParks } = useContent();
   const [started, setStarted] = useState(restored?.started ?? false);
   const [step, setStep] = useState(restored?.step ?? 0);
   const [profile, setProfile] = useState<Profile>(restored?.profile ?? emptyProfile);

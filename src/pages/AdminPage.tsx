@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import report from "../../reports/import-gap-report.json";
-import { experiences } from "../data";
+import { useContent } from "../data/content";
 
 /**
  * Content completeness, built from the gap report the importer writes.
@@ -31,6 +31,7 @@ function orderedCoverage<T extends { field: string; filled: number; total: numbe
 }
 
 export function AdminPage() {
+  const { experiences } = useContent();
   const { t } = useTranslation();
   const r = report as {
     ranAt: string; rows: { read: number; accepted: number; rejected: number };

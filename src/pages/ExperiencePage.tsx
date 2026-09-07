@@ -1,6 +1,6 @@
 import { Link, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { bySlug } from "../data";
+import { useContent } from "../data/content";
 import { REQUIRED_FIELDS, type Experience } from "../data/schema";
 import { Facts, Ticket, Trust } from "../components/Facts";
 
@@ -15,6 +15,7 @@ function missingFields(e: Experience): string[] {
 }
 
 export function ExperiencePage() {
+  const { bySlug } = useContent();
   const { t } = useTranslation();
   const { slug } = useParams();
   const experience = slug ? bySlug(slug) : undefined;
