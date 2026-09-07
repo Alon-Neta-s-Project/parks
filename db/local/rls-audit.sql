@@ -45,3 +45,26 @@ union all select 'trip', count(*) from trip
 union all select 'trip_member', count(*) from trip_member;
 -- ציפייה: תוכן נראה · profile/trip/trip_member = 0, בזמן שהבעלים רואה 1.
 reset role;
+
+-- 5 ─ ניקוי ────────────────────────────────────────────────────────────
+--
+-- 🔴 גיא, 07.09: הקובץ הזה כותב ל-auth.users האמיתית ומעולם לא ניקה
+-- אחריו. מקומית זו טבלת פיגום; **בסופהבייס זו טבלת המשתמשים.** בדיקה
+-- שמשאירה משתמש דמה בייצור אינה בדיקה — היא שינוי.
+--
+-- ⚠️ והמחיקה מסודרת מהעלה לשורש. trip_member תלויה ב-trip שתלויה
+-- ב-profile שתלויה ב-auth.users, ומחיקה בסדר ההפוך נופלת על מפתח זר.
+-- (יש on delete cascade, אבל להישען עליו פירושו שמחיקה של משתמש
+-- אמיתי תמחק בשקט את הטיולים שלו — עדיף מפורש.)
+delete from trip_member where trip_id = '22222222-2222-2222-2222-222222222222';
+delete from trip         where id      = '22222222-2222-2222-2222-222222222222';
+delete from profile      where id      = '11111111-1111-1111-1111-111111111111';
+delete from auth.users   where id      = '11111111-1111-1111-1111-111111111111';
+
+-- ואימות שהניקוי באמת קרה. ⚠️ מחיקה שנכשלה בשקט משאירה בדיוק את
+-- השורות שהיא באה להסיר.
+select
+  (select count(*) from auth.users   where id      = '11111111-1111-1111-1111-111111111111') as "auth.users (צפוי 0)",
+  (select count(*) from profile      where id      = '11111111-1111-1111-1111-111111111111') as "profile (צפוי 0)",
+  (select count(*) from trip         where id      = '22222222-2222-2222-2222-222222222222') as "trip (צפוי 0)",
+  (select count(*) from trip_member  where trip_id = '22222222-2222-2222-2222-222222222222') as "trip_member (צפוי 0)";
