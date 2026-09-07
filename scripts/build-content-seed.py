@@ -195,11 +195,25 @@ skipped: list[tuple[str, str]] = []
 
 import re as _re
 
-def land_id(park_id: str, name: str) -> str:
-    """מזהה יציב לאזור. נגזר מהפארק ומהשם, ולכן זהה בקובץ האזורים ובשורות
-    המתקנים — בלי טבלת תרגום ובלי סיכון שהשניים ייפרדו."""
-    slug = _re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
-    return f"{park_id}-{slug}"
+# ⚠️ **"N/A" אינו שם של אזור.** שמונה מפגשי דמויות במאסטר אינם משויכים
+# לאזור, ובעמודה כתוב N/A — כלומר "לא רלוונטי". הגזירה הנאיבית הפכה את
+# זה ל-`ak-n-a`, מזהה של אזור שאינו קיים, והטעינה נעצרה על מפתח זר.
+#
+# היא נעצרה **בקול**, וזה בסדר. אבל אילו הייתה נוצרת שורת אזור בשם
+# "N/A" — וזה מה שקובץ האזורים היה עושה — היה מופיע בממשק פארק עם אזור
+# ששמו "N/A". זו אותה תבנית בפעם הרביעית היום: ערך שאומר "אין" נקרא
+# כערך.
+NO_LAND = {"", "n/a", "na", "none"}
+
+def land_id(park_id: str, name: str | None) -> str | None:
+    """מזהה יציב לאזור, או None כשאין אזור.
+
+    נגזר מהפארק ומהשם, ולכן זהה בקובץ האזורים ובשורות המתקנים — בלי
+    טבלת תרגום ובלי סיכון שהשניים ייפרדו."""
+    if name is None or str(name).strip().lower() in NO_LAND:
+        return None
+    slug = _re.sub(r"[^a-z0-9]+", "-", str(name).lower()).strip("-")
+    return f"{park_id}-{slug}" if slug else None
 
 def text(v):
     """NULL נשאר NULL. מחרוזת ריקה אינה NULL, וגם לא להפך."""
@@ -288,7 +302,7 @@ for e in experiences:
         q(e["id"]),
         q(e["key"]),
         q(park_id),
-        q(land_id(park_id, e["land"])),
+        text(land_id(park_id, e["land"])),
         q(e["kind"]),
         q(e["type"]),
         q(e["category"]),
@@ -512,7 +526,11 @@ RULE = "-- " + "=" * 74
 # ברשימת השמות הייחודיים. והוא גם אינו אזור אלא היעדרו — מצעד או נגן
 # מסתובב אינם נמצאים באזור מסוים. הוא נשמר כשורה משלו ולא כ-NULL, כי
 # NULL כאן פירושו "לא נבדק", וזה נבדק.
-lands = sorted({(PARK_ID[e["park"]], e["land"]) for e in emitted if e["park"] in PARK_ID})
+# ⚠️ אזור שאין לו מזהה אינו נכנס לקובץ האזורים. ראה ההערה ליד land_id.
+lands = sorted({
+    (PARK_ID[e["park"]], e["land"]) for e in emitted
+    if e["park"] in PARK_ID and land_id(PARK_ID[e["park"]], e["land"]) is not None
+})
 land_rows = ",\n".join(
     "(" + ", ".join([q(land_id(pid, name)), q(pid), q(name), jsonb({})]) + ")"
     for pid, name in lands
@@ -621,3 +639,47 @@ assert not set(COLUMNS) - set(TABLE_COLUMNS), set(COLUMNS) - set(TABLE_COLUMNS)
 untouched = [c for c in TABLE_COLUMNS
              if c not in COLUMNS and c not in ("created_at", "updated_at")]
 print(f"\nⓘ  not written, left at their column defaults: {', '.join(untouched)}")
+
+
+# ── מה שכבר אינו בייצוא ──────────────────────────────────────────────────
+# ⚠️ **הטעינה היא upsert, והיא לעולם אינה מוחקת.** שורה שהוסרה מהמאסטר
+# נשארת במסד לנצח, וטים ממשיך לענות עליה. בטעינת v7_10 התגלו שלוש כאלה:
+# Hammerhead Beach (הודר בהכרעת תוכן), Taniwha Tubes (הוחלף בשתי שורות
+# מפוצלות), ו-The Mystic Fountain (נעלם מהמאסטר בלי שאיש ציין זאת).
+#
+# מתקן שהוסר וממשיך להופיע הוא בדיוק הכשל שהמוצר בנוי נגדו — תוכן ישן
+# שמוצג כאילו הוא עדכני. ולכן הקובץ הזה נוצר בכל בנייה.
+#
+# ⚠️ **והוא אינו מוחק בשקט.** הוא מדפיס תחילה מה עומד להימחק, כדי שמי
+# שמריצה תראה זאת לפני שזה קורה ולא אחרי.
+keys_sql = ",\n  ".join("(" + q(e["key"]) + ")" for e in emitted)
+(OUTDIR / "prune-content.sql").write_text(f"""-- Park Day Companion — מה שכבר אינו בייצוא
+--
+-- ⚠️ **מוחק שורות.** להריץ **אחרי** קובצי התוכן, ורק אחריהם.
+--
+-- הטעינה היא upsert ואינה מוחקת דבר. שורה שהוסרה מהמאסטר — כי הוחלפה,
+-- כי הוחלט להדיר אותה, או כי נשמטה בטעות — נשארת במסד וטים ממשיך לענות
+-- עליה. זה בדיוק "תוכן ישן שמוצג כאילו הוא עדכני".
+--
+-- הרשימה נגזרת מהייצוא הנוכחי ({len(emitted)} שורות), ולכן היא תמיד
+-- מעודכנת. אין כאן מפתחות כתובים ביד.
+
+BEGIN;
+
+create temporary table _current (key text primary key) on commit drop;
+insert into _current (key) values
+  {keys_sql};
+
+-- ⚠️ קודם רואים, ואז מוחקים.
+select e.key as "יימחק — אינו בייצוא", e.name as "שם"
+from experience e
+where e.key not in (select key from _current)
+order by e.key;
+
+delete from experience e where e.key not in (select key from _current);
+
+select count(*) as "נשארו במסד" from experience;
+
+COMMIT;
+""", "utf-8")
+print(f"  prune-content.sql        (מוחק מה שאינו בייצוא)")

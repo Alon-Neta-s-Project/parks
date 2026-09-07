@@ -1,5 +1,5 @@
 -- ==========================================================================
--- Park Day Companion — אזורים בפארקים (81 שורות)
+-- Park Day Companion — אזורים בפארקים (78 שורות)
 -- ==========================================================================
 --
 -- ⚠️ להריץ **לפני** קובצי התוכן. experience.land_id הוא מפתח זר לטבלה
@@ -24,7 +24,6 @@ values
 ('ak-africa-rafiki-s-planet-watch', 'ak', 'Africa / Rafiki''s Planet Watch', '{}'::jsonb),
 ('ak-asia', 'ak', 'Asia', '{}'::jsonb),
 ('ak-discovery-island', 'ak', 'Discovery Island', '{}'::jsonb),
-('ak-n-a', 'ak', 'N/A', '{}'::jsonb),
 ('ak-oasis', 'ak', 'Oasis', '{}'::jsonb),
 ('ak-pandora-the-world-of-avatar', 'ak', 'Pandora – The World of Avatar', '{}'::jsonb),
 ('ak-park-wide', 'ak', 'Park-wide', '{}'::jsonb),
@@ -37,7 +36,6 @@ values
 ('bb-park-wide', 'bb', 'Park-wide', '{}'::jsonb),
 ('bb-ski-patrol-training-camp', 'bb', 'Ski Patrol Training Camp', '{}'::jsonb),
 ('bb-tike-s-peak', 'bb', 'Tike''s Peak', '{}'::jsonb),
-('epcot-n-a', 'epcot', 'N/A', '{}'::jsonb),
 ('epcot-world-celebration', 'epcot', 'World Celebration', '{}'::jsonb),
 ('epcot-world-discovery', 'epcot', 'World Discovery', '{}'::jsonb),
 ('epcot-world-nature', 'epcot', 'World Nature', '{}'::jsonb),
@@ -59,7 +57,6 @@ values
 ('hs-chinese-theatre', 'hs', 'Chinese Theatre', '{}'::jsonb),
 ('hs-echo-lake', 'hs', 'Echo Lake', '{}'::jsonb),
 ('hs-hollywood-boulevard', 'hs', 'Hollywood Boulevard', '{}'::jsonb),
-('hs-n-a', 'hs', 'N/A', '{}'::jsonb),
 ('hs-star-wars-galaxy-s-edge', 'hs', 'Star Wars: Galaxy''s Edge', '{}'::jsonb),
 ('hs-sunset-boulevard', 'hs', 'Sunset Boulevard', '{}'::jsonb),
 ('hs-toy-story-land', 'hs', 'Toy Story Land', '{}'::jsonb),
