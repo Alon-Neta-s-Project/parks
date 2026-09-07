@@ -610,9 +610,9 @@ Deno.test("404 מהמסד מפנה למיגרציה 026, לא לחתימה הי�
 
 Deno.test("כל קטע מסומן לפי volatility, ולא לפי הטקסט שלו", () => {
   const out = formatChunks([
-    { content: "אלף", volatility: "volatile", last_verified: "2026-09-01" },
-    { content: "בית", volatility: "seasonal", last_verified: null },
-    { content: "גימל", volatility: "static", last_verified: "2026-08-01" },
+    { content: "אלף", volatility: "volatile", last_verified: "2026-09-01" , authority_tier: "T1" },
+    { content: "בית", volatility: "seasonal", last_verified: null , authority_tier: "T1" },
+    { content: "גימל", volatility: "static", last_verified: "2026-08-01" , authority_tier: "T1" },
   ]);
   assertEquals(out.includes("· משתנה · נבדק 2026-09-01"), true);
   assertEquals(out.includes("· עונתי]"), true);
@@ -622,13 +622,13 @@ Deno.test("כל קטע מסומן לפי volatility, ולא לפי הטקסט ש
 // ⚠️ ברירת המחדל היא לכיוון הבטוח. קטע בלי סימון נאמר בזהירות, לא
 // בביטחון — "לא ידוע" אינו "יציב".
 Deno.test("volatility חסר נקרא כמשתנה ולא כיציב", () => {
-  const out = formatChunks([{ content: "x", volatility: null, last_verified: null }]);
+  const out = formatChunks([{ content: "x", volatility: null, last_verified: null , authority_tier: "T1" }]);
   assertEquals(out.includes("משתנה"), true);
   assertEquals(out.includes("יציב"), false);
 });
 
 Deno.test("ערך שאינו באוצר המילים אינו הופך ליציב", () => {
-  const out = formatChunks([{ content: "x", volatility: "unknown-value", last_verified: null }]);
+  const out = formatChunks([{ content: "x", volatility: "unknown-value", last_verified: null , authority_tier: "T1" }]);
   assertEquals(out.includes("משתנה"), true);
 });
 
@@ -649,7 +649,7 @@ const withChunks = (rows: unknown[]) => (url: string) => {
 
 Deno.test("הקטעים נכנסים להקשר, לפני השאלה", async () => {
   const s = stub(withChunks([
-    { content: "Multi Pass עולה כך וכך", volatility: "volatile", last_verified: "2026-09-01" },
+    { content: "Multi Pass עולה כך וכך", volatility: "volatile", last_verified: "2026-09-01" , authority_tier: "T1" },
   ]));
   const r = await handle(ask({ question: "כמה עולה?" }), FULL);
   s.restore();
@@ -700,6 +700,34 @@ Deno.test("אין קטעים ותקלת שליפה הם שתי סיבות שונ
   const body = await r.json();
   assertEquals(body.retrieval, "empty");
   assertEquals(body.chunks, 0);
+});
+
+// ⚠️ **דרגת המקור יוצאת בתשובה, ואינה נכנסת להקשר.**
+// match_knowledge מחזירה authority_tier מאז 028, והוא נבלע בדרך — כלומר
+// שישה ממקרי סט הזהב שדורשים must_cite_tier לא היו ניתנים לבדיקה כלל.
+// הוא יוצא כדי שבדיקה תדע על מה התשובה נשענה, ולא כדי שהמודל יראה אותו.
+Deno.test("דרגת המקור מדווחת בתשובה, בלי כפילויות", async () => {
+  const s = stub(withChunks([
+    { content: "א", volatility: "stable", last_verified: null, authority_tier: "T1" },
+    { content: "ב", volatility: "stable", last_verified: null, authority_tier: "T1" },
+    { content: "ג", volatility: "stable", last_verified: null, authority_tier: "T2" },
+  ]));
+  const r = await handle(ask({ question: "מה המדיניות" }), FULL);
+  s.restore();
+  const body = await r.json();
+  assertEquals(body.tiers.sort(), ["T1", "T2"]);
+});
+
+// ⚠️ ודרגת המקור **אינה** מגיעה למודל. היא נועדה לבדיקה, ואילו הייתה
+// בהקשר, המודל היה מצטט אותה למשתמשת — וזה ייחוס למקור, שאסור.
+Deno.test("דרגת המקור אינה נכנסת להקשר של המודל", async () => {
+  const s = stub(withChunks([
+    { content: "א", volatility: "stable", last_verified: null, authority_tier: "T1" },
+  ]));
+  await handle(ask({ question: "מה המדיניות" }), FULL);
+  s.restore();
+  const call = s.calls.find((c) => c.url.includes("generateContent"))!;
+  assertEquals(String(call.init!.body).includes("T1"), false, "הדרגה דלפה להקשר");
 });
 
 // ── המתקנים ───────────────────────────────────────────────────────────

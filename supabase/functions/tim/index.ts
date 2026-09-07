@@ -329,6 +329,16 @@ export interface KnowledgeChunk {
   content: string;
   volatility: string | null;
   last_verified: string | null;
+  /**
+   * ⚠️ **נשלף ולא נזרק.** `match_knowledge` מחזירה אותו מאז 028, והוא
+   * נבלע כאן — כלומר שישה ממקרי סט הזהב שדורשים `must_cite_tier: [T1]`
+   * לא היו ניתנים לבדיקה כלל: אין במה להסתכל.
+   *
+   * הוא **אינו** נכנס להקשר של המודל. הוא יוצא בתשובה כדי שבדיקה תוכל
+   * לוודא מאיזו דרגת מקור נשענה התשובה — קטע T1 הוא מקור רשמי, ותשובה
+   * שנשענת רק על דרגה נמוכה יותר היא ממצא ולא תקלה.
+   */
+  authority_tier: string | null;
 }
 
 /**
@@ -731,7 +741,13 @@ export async function handle(req: Request, env: Record<string, string | undefine
 
   // ⚠️ retrieval מוחזר תמיד. בלעדיו "טים לא יודע" ו"השליפה נפלה" נראים
   // זהים על המסך — והראשון הוא תשובה, השני הוא תקלה.
-  return json({ answer, model, usage, retrieval, chunks: chunks.length, rides: rides.length });
+  // ⚠️ `tiers` הוא לבדיקות, לא לממשק. הוא אומר על מה התשובה נשענה,
+  // ובלעדיו "must_cite_tier" בסט הזהב אינו ניתן לאכיפה.
+  const tiers = [...new Set(chunks.map((c) => c.authority_tier).filter(Boolean))];
+  return json({
+    answer, model, usage, retrieval,
+    chunks: chunks.length, rides: rides.length, tiers,
+  });
 }
 
 /**
