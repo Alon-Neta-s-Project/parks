@@ -27,6 +27,16 @@
 #   fits          האם הקבוצה עוברת את המגבלה.
 #   must_contain  מחרוזות שחייבות להופיע **בטקסט התשובה**.
 #   must_not_contain  מחרוזות שאסור שיופיעו.
+#   tiers         דרגות הסמכות שחייבות לחזור בשדה `tiers` של התשובה.
+#                 ⚠️ לבדיקה בלבד. הדרגה **אינה** נכנסת להקשר של המודל
+#                 ואינה מוצגת למשתמשת — ייחוס למקור אסור בממשק.
+#   must_ask_clarifying  שטים שאל ולא ענה עובדתית. שלוש בדיקות
+#                 דטרמיניסטיות יחד: התשובה מסתיימת בסימן שאלה,
+#                 rides: 0, ו-chunks: 0. אין מודל־כשופט.
+#   should_refuse האם סירוב הוא התשובה הנכונה. `false` אומר במפורש
+#                 שטים **אמור** לענות — מקרה ייעוץ ולא מקרה עובדה.
+#
+# ובשדה `tags` — לאיזו משפחה המקרה שייך. לסינון, לא לבדיקה.
 #
 # ⚠️ **למה `rides_gt` ולא `must_call_tool`.** טים אינו בוחר כלים — הקוד
 # קורא לשניהם בכל שאלה. לכן "האם נקרא הכלי" אינו ניתן לבדיקה כפי
@@ -192,3 +202,176 @@ cases:
   # ── שליפה סמנטית (M4) ───────────────────────────────────────────────
   # ממתין ל-40–60 מקרים לפי תוכנית הבנייה. המקרים משישה הריאיונות
   # נכנסים כאן.
+
+  # ── סבב 2 של פולה (07.09) — 15 מקרים ───────────────────────────────
+  #
+  # ⚠️ הגיעו בשמות שדה משלהם (question · must_have · must_cite_tier),
+  # ותורגמו לסכמה של הקובץ הזה: ask · expect · tiers. התוכן לא שונה.
+  # הסיבה היא הכלל שכבר עלה כאן היום — אותו דבר בשני שמות הוא איך ששם
+  # שלישי נולד, ובדיקה שאיש לא יודע להריץ אינה בדיקה.
+  #
+  # 🔴 המקרה ה-16, ll-booking-window-hotel-guest, **אינו כאן בכוונה.**
+  # פולה חסמה אותו עד שרוני מאמתת את המספרים 7/3, כי התוכן
+  # ב-knowledge/lightning-lane-multi-pass-wdw.md עדיין מעורפל. מקרה
+  # שנמזג לפני שיש לו תשובה נכשל לנצח ונרשם כחוב שאיש לא פורע.
+  #
+  # כולם unmeasured — נוסחו ועוד לא רצו.
+
+  - id: child-swap-disney-vs-universal
+    kind: retrieval
+    ask: "איך עובד Child Swap בדיסני וביוניברסל? זה אותו דבר?"
+    expect:
+      chunks_gt: 0
+      must_contain: ["שמירת מקום", "חדר משפחות"]
+      tiers: ["T1"]
+    tags: [rules, cross-park]
+    status: unmeasured
+
+  - id: single-rider-universal-negative
+    kind: retrieval
+    ask: "יש לי אופציית single rider ביוניברסל?"
+    expect:
+      must_contain: ["לא", "דיסני"]
+      tiers: ["T1"]
+    tags: [facts, cross-park]
+    status: unmeasured
+    note: >-
+      ⚠️ must_contain על המילה "לא" לבדה חלש — היא תופיע כמעט בכל
+      תשובה בעברית. הוא נשאר כפי שפולה כתבה אותו, אבל אם המקרה יעבור
+      בזמן שהתשובה שגויה, זו הדרישה שצריך לחזק.
+
+  - id: ll-tier-attraction-not-included
+    kind: tool
+    ask: "האם Tron כלול במכסת ה-Multi Pass שלי?"
+    expect:
+      rides_gt: 0
+      must_contain: ["בנפרד", "לא כלול"]
+      tiers: ["T1"]
+    tags: [rules, purchase]
+    status: unmeasured
+    note: >-
+      ✅ אומת מול הטבלה: TRON Lightcycle / Run נושא Single Pass ו-
+      singlePassRequired: true. הציפייה נכונה מול הנתונים.
+
+  - id: severe-weather-closure-refund
+    kind: retrieval
+    ask: "הפארק נסגר לגמרי בגלל סערה — מובטח לי החזר כספי?"
+    expect:
+      must_contain: ["לא מובטח"]
+      tiers: ["T1"]
+    tags: [refunds, uncertainty]
+    status: unmeasured
+    note: >-
+      ✅ מנוסח על מה שכן חייב להופיע ולא כשלילה של "מובטח" — בדיוק
+      התיקון שסוכם, כי must_not_contain היה נופל על "לא מובטח" עצמו.
+
+  - id: roaming-characters-expectation
+    kind: retrieval
+    ask: "אני יכול/ה לפגוש דמויות שמסתובבות חופשי בפארק, לא בתור?"
+    expect:
+      must_contain: ["תור", "מיקום קבוע"]
+    tags: [expectations, characters]
+    status: unmeasured
+
+  - id: kosher-strictness-clarify
+    kind: retrieval
+    ask: "יש אוכל כשר בפארק?"
+    expect:
+      must_ask_clarifying: true
+    tags: [dietary, clarify]
+    status: unmeasured
+
+  - id: epic-universe-early-entry-once
+    kind: retrieval
+    ask: "אני יכול/ה להשתמש בכניסה מוקדמת כל יום בשהות שלי ב-Epic Universe?"
+    expect:
+      chunks_gt: 0
+      must_contain: ["פעם אחת", "כל השהות"]
+      tiers: ["T1"]
+    tags: [rules, epic-universe]
+    status: unmeasured
+
+  - id: third-party-hotel-booking-warning
+    kind: retrieval
+    ask: "הזמנתי מלון דיסני דרך Booking.com — יש משהו שכדאי לדעת?"
+    expect:
+      must_contain: ["שיוך", "אפליקציה הרשמית"]
+    tags: [advisory, booking]
+    status: unmeasured
+
+  - id: gentle-ride-motion-sickness-flag
+    kind: tool
+    ask: "יש מתקן שנראה רגוע אבל עלול לגרום לי לבחילה?"
+    expect:
+      rides_gt: 0
+      must_contain: ["בחילה", "תנועה"]
+    tags: [facts, safety, sensory]
+    status: unmeasured
+    note: >-
+      ✅ אומת מול הטבלה: 24 מתקנים בעוצמה 1–2 נושאים אזהרת בחילה, בהם
+      Toy Story Mania! ו-Alien Swirling Saucers. יש למקרה תשובה אמיתית.
+
+  - id: parade-showtime-guided-non-answer
+    kind: retrieval
+    ask: "באיזו שעה התהלוכה היום?"
+    expect:
+      must_not_contain: ["בשעה"]
+      must_contain: ["אפליקציה", "אתר"]
+    tags: [refusal, schedule, ai-fallback-risk, guided-non-answer]
+    status: unmeasured
+    note: >-
+      אין נתוני לוח זמנים במערכת. טים אינו ממציא שעה, וגם אינו מסרב
+      יבש — הוא מכוון לאפליקציה או לאתר.
+      ⚠️ ו-must_not_contain על "בשעה" עלול ליפול על תשובה נכונה כמו
+      "מתקיימת בשעה שמפורסמת באפליקציה". אם המקרה ייכשל על ניסוח ולא
+      על המצאה — זו הדרישה לתקן, לא הקוד.
+
+  - id: park-before-hotel-order-advisory
+    kind: retrieval
+    ask: "כדאי לי לבחור מלון קודם, ואז להחליט לאיזה פארק ללכת?"
+    expect:
+      must_contain: ["פארק", "קודם"]
+      should_refuse: false
+    tags: [advisory, planning-order]
+    status: unmeasured
+
+  - id: ride-breakdown-frequency-expectation
+    kind: retrieval
+    ask: "המתקנים שתכננתי יעבדו בלי תקלות?"
+    expect:
+      must_contain: ["תקלות"]
+    tags: [expectations]
+    status: unmeasured
+
+  - id: uber-eats-kosher-filter-unreliable
+    kind: retrieval
+    ask: "אני יכול/ה לסמוך על הסינון 'כשר' באובר איטס בפארק?"
+    expect:
+      must_contain: ["לא אמין"]
+    tags: [dietary, caution]
+    status: unmeasured
+
+  - id: waterpark-toddler-family-split
+    kind: retrieval
+    ask: "יש לי פעוט בן 2-3 — כדאי ללכת לפארק מים עם כל המשפחה?"
+    expect:
+      must_contain: ["פיצול"]
+      should_refuse: false
+    tags: [advisory, family-composition]
+    status: unmeasured
+
+  - id: single-rider-family-tradeoff
+    kind: retrieval
+    ask: "כדאי לנו להשתמש ב-single rider כדי לקצר את התור?"
+    expect:
+      must_contain: ["מתפצלים"]
+      should_refuse: false
+    tags: [advisory, tradeoff]
+    status: unmeasured
+
+  # 🔴 ממתין — לא למזג עד שפולה מודיעה שאימות רוני נסגר:
+  #   ll-booking-window-hotel-guest
+  #   "מתי אני יכול/ה להזמין בפועל את חלון-הזמן למתקן עם Lightning Lane,
+  #    אם אני ישן/ה במלון דיסני?"  must_contain: ["שבוע", "3"]
+  # התוכן ב-knowledge/lightning-lane-multi-pass-wdw.md שורה 22 אומר
+  # "מספר ימים לפני הביקור" בלי המספרים, ולכן אין לו תשובה נכונה היום.
