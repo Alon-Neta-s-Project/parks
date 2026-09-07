@@ -1,5 +1,6 @@
 import type { IntensityLevel } from "../data/schema";
 import type { Member } from "./group";
+import type { Sensitivity } from "./sensitivity";
 
 /**
  * What Tim learns about this trip.
@@ -40,6 +41,30 @@ export interface Profile {
   /** ⚠️ Trip dates only. No birth dates, ever (CLAUDE.md). */
   dates: "set" | "flexible" | null;
 
+  /**
+   * What someone in the group needs Tim to watch for.
+   *
+   * ⚠️ Not one of the six. It is asked as a follow-up in the same breath as the
+   * group question — Dana's artboard puts it there and the flow decision keeps
+   * it ("נשארת כפי שהוכרעה") — because it is a fact about the same people, and
+   * splitting it into its own numbered question makes it read like screening.
+   *
+   * ⚠️ Empty means not asked or not answered. It never means "no sensitivities",
+   * and nothing may read it as a clean bill: an unanswered question is the
+   * absence of an answer, which is the pattern this project has been caught by
+   * seven times.
+   */
+  sensitivities: Sensitivity[];
+
+  /**
+   * Whether rides nobody checked may appear when a sensitivity is being avoided.
+   *
+   * Default false, mirroring includeUnrated: a ride whose noise flag was never
+   * filled is not an answer to "what is quiet". Turning it on is a deliberate
+   * choice to see the rest, with the gap stated beside each one.
+   */
+  includeUncheckedSensitivity: boolean;
+
   parks: string[];
   intensityMin: IntensityLevel | null;
   intensityMax: IntensityLevel | null;
@@ -68,6 +93,8 @@ export const emptyProfile: Profile = {
   parkDays: null,
   visitStyle: null,
   dates: null,
+  sensitivities: [],
+  includeUncheckedSensitivity: false,
   parks: [],
   intensityMin: null,
   intensityMax: null,
@@ -93,6 +120,14 @@ export interface Question {
   multi?: boolean;
   /** Free text is always available beside the chips. */
   freeText?: boolean;
+  /**
+   * Asked in the same breath as another question, and not counted separately.
+   *
+   * ⚠️ The counter the user reads is over the six, and a follow-up must not
+   * push it to "7/6" or silently renumber the rest. `numberedQuestions` below
+   * is what the counter runs on.
+   */
+  followUpTo?: string;
   options?: Option[];
 }
 
@@ -109,6 +144,24 @@ export interface Question {
  */
 export const questions: Question[] = [
   { id: "group", kind: "members", freeText: true },
+  {
+    // ⚠️ Numbered 0, not 2. It rides along with the group question and the
+    // counter does not advance for it — the interface says "1/6" through both.
+    // Six was the decision; this is the follow-up that was kept, not a seventh.
+    id: "sensitivities",
+    followUpTo: "group",
+    multi: true,
+    freeText: true,
+    options: [
+      { id: "dark", patch: { sensitivities: ["dark"] } },
+      { id: "loudSudden", patch: { sensitivities: ["loudSudden"] } },
+      { id: "strobe", patch: { sensitivities: ["strobe"] } },
+      { id: "heights", patch: { sensitivities: ["heights"] } },
+      { id: "motionSickness", patch: { sensitivities: ["motionSickness"] } },
+      { id: "accessibility", patch: { sensitivities: ["accessibility"] } },
+      { id: "longQueues", patch: { sensitivities: ["longQueues"] } },
+    ],
+  },
   {
     id: "attractionTypes",
     multi: true,
@@ -166,6 +219,15 @@ export const questions: Question[] = [
     ],
   },
 ];
+
+/**
+ * The six the counter counts. Follow-ups are asked, never numbered.
+ *
+ * ⚠️ Derived, not a second hand-maintained list — a literal `6` here would go
+ * stale the first time the flow changes, which is the frozen-expectation
+ * failure this project has now hit six times.
+ */
+export const numberedQuestions = questions.filter((q) => !q.followUpTo);
 
 export const applyPatch = (profile: Profile, patch: Partial<Profile>): Profile => ({
   ...profile,

@@ -3,7 +3,13 @@ import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import { useContent } from "../data/content";
 import { clear, load, save } from "../lib/persist";
-import { applyPatch, emptyProfile, questions, type Profile } from "../lib/profile";
+import {
+  applyPatch,
+  emptyProfile,
+  numberedQuestions,
+  questions,
+  type Profile,
+} from "../lib/profile";
 import type { TFunction } from "i18next";
 import { HEIGHT_ASK_BELOW_AGE, type Member } from "../lib/group";
 import { GroupBuilder } from "./GroupBuilder";
@@ -55,6 +61,16 @@ export function Chat() {
 
   const question = questions[step];
   const onboardingDone = step >= questions.length;
+  /**
+   * The number the reader sees. A follow-up shows its parent's number, so the
+   * counter never advances for a question that was never counted.
+   */
+  const stepNumber = Math.max(
+    1,
+    numberedQuestions.findIndex(
+      (q) => q.id === (question?.followUpTo ?? question?.id),
+    ) + 1,
+  );
   /**
    * Which park is trip context, not a profile axis, so it is not one of the
    * three opening questions — it is asked once there is actually a day to plan.
@@ -544,6 +560,7 @@ export function Chat() {
             includeUnrated={profile.includeUnrated}
             onToggleUnrated={toggleUnrated}
             members={profile.members}
+            sensitivities={profile.sensitivities}
           />
 
           <div className="coverage">
@@ -584,7 +601,14 @@ export function Chat() {
         <div className="thinking">
           <PathLine />
           <span className="num">
-            {step + 1} / {questions.length}
+            {/*
+              ⚠️ Numbered over the six, not over the array. The sensitivity
+              follow-up rides along with the group question and must not push
+              this to "7/6" — it is a follow-up that was kept, not a seventh
+              question. `stepNumber` holds at the group question's number while
+              the follow-up is on screen.
+            */}
+            {stepNumber} / {numberedQuestions.length}
           </span>
         </div>
       )}

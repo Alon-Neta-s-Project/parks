@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { emptyProfile, isDropped, questions, type Profile } from "../profile";
+import {
+  emptyProfile,
+  isDropped,
+  numberedQuestions,
+  questions,
+  type Profile,
+} from "../profile";
 import { experiences } from "../../data";
 import { matchesFilters, recommend, searchExperiences } from "../recommend";
 import { refinementById } from "../refine";
@@ -173,8 +179,12 @@ describe("more than one park", () => {
 describe("opening questions", () => {
   // ⚠️ שש ולא שלוש. הסדר נקבע במוצר (פולה, 03.09) ואינו נתון לשינוי כאן —
   // הבדיקה נועלת אותו, כדי ששינוי סדר יהיה החלטה ולא תופעת לוואי של refactor.
+  //
+  // ⚠️ ונועלת את הממוספרות, לא את המערך. שאלת הרגישויות נשאלת באותה נשימה עם
+  // שאלת הקבוצה ואינה נספרת — נעילה על המערך הייתה הופכת כל שאלת־המשך עתידית
+  // לכשל בבדיקה במקום להישאר החלטת מוצר.
   it("asks six, in the order product fixed", () => {
-    expect(questions.map((q) => q.id)).toEqual([
+    expect(numberedQuestions.map((q) => q.id)).toEqual([
       "group",
       "attractionTypes",
       "worlds",

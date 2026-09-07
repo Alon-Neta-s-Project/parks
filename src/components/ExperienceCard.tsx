@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import type { Experience } from "../data/schema";
 import type { Member } from "../lib/group";
+import { dependsFor, uncheckedFor, type Sensitivity } from "../lib/sensitivity";
 import { FitTag } from "./FitTag";
 import { Intensity } from "./Intensity";
 
@@ -17,13 +18,30 @@ import { Intensity } from "./Intensity";
 export function ExperienceCard({
   experience,
   members = [],
+  sensitivities = [],
 }: {
   experience: Experience;
   members?: Member[];
+  /**
+   * What this group asked Tim to watch for.
+   *
+   * ⚠️ Only these are marked. Printing every sensitivity under every ride would
+   * bury the one that matters to this family under five that do not.
+   */
+  sensitivities?: Sensitivity[];
 }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { fastAccess, status } = experience;
+
+  // ⚠️ A ride that reached this list is not flagged for anything the group
+  // named — the filter already removed those. What is left to say is the part
+  // the list cannot show by itself: which of those questions was never asked of
+  // this ride, and which one has an answer that depends on the rider.
+  const unchecked = uncheckedFor(experience, sensitivities);
+  const depends = dependsFor(experience, sensitivities);
+  const names = (list: Sensitivity[]) =>
+    list.map((s) => t(`questions.sensitivities.${s}`)).join(" · ");
 
   return (
     <li className="exp">
@@ -54,6 +72,19 @@ export function ExperienceCard({
           )}
           {status.state === "check" && (
             <span className="chip chip--warn">{t("card.checkStatus")}</span>
+          )}
+          {depends.length > 0 && (
+            <span className="chip chip--way" title={t("sensitivity.transferNote")}>
+              {t("sensitivity.depends", { list: names(depends) })}
+            </span>
+          )}
+          {unchecked.length > 0 && (
+            <span className="chip chip--missing">
+              {t("sensitivity.unchecked", {
+                count: unchecked.length,
+                list: names(unchecked),
+              })}
+            </span>
           )}
         </span>
       </button>

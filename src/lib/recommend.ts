@@ -1,6 +1,11 @@
 import { experiences } from "../data";
 import type { Experience, IntensityLevel } from "../data/schema";
 import type { Profile } from "./profile";
+import {
+  rideSensitivities,
+  sensitivityStateFor,
+  type Sensitivity,
+} from "./sensitivity";
 
 /**
  * The recommendation engine, and the only place experiences are selected.
@@ -35,6 +40,23 @@ export interface SearchFilters {
   includeClosed?: boolean;
   /** Explicit opt-in: only rides whose short queue the group's pass covers. */
   excludeSinglePass?: boolean;
+  /**
+   * Sensitivities someone in the group asked Tim to avoid.
+   *
+   * A ride flagged for any of them is out. So, by default, is a ride nobody
+   * checked — see includeUncheckedSensitivity.
+   */
+  avoidSensitivities?: Sensitivity[];
+  /**
+   * Whether rides nobody checked may still appear while avoiding.
+   *
+   * ⚠️ Default false, and the default is the safety property. A family that
+   * said "she is frightened of the dark" and reads a list is reading it as a
+   * list of rides that are not dark. An unchecked row would be indistinguishable
+   * from a cleared one — the same collapse as an unrated ride answering a
+   * question about intensity, and it is excluded for the same reason.
+   */
+  includeUncheckedSensitivity?: boolean;
   land?: string;
 }
 
@@ -56,6 +78,8 @@ export function matchesFilters(e: Experience, filters: SearchFilters): boolean {
     includeClosed = false,
     excludeSinglePass = false,
     hasMotionSicknessWarning,
+    avoidSensitivities,
+    includeUncheckedSensitivity = false,
     land,
   } = filters;
 
@@ -65,6 +89,18 @@ export function matchesFilters(e: Experience, filters: SearchFilters): boolean {
     if (land && e.land !== land) return false;
     if (!includeClosed && e.status.state === "closed") return false;
     if (excludeSinglePass && e.fastAccess.singlePassRequired) return false;
+
+    if (avoidSensitivities?.length) {
+      for (const sensitivity of rideSensitivities) {
+        if (!avoidSensitivities.includes(sensitivity)) continue;
+        const state = sensitivityStateFor(e, sensitivity);
+        if (state === "flagged") return false;
+        if (state === "unchecked" && !includeUncheckedSensitivity) return false;
+        // "depends" stays in deliberately. It is a checked row whose answer is
+        // about the person; dropping it would hide most of a park from someone
+        // who can transfer. It is surfaced beside the ride instead.
+      }
+    }
 
     if (hasMotionSicknessWarning !== undefined) {
       // "na" and null both mean we cannot answer, so neither counts as a match
@@ -118,6 +154,16 @@ export interface Recommendation {
     condensedAway: number;
     /** Parks in the profile that carry no intensity ratings at all. */
     unratedParks: string[];
+    /**
+     * Rides held back only because a sensitivity the group named was never
+     * checked on them.
+     *
+     * ⚠️ This number has to reach the screen. Silently dropping them would let
+     * a short list read as "that is all there is", when what happened is that
+     * Tim does not know — and "I do not know about 14 more" is a different
+     * sentence from "there are no others".
+     */
+    sensitivityUncheckedExcluded: number;
   };
   verifiedAt: string | null;
 }
@@ -132,6 +178,7 @@ const emptyRecommendation: Recommendation = {
     unconfirmedFastAccess: 0,
     condensedAway: 0,
     unratedParks: [],
+    sensitivityUncheckedExcluded: 0,
   },
   verifiedAt: null,
 };
@@ -164,6 +211,8 @@ export function recommend(profile: Profile): Recommendation {
     intensityMax: profile.intensityMax,
     includeUnrated: profile.includeUnrated,
     excludeSinglePass: profile.onlyIncludedInPass,
+    avoidSensitivities: profile.sensitivities,
+    includeUncheckedSensitivity: profile.includeUncheckedSensitivity,
   });
 
   const sorted = [...matches].sort((a, b) => {
@@ -214,6 +263,23 @@ export function recommend(profile: Profile): Recommendation {
           (!profile.kinds.length || profile.kinds.includes(e.kind)),
       ).length;
 
+  // Counted by re-running the same filters with the unchecked rows allowed back
+  // in, rather than by a second hand-written predicate that could drift from
+  // matchesFilters. The difference is exactly what the strictness cost.
+  const sensitivityUncheckedExcluded =
+    profile.sensitivities.length && !profile.includeUncheckedSensitivity
+      ? searchExperiences({
+          parks,
+          kinds: profile.kinds,
+          intensityMin: profile.intensityMin,
+          intensityMax: profile.intensityMax,
+          includeUnrated: profile.includeUnrated,
+          excludeSinglePass: profile.onlyIncludedInPass,
+          avoidSensitivities: profile.sensitivities,
+          includeUncheckedSensitivity: true,
+        }).length - matches.length
+      : 0;
+
   const unratedParks = parks.filter(
     (park) => !experiences.some((e) => e.park === park && e.intensity.rated),
   );
@@ -228,6 +294,7 @@ export function recommend(profile: Profile): Recommendation {
       unconfirmedFastAccess: matches.filter((e) => e.fastAccess.unconfirmed).length,
       condensedAway: matches.length - groups.reduce((n, g) => n + g.items.length, 0),
       unratedParks,
+      sensitivityUncheckedExcluded,
     },
     verifiedAt: matches[0]?.lastVerified ?? null,
   };
@@ -243,5 +310,7 @@ export function countFor(profile: Profile): number {
     intensityMax: profile.intensityMax,
     includeUnrated: profile.includeUnrated,
     excludeSinglePass: profile.onlyIncludedInPass,
+    avoidSensitivities: profile.sensitivities,
+    includeUncheckedSensitivity: profile.includeUncheckedSensitivity,
   }).length;
 }
