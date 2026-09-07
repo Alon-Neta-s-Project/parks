@@ -75,10 +75,23 @@ function quadState(v: string, key: string, col: string): QuadState {
   return null;
 }
 
-/** A closed set of values, where anything else is reported rather than guessed. */
+/**
+ * A closed set of values, where anything else is reported rather than guessed.
+ *
+ * ⚠️ **"N/A" and "na" are the same statement.** The master writes `N/A`; the
+ * vocabulary spells it `na`. For months the reports read this as an empty
+ * cell and the gap was blamed on the export — 77 rows in v7_10 alone, all of
+ * them "not applicable" recorded as "not checked". That is instance five of
+ * the pattern this project keeps catching, and this time the collector had
+ * done the work and the importer threw it away.
+ *
+ * The normalisation happens only where `na` is actually part of the
+ * vocabulary, so no other enum is quietly coerced.
+ */
 function enumOrNull<T extends string>(v: string, allowed: readonly T[], key: string, col: string): T | null {
-  const t = v.trim();
+  let t = v.trim();
   if (t === "") return null;
+  if ((allowed as readonly string[]).includes("na") && /^n\/?a$/i.test(t)) t = "na";
   if ((allowed as readonly string[]).includes(t)) return t as T;
   note(key, `${col} is not one of ${allowed.join(" | ")}: ${JSON.stringify(v)} — left empty`);
   return null;

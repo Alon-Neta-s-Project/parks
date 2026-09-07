@@ -1,10 +1,10 @@
 {
-  "ranAt": "2026-09-01",
+  "ranAt": "2026-09-07",
   "source": "data/source/product_export.csv",
   "mode": "write",
   "rows": {
-    "read": 232,
-    "accepted": 232,
+    "read": 242,
+    "accepted": 242,
     "rejected": 0
   },
   "columns": {
@@ -23,741 +23,650 @@
   "fieldCoverage": [
     {
       "field": "nameHe",
-      "filled": 232,
+      "filled": 234,
       "notApplicable": 0,
-      "total": 232
+      "total": 242
     },
     {
       "field": "intensity",
-      "filled": 232,
+      "filled": 242,
       "notApplicable": 0,
-      "total": 232
+      "total": 242
     },
     {
       "field": "heightRequirementCm",
-      "filled": 232,
+      "filled": 242,
       "notApplicable": 0,
-      "total": 232
+      "total": 242
     },
     {
       "field": "motionSicknessWarning",
-      "filled": 232,
+      "filled": 242,
       "notApplicable": 0,
-      "total": 232
+      "total": 242
     },
     {
       "field": "wheelchair",
-      "filled": 231,
+      "filled": 241,
       "notApplicable": 0,
-      "total": 232
+      "total": 242
     },
     {
       "field": "getsWet",
-      "filled": 166,
-      "notApplicable": 0,
-      "total": 232
+      "filled": 242,
+      "notApplicable": 77,
+      "total": 242
     },
     {
       "field": "airConditioned",
-      "filled": 164,
-      "notApplicable": 0,
-      "total": 232
+      "filled": 242,
+      "notApplicable": 79,
+      "total": 242
     },
     {
       "field": "environment",
-      "filled": 232,
+      "filled": 242,
       "notApplicable": 0,
-      "total": 232
+      "total": 242
     }
   ],
-  "valueProblems": [],
+  "valueProblems": [
+    "Magic Kingdom|Attraction|Astro Orbiter: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|Astro Orbiter: inversions is not a whole number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|Buzz Lightyear's Space Ranger Spin: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|Buzz Lightyear's Space Ranger Spin: inversions is not a whole number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|Casey Jr. Splash 'N' Soak Station: duration_minutes is not a number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|Casey Jr. Splash 'N' Soak Station: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|Casey Jr. Splash 'N' Soak Station: inversions is not a whole number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|Dumbo the Flying Elephant: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|Dumbo the Flying Elephant: inversions is not a whole number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|Enchanted Tales with Belle: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|Enchanted Tales with Belle: inversions is not a whole number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|Haunted Mansion: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|Haunted Mansion: inversions is not a whole number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|it's a small world: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|it's a small world: inversions is not a whole number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|Jungle Cruise: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|Jungle Cruise: inversions is not a whole number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|Mad Tea Party: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|Mad Tea Party: inversions is not a whole number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|The Magic Carpets of Aladdin: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|The Magic Carpets of Aladdin: inversions is not a whole number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|The Many Adventures of Winnie the Pooh: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|The Many Adventures of Winnie the Pooh: inversions is not a whole number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|Peter Pan's Flight: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|Peter Pan's Flight: inversions is not a whole number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|Pirates of the Caribbean: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|Pirates of the Caribbean: inversions is not a whole number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|Prince Charming Regal Carrousel: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|Prince Charming Regal Carrousel: inversions is not a whole number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|Swiss Family Treehouse: duration_minutes is not a number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|Swiss Family Treehouse: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|Swiss Family Treehouse: inversions is not a whole number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|Tiana's Bayou Adventure: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|Tiana's Bayou Adventure: inversions is not a whole number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|Tomorrowland Speedway: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|Tomorrowland Speedway: inversions is not a whole number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|Tomorrowland Transit Authority PeopleMover: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|Tomorrowland Transit Authority PeopleMover: inversions is not a whole number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|Under the Sea ~ Journey of The Little Mermaid: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|Under the Sea ~ Journey of The Little Mermaid: inversions is not a whole number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|Walt Disney's Carousel of Progress: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Magic Kingdom|Attraction|Walt Disney's Carousel of Progress: inversions is not a whole number: \"N/A\" — left empty",
+    "Magic Kingdom|Entertainment|Casey's Corner Pianist: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Magic Kingdom|Entertainment|Casey's Corner Pianist: inversions is not a whole number: \"N/A\" — left empty",
+    "Magic Kingdom|Entertainment|Country Bear Musical Jamboree: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Magic Kingdom|Entertainment|Country Bear Musical Jamboree: inversions is not a whole number: \"N/A\" — left empty",
+    "Magic Kingdom|Entertainment|The Dapper Dans: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Magic Kingdom|Entertainment|The Dapper Dans: inversions is not a whole number: \"N/A\" — left empty",
+    "Magic Kingdom|Entertainment|Disney Adventure Friends Cavalcade: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Magic Kingdom|Entertainment|Disney Adventure Friends Cavalcade: inversions is not a whole number: \"N/A\" — left empty",
+    "Magic Kingdom|Entertainment|Disney Festival of Fantasy Parade: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Magic Kingdom|Entertainment|Disney Festival of Fantasy Parade: inversions is not a whole number: \"N/A\" — left empty",
+    "Magic Kingdom|Entertainment|Disney Starlight: Dream the Night Away: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Magic Kingdom|Entertainment|Disney Starlight: Dream the Night Away: inversions is not a whole number: \"N/A\" — left empty",
+    "Magic Kingdom|Entertainment|Happily Ever After: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Magic Kingdom|Entertainment|Happily Ever After: inversions is not a whole number: \"N/A\" — left empty",
+    "Magic Kingdom|Entertainment|The Hall of Presidents: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Magic Kingdom|Entertainment|The Hall of Presidents: inversions is not a whole number: \"N/A\" — left empty",
+    "Magic Kingdom|Entertainment|Mickey's PhilharMagic: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Magic Kingdom|Entertainment|Mickey's PhilharMagic: inversions is not a whole number: \"N/A\" — left empty",
+    "Magic Kingdom|Entertainment|Monsters Inc. Laugh Floor: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Magic Kingdom|Entertainment|Monsters Inc. Laugh Floor: inversions is not a whole number: \"N/A\" — left empty",
+    "Magic Kingdom|Entertainment|Walt Disney's Enchanted Tiki Room: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Magic Kingdom|Entertainment|Walt Disney's Enchanted Tiki Room: inversions is not a whole number: \"N/A\" — left empty",
+    "EPCOT|Attraction|Advanced Training Lab: duration_minutes is not a number: \"N/A\" — left empty",
+    "EPCOT|Attraction|Advanced Training Lab: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "EPCOT|Attraction|Advanced Training Lab: inversions is not a whole number: \"N/A\" — left empty",
+    "EPCOT|Attraction|Frozen Ever After: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "EPCOT|Attraction|Frozen Ever After: inversions is not a whole number: \"N/A\" — left empty",
+    "EPCOT|Attraction|Gran Fiesta Tour Starring The Three Caballeros: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "EPCOT|Attraction|Gran Fiesta Tour Starring The Three Caballeros: inversions is not a whole number: \"N/A\" — left empty",
+    "EPCOT|Attraction|Journey Into Imagination With Figment: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "EPCOT|Attraction|Journey Into Imagination With Figment: inversions is not a whole number: \"N/A\" — left empty",
+    "EPCOT|Attraction|Journey of Water, Inspired by Moana: duration_minutes is not a number: \"N/A\" — left empty",
+    "EPCOT|Attraction|Journey of Water, Inspired by Moana: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "EPCOT|Attraction|Journey of Water, Inspired by Moana: inversions is not a whole number: \"N/A\" — left empty",
+    "EPCOT|Attraction|Living with the Land: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "EPCOT|Attraction|Living with the Land: inversions is not a whole number: \"N/A\" — left empty",
+    "EPCOT|Attraction|Mission: SPACE – Green: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "EPCOT|Attraction|Mission: SPACE – Green: inversions is not a whole number: \"N/A\" — left empty",
+    "EPCOT|Attraction|Mission: SPACE – Orange: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "EPCOT|Attraction|Mission: SPACE – Orange: inversions is not a whole number: \"N/A\" — left empty",
+    "EPCOT|Attraction|Remy's Ratatouille Adventure: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "EPCOT|Attraction|Remy's Ratatouille Adventure: inversions is not a whole number: \"N/A\" — left empty",
+    "EPCOT|Attraction|The Seas with Nemo & Friends: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "EPCOT|Attraction|The Seas with Nemo & Friends: inversions is not a whole number: \"N/A\" — left empty",
+    "EPCOT|Attraction|Soarin' Across America: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "EPCOT|Attraction|Soarin' Across America: inversions is not a whole number: \"N/A\" — left empty",
+    "EPCOT|Attraction|Spaceship Earth: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "EPCOT|Attraction|Spaceship Earth: inversions is not a whole number: \"N/A\" — left empty",
+    "EPCOT|Attraction|Bruce's Shark World: duration_minutes is not a number: \"N/A\" — left empty",
+    "EPCOT|Attraction|Bruce's Shark World: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "EPCOT|Attraction|Bruce's Shark World: inversions is not a whole number: \"N/A\" — left empty",
+    "EPCOT|Entertainment|The American Adventure: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "EPCOT|Entertainment|The American Adventure: inversions is not a whole number: \"N/A\" — left empty",
+    "EPCOT|Entertainment|Awesome Planet: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "EPCOT|Entertainment|Awesome Planet: inversions is not a whole number: \"N/A\" — left empty",
+    "EPCOT|Entertainment|Beauty and the Beast Sing-Along: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "EPCOT|Entertainment|Beauty and the Beast Sing-Along: inversions is not a whole number: \"N/A\" — left empty",
+    "EPCOT|Entertainment|Canada Far and Wide in Circle-Vision 360: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "EPCOT|Entertainment|Canada Far and Wide in Circle-Vision 360: inversions is not a whole number: \"N/A\" — left empty",
+    "EPCOT|Entertainment|Disney and Pixar Short Film Festival: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "EPCOT|Entertainment|Disney and Pixar Short Film Festival: inversions is not a whole number: \"N/A\" — left empty",
+    "EPCOT|Entertainment|Luminous: The Symphony of Us: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "EPCOT|Entertainment|Luminous: The Symphony of Us: inversions is not a whole number: \"N/A\" — left empty",
+    "EPCOT|Entertainment|Turtle Talk With Crush: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "EPCOT|Entertainment|Turtle Talk With Crush: inversions is not a whole number: \"N/A\" — left empty",
+    "EPCOT|Entertainment|Voices of Liberty: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "EPCOT|Entertainment|Voices of Liberty: inversions is not a whole number: \"N/A\" — left empty",
+    "EPCOT|Entertainment|Matsuriza: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "EPCOT|Entertainment|Matsuriza: inversions is not a whole number: \"N/A\" — left empty",
+    "EPCOT|Entertainment|Mariachi Cobre: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "EPCOT|Entertainment|Mariachi Cobre: inversions is not a whole number: \"N/A\" — left empty",
+    "EPCOT|Entertainment|Command Performance: opened_year is not a whole number: \"N/A\" — left empty",
+    "EPCOT|Entertainment|Command Performance: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "EPCOT|Entertainment|Command Performance: inversions is not a whole number: \"N/A\" — left empty",
+    "EPCOT|Entertainment|Acrobatico!: opened_year is not a whole number: \"N/A\" — left empty",
+    "EPCOT|Entertainment|Acrobatico!: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "EPCOT|Entertainment|Acrobatico!: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Attraction|Alien Swirling Saucers: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Attraction|Alien Swirling Saucers: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Attraction|Mickey & Minnie's Runaway Railway: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Attraction|Mickey & Minnie's Runaway Railway: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Attraction|Millennium Falcon: Smugglers Run: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Attraction|Millennium Falcon: Smugglers Run: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Attraction|Star Tours – The Adventures Continue: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Attraction|Star Tours – The Adventures Continue: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Attraction|Star Wars: Rise of the Resistance: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Attraction|Star Wars: Rise of the Resistance: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Attraction|Toy Story Mania!: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Attraction|Toy Story Mania!: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Attraction|Vacation Fun: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Attraction|Vacation Fun: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Attraction|Walt Disney Presents: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Attraction|Walt Disney Presents: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Attraction|Walt Disney Presents: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Attraction|The Magic of Disney Animation: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Attraction|The Magic of Disney Animation: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Attraction|The Magic of Disney Animation: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Entertainment|Beauty and the Beast – Live on Stage: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Entertainment|Beauty and the Beast – Live on Stage: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Entertainment|Disney Jr. Mickey Mouse Clubhouse Live!: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Entertainment|Disney Jr. Mickey Mouse Clubhouse Live!: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Entertainment|Disney Villains: Unfairly Ever After: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Entertainment|Disney Villains: Unfairly Ever After: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Entertainment|For the First Time in Forever: A Frozen Sing-Along Celebration: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Entertainment|For the First Time in Forever: A Frozen Sing-Along Celebration: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Entertainment|Indiana Jones Epic Stunt Spectacular!: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Entertainment|Indiana Jones Epic Stunt Spectacular!: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Entertainment|The Little Mermaid – A Musical Adventure: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Entertainment|The Little Mermaid – A Musical Adventure: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Entertainment|Fantasmic!: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Entertainment|Fantasmic!: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Entertainment|Wonderful World of Animation: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Entertainment|Wonderful World of Animation: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Entertainment|Disney Movie Magic: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Entertainment|Disney Movie Magic: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Attraction|Avatar Flight of Passage: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Attraction|Avatar Flight of Passage: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Attraction|Bluey's Wild World at Conservation Station: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Attraction|Bluey's Wild World at Conservation Station: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Attraction|Bluey's Wild World at Conservation Station: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Attraction|Discovery Island Trails: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Attraction|Discovery Island Trails: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Attraction|Discovery Island Trails: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Attraction|Gorilla Falls Exploration Trail: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Attraction|Gorilla Falls Exploration Trail: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Attraction|Gorilla Falls Exploration Trail: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Attraction|Kali River Rapids: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Attraction|Kali River Rapids: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Attraction|Kilimanjaro Safaris: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Attraction|Kilimanjaro Safaris: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Attraction|Maharajah Jungle Trek: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Attraction|Maharajah Jungle Trek: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Attraction|Maharajah Jungle Trek: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Attraction|Na'vi River Journey: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Attraction|Na'vi River Journey: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Attraction|The Oasis Exhibits: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Attraction|The Oasis Exhibits: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Attraction|The Oasis Exhibits: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Attraction|Tree of Life: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Attraction|Tree of Life: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Attraction|Tree of Life: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Attraction|Wilderness Explorers: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Attraction|Wilderness Explorers: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Attraction|Wilderness Explorers: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Attraction|Wildlife Express Train: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Attraction|Wildlife Express Train: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Attraction|Animal Care at Conservation Station: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Attraction|Animal Care at Conservation Station: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Attraction|Animal Care at Conservation Station: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Feathered Friends in Flight!: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Feathered Friends in Flight!: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Festival of the Lion King: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Festival of the Lion King: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Finding Nemo: The Big Blue... and Beyond!: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Finding Nemo: The Big Blue... and Beyond!: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Harambe Village Street Band – Burudika: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Harambe Village Street Band – Burudika: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Jumping Junction: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Jumping Junction: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Jumping Junction: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Tam Tam Drummers of Harambe: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Tam Tam Drummers of Harambe: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Tree of Life Awakenings: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Tree of Life Awakenings: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Viva Gaia Street Band!: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Viva Gaia Street Band!: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Winged Encounters – The Kingdom Takes Flight: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Winged Encounters – The Kingdom Takes Flight: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Zootopia: Better Zoogether!: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Zootopia: Better Zoogether!: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Typhoon Lagoon|Attraction|Bay Slides: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Typhoon Lagoon|Attraction|Bay Slides: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Typhoon Lagoon|Attraction|Bay Slides: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Typhoon Lagoon|Attraction|Castaway Creek: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Typhoon Lagoon|Attraction|Castaway Creek: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Typhoon Lagoon|Attraction|Castaway Creek: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Typhoon Lagoon|Attraction|Crush 'n' Gusher: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Typhoon Lagoon|Attraction|Crush 'n' Gusher: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Typhoon Lagoon|Attraction|Crush 'n' Gusher: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Typhoon Lagoon|Attraction|Gangplank Falls: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Typhoon Lagoon|Attraction|Gangplank Falls: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Typhoon Lagoon|Attraction|Gangplank Falls: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Typhoon Lagoon|Attraction|Humunga Kowabunga: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Typhoon Lagoon|Attraction|Humunga Kowabunga: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Typhoon Lagoon|Attraction|Humunga Kowabunga: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Typhoon Lagoon|Attraction|Keelhaul Falls: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Typhoon Lagoon|Attraction|Keelhaul Falls: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Typhoon Lagoon|Attraction|Keelhaul Falls: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Typhoon Lagoon|Attraction|Ketchakiddee Creek: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Typhoon Lagoon|Attraction|Ketchakiddee Creek: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Typhoon Lagoon|Attraction|Ketchakiddee Creek: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Typhoon Lagoon|Attraction|Mayday Falls: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Typhoon Lagoon|Attraction|Mayday Falls: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Typhoon Lagoon|Attraction|Mayday Falls: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Typhoon Lagoon|Attraction|Miss Adventure Falls: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Typhoon Lagoon|Attraction|Miss Adventure Falls: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Typhoon Lagoon|Attraction|Miss Adventure Falls: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Typhoon Lagoon|Attraction|Storm Slides: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Typhoon Lagoon|Attraction|Storm Slides: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Typhoon Lagoon|Attraction|Storm Slides: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Typhoon Lagoon|Attraction|Typhoon Lagoon Surf Pool: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Typhoon Lagoon|Attraction|Typhoon Lagoon Surf Pool: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Typhoon Lagoon|Attraction|Typhoon Lagoon Surf Pool: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Blizzard Beach|Attraction|Chairlift: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Blizzard Beach|Attraction|Chairlift: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Blizzard Beach|Attraction|Chairlift: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Blizzard Beach|Attraction|Cross Country Creek: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Blizzard Beach|Attraction|Cross Country Creek: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Blizzard Beach|Attraction|Cross Country Creek: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Blizzard Beach|Attraction|Downhill Double Dipper: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Blizzard Beach|Attraction|Downhill Double Dipper: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Blizzard Beach|Attraction|Downhill Double Dipper: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Blizzard Beach|Attraction|Melt-Away Bay: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Blizzard Beach|Attraction|Melt-Away Bay: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Blizzard Beach|Attraction|Melt-Away Bay: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Blizzard Beach|Attraction|Runoff Rapids: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Blizzard Beach|Attraction|Runoff Rapids: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Blizzard Beach|Attraction|Runoff Rapids: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Blizzard Beach|Attraction|Ski Patrol Training Camp: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Blizzard Beach|Attraction|Ski Patrol Training Camp: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Blizzard Beach|Attraction|Ski Patrol Training Camp: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Blizzard Beach|Attraction|Slush Gusher: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Blizzard Beach|Attraction|Slush Gusher: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Blizzard Beach|Attraction|Slush Gusher: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Blizzard Beach|Attraction|Snow Stormers: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Blizzard Beach|Attraction|Snow Stormers: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Blizzard Beach|Attraction|Snow Stormers: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Blizzard Beach|Attraction|Summit Plummet: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Blizzard Beach|Attraction|Summit Plummet: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Blizzard Beach|Attraction|Summit Plummet: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Blizzard Beach|Attraction|Teamboat Springs: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Blizzard Beach|Attraction|Teamboat Springs: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Blizzard Beach|Attraction|Teamboat Springs: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Blizzard Beach|Attraction|Tike's Peak: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Blizzard Beach|Attraction|Tike's Peak: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Blizzard Beach|Attraction|Tike's Peak: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Blizzard Beach|Attraction|Toboggan Racers: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Blizzard Beach|Attraction|Toboggan Racers: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Blizzard Beach|Attraction|Toboggan Racers: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|Illumination's Villain-Con Minion Blast: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|Illumination's Villain-Con Minion Blast: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|Despicable Me Minion Mayhem: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|Despicable Me Minion Mayhem: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|TRANSFORMERS: The Ride-3D: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|TRANSFORMERS: The Ride-3D: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|Race Through New York Starring Jimmy Fallon: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|Race Through New York Starring Jimmy Fallon: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|Fast & Furious – Supercharged: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|Fast & Furious – Supercharged: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|Hogwarts Express – King's Cross Station: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|Hogwarts Express – King's Cross Station: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|MEN IN BLACK Alien Attack: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|MEN IN BLACK Alien Attack: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|The Simpsons Ride: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|The Simpsons Ride: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|Kang & Kodos' Twirl 'n' Hurl: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|Kang & Kodos' Twirl 'n' Hurl: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|E.T. Adventure: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|E.T. Adventure: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|Po's Kung Fu Training Camp: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|Po's Kung Fu Training Camp: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|Po's Kung Fu Training Camp: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|Shrek's Swamp for Little Ogres: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|Shrek's Swamp for Little Ogres: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|Shrek's Swamp for Little Ogres: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|Poppy's Playground: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|Poppy's Playground: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|Poppy's Playground: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|King Harold's Swamp Symphony: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|King Harold's Swamp Symphony: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|King Harold's Swamp Symphony: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|Mama Luna Feline Fiesta: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|Mama Luna Feline Fiesta: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|Mama Luna Feline Fiesta: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|Ollivanders – Diagon Alley: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Studios Florida|Attraction|Ollivanders – Diagon Alley: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Studios Florida|Entertainment|Illumination Theater: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Studios Florida|Entertainment|Illumination Theater: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Studios Florida|Entertainment|Illumination Theater: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Studios Florida|Entertainment|The Blues Brothers Show: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Studios Florida|Entertainment|The Blues Brothers Show: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Studios Florida|Entertainment|¡Vamos! – Báilalo: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Studios Florida|Entertainment|¡Vamos! – Báilalo: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Studios Florida|Entertainment|DreamWorks Imagination Celebration: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Studios Florida|Entertainment|DreamWorks Imagination Celebration: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Studios Florida|Entertainment|Po Live!: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Studios Florida|Entertainment|Po Live!: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Studios Florida|Entertainment|CineSational: A Symphonic Spectacular: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Studios Florida|Entertainment|CineSational: A Symphonic Spectacular: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Studios Florida|Entertainment|Universal Mega Movie Parade: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Studios Florida|Entertainment|Universal Mega Movie Parade: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Studios Florida|Entertainment|The Bourne Stuntacular: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Studios Florida|Entertainment|The Bourne Stuntacular: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Studios Florida|Entertainment|Universal Orlando's Horror Make-Up Show: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Studios Florida|Entertainment|Universal Orlando's Horror Make-Up Show: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Studios Florida|Entertainment|The Tales of Beedle the Bard: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Studios Florida|Entertainment|The Tales of Beedle the Bard: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Studios Florida|Entertainment|Celestina Warbeck and the Banshees: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Studios Florida|Entertainment|Celestina Warbeck and the Banshees: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|Storm Force Accelatron: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|Storm Force Accelatron: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|Doctor Doom's Fearfall: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|The Amazing Adventures of Spider-Man: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|The Amazing Adventures of Spider-Man: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|Me Ship, The Olive: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|Me Ship, The Olive: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|Me Ship, The Olive: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|Popeye & Bluto's Bilge-Rat Barges: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|Popeye & Bluto's Bilge-Rat Barges: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|Dudley Do-Right's Ripsaw Falls: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|Dudley Do-Right's Ripsaw Falls: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|Skull Island: Reign of Kong: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|Skull Island: Reign of Kong: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|Camp Jurassic: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|Camp Jurassic: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|Camp Jurassic: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|Pteranodon Flyers: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|Pteranodon Flyers: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|Jurassic Park River Adventure: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|Jurassic Park River Adventure: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|Raptor Encounter: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|Raptor Encounter: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|Raptor Encounter: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|Jurassic Park Discovery Center: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|Jurassic Park Discovery Center: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|Jurassic Park Discovery Center: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|Harry Potter and the Forbidden Journey: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|Harry Potter and the Forbidden Journey: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|Hogwarts Express – Hogsmeade Station: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|Hogwarts Express – Hogsmeade Station: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|The High in the Sky Seuss Trolley Train Ride!: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|The High in the Sky Seuss Trolley Train Ride!: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|Caro-Seuss-el: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|Caro-Seuss-el: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|One Fish, Two Fish, Red Fish, Blue Fish: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|One Fish, Two Fish, Red Fish, Blue Fish: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|The Cat in the Hat: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|The Cat in the Hat: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|If I Ran The Zoo: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|If I Ran The Zoo: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|If I Ran The Zoo: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|Ollivanders – Hogsmeade: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Attraction|Ollivanders – Hogsmeade: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Entertainment|Meet the Marvel Super Heroes: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Entertainment|Meet the Marvel Super Heroes: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Entertainment|Meet the Marvel Super Heroes: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Entertainment|Classic Comic Strip Characters: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Entertainment|Classic Comic Strip Characters: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Entertainment|Classic Comic Strip Characters: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Entertainment|Frog Choir: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Entertainment|Frog Choir: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Entertainment|Triwizard Spirit Rally: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Entertainment|Triwizard Spirit Rally: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Entertainment|Oh! The Stories You'll Hear!: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Entertainment|Oh! The Stories You'll Hear!: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Entertainment|Dr. Seuss Character Zone: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Entertainment|Dr. Seuss Character Zone: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Islands of Adventure|Entertainment|Dr. Seuss Character Zone: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Epic Universe|Attraction|Constellation Carousel: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Epic Universe|Attraction|Constellation Carousel: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Epic Universe|Attraction|Astronomica: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Epic Universe|Attraction|Astronomica: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Epic Universe|Attraction|Astronomica: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Epic Universe|Attraction|Monsters Unchained: The Frankenstein Experiment: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Epic Universe|Attraction|Monsters Unchained: The Frankenstein Experiment: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Epic Universe|Attraction|Curse of the Werewolf: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Epic Universe|Attraction|Harry Potter and the Battle at the Ministry: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Epic Universe|Attraction|Harry Potter and the Battle at the Ministry: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Epic Universe|Attraction|Mario Kart: Bowser's Challenge: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Epic Universe|Attraction|Mario Kart: Bowser's Challenge: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Epic Universe|Attraction|Mine-Cart Madness: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Epic Universe|Attraction|Yoshi's Adventure: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Epic Universe|Attraction|Yoshi's Adventure: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Epic Universe|Attraction|Dragon Racer's Rally: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Epic Universe|Attraction|Dragon Racer's Rally: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Epic Universe|Attraction|Fyre Drill: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Epic Universe|Attraction|Fyre Drill: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Epic Universe|Attraction|Viking Training Camp: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Epic Universe|Attraction|Viking Training Camp: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Epic Universe|Attraction|Viking Training Camp: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Epic Universe|Attraction|Darkmoor Monster Makeup Experience: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Epic Universe|Attraction|Darkmoor Monster Makeup Experience: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Epic Universe|Attraction|Darkmoor Monster Makeup Experience: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Epic Universe|Entertainment|Le Cirque Arcanus: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Epic Universe|Entertainment|Le Cirque Arcanus: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Epic Universe|Entertainment|The Untrainable Dragon: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Epic Universe|Entertainment|The Untrainable Dragon: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Epic Universe|Entertainment|Dark Universe Character Meet & Greet: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Epic Universe|Entertainment|Dark Universe Character Meet & Greet: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Epic Universe|Entertainment|Dark Universe Character Meet & Greet: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Epic Universe|Entertainment|Meet Mario, Luigi, Princess Peach and Toad: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Epic Universe|Entertainment|Meet Mario, Luigi, Princess Peach and Toad: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Epic Universe|Entertainment|Meet Mario, Luigi, Princess Peach and Toad: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Epic Universe|Entertainment|Meet Donkey Kong: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Epic Universe|Entertainment|Meet Donkey Kong: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Epic Universe|Entertainment|Meet Donkey Kong: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Epic Universe|Entertainment|Meet Toothless and Friends: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Epic Universe|Entertainment|Meet Toothless and Friends: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Epic Universe|Entertainment|Meet Toothless and Friends: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Kala and Tai Nui Serpentine Body Slides: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Kala and Tai Nui Serpentine Body Slides: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Kala and Tai Nui Serpentine Body Slides: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Ohyah of Ohyah and Ohno Drop Slides: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Ohyah of Ohyah and Ohno Drop Slides: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Ohyah of Ohyah and Ohno Drop Slides: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Ohno of Ohyah and Ohno Drop Slides: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Ohno of Ohyah and Ohno Drop Slides: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Ohno of Ohyah and Ohno Drop Slides: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Puka Uli Lagoon: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Puka Uli Lagoon: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Puka Uli Lagoon: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Maku of Maku Puihi Round Raft Rides: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Maku of Maku Puihi Round Raft Rides: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Maku of Maku Puihi Round Raft Rides: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Puihi of Maku Puihi Round Raft Rides: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Puihi of Maku Puihi Round Raft Rides: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Puihi of Maku Puihi Round Raft Rides: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|TeAwa The Fearless River: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|TeAwa The Fearless River: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|TeAwa The Fearless River: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Punga Racers: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Punga Racers: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Punga Racers: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Krakatau Aqua Coaster: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Krakatau Aqua Coaster: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Krakatau Aqua Coaster: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Runamukka Reef: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Runamukka Reef: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Runamukka Reef: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Tot Tiki Reef: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Tot Tiki Reef: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Tot Tiki Reef: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Kopiko Wai Winding River: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Kopiko Wai Winding River: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Kopiko Wai Winding River: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Honu of Honu ika Moana: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Honu of Honu ika Moana: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Honu of Honu ika Moana: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|ika Moana of Honu ika Moana: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|ika Moana of Honu ika Moana: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|ika Moana of Honu ika Moana: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Ko'okiri Body Plunge: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Ko'okiri Body Plunge: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Ko'okiri Body Plunge: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|The Reef: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|The Reef: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|The Reef: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Waturi Beach: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Waturi Beach: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Waturi Beach: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Entertainment|Meet Vol: the Spirit of Krakatau: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Entertainment|Meet Vol: the Spirit of Krakatau: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Entertainment|Meet Vol: the Spirit of Krakatau: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Studios Florida|Entertainment|Marilyn and the Diamond Bellas: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Studios Florida|Entertainment|Marilyn and the Diamond Bellas: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Studios Florida|Entertainment|Animal Actors On Location!: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Studios Florida|Entertainment|Animal Actors On Location!: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Studios Florida|Entertainment|Beat Builders: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Studios Florida|Entertainment|Beat Builders: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Tonga of Taniwha Tubes: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Tonga of Taniwha Tubes: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Tonga of Taniwha Tubes: inversions is not a whole number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Raki of Taniwha Tubes: duration_minutes is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Raki of Taniwha Tubes: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Universal Volcano Bay|Attraction|Raki of Taniwha Tubes: inversions is not a whole number: \"N/A\" — left empty",
+    "EPCOT|Entertainment|JAMMitors: opened_year is not a whole number: \"N/A\" — left empty",
+    "EPCOT|Entertainment|JAMMitors: duration_minutes is not a number: \"N/A\" — left empty",
+    "EPCOT|Entertainment|JAMMitors: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "EPCOT|Entertainment|JAMMitors: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Adventures with Kevin on Discovery Island: opened_year is not a whole number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Adventures with Kevin on Discovery Island: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Adventures with Kevin on Discovery Island: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Adventures with Kevin on Discovery Island: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Meet Favorite Disney Pals at Adventurers Outpost: opened_year is not a whole number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Meet Favorite Disney Pals at Adventurers Outpost: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Meet Favorite Disney Pals at Adventurers Outpost: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Meet Favorite Disney Pals at Adventurers Outpost: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Meet Moana at Character Landing: opened_year is not a whole number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Meet Moana at Character Landing: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Meet Moana at Character Landing: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Meet Moana at Character Landing: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Zoogether Day Gathering Spot: opened_year is not a whole number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Zoogether Day Gathering Spot: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Zoogether Day Gathering Spot: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Animal Kingdom|Entertainment|Zoogether Day Gathering Spot: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Entertainment|Green Army Drum Corps: opened_year is not a whole number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Entertainment|Green Army Drum Corps: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Entertainment|Green Army Drum Corps: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Entertainment|Green Army Drum Corps: inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Entertainment|Hollygroove Swingin': opened_year is not a whole number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Entertainment|Hollygroove Swingin': duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Entertainment|Hollygroove Swingin': max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Entertainment|Hollygroove Swingin': inversions is not a whole number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Entertainment|The Record Setters: opened_year is not a whole number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Entertainment|The Record Setters: duration_minutes is not a number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Entertainment|The Record Setters: max_speed_kmh is not a number: \"N/A\" — left empty",
+    "Disney's Hollywood Studios|Entertainment|The Record Setters: inversions is not a whole number: \"N/A\" — left empty"
+  ],
   "rejected": [],
-  "pagesComplete": 122,
-  "incompleteCount": 110,
+  "pagesComplete": 233,
+  "incompleteCount": 9,
   "incomplete": [
     {
-      "key": "Disney's Animal Kingdom|Entertainment|Festival of the Lion King",
+      "key": "Disney's Animal Kingdom|Entertainment|Adventures with Kevin on Discovery Island",
       "missing": [
-        "getsWet"
+        "nameHe"
       ]
     },
     {
-      "key": "Disney's Animal Kingdom|Entertainment|Harambe Village Street Band – Burudika",
+      "key": "Disney's Animal Kingdom|Entertainment|Meet Favorite Disney Pals at Adventurers Outpost",
       "missing": [
-        "getsWet"
+        "nameHe"
       ]
     },
     {
-      "key": "Disney's Animal Kingdom|Entertainment|Tam Tam Drummers of Harambe",
+      "key": "Disney's Animal Kingdom|Entertainment|Meet Moana at Character Landing",
       "missing": [
-        "getsWet"
+        "nameHe"
       ]
     },
     {
-      "key": "Disney's Animal Kingdom|Entertainment|Feathered Friends in Flight!",
+      "key": "Disney's Animal Kingdom|Entertainment|Zoogether Day Gathering Spot",
       "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "Disney's Animal Kingdom|Entertainment|Jumping Junction",
-      "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "Disney's Animal Kingdom|Entertainment|Tree of Life Awakenings",
-      "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "Disney's Animal Kingdom|Entertainment|Viva Gaia Street Band!",
-      "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "Disney's Animal Kingdom|Entertainment|Winged Encounters – The Kingdom Takes Flight",
-      "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "Disney's Animal Kingdom|Entertainment|Finding Nemo: The Big Blue... and Beyond!",
-      "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "Disney's Animal Kingdom|Entertainment|Zootopia: Better Zoogether!",
-      "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "Disney's Blizzard Beach|Attraction|Melt-Away Bay",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Disney's Blizzard Beach|Attraction|Chairlift",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Disney's Blizzard Beach|Attraction|Downhill Double Dipper",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Disney's Blizzard Beach|Attraction|Runoff Rapids",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Disney's Blizzard Beach|Attraction|Slush Gusher",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Disney's Blizzard Beach|Attraction|Snow Stormers",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Disney's Blizzard Beach|Attraction|Summit Plummet",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Disney's Blizzard Beach|Attraction|Teamboat Springs",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Disney's Blizzard Beach|Attraction|Toboggan Racers",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Disney's Blizzard Beach|Attraction|Cross Country Creek",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Disney's Blizzard Beach|Attraction|Ski Patrol Training Camp",
-      "missing": [
-        "airConditioned"
+        "nameHe"
       ]
     },
     {
       "key": "Disney's Blizzard Beach|Attraction|Tike's Peak",
       "missing": [
-        "wheelchair",
-        "airConditioned"
+        "wheelchair"
       ]
     },
     {
-      "key": "Disney's Hollywood Studios|Entertainment|Disney Jr. Mickey Mouse Clubhouse Live!",
+      "key": "Disney's Hollywood Studios|Entertainment|Green Army Drum Corps",
       "missing": [
-        "getsWet"
+        "nameHe"
       ]
     },
     {
-      "key": "Disney's Hollywood Studios|Entertainment|The Little Mermaid – A Musical Adventure",
+      "key": "Disney's Hollywood Studios|Entertainment|Hollygroove Swingin'",
       "missing": [
-        "getsWet"
+        "nameHe"
       ]
     },
     {
-      "key": "Disney's Hollywood Studios|Entertainment|Disney Movie Magic",
+      "key": "Disney's Hollywood Studios|Entertainment|The Record Setters",
       "missing": [
-        "getsWet"
+        "nameHe"
       ]
     },
     {
-      "key": "Disney's Hollywood Studios|Entertainment|Wonderful World of Animation",
+      "key": "EPCOT|Entertainment|JAMMitors",
       "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "Disney's Hollywood Studios|Entertainment|For the First Time in Forever: A Frozen Sing-Along Celebration",
-      "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "Disney's Hollywood Studios|Entertainment|Indiana Jones Epic Stunt Spectacular!",
-      "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "Disney's Hollywood Studios|Entertainment|Beauty and the Beast – Live on Stage",
-      "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "Disney's Hollywood Studios|Entertainment|Disney Villains: Unfairly Ever After",
-      "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "Disney's Hollywood Studios|Entertainment|Fantasmic!",
-      "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "Disney's Typhoon Lagoon|Attraction|Crush 'n' Gusher",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Disney's Typhoon Lagoon|Attraction|Ketchakiddee Creek",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Disney's Typhoon Lagoon|Attraction|Gangplank Falls",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Disney's Typhoon Lagoon|Attraction|Humunga Kowabunga",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Disney's Typhoon Lagoon|Attraction|Keelhaul Falls",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Disney's Typhoon Lagoon|Attraction|Mayday Falls",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Disney's Typhoon Lagoon|Attraction|Miss Adventure Falls",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Disney's Typhoon Lagoon|Attraction|Storm Slides",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Disney's Typhoon Lagoon|Attraction|Castaway Creek",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Disney's Typhoon Lagoon|Attraction|Typhoon Lagoon Surf Pool",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Disney's Typhoon Lagoon|Attraction|Bay Slides",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "EPCOT|Entertainment|Disney and Pixar Short Film Festival",
-      "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "EPCOT|Entertainment|Awesome Planet",
-      "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "EPCOT|Entertainment|Turtle Talk With Crush",
-      "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "EPCOT|Entertainment|The American Adventure",
-      "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "EPCOT|Entertainment|Voices of Liberty",
-      "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "EPCOT|Entertainment|Canada Far and Wide in Circle-Vision 360",
-      "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "EPCOT|Entertainment|Beauty and the Beast Sing-Along",
-      "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "EPCOT|Entertainment|Acrobatico!",
-      "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "EPCOT|Entertainment|Matsuriza",
-      "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "EPCOT|Entertainment|Mariachi Cobre",
-      "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "EPCOT|Entertainment|Command Performance",
-      "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "EPCOT|Entertainment|Luminous: The Symphony of Us",
-      "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "Magic Kingdom|Attraction|Swiss Family Treehouse",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Magic Kingdom|Entertainment|Walt Disney's Enchanted Tiki Room",
-      "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "Magic Kingdom|Entertainment|Happily Ever After",
-      "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "Magic Kingdom|Entertainment|Mickey's PhilharMagic",
-      "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "Magic Kingdom|Attraction|Casey Jr. Splash 'N' Soak Station",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Magic Kingdom|Entertainment|Country Bear Musical Jamboree",
-      "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "Magic Kingdom|Entertainment|The Hall of Presidents",
-      "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "Magic Kingdom|Entertainment|Casey's Corner Pianist",
-      "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "Magic Kingdom|Entertainment|The Dapper Dans",
-      "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "Magic Kingdom|Entertainment|Disney Adventure Friends Cavalcade",
-      "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "Magic Kingdom|Entertainment|Disney Festival of Fantasy Parade",
-      "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "Magic Kingdom|Entertainment|Disney Starlight: Dream the Night Away",
-      "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "Magic Kingdom|Entertainment|Monsters Inc. Laugh Floor",
-      "missing": [
-        "getsWet"
-      ]
-    },
-    {
-      "key": "Universal Epic Universe|Entertainment|Dark Universe Character Meet & Greet",
-      "missing": [
-        "getsWet",
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Epic Universe|Entertainment|Meet Toothless and Friends",
-      "missing": [
-        "getsWet",
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Epic Universe|Entertainment|The Untrainable Dragon",
-      "missing": [
-        "getsWet",
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Epic Universe|Entertainment|Meet Mario, Luigi, Princess Peach and Toad",
-      "missing": [
-        "getsWet",
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Epic Universe|Entertainment|Meet Donkey Kong",
-      "missing": [
-        "getsWet",
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Epic Universe|Entertainment|Le Cirque Arcanus",
-      "missing": [
-        "getsWet",
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Islands of Adventure|Entertainment|Frog Choir",
-      "missing": [
-        "getsWet",
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Islands of Adventure|Entertainment|Triwizard Spirit Rally",
-      "missing": [
-        "getsWet",
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Islands of Adventure|Entertainment|Meet the Marvel Super Heroes",
-      "missing": [
-        "getsWet",
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Islands of Adventure|Entertainment|Dr. Seuss Character Zone",
-      "missing": [
-        "getsWet",
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Islands of Adventure|Entertainment|Oh! The Stories You'll Hear!",
-      "missing": [
-        "getsWet",
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Islands of Adventure|Entertainment|Classic Comic Strip Characters",
-      "missing": [
-        "getsWet",
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Studios Florida|Entertainment|Celestina Warbeck and the Banshees",
-      "missing": [
-        "getsWet",
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Studios Florida|Entertainment|The Tales of Beedle the Bard",
-      "missing": [
-        "getsWet",
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Studios Florida|Entertainment|DreamWorks Imagination Celebration",
-      "missing": [
-        "getsWet",
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Studios Florida|Entertainment|Po Live!",
-      "missing": [
-        "getsWet",
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Studios Florida|Entertainment|The Bourne Stuntacular",
-      "missing": [
-        "getsWet",
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Studios Florida|Entertainment|Universal Orlando's Horror Make-Up Show",
-      "missing": [
-        "getsWet",
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Studios Florida|Entertainment|Illumination Theater",
-      "missing": [
-        "getsWet",
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Studios Florida|Entertainment|¡Vamos! – Báilalo",
-      "missing": [
-        "getsWet",
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Studios Florida|Entertainment|The Blues Brothers Show",
-      "missing": [
-        "getsWet",
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Studios Florida|Entertainment|Universal Mega Movie Parade",
-      "missing": [
-        "getsWet",
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Studios Florida|Entertainment|CineSational: A Symphonic Spectacular",
-      "missing": [
-        "getsWet",
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Volcano Bay|Attraction|Ko'okiri Body Plunge",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Volcano Bay|Attraction|Krakatau Aqua Coaster",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Volcano Bay|Entertainment|Meet Vol: the Spirit of Krakatau",
-      "missing": [
-        "getsWet",
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Volcano Bay|Attraction|Hammerhead Beach",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Volcano Bay|Attraction|Kala and Tai Nui Serpentine Body Slides",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Volcano Bay|Attraction|Maku of Maku Puihi Round Raft Rides",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Volcano Bay|Attraction|Ohno of Ohyah and Ohno Drop Slides",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Volcano Bay|Attraction|Ohyah of Ohyah and Ohno Drop Slides",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Volcano Bay|Attraction|Puihi of Maku Puihi Round Raft Rides",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Volcano Bay|Attraction|Puka Uli Lagoon",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Volcano Bay|Attraction|Punga Racers",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Volcano Bay|Attraction|Taniwha Tubes",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Volcano Bay|Attraction|TeAwa The Fearless River",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Volcano Bay|Attraction|Kopiko Wai Winding River",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Volcano Bay|Attraction|Runamukka Reef",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Volcano Bay|Attraction|Tot Tiki Reef",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Volcano Bay|Attraction|Honu of Honu ika Moana",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Volcano Bay|Attraction|ika Moana of Honu ika Moana",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Volcano Bay|Attraction|The Reef",
-      "missing": [
-        "airConditioned"
-      ]
-    },
-    {
-      "key": "Universal Volcano Bay|Attraction|Waturi Beach",
-      "missing": [
-        "airConditioned"
+        "nameHe"
       ]
     }
   ]

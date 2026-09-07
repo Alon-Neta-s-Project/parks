@@ -14,7 +14,13 @@ describe("dataset", () => {
   });
 
   it("holds only attractions and entertainment", () => {
-    expect(experiences).toHaveLength(232);
+    // ⚠️ מול המניפסט ולא מול מספר קשיח. מספר קשיח נשבר בכל מנת תוכן
+    // ומתוקן בלי מחשבה, וכך הוא מפסיק להיות שמירה. מול המניפסט הוא
+    // שואל את השאלה האמיתית: האם הדאטהסט מכיל את מה שהייצוא הביא.
+    const manifest = JSON.parse(
+      readFileSync(join(process.cwd(), "data/source/product_export_manifest.json"), "utf8"),
+    );
+    expect(experiences).toHaveLength(manifest.rows);
     expect(new Set(experiences.map((e) => e.kind))).toEqual(
       new Set(["attraction", "entertainment"]),
     );
@@ -63,9 +69,10 @@ describe("dataset", () => {
       for (const f of quad) {
         expect([null, "true", "false", "na"]).toContain(e[f]);
       }
-      // gets_wet is a three-value enum, not four-state, and null means unchecked
-      // rather than "does not get you wet".
-      expect([null, "none", "may_get_wet", "may_get_soaked"]).toContain(e.getsWet);
+      // ⚠️ ארבעה ערכים ולא שלושה. "na" הוא מופע — השאלה אינה חלה, וזו
+      // תשובה. null הוא "לא נבדק". ההערה כאן אמרה "שלושה" עד ש-v7_10
+      // הביא N/A בפועל.
+      expect([null, "none", "may_get_wet", "may_get_soaked", "na"]).toContain(e.getsWet);
     }
   });
 
@@ -224,6 +231,9 @@ describe("what must never be inferred", () => {
     for (const e of experiences) {
       const raw = fromCsv.get(e.key);
       if (raw === undefined || raw === "") continue;
+      // ⚠️ "N/A" אינו מספר, והייבוא משאיר null. זו אינה המרה — זו
+      // היעדר ערך, והשוואה מולו הייתה מצפה ל-NaN.
+      if (Number.isNaN(Number(raw))) continue;
       compared += 1;
       expect(e.durationMinutes).toBe(Number(raw));
     }
@@ -242,13 +252,19 @@ describe("gets_wet holds four states, not three", () => {
     }
   });
 
-  it("has not yet received na from the export, so shows are still unchecked", () => {
-    // Migration 014 is ready ahead of the data. Until an export carries "na",
-    // the entertainment rows stay null, and the UI must keep saying "not
-    // checked" rather than inventing an answer.
+  it("מקבל na מהייצוא — מופע אינו 'לא נבדק'", () => {
+    // 🔴 הבדיקה הזו תיעדה פער, וכעת היא אוכפת את סגירתו.
+    //
+    // היא אמרה "עדיין לא התקבל na מהייצוא", ובמשך חודשים זה נכון היה —
+    // אבל הסיבה לא הייתה מה שחשבנו. **המאסטר כתב N/A כל הזמן הזה,
+    // והייבוא שלנו זרק אותו** כי אוצר המילים מאיית "na". 77 שורות
+    // נקראו "לא נבדק" בזמן שמישהי טרחה לענות עליהן.
+    //
+    // ⚠️ ולכן היא מנוסחת עכשיו כאכיפה ולא כתיעוד: אם נחזור לזרוק N/A,
+    // היא נופלת.
     const shows = experiences.filter((e) => e.kind === "entertainment");
     expect(shows.length).toBeGreaterThan(0);
-    expect(shows.every((e) => e.getsWet === null)).toBe(true);
-    expect(experiences.some((e) => e.getsWet === "na")).toBe(false);
+    expect(experiences.some((e) => e.getsWet === "na")).toBe(true);
+    expect(shows.every((e) => e.getsWet !== null)).toBe(true);
   });
 });

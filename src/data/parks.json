@@ -19,13 +19,36 @@
   ]
  },
  {
+  "name": "Disney's Animal Kingdom",
+  "slug": "disney-s-animal-kingdom",
+  "resort": "Disney World",
+  "kind": "theme",
+  "count": 28,
+  "rated": 28,
+  "lands": [
+   "Africa",
+   "Africa / Rafiki's Planet Watch",
+   "Asia",
+   "Discovery Island",
+   "N/A",
+   "Oasis",
+   "Pandora – The World of Avatar",
+   "Park-wide",
+   "Rafiki's Planet Watch",
+   "Rafiki's Planet Watch / Conservation Station",
+   "Theater in the Wild",
+   "Tree of Life Theater"
+  ]
+ },
+ {
   "name": "EPCOT",
   "slug": "epcot",
   "resort": "Disney World",
   "kind": "theme",
-  "count": 27,
-  "rated": 27,
+  "count": 28,
+  "rated": 28,
   "lands": [
+   "N/A",
    "World Celebration",
    "World Discovery",
    "World Nature",
@@ -33,7 +56,6 @@
    "World Showcase – American Adventure",
    "World Showcase – Canada",
    "World Showcase – France",
-   "World Showcase – Italy",
    "World Showcase – Japan",
    "World Showcase – Mexico",
    "World Showcase – Norway",
@@ -41,37 +63,18 @@
   ]
  },
  {
-  "name": "Disney's Animal Kingdom",
-  "slug": "disney-s-animal-kingdom",
+  "name": "Disney's Hollywood Studios",
+  "slug": "disney-s-hollywood-studios",
   "resort": "Disney World",
   "kind": "theme",
   "count": 24,
   "rated": 24,
   "lands": [
-   "Africa",
-   "Africa / Rafiki's Planet Watch",
-   "Asia",
-   "Discovery Island",
-   "Oasis",
-   "Pandora – The World of Avatar",
-   "Park-wide",
-   "Rafiki's Planet Watch",
-   "Theater in the Wild",
-   "Tree of Life Theater"
-  ]
- },
- {
-  "name": "Disney's Hollywood Studios",
-  "slug": "disney-s-hollywood-studios",
-  "resort": "Disney World",
-  "kind": "theme",
-  "count": 21,
-  "rated": 21,
-  "lands": [
    "Animation Courtyard",
    "Chinese Theatre",
    "Echo Lake",
    "Hollywood Boulevard",
+   "N/A",
    "Star Wars: Galaxy's Edge",
    "Sunset Boulevard",
    "Toy Story Land"
@@ -109,30 +112,12 @@
   ]
  },
  {
-  "name": "Universal Islands of Adventure",
-  "slug": "universal-islands-of-adventure",
-  "resort": "Universal Orlando",
-  "kind": "theme",
-  "count": 31,
-  "rated": 31,
-  "lands": [
-   "Hogsmeade",
-   "Jurassic Park",
-   "Marvel Super Hero Island",
-   "Seuss Landing",
-   "Skull Island",
-   "The Lost Continent",
-   "The Wizarding World of Harry Potter – Hogsmeade",
-   "Toon Lagoon"
-  ]
- },
- {
   "name": "Universal Studios Florida",
   "slug": "universal-studios-florida",
   "resort": "Universal Orlando",
   "kind": "theme",
-  "count": 30,
-  "rated": 30,
+  "count": 33,
+  "rated": 33,
   "lands": [
    "Diagon Alley",
    "DreamWorks Land",
@@ -146,6 +131,23 @@
    "The Wizarding World of Harry Potter – Diagon Alley",
    "Universal Studios Lagoon",
    "World Expo"
+  ]
+ },
+ {
+  "name": "Universal Islands of Adventure",
+  "slug": "universal-islands-of-adventure",
+  "resort": "Universal Orlando",
+  "kind": "theme",
+  "count": 30,
+  "rated": 30,
+  "lands": [
+   "Hogsmeade",
+   "Jurassic Park",
+   "Marvel Super Hero Island",
+   "Seuss Landing",
+   "Skull Island",
+   "The Wizarding World of Harry Potter – Hogsmeade",
+   "Toon Lagoon"
   ]
  },
  {

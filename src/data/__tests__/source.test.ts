@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import rows from "./db-rows.fixture.json";
 
@@ -26,6 +28,13 @@ beforeEach(() => {
  * אבל ברגע שהוא מה שעל המסך, זה חייב להיראות. תוכן שקפא בזמן הבנייה
  * שמוצג כאילו הוא עדכני הוא הכשל שהמוצר בנוי נגדו.
  */
+/** מספר השורות שהייצוא הנוכחי הביא, לפי המניפסט. */
+function bundledRows(): number {
+  return JSON.parse(
+    readFileSync(join(process.cwd(), "data/source/product_export_manifest.json"), "utf8"),
+  ).rows;
+}
+
 describe("מאיפה מגיע התוכן", () => {
   it("מסד זמין — נקרא ממנו, ונאמר שכך", async () => {
     const s = await loadContent();
@@ -40,7 +49,8 @@ describe("מאיפה מגיע התוכן", () => {
     expect(s.status).toBe("bundled");
     if (s.status !== "bundled") throw new Error("unreachable");
     expect(s.reason).toEqual({ kind: "not_configured" });
-    expect(s.experiences.length).toBe(232);
+    // ⚠️ מול המניפסט ולא מול מספר קשיח — ראה ההערה ב-dataset.test.ts.
+    expect(s.experiences.length).toBe(bundledRows());
   });
 
   it("המסד לא נענה — נופל למובנה עם ההסבר, ולא מתרסק", async () => {
