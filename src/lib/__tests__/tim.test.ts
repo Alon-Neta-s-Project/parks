@@ -49,6 +49,33 @@ describe("טים מהדפדפן", () => {
 
   it("שגיאת שרת מוחזרת עם הקוד שלה", async () => {
     reply({ error: "upstream_error" }, 502);
-    expect(await askTim("א")).toMatchObject({ reason: "upstream", detail: "upstream_error" });
+    expect(await askTim("א")).toMatchObject({ reason: "upstream", detail: "[upstream_error]" });
+  });
+
+  // ⚠️ הבדיקה שנולדה מהעלייה הראשונה לאוויר. הפונקציה מחזירה hint בעברית
+  // שאומר מה לתקן, וקודם נקרא ממנה רק שם השגיאה — כלומר המסך הציג
+  // "upstream_error" והוראת התיקון נזרקה. הסדר כאן הוא הנבדק: ההוראה
+  // ראשונה, שם השגיאה אחרונה.
+  it("ההוראה מה לתקן מגיעה לפני שם השגיאה, ולא במקומה", async () => {
+    reply({
+      error: "upstream_error",
+      status: 404,
+      upstream_detail: "models/gemini-9 is not found",
+      hint: "להגדיר סוד GEMINI_MODEL עם שם מהרשימה",
+    }, 502);
+    const r = await askTim("א");
+    expect(r).toMatchObject({ reason: "upstream" });
+    expect(r.status === "failed" && r.detail).toBe(
+      "להגדיר סוד GEMINI_MODEL עם שם מהרשימה · models/gemini-9 is not found · [upstream_error 404]",
+    );
+  });
+
+  // ⚠️ גוף שאינו JSON, או תשובה בלי שום שדה מוכר. בלי זה המסך היה מציג
+  // מחרוזת ריקה — כלומר שורה שנייה שאינה אומרת דבר, וזו הנפילה השקטה
+  // שהשורה הזו נועדה למנוע.
+  it("תשובה בלי שדות מוכרים נופלת לקוד ה-HTTP ולא לריק", async () => {
+    reply({}, 500);
+    const r = await askTim("א");
+    expect(r.status === "failed" && r.detail).toBe("HTTP 500");
   });
 });
