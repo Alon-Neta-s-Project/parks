@@ -423,6 +423,14 @@ function corsFor(req: Request, env: Record<string, string | undefined>) {
   const h: Record<string, string> = {
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
+    // ⚠️ בלי השורה הזו הדפדפן שולח בקשת בדיקה מקדימה **לפני כל שאלה**,
+    // ומחכה לתשובה לפני שהוא שולח את השאלה עצמה. זה נראה בלוג: לכל POST
+    // יש OPTIONS צמוד. יממה של זיכרון מוחקת את הסבב הזה מכל שאלה שנייה
+    // ואילך.
+    //
+    // ⚠️ ומה שזה **אינו**: הרשאה. הדפדפן זוכר את התשובה, לא מדלג על
+    // הבדיקה — שינוי במדיניות ייכנס לתוקף אצל מבקרת קיימת תוך יממה.
+    "Access-Control-Max-Age": "86400",
   };
   if (value) h["Access-Control-Allow-Origin"] = value;
   return h;
@@ -582,9 +590,10 @@ export async function handle(req: Request, env: Record<string, string | undefine
   // ⚠️ וזה גם מה שמונע מטים לענות מהאימון שלו. הוא "יודע" גבהים מהרשת,
   // והם עשויים להיות ישנים בשנתיים. כאן הוא מקבל את המספר **שלנו**, עם
   // תאריך בדיקה.
-  let rides: ExperienceRow[] = [];
   const asked = extractRideName(question);
-  if (asked) {
+
+  const ridesTask = async (): Promise<ExperienceRow[]> => {
+    if (!asked) return [];
     try {
       const res = await fetch(`${url}/rest/v1/rpc/find_experiences`, {
         method: "POST",
@@ -600,50 +609,68 @@ export async function handle(req: Request, env: Record<string, string | undefine
         }),
       });
       const rows = res.ok ? await res.json() : null;
-      rides = Array.isArray(rows) ? rows : [];
+      return Array.isArray(rows) ? rows : [];
     } catch { /* נפילה רכה, כמו השליפה */ }
-  }
+    return [];
+  };
 
   // ── השליפה ───────────────────────────────────────────────────────────
-  let chunks: KnowledgeChunk[] = [];
-  let retrieval: "ok" | "empty" | "failed" = "empty";
-  try {
-    // ⚠️ השאלה מקודדת כ-RETRIEVAL_QUERY ולא כ-RETRIEVAL_DOCUMENT. שני
-    // התפקידים אינם סימטריים, וקידוד בתפקיד הלא נכון **עובד** ומחזיר
-    // תוצאות גרועות יותר בלי שום שגיאה — אותה מלכודת כמו בצד הטעינה.
-    const emb = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-goog-api-key": key! },
-        body: JSON.stringify({
-          model: "models/gemini-embedding-001",
-          content: { parts: [{ text: question }] },
-          taskType: "RETRIEVAL_QUERY",
-          outputDimensionality: 1536,
-        }),
-      },
-    );
-    const vector = emb.ok ? (await emb.json())?.embedding?.values : null;
-    if (Array.isArray(vector) && vector.length === 1536) {
-      const res = await fetch(`${url}/rest/v1/rpc/match_knowledge`, {
-        method: "POST",
-        headers: {
-          apikey: dbKey,
-          Authorization: `Bearer ${dbKey}`,
-          "Content-Type": "application/json",
+  const retrievalTask = async (): Promise<{
+    chunks: KnowledgeChunk[];
+    retrieval: "ok" | "empty" | "failed";
+  }> => {
+    let chunks: KnowledgeChunk[] = [];
+    let retrieval: "ok" | "empty" | "failed" = "empty";
+    try {
+      // ⚠️ השאלה מקודדת כ-RETRIEVAL_QUERY ולא כ-RETRIEVAL_DOCUMENT. שני
+      // התפקידים אינם סימטריים, וקידוד בתפקיד הלא נכון **עובד** ומחזיר
+      // תוצאות גרועות יותר בלי שום שגיאה — אותה מלכודת כמו בצד הטעינה.
+      const emb = await fetch(
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-goog-api-key": key! },
+          body: JSON.stringify({
+            model: "models/gemini-embedding-001",
+            content: { parts: [{ text: question }] },
+            taskType: "RETRIEVAL_QUERY",
+            outputDimensionality: 1536,
+          }),
         },
-        body: JSON.stringify({ p_embedding: JSON.stringify(vector), p_limit: 5 }),
-      });
-      const rows = res.ok ? await res.json() : null;
-      chunks = Array.isArray(rows) ? rows : [];
-      retrieval = res.ok ? (chunks.length > 0 ? "ok" : "empty") : "failed";
-    } else {
+      );
+      const vector = emb.ok ? (await emb.json())?.embedding?.values : null;
+      if (Array.isArray(vector) && vector.length === 1536) {
+        const res = await fetch(`${url}/rest/v1/rpc/match_knowledge`, {
+          method: "POST",
+          headers: {
+            apikey: dbKey,
+            Authorization: `Bearer ${dbKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ p_embedding: JSON.stringify(vector), p_limit: 5 }),
+        });
+        const rows = res.ok ? await res.json() : null;
+        chunks = Array.isArray(rows) ? rows : [];
+        retrieval = res.ok ? (chunks.length > 0 ? "ok" : "empty") : "failed";
+      } else {
+        retrieval = "failed";
+      }
+    } catch {
       retrieval = "failed";
     }
-  } catch {
-    retrieval = "failed";
-  }
+    return { chunks, retrieval };
+  };
+
+  /**
+   * ⚠️ **במקביל, ולא בטור.** שורת המתקן נשלפת מהמסד, והשאלה נשלחת לגוגל
+   * להפוך לווקטור — שתי פעולות שאינן תלויות זו בזו, ושחיכו זו לזו רק
+   * מפני שנכתבו זו אחרי זו. נמדד בלוג: 3–4 שניות לשאלה.
+   *
+   * ⚠️ ו-`Promise.all` ולא `allSettled`, מפני ששתיהן כבר נופלות רכות
+   * בפנים ואינן זורקות. הבחירה הזו נכונה רק כל עוד זה נכון — טיפול
+   * שגיאות שיוסר מאחת מהן ישבור את השורה הזו בשקט.
+   */
+  const [rides, { chunks, retrieval }] = await Promise.all([ridesTask(), retrievalTask()]);
 
   // ── הקריאה למודל ─────────────────────────────────────────────────────
   const model = env.GEMINI_MODEL?.trim() || DEFAULT_MODEL;
