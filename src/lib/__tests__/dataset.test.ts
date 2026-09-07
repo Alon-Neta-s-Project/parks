@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { experiences, parks } from "../../data";
@@ -95,9 +95,29 @@ describe("the master never reaches the repo", () => {
       "product_export_manifest.json",
       "subtype_map.json",
       "subtype_vocab_review.csv",
+      // ⚠️ שמונה שמות עבריים מאושרים, שהמאסטר עדיין אינו נושא. הוא נכנס
+      // לכאן ולא לתיקייה אחרת כי הצינור קורא אותו בזמן הייבוא — אבל
+      // ההיתר מותנה, והמבחן הבא הוא מה שמתנה אותו.
+      "name_he_patch.csv",
     ]);
     for (const file of readdirSync(join(process.cwd(), "data/source"))) {
       expect(allowed).toContain(file);
+    }
+  });
+
+  // ⚠️ הטלאי הוא הדלת היחידה שנפתחה ב-data/source, ולכן זו הבדיקה
+  // ששומרת עליה. שתי עמודות בלבד: מפתח ושם עברי. עמודה שלישית — עוצמה,
+  // מגבלת גובה, מקור — הופכת את הטלאי לדלת אחורית למאסטר, וזה בדיוק מה
+  // שהכלל בא למנוע.
+  it("keeps the Hebrew-name patch to two columns and nothing more", () => {
+    const path = join(process.cwd(), "data/source/name_he_patch.csv");
+    if (!existsSync(path)) return; // נמחק כשהמאסטר משלים אותו — וזה תקין
+    const [header = "", ...lines] = readFileSync(path, "utf8").trim().split(/\r?\n/);
+    expect(header.trim()).toBe("Key,name_he");
+    for (const line of lines) {
+      // מפתח אחד, פסיק אחד, שם. פסיק נוסף הוא עמודה נוספת.
+      expect(line.split(",").length).toBe(2);
+      expect(line).not.toMatch(/https?:\/\//);
     }
   });
 

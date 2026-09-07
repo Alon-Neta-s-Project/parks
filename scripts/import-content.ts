@@ -16,7 +16,7 @@
  *   npx tsx scripts/import-content.ts --write    # actually write the dataset
  */
 import { createHash } from "node:crypto";
-import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -196,6 +196,59 @@ if (columnsHash !== manifest.columns_hash) {
   console.error(`  manifest expects ${manifest.columns_hash}, this file is ${columnsHash}`);
   console.error(`  The export and the manifest disagree. Do not import.`);
   process.exit(1);
+}
+
+/**
+ * Hebrew names approved out of band, before the master carries them.
+ *
+ * The eight character-meet rows arrived in the master with no Hebrew name, and
+ * without one Tim's search cannot find them at all: it looks at the English
+ * name, the Hebrew name and the aliases, so "מפגש עם מואנה" returns nothing and
+ * Tim says "I do not have that" — which is false, the row is right there.
+ * Paula approved the names (8-names-he-2026-09-07.txt) ahead of the next export.
+ *
+ * ⚠️ This is a patch and not a second source of truth, and the difference is
+ * that it announces itself. Every row here is reported on every import, and the
+ * moment the master carries the same value the row is called out as redundant
+ * so it can be deleted. A patch that goes quiet is how two sources of truth
+ * start.
+ *
+ * ⚠️ It only ever fills a blank. A patch that overwrote a value the master
+ * holds would make the export a suggestion, and the next person to correct a
+ * name in the master would watch the correction disappear with no error.
+ */
+const patchPath = join(ROOT, "data/source/name_he_patch.csv");
+const namePatch: Record<string, string> = {};
+if (existsSync(patchPath)) {
+  for (const row of parseCsv(readFileSync(patchPath, "utf8"))) {
+    const key = (row["Key"] ?? "").trim();
+    const value = (row["name_he"] ?? "").trim();
+    if (key && value) namePatch[key] = value;
+  }
+}
+
+const patched: string[] = [];
+const patchRedundant: string[] = [];
+const patchOrphaned = new Set(Object.keys(namePatch));
+for (const row of rows) {
+  const key = (row["Key"] ?? "").trim();
+  const approved = namePatch[key];
+  if (!approved) continue;
+  patchOrphaned.delete(key);
+  const current = (row["name_he"] ?? "").trim();
+  if (current === approved) patchRedundant.push(key);
+  else if (current !== "") {
+    // The master disagrees with the patch. That is a decision, not a merge.
+    console.error(`✗ ABORT — the master already holds a different Hebrew name.`);
+    console.error(`  ${key}`);
+    console.error(`  master: ${current}`);
+    console.error(`  patch:  ${approved}`);
+    console.error(`  Delete the row from data/source/name_he_patch.csv, or fix the master.`);
+    process.exit(1);
+  } else {
+    row["name_he"] = approved;
+    patched.push(key);
+  }
 }
 
 /**
@@ -400,6 +453,24 @@ writeFileSync(join(ROOT, "reports/import-gap-report.json"), JSON.stringify(repor
 // ── console summary ─────────────────────────────────────────────────────────
 console.log(`\n${WRITE ? "IMPORT" : "DRY RUN"} — ${mapping.source}`);
 console.log(`  columns hash  ${columnsHash} ✓ matches manifest`);
+
+// ⚠️ The patch reports itself on every run, including when it has nothing to
+// do. A silent patch is indistinguishable from no patch, and that is exactly
+// how a second source of truth stops being noticed.
+if (patched.length) {
+  console.log(`\n  ${patched.length} שמות עבריים הושלמו מ-name_he_patch.csv:`);
+  for (const k of patched) console.log(`    ${k.split("|").pop()}`);
+  console.log(`  ⚠️ אלה אינם במאסטר. הייצוא הבא ידרוס אותם אם המאסטר לא יכיל אותם.`);
+}
+if (patchRedundant.length) {
+  console.log(`\n  ✅ ${patchRedundant.length} שורות בטלאי — המאסטר כבר מכיל אותן.`);
+  for (const k of patchRedundant) console.log(`    ${k.split("|").pop()}`);
+  console.log(`  אפשר למחוק אותן מ-data/source/name_he_patch.csv.`);
+}
+if (patchOrphaned.size) {
+  console.log(`\n  ⚠️ ${patchOrphaned.size} שורות בטלאי מצביעות על מפתח שאינו בייצוא:`);
+  for (const k of patchOrphaned) console.log(`    ${k}`);
+}
 console.log(`  rows read     ${rows.length}`);
 console.log(`  accepted      ${experiences.length}`);
 console.log(`  rejected      ${rejected.length}`);

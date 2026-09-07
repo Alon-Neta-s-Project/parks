@@ -23,7 +23,7 @@
   "fieldCoverage": [
     {
       "field": "nameHe",
-      "filled": 234,
+      "filled": 242,
       "notApplicable": 0,
       "total": 242
     },
@@ -612,61 +612,13 @@
     "Disney's Hollywood Studios|Entertainment|The Record Setters: inversions is not a whole number: \"N/A\" — left empty"
   ],
   "rejected": [],
-  "pagesComplete": 233,
-  "incompleteCount": 9,
+  "pagesComplete": 241,
+  "incompleteCount": 1,
   "incomplete": [
-    {
-      "key": "Disney's Animal Kingdom|Entertainment|Adventures with Kevin on Discovery Island",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Disney's Animal Kingdom|Entertainment|Meet Favorite Disney Pals at Adventurers Outpost",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Disney's Animal Kingdom|Entertainment|Meet Moana at Character Landing",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Disney's Animal Kingdom|Entertainment|Zoogether Day Gathering Spot",
-      "missing": [
-        "nameHe"
-      ]
-    },
     {
       "key": "Disney's Blizzard Beach|Attraction|Tike's Peak",
       "missing": [
         "wheelchair"
-      ]
-    },
-    {
-      "key": "Disney's Hollywood Studios|Entertainment|Green Army Drum Corps",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Disney's Hollywood Studios|Entertainment|Hollygroove Swingin'",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "Disney's Hollywood Studios|Entertainment|The Record Setters",
-      "missing": [
-        "nameHe"
-      ]
-    },
-    {
-      "key": "EPCOT|Entertainment|JAMMitors",
-      "missing": [
-        "nameHe"
       ]
     }
   ]
