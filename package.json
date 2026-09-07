@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "import": "tsx scripts/import-content.ts",
-    "artifact": "npm run build && python3 scripts/build-artifact.py"
+    "artifact": "npm run build && python3 scripts/build-artifact.py",
+    "build:tim": "tsc -b && vite build --config vite.tim.config.ts && tsx scripts/verify-tim-build.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.4",

@@ -943,3 +943,38 @@ button {
     rgba(251,246,239,0) 0%, rgba(251,246,239,.5) 28%,
     rgba(251,246,239,.86) 58%, rgba(251,246,239,.98) 100%);
 }
+
+/* ---- טים בלבד: הבנייה הראשונה שעולה לאוויר ------------------------------- */
+/* ⚠️ ארבעת הקלאסים כאן חסרו, והמסך גלש מהמסך בלעדיהם. הם נוספו אחרי
+   שהמסך נטען בדפדפן אמיתי וראיתי את הגלישה — לא מקריאת הקוד. */
+.timonly {
+  padding: var(--pw-s4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--pw-s4);
+  flex: 1;
+  /* ⚠️ המבטיח שהתוכן לא ידחוף את הרוחב. בועה עם מילה ארוכה באנגלית —
+     שם מתקן — הייתה מרחיבה את העמודה ומוציאה את הכל מהמסך. */
+  min-inline-size: 0;
+}
+/* טים מחזיר טקסט עם שורות. `pre-line` שומר עליהן בלי לפרש HTML. */
+.bubble__body { white-space: pre-line; }
+.bubble__typing { color: var(--pw-ink-3); }
+.bubble__error { color: var(--pw-ink-2); }
+/* ⚠️ צ'יפ במסך הזה נושא שאלה שלמה ולא מילה. בלי שבירה הוא נשאר שורה
+   אחת ברוחב 395px, יוצא מהמסך משמאל, וגורר גלילה אופקית — נמדד
+   בדפדפן, לא נחזה. `text-align: start` ולא left, כמו כל השאר. */
+.timonly .options { padding-inline-start: 0; }
+.timonly .option {
+  max-inline-size: 100%;
+  white-space: normal;
+  text-align: start;
+  line-height: 1.5;
+}
+
+.timonly__note {
+  font: var(--pw-t-small);
+  color: var(--pw-ink-3);
+  margin-block-start: var(--pw-s2);
+  text-align: center;
+}
