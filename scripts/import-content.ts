@@ -245,6 +245,8 @@ for (const row of rows) {
     includedWithAdmission: row["Included With Admission?"] ?? "",
     fastAccess: {
       system: llType === "Multi Pass" || llType === "Single Pass" ? llType : null,
+      // ⚠️ הערך הגולמי, בלי כיווץ. ראה ההערה ב-schema.ts.
+      lightningLaneType: llType === "" ? null : llType,
       offered: llType === "Multi Pass" || llType === "Single Pass",
       inMultiPass: ["Yes", "No"].includes(row["Included in Multi Pass?"] ?? "")
         ? (row["Included in Multi Pass?"] as "Yes" | "No") : null,

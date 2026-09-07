@@ -188,6 +188,10 @@ export function toExperience(row: ExperienceRow): Experience | { refused: string
     // written from anywhere but `skip`.
     fastAccess: {
       system: skip ? (SKIP_LINE_LABEL[skip] ?? null) : null,
+      // ⚠️ נגזר מ-skip_line_system ואינו עמודה שנייה במסד. הוא קיים בצורה
+      // כדי שהסכמה תהיה אחת לשני מקורות הנתונים; המסד כבר מחזיק את
+      // ההבחנה בערך עצמו, ולכן אין כאן מה לשמר בנפרד.
+      lightningLaneType: skip ? (SKIP_LINE_LABEL[skip] ?? null) : null,
       offered: skip !== null && skip !== "none",
       inMultiPass: skip === null ? null : skip === "multi_pass" ? "Yes" : "No",
       singlePassRequired: skip === "single_pass",

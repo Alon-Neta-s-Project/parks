@@ -37,9 +37,13 @@
 --   26. מיגרציה 026_rate_limit_caps_not_arguments.sql
 --   27. מיגרציה 027_ingest_rpc.sql
 --   28. מיגרציה 028_match_knowledge.sql
---   29. seed 010_reference.sql
---   30. seed 011_water_parks.sql
---   31. בלוק אימות — שאילתה אחת שמדווחת מה נוצר בפועל.
+--   29. מיגרציה 029_find_experiences.sql
+--   30. מיגרציה 030_find_experiences_by_words.sql
+--   31. מיגרציה 031_alias_candidates.sql
+--   32. מיגרציה 032_alias_reject_useless.sql
+--   33. seed 010_reference.sql
+--   34. seed 011_water_parks.sql
+--   35. בלוק אימות — שאילתה אחת שמדווחת מה נוצר בפועל.
 --
 -- מה שאין כאן, בכוונה
 --   db/local/000_auth_shim.sql. הוא מפגם מקומי לסכמת auth. ב-Supabase
@@ -2302,6 +2306,512 @@ begin
   end loop;
 end
 $$;
+
+COMMIT;
+
+
+-- ==========================================================================
+-- מיגרציה: 029_find_experiences.sql
+-- ==========================================================================
+
+set search_path = public, extensions;
+
+-- 029_find_experiences.sql
+-- הכלי. עובדות על מתקנים נשלפות מהטבלה, לא מחיפוש סמנטי.
+--
+-- ⚠️ **זו ההפרדה שהארכיטקטורה נועדה לשמור** (הערה ב-003_knowledge.sql):
+-- "עובדות קשות יושבות ב-experience ונשלפות דרך כלים. כאן יושב רק מה
+-- שהוא פרוזה. **ערבוב השניים הוא בדיוק הטעות שהארכיטקטורה נועדה
+-- למנוע.**"
+--
+-- חיפוש סמנטי מצוין לפרוזה וגרוע לעובדות. "מה גובה המינימום" צריכה את
+-- **המספר מהשורה**, לא את הקטע שנשמע הכי דומה. 112 הוא ערך, לא טקסט
+-- שמתאים בערך — והפרש של קטע אחד בדירוג הוא מתקן אחר לגמרי.
+--
+-- ⚠️ **וזה גם מה שמונע מטים לענות מהאימון שלו.** הוא "יודע" גבהים של
+-- מתקנים בדיסני מהאינטרנט, והם עשויים להיות נכונים ועשויים להיות ישנים
+-- בשנתיים. הפונקציה הזו נותנת לו את המספר **שלנו**, שנבדק ויש לו תאריך.
+
+BEGIN;
+
+set local search_path = public, extensions;
+
+/**
+ * מתקנים לפי שם, פארק וגובה.
+ *
+ * ⚠️ החיפוש בשם עובר על שלושה שדות: השם האנגלי, השם העברי, והשמות
+ * הנרדפים. משפחה ישראלית תכתוב "אוורסט" ולא "Expedition Everest",
+ * וחיפוש באנגלית בלבד היה מחזיר ריק על שאלה שיש לה תשובה.
+ */
+create or replace function public.find_experiences(
+  p_name        text default null,
+  p_park        text default null,
+  p_height_cm   int  default null,
+  p_limit       int  default 8
+)
+returns table (
+  id            text,
+  name          text,
+  name_he       text,
+  park          text,
+  land          text,
+  category      text,
+  status        text,
+  status_note   text,
+  intensity     int,
+  height_cm     int,
+  gets_wet      text,
+  wheelchair    text,
+  motion_sickness text,
+  skip_line     text,
+  last_verified date,
+  fits          boolean
+)
+language sql
+stable
+security definer
+set search_path = public, extensions
+as $$
+  select
+    e.id,
+    e.name,
+    e.name_i18n->>'he',
+    p.name,
+    l.name,
+    e.category,
+    e.status,
+    e.status_note,
+    e.intensity,
+    e.height_requirement_cm,
+    e.gets_wet,
+    e.wheelchair,
+    e.motion_sickness_warning,
+    e.skip_line_system,
+    e.last_verified,
+    -- ⚠️ **שלושה מצבים, ו-NULL אינו "מתאים לכולם"** (CLAUDE.md).
+    --   גובה נדרש 0     → נבדק ואין מגבלה → מתאים
+    --   גובה נדרש מספר  → מתאים אם הילד/ה מגיע/ה
+    --   גובה נדרש NULL  → **לא נבדק** → NULL, ולא true
+    -- הערך הזה נגזר בזמן ריצה ואינו מאוחסן בשום מקום — אחרת הוא היה
+    -- מקור אמת שני שמתיישן ברגע שהגובה של הילד/ה משתנה.
+    case
+      when p_height_cm is null then null
+      when e.height_requirement_cm is null then null
+      else p_height_cm >= e.height_requirement_cm
+    end
+  from experience e
+  join park p on p.id = e.park_id
+  left join land l on l.id = e.land_id
+  where
+    (p_park is null or p.id = p_park or p.name ilike '%' || p_park || '%')
+    and (
+      p_name is null
+      or e.name ilike '%' || p_name || '%'
+      or e.name_i18n->>'he' ilike '%' || p_name || '%'
+      -- ⚠️ גם השמות הנרדפים. "מסע אל ההר" ו-"אוורסט" הם אותו מתקן.
+      or exists (
+        select 1 from jsonb_array_elements_text(
+          coalesce(e.aliases_i18n->'he', '[]'::jsonb)) a
+        where a ilike '%' || p_name || '%'
+      )
+    )
+  -- ⚠️ מתקן סגור **מוחזר**, עם הסטטוס שלו. סינון שקט של סגורים היה גורם
+  -- לטים לומר "לא מצאתי מתקן כזה" על מתקן שקיים ופשוט סגור — וזו תשובה
+  -- שגויה שנשמעת כמו תשובה.
+  order by
+    case when e.name ilike p_name || '%' then 0 else 1 end,
+    e.name
+  limit least(coalesce(p_limit, 8), 25)
+$$;
+
+comment on function public.find_experiences(text, text, int, int) is
+  'עובדות על מתקנים, מהטבלה. ⚠️ לא חיפוש סמנטי: "מה גובה המינימום" צריכה את המספר מהשורה, לא את הקטע שנשמע דומה. fits נגזר בזמן ריצה, ו-NULL בו פירושו "הגובה לא נבדק" ולא "מתאים".';
+
+revoke all on function public.find_experiences(text, text, int, int) from public;
+do $$
+declare r text;
+begin
+  foreach r in array array['anon','authenticated','service_role'] loop
+    if exists (select 1 from pg_roles where rolname = r) then
+      execute format('grant execute on function public.find_experiences(text, text, int, int) to %I', r);
+    end if;
+  end loop;
+end
+$$;
+
+COMMIT;
+
+
+-- ==========================================================================
+-- מיגרציה: 030_find_experiences_by_words.sql
+-- ==========================================================================
+
+set search_path = public, extensions;
+
+-- 030_find_experiences_by_words.sql
+-- 🔴 תיקון באג שנמדד בשדה: החיפוש התאים **ביטוי**, והשאלה היא **משפט**.
+--
+-- 029 עשתה `e.name ilike '%' || p_name || '%'` — כלומר התאימה את כל מה
+-- שהגיע כמחרוזת אחת רציפה. הקוד שקורא לה מסיר מילות שאלה ומחזיר את מה
+-- שנשאר, וזה **צירוף מילים** ולא שם:
+--
+--   "הבת שלי בגובה 112 ס״מ, היא יכולה לעלות על אקספדישן אוורסט?"
+--     → "הבת שלי סנטימטר יכולה לעלות אקספדישן אוורסט"
+--     → ilike '%הבת שלי סנטימטר יכולה לעלות אקספדישן אוורסט%'
+--     → אפס שורות
+--
+-- ⚠️ **והבדיקות שלי לא תפסו את זה, כי הן בדקו את הצד הלא נכון.** הן
+-- אימתו ש-extractRideName מחזירה מחרוזת שמכילה "אוורסט" — וזה היה נכון.
+-- אף בדיקה לא שאלה **האם המסד מוצא משהו עם המחרוזת הזו**. בדיקה על
+-- הפלט של שלב אחד אינה בדיקה על החיבור בין שני שלבים, ופה הכשל ישב
+-- בדיוק בתפר. השאלה הקצרה ("כמה עולה אוורסט") עבדה במקרה, כי אחרי
+-- ההסרה נשארה מילה אחת.
+--
+-- התיקון: התאמה לפי **מילים**. שורה נמדדת לפי כמה מילים מהשאלה נמצאו
+-- בה, ומוחזרות רק השורות עם המספר הגבוה ביותר.
+--
+-- ⚠️ **הסינון הזה הוא מה שמונע זבל.** בלעדיו "שלי" או "לעלות" היו
+-- יכולות להתאים למתקן אקראי במילה אחת, והוא היה נכנס להקשר של טים
+-- כעובדה. מתקן שהתאים בשתי מילים דוחק החוצה כל מי שהתאים באחת.
+
+BEGIN;
+
+set local search_path = public, extensions;
+
+create or replace function public.find_experiences(
+  p_name        text default null,
+  p_park        text default null,
+  p_height_cm   int  default null,
+  p_limit       int  default 8
+)
+returns table (
+  id            text,
+  name          text,
+  name_he       text,
+  park          text,
+  land          text,
+  category      text,
+  status        text,
+  status_note   text,
+  intensity     int,
+  height_cm     int,
+  gets_wet      text,
+  wheelchair    text,
+  motion_sickness text,
+  skip_line     text,
+  last_verified date,
+  fits          boolean
+)
+language sql
+stable
+security definer
+set search_path = public, extensions
+as $$
+  with tok as (
+    -- ⚠️ פיצול על רווח בלבד, וקיצוץ פיסוק מהקצוות ב-btrim.
+    -- **בכוונה בלי מחלקות תווים כמו [:alnum:]** — הן תלויות ב-locale,
+    -- והמסד המקומי (C) והמסד בסופאבייס (UTF-8) היו מתנהגים אחרת.
+    -- זה הכשל שכבר תפס אותי שלוש פעמים (search_path, format_type),
+    -- ואות עברית היא בדיוק סוג התו שנופל בין ההגדרות.
+    select distinct btrim(t, ',.;:!?()"''[]{}<>/-') as t
+    from regexp_split_to_table(coalesce(p_name, ''), '[[:space:]]+') t
+  ),
+  words as (
+    -- שתי אותיות אינן מילה מזהה; הן שאריות של מילות קישור.
+    select t from tok where length(t) >= 3
+  ),
+  -- ⚠️ **תחיליות עבריות.** "לספייס" ו-"באקספדישן" הן אותה מילה עם אות
+  -- אחת מלפנים, ו-ilike על מחרוזת אינו יודע את זה. בלי זה שאלה טבעית
+  -- ("כדאי ללכת לספייס מאונטיין") מחזירה אפס על מתקן שקיים.
+  -- הקיצוץ מוגבל למילים בנות 5 ומעלה, כדי שלא ניצור מילים קצרות
+  -- ומקריות שיתאימו לחצי מהטבלה.
+  forms as (
+    select t as t, t as root from words
+    union
+    select t, substr(t, 2) from words
+    where length(t) >= 5 and substr(t, 1, 1) in ('ל','ב','ה','מ','ש','ו','כ')
+  ),
+  scored as (
+    select
+      e.id, e.name, e.name_i18n->>'he' as name_he,
+      p.name as park_name, l.name as land_name,
+      e.category, e.status, e.status_note, e.intensity,
+      e.height_requirement_cm, e.gets_wet, e.wheelchair,
+      e.motion_sickness_warning, e.skip_line_system, e.last_verified,
+      -- ⚠️ **count(distinct f.t) ולא count(*)** — מילה אחת שמתאימה גם
+      -- בצורתה המלאה וגם בלי התחילית היא **מילה אחת**, ושתי צורות של
+      -- אותה מילה לא אמורות לדחוק החוצה מתקן שהתאים בשתי מילים שונות.
+      (select count(distinct f.t) from forms f
+        where e.name ilike '%' || f.root || '%'
+           or coalesce(e.name_i18n->>'he', '') ilike '%' || f.root || '%'
+           -- ⚠️ גם השמות הנרדפים. "מסע אל ההר" ו-"אוורסט" הם אותו מתקן.
+           or exists (
+             select 1 from jsonb_array_elements_text(
+               coalesce(e.aliases_i18n->'he', '[]'::jsonb)) a
+             where a ilike '%' || f.root || '%'
+           )) as hits
+    from experience e
+    join park p on p.id = e.park_id
+    left join land l on l.id = e.land_id
+    where (p_park is null or p.id = p_park or p.name ilike '%' || p_park || '%')
+  )
+  select
+    s.id, s.name, s.name_he, s.park_name, s.land_name,
+    s.category, s.status, s.status_note, s.intensity,
+    s.height_requirement_cm, s.gets_wet, s.wheelchair,
+    s.motion_sickness_warning, s.skip_line_system, s.last_verified,
+    -- ⚠️ **שלושה מצבים, ו-NULL אינו "מתאים לכולם"** (CLAUDE.md).
+    --   0     → נבדק ואין מגבלה → מתאים
+    --   מספר  → מתאים אם הילד/ה מגיע/ה
+    --   NULL  → **לא נבדק** → NULL, ולא true
+    -- נגזר בזמן ריצה ואינו מאוחסן — אחרת היה מקור אמת שני שמתיישן
+    -- ברגע שהגובה של הילד/ה משתנה.
+    case
+      when p_height_cm is null then null
+      when s.height_requirement_cm is null then null
+      else p_height_cm >= s.height_requirement_cm
+    end
+  from scored s
+  where
+    -- בלי שם — כל הפארק, לפי הסינון בלבד.
+    (select count(*) from words) = 0
+    -- ⚠️ עם שם — **רק ההתאמות הטובות ביותר.** ראה ההערה בראש הקובץ.
+    or s.hits = (select max(x.hits) from scored x where x.hits > 0)
+  -- ⚠️ מתקן סגור **מוחזר**, עם הסטטוס שלו. סינון שקט היה גורם לטים לומר
+  -- "לא מצאתי מתקן כזה" על מתקן שקיים ופשוט סגור.
+  order by
+    case when p_name is not null and s.name ilike p_name || '%' then 0 else 1 end,
+    s.name
+  limit least(coalesce(p_limit, 8), 25)
+$$;
+
+comment on function public.find_experiences(text, text, int, int) is
+  'עובדות על מתקנים, מהטבלה. ⚠️ התאמה לפי מילים ולא לפי ביטוי — שאלה היא משפט, לא שם (הבאג של 029). מוחזרות רק השורות עם מספר המילים התואמות הגבוה ביותר, כדי שמילה אחת מקרית לא תכניס מתקן זר להקשר. fits נגזר בזמן ריצה, ו-NULL בו פירושו "הגובה לא נבדק" ולא "מתאים".';
+
+revoke all on function public.find_experiences(text, text, int, int) from public;
+do $$
+declare r text;
+begin
+  foreach r in array array['anon','authenticated','service_role'] loop
+    if exists (select 1 from pg_roles where rolname = r) then
+      execute format('grant execute on function public.find_experiences(text, text, int, int) to %I', r);
+    end if;
+  end loop;
+end
+$$;
+
+COMMIT;
+
+
+-- ==========================================================================
+-- מיגרציה: 031_alias_candidates.sql
+-- ==========================================================================
+
+set search_path = public, extensions;
+
+-- 031_alias_candidates.sql
+-- מועמדים לשמות נרדפים. **מחוץ ל-experience, בכוונה.**
+--
+-- ⚠️ **נרדף שנכנס בלי אישור מצמיד שאלה למתקן הלא נכון, וזו טעות גרועה
+-- מ"לא מצאתי".** המשתמשת מקבלת עובדות מדויקות, מנוסחות היטב ועם תאריך
+-- בדיקה — על מתקן אחר. התאריך גורם לזה להיראות אמין **יותר**.
+--
+-- לכן המודל כותב **לכאן** ולא ל-experience.aliases_i18n. הטבלה הזו היא
+-- תור אישור, לא מקור אמת. שום שליפה אינה קוראת ממנה.
+--
+-- 197 מתוך 232 המתקנים היו בלי אף נרדף עברי, ובגלל זה "ולוצירפטור"
+-- ו"מסע אל ההר האסור" החזירו אפס שורות על מתקנים שקיימים במאגר.
+
+BEGIN;
+
+set local search_path = public, extensions;
+
+create table if not exists alias_candidate (
+  id            bigint generated always as identity primary key,
+  experience_id text not null references experience(id) on delete cascade,
+  candidate     text not null,
+  -- ⚠️ **בלי DEFAULT.** מי שכתב את השורה חייב לומר מאיפה היא הגיעה.
+  -- 'model'   — יוצר אוטומטית, לא נבדק
+  -- 'runtime' — המודל פענח כך בשאלה אמיתית שהחזירה אפס
+  source        text not null check (source in ('model', 'runtime')),
+  -- ⚠️ **וגם כאן בלי DEFAULT 'approved'.** זו התבנית שנתפסה בפרויקט
+  -- הזה שבע פעמים: NOT NULL DEFAULT על שדה שמגיע מאיסוף חיצוני הוא
+  -- הצהרה שאיש לא בדק. 'pending' הוא הערך המפורש, ומי שמאשר כותב אותו.
+  status        text not null check (status in ('pending', 'approved', 'rejected')),
+  note          text,
+  created_at    timestamptz not null default now(),
+  -- אותו מועמד לאותו מתקן פעם אחת בלבד.
+  unique (experience_id, candidate)
+);
+
+alter table alias_candidate enable row level security;
+-- ⚠️ אין מדיניות, ולכן אין גישה מהדפדפן. הכתיבה עוברת דרך הפונקציה
+-- שדורשת סוד, והקריאה נעשית בסקירה — לא במוצר.
+
+comment on table alias_candidate is
+  'תור אישור לשמות נרדפים. ⚠️ אינו מקור אמת ואינו נשלף: נרדף לא מאושר שמצמיד שאלה למתקן הלא נכון גרוע מ"לא מצאתי", כי הוא נראה כמו תשובה.';
+
+-- ── מי עוד צריך מועמדים ─────────────────────────────────────────────
+create or replace function public.alias_pending(p_secret text, p_limit int default 25)
+returns table (id text, name text, name_he text, aliases text)
+language plpgsql stable security definer
+set search_path = public, extensions
+as $$
+begin
+  if not public.ingest_check(p_secret) then
+    raise exception 'סוד שגוי';
+  end if;
+  return query
+    select e.id, e.name, e.name_i18n->>'he',
+           coalesce(array_to_string(
+             array(select jsonb_array_elements_text(
+               coalesce(e.aliases_i18n->'he', '[]'::jsonb))), ' · '), '')
+    from experience e
+    where not exists (
+      select 1 from alias_candidate c where c.experience_id = e.id)
+    order by e.name
+    limit least(coalesce(p_limit, 25), 50);
+end
+$$;
+
+-- ── כתיבת מועמד ─────────────────────────────────────────────────────
+create or replace function public.alias_add(
+  p_secret text, p_experience_id text, p_candidate text, p_source text)
+returns boolean
+language plpgsql security definer
+set search_path = public, extensions
+as $$
+begin
+  if not public.ingest_check(p_secret) then
+    raise exception 'סוד שגוי';
+  end if;
+  -- ⚠️ מועמד נכנס תמיד כ-pending. אין דרך לכתוב 'approved' דרך כאן,
+  -- גם לא בטעות — האישור נעשה בסקירה ולא בייצור.
+  insert into alias_candidate (experience_id, candidate, source, status)
+  values (p_experience_id, btrim(p_candidate), p_source, 'pending')
+  on conflict (experience_id, candidate) do nothing;
+  return found;
+end
+$$;
+
+-- ── כמה נשארו ────────────────────────────────────────────────────────
+create or replace function public.alias_remaining(p_secret text)
+returns int
+language plpgsql stable security definer
+set search_path = public, extensions
+as $$
+declare n int;
+begin
+  if not public.ingest_check(p_secret) then
+    raise exception 'סוד שגוי';
+  end if;
+  select count(*) into n from experience e
+  where not exists (select 1 from alias_candidate c where c.experience_id = e.id);
+  return n;
+end
+$$;
+
+do $$
+declare r text; f text;
+begin
+  foreach f in array array[
+    'alias_pending(text, int)', 'alias_add(text, text, text, text)',
+    'alias_remaining(text)'] loop
+    execute format('revoke all on function public.%s from public', f);
+    foreach r in array array['anon','authenticated','service_role'] loop
+      if exists (select 1 from pg_roles where rolname = r) then
+        execute format('grant execute on function public.%s to %I', f, r);
+      end if;
+    end loop;
+  end loop;
+end
+$$;
+
+COMMIT;
+
+
+-- ==========================================================================
+-- מיגרציה: 032_alias_reject_useless.sql
+-- ==========================================================================
+
+set search_path = public, extensions;
+
+-- 032_alias_reject_useless.sql
+-- שני סוגי מועמדים שאין טעם שיגיעו לסקירה של פולה.
+--
+-- ⚠️ נמדד על 60 המועמדים הראשונים, לא נצפה מראש:
+--
+--   Advanced Training Lab → "אדוונסד טריינינג לאב"   ← זהה לשם שכבר במסד
+--   Acrobatico!           → "אקרובטיקו אפקוט"        ← שם + פארק
+--   Astro Orbiter         → "אסטרו אורביטר מג'יק קינגדום"
+--   Awesome Planet        → "אוסום פלאנט אפקוט"
+--
+-- הראשון הוא רעש. **השני מזיק:** ההתאמה היא לפי מילים, ולכן המילה
+-- "אפקוט" בשאלה כלשהי הייתה מתאימה לנרדף "אקרובטיקו אפקוט" ומחזירה את
+-- Acrobatico על כל שאלה שמזכירה את אפקוט. נרדף שמכיל שם פארק הוא
+-- מחולל התאמות שגויות.
+--
+-- ⚠️ **וזו הגנה שנייה ולא ראשונה.** הראשונה היא שמילים גנריות נופלות
+-- מהשאלה בצד של טים — כי מילה גנרית מופיעה גם בנרדף לגיטימי
+-- ("מופע היפה והחיה"), ואי אפשר לפסול אותה כאן בלי לאבד אותו.
+
+BEGIN;
+
+set local search_path = public, extensions;
+
+create or replace function public.alias_add(
+  p_secret text, p_experience_id text, p_candidate text, p_source text)
+returns boolean
+language plpgsql security definer
+set search_path = public, extensions
+as $$
+declare
+  c text := btrim(p_candidate);
+  e record;
+begin
+  if not public.ingest_check(p_secret) then
+    raise exception 'סוד שגוי';
+  end if;
+
+  select name, name_i18n->>'he' as he into e
+  from experience where id = p_experience_id;
+  if not found then
+    return false;
+  end if;
+
+  -- ⚠️ נרדף שזהה לשם הקיים אינו מוסיף דבר. הוא רק שורה שפולה צריכה
+  -- לקרוא ולדחות.
+  if lower(c) = lower(coalesce(e.he, '')) or lower(c) = lower(e.name) then
+    return false;
+  end if;
+
+  -- ⚠️ **נרדף שמכיל שם פארק מזיק.** ראה ההערה בראש הקובץ.
+  if exists (
+    select 1 from park p
+    where c ilike '%' || p.name || '%'
+       or (p.name_i18n->>'he' is not null and c ilike '%' || (p.name_i18n->>'he') || '%')
+  ) then
+    return false;
+  end if;
+
+  insert into alias_candidate (experience_id, candidate, source, status)
+  values (p_experience_id, c, p_source, 'pending')
+  on conflict (experience_id, candidate) do nothing;
+  return found;
+end
+$$;
+
+comment on function public.alias_add(text, text, text, text) is
+  'כתיבת מועמד לנרדף. ⚠️ דוחה כפילות של השם הקיים, ונרדף שמכיל שם פארק — האחרון מחזיר את המתקן על כל שאלה שמזכירה את הפארק.';
+
+-- ── איפוס המנה הראשונה ──────────────────────────────────────────────
+-- 60 המועמדים שנוצרו לפני התיקון נוצרו בהוראה הישנה, וחלקם מהסוג
+-- שהפונקציה עכשיו דוחה. מוחקים ומייצרים מחדש — זול (₪0.31 לכל 232)
+-- ועדיף על סקירה ידנית של רעש.
+--
+-- ⚠️ **התנאי צר בכוונה: רק מה שהמודל ייצר ואיש עוד לא נגע בו.**
+-- מועמד שאושר או נדחה על ידי אדם אינו נמחק, גם לא בטעות.
+delete from alias_candidate where source = 'model' and status = 'pending';
 
 COMMIT;
 

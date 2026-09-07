@@ -14,9 +14,9 @@ with checks as (
   select 1 as ord,
          'שורות ב-experience' as "בדיקה",
          (select count(*) from experience)::text as "במסד",
-         '232' as "בייצוא",
+         '242' as "בייצוא",
          '—' as "אצלך",
-         case when (select count(*) from experience) <> 232 then '❌ נמעך במעבר — במסד יש משהו אחר ממה שיצא'
+         case when (select count(*) from experience) <> 242 then '❌ נמעך במעבר — במסד יש משהו אחר ממה שיצא'
               when false then ''
               else '✅ תקין' end as "מצב"
 
@@ -24,20 +24,20 @@ with checks as (
   select 2 as ord,
          'height > 0 (יש מגבלה)' as "בדיקה",
          (select count(*) from experience where height_requirement_cm > 0)::text as "במסד",
-         '78' as "בייצוא",
+         '79' as "בייצוא",
          '78' as "אצלך",
-         case when (select count(*) from experience where height_requirement_cm > 0) <> 78 then '❌ נמעך במעבר — במסד יש משהו אחר ממה שיצא'
-              when false then '⚠️ הפרש מול המאסטר, כי 0 שורות נעצרו בכוונה. לא נמעך במעבר — ראה את השורה האחרונה'
+         case when (select count(*) from experience where height_requirement_cm > 0) <> 79 then '❌ נמעך במעבר — במסד יש משהו אחר ממה שיצא'
+              when true then '⚠️ הפרש מול המאסטר, כי 0 שורות נעצרו בכוונה. לא נמעך במעבר — ראה את השורה האחרונה'
               else '✅ תקין' end as "מצב"
 
   union all
   select 3 as ord,
          'height = 0 (נבדק, אין מגבלה)' as "בדיקה",
          (select count(*) from experience where height_requirement_cm = 0)::text as "במסד",
-         '154' as "בייצוא",
+         '163' as "בייצוא",
          '154' as "אצלך",
-         case when (select count(*) from experience where height_requirement_cm = 0) <> 154 then '❌ נמעך במעבר — במסד יש משהו אחר ממה שיצא'
-              when false then '⚠️ הפרש מול המאסטר, כי 0 שורות נעצרו בכוונה. לא נמעך במעבר — ראה את השורה האחרונה'
+         case when (select count(*) from experience where height_requirement_cm = 0) <> 163 then '❌ נמעך במעבר — במסד יש משהו אחר ממה שיצא'
+              when true then '⚠️ הפרש מול המאסטר, כי 0 שורות נעצרו בכוונה. לא נמעך במעבר — ראה את השורה האחרונה'
               else '✅ תקין' end as "מצב"
 
   union all
@@ -54,9 +54,9 @@ with checks as (
   select 5 as ord,
          'gets_wet = ''na''' as "בדיקה",
          (select count(*) from experience where gets_wet = 'na')::text as "במסד",
-         '0' as "בייצוא",
+         '77' as "בייצוא",
          '66' as "אצלך",
-         case when (select count(*) from experience where gets_wet = 'na') <> 0 then '❌ נמעך במעבר — במסד יש משהו אחר ממה שיצא'
+         case when (select count(*) from experience where gets_wet = 'na') <> 77 then '❌ נמעך במעבר — במסד יש משהו אחר ממה שיצא'
               when true then '⚠️ לא נמעך במעבר — הייצוא עצמו כותב תא ריק במקום na. ראה שורה 6'
               else '✅ תקין' end as "מצב"
 
@@ -64,10 +64,10 @@ with checks as (
   select 6 as ord,
          'gets_wet NULL' as "בדיקה",
          (select count(*) from experience where gets_wet is null)::text as "במסד",
-         '66' as "בייצוא",
+         '0' as "בייצוא",
          '0' as "אצלך",
-         case when (select count(*) from experience where gets_wet is null) <> 66 then '❌ נמעך במעבר — במסד יש משהו אחר ממה שיצא'
-              when true then '⚠️ אלה אותן 66 שורות של שורה 5, עם NULL במקום na. פער בייצוא, לא במעבר'
+         case when (select count(*) from experience where gets_wet is null) <> 0 then '❌ נמעך במעבר — במסד יש משהו אחר ממה שיצא'
+              when false then '⚠️ אלה אותן 66 שורות של שורה 5, עם NULL במקום na. פער בייצוא, לא במעבר'
               else '✅ תקין' end as "מצב"
 
   union all
@@ -105,7 +105,7 @@ with checks as (
          'status — לא הכל open',
          (select string_agg(status || ': ' || n, ' · ' order by status)
             from (select status, count(*) as n from experience group by status) s),
-         '208 open · 22 closed · 1 temporarily_closed · 1 coming_soon',
+         '217 open · 22 closed · 2 temporarily_closed · 1 coming_soon',
          '—',
          case when (select count(*) from experience where status = 'closed') > 0
                 then '✅ תקין — הסגורים נשמרו כסגורים'
@@ -125,10 +125,10 @@ with checks as (
          'מוצר דילוג בתור',
          (select string_agg(coalesce(skip_line_system,'(לא נבדק)') || ': ' || n, ' · ' order by n desc)
             from (select skip_line_system, count(*) as n from experience group by 1) s),
-         'none: 75 · (לא נבדק): 74 · multi_pass: 51 · express: 27 · single_pass: 5',
+         'none: 83 · (לא נבדק): 76 · multi_pass: 51 · express: 27 · single_pass: 5',
          '—',
-         case when (select count(*) from experience where skip_line_system is null) = 74
-               and (select count(*) from experience where skip_line_system = 'none') = 75
+         case when (select count(*) from experience where skip_line_system is null) = 76
+               and (select count(*) from experience where skip_line_system = 'none') = 83
                 then '✅ תקין — NULL הוא "לא נבדק", לא "אין"'
               else '❌ לא תואם לייצוא' end
 

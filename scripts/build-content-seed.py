@@ -80,6 +80,10 @@ STATUS_DECIDED = {
     ("disney-s-blizzard-beach-slush-gusher", "check"): "temporarily_closed",
     # The Magic of Disney Animation — נפתח 14.9.2026. אומת מול אתר דיסני, 2026-09-01.
     ("disney-s-hollywood-studios-the-magic-of-disney-animation", "check"): "coming_soon",
+    # Meet Moana at Character Landing — הכרעת פולה, 06.09: נכנס כ"לא קבוע /
+    # תלוי מעבר דמות", כמו "סגור זמנית" ולא כמפגש בלוח קבוע. הסטטוס אומר
+    # למשתמשת שאי אפשר לסמוך על נוכחות הדמות, וזו בדיוק המשמעות.
+    ("disney-s-animal-kingdom-meet-moana-at-character-landing", "check"): "temporarily_closed",
 }
 TYPE = {"attraction", "show", "parade", "meet_greet", "walkthrough"}
 CATEGORY = {"dark_ride", "coaster", "simulator", "water_ride", "show",
@@ -143,6 +147,30 @@ SKIP_LINE = {
     "Universal Express may be available at this attraction, but it does NOT replace "
     "the mandatory Park-to-Park admission. Verify current participation in the "
     "Universal app.": None,
+
+    # ── ניסוחים שהופיעו ב-v7_10 ──────────────────────────────────────────
+    # ⚠️ "לא אומת מול המקור הרשמי" הוא **לא נבדק**, ולכן NULL ולא 'none'.
+    # 'none' פירושו "נבדק ואין מוצר", וזו אמירה אחרת לגמרי.
+    "Not confirmed on the current official source used for this row; check the "
+    "Universal app/official attraction page before buying Express.": None,
+
+    # מפגש דמויות או מופע רחוב — אין מוצר דילוג, וזו תשובה ולא חוסר.
+    "N/A": "none",
+}
+
+# ── העמודה המובנית, כפי שההערה למעלה ביקשה ──────────────────────────────
+# ⚠️ **החסם שתואר שם נפתח.** הייצוא נבנה עכשיו ב-openpyxl ולא ב-pandas,
+# ולכן 'None' ו-'N/A' נשמרים כשתי מחרוזות שונות במקום להימחק יחד. 52
+# שורות דיסני שיצאו ריקות חזרו להיות ניתנות להפרדה.
+#
+# ולכן דיסני ממופה עכשיו מ**ערך מובנה** ולא מפרוזה. ערך מובנה אינו משתנה
+# כשמישהו מנסח מחדש; פרוזה כן, וזה בדיוק מה שקרה כאן ועצר 54 שורות.
+LIGHTNING_LANE = {
+    "Multi Pass": "multi_pass",
+    "Single Pass": "single_pass",
+    "None": "none",
+    # 'N/A' אינו כאן בכוונה: אצל יוניברסל ובפארקי המים אין Lightning Lane
+    # כלל, והמוצר שלהם יושב בעמודה השנייה. נופלים לפרוזה רק שם.
 }
 
 # Columns the export owns. Everything else on the table keeps its default and
@@ -242,8 +270,12 @@ for e in experiences:
     if not ok:
         continue
 
+    # ⚠️ העמודה המובנית קודמת. ראה ההערה ליד LIGHTNING_LANE.
+    lane = (e.get("fastAccess") or {}).get("lightningLaneType")
     summary = (e.get("fastAccess") or {}).get("summary")
-    if summary not in SKIP_LINE:
+    if lane in LIGHTNING_LANE:
+        summary = None  # לא נדרש; הערך המובנה הכריע
+    elif summary not in SKIP_LINE:
         skipped.append((label, f"fastAccess.summary אינו באוצר המילים: {(summary or '')[:60]!r}"))
         continue
 
@@ -282,7 +314,7 @@ for e in experiences:
         text(checked["uses_large_screens_or_3d"]),
         text(checked["big_drops"]),
         text(checked["spinning"]),
-        text(SKIP_LINE[summary]),
+        text(LIGHTNING_LANE[lane] if lane in LIGHTNING_LANE else SKIP_LINE[summary]),
         boolean(e["sensEnclosedDark"]),
         boolean(e["sensHeights"]),
         boolean(e["sensLoudSudden"]),

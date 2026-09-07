@@ -48,6 +48,16 @@ export const statusSchema = z.object({
 export const fastAccessSchema = z.object({
   /** null where the export leaves it blank, meaning no such product here. */
   system: z.enum(["Multi Pass", "Single Pass"]).nullable(),
+  /**
+   * הערך הגולמי מהעמודה המובנית, בלי כיווץ.
+   *
+   * ⚠️ `system` מכווץ ל-null את "None" (נבדק ואין), את "N/A" (לא רלוונטי —
+   * ליוניברסל אין Lightning Lane כלל) ואת התא הריק (לא נבדק). שלוש
+   * אמירות שונות שנקראות אותו דבר, וזו התבנית שנתפסה בפרויקט שבע פעמים.
+   * השדה הזה שומר את ההבחנה כדי שהטעינה למסד תוכל להישען על ערך מובנה
+   * במקום על פרוזה שמשתנה בכל ניסוח מחדש.
+   */
+  lightningLaneType: z.string().nullable(),
   offered: z.boolean(),
   inMultiPass: z.enum(["Yes", "No"]).nullable(),
   singlePassRequired: z.boolean(),

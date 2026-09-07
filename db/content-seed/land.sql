@@ -1,5 +1,5 @@
 -- ==========================================================================
--- Park Day Companion — אזורים בפארקים (79 שורות)
+-- Park Day Companion — אזורים בפארקים (81 שורות)
 -- ==========================================================================
 --
 -- ⚠️ להריץ **לפני** קובצי התוכן. experience.land_id הוא מפתח זר לטבלה
@@ -24,10 +24,12 @@ values
 ('ak-africa-rafiki-s-planet-watch', 'ak', 'Africa / Rafiki''s Planet Watch', '{}'::jsonb),
 ('ak-asia', 'ak', 'Asia', '{}'::jsonb),
 ('ak-discovery-island', 'ak', 'Discovery Island', '{}'::jsonb),
+('ak-n-a', 'ak', 'N/A', '{}'::jsonb),
 ('ak-oasis', 'ak', 'Oasis', '{}'::jsonb),
 ('ak-pandora-the-world-of-avatar', 'ak', 'Pandora – The World of Avatar', '{}'::jsonb),
 ('ak-park-wide', 'ak', 'Park-wide', '{}'::jsonb),
 ('ak-rafiki-s-planet-watch', 'ak', 'Rafiki''s Planet Watch', '{}'::jsonb),
+('ak-rafiki-s-planet-watch-conservation-station', 'ak', 'Rafiki''s Planet Watch / Conservation Station', '{}'::jsonb),
 ('ak-theater-in-the-wild', 'ak', 'Theater in the Wild', '{}'::jsonb),
 ('ak-tree-of-life-theater', 'ak', 'Tree of Life Theater', '{}'::jsonb),
 ('bb-melt-away-bay', 'bb', 'Melt-Away Bay', '{}'::jsonb),
@@ -35,6 +37,7 @@ values
 ('bb-park-wide', 'bb', 'Park-wide', '{}'::jsonb),
 ('bb-ski-patrol-training-camp', 'bb', 'Ski Patrol Training Camp', '{}'::jsonb),
 ('bb-tike-s-peak', 'bb', 'Tike''s Peak', '{}'::jsonb),
+('epcot-n-a', 'epcot', 'N/A', '{}'::jsonb),
 ('epcot-world-celebration', 'epcot', 'World Celebration', '{}'::jsonb),
 ('epcot-world-discovery', 'epcot', 'World Discovery', '{}'::jsonb),
 ('epcot-world-nature', 'epcot', 'World Nature', '{}'::jsonb),
@@ -42,7 +45,6 @@ values
 ('epcot-world-showcase-american-adventure', 'epcot', 'World Showcase – American Adventure', '{}'::jsonb),
 ('epcot-world-showcase-canada', 'epcot', 'World Showcase – Canada', '{}'::jsonb),
 ('epcot-world-showcase-france', 'epcot', 'World Showcase – France', '{}'::jsonb),
-('epcot-world-showcase-italy', 'epcot', 'World Showcase – Italy', '{}'::jsonb),
 ('epcot-world-showcase-japan', 'epcot', 'World Showcase – Japan', '{}'::jsonb),
 ('epcot-world-showcase-mexico', 'epcot', 'World Showcase – Mexico', '{}'::jsonb),
 ('epcot-world-showcase-norway', 'epcot', 'World Showcase – Norway', '{}'::jsonb),
@@ -57,6 +59,7 @@ values
 ('hs-chinese-theatre', 'hs', 'Chinese Theatre', '{}'::jsonb),
 ('hs-echo-lake', 'hs', 'Echo Lake', '{}'::jsonb),
 ('hs-hollywood-boulevard', 'hs', 'Hollywood Boulevard', '{}'::jsonb),
+('hs-n-a', 'hs', 'N/A', '{}'::jsonb),
 ('hs-star-wars-galaxy-s-edge', 'hs', 'Star Wars: Galaxy''s Edge', '{}'::jsonb),
 ('hs-sunset-boulevard', 'hs', 'Sunset Boulevard', '{}'::jsonb),
 ('hs-toy-story-land', 'hs', 'Toy Story Land', '{}'::jsonb),
@@ -65,7 +68,6 @@ values
 ('ioa-marvel-super-hero-island', 'ioa', 'Marvel Super Hero Island', '{}'::jsonb),
 ('ioa-seuss-landing', 'ioa', 'Seuss Landing', '{}'::jsonb),
 ('ioa-skull-island', 'ioa', 'Skull Island', '{}'::jsonb),
-('ioa-the-lost-continent', 'ioa', 'The Lost Continent', '{}'::jsonb),
 ('ioa-the-wizarding-world-of-harry-potter-hogsmeade', 'ioa', 'The Wizarding World of Harry Potter – Hogsmeade', '{}'::jsonb),
 ('ioa-toon-lagoon', 'ioa', 'Toon Lagoon', '{}'::jsonb),
 ('mk-adventureland', 'mk', 'Adventureland', '{}'::jsonb),
