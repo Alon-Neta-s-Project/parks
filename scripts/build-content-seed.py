@@ -40,15 +40,19 @@ BUDGET = 110_000
 # so the verification block can tell two different failures apart: a value
 # crushed on the way into the database, and a value that was already like
 # that in the export. Update these when the master changes.
-MASTER = {
-    "height_gt0": 78,
-    "height_eq0": 154,
-    "height_null": 0,
-    "gets_wet_na": 66,
-    "gets_wet_null": 0,
-    "intensity_null": 0,
-    "wheelchair_null": 1,
-}
+# ⚠️ **היה כאן dict של מספרים מהמאסטר, והוא הוסר.**
+#
+# הוא נועד לתת "דעה שלישית" — מה נמסר לנו על המאסטר — כדי לתפוס פער
+# בין הייצוא למאסטר. הוא הפסיק להיות נחוץ ברגע שהייצוא נבנה מהמאסטר
+# עצמו (scripts/build-product-export.py): מאז השניים זהים בהגדרה.
+#
+# 🔴 ומה שהוא כן עשה היה נזק. המספרים היו קפואים על v7_1, ולכן כל מנת
+# תוכן חדשה ייצרה ⚠️ על טעינה תקינה לחלוטין — הפעם השישית שזה קורה
+# בפרויקט. וגרוע מזה: אחת ההערות שלו אמרה "הייצוא עצמו כותב תא ריק
+# במקום na", וזה **לא היה נכון** — המאסטר כתב N/A והייבוא שלנו זרק
+# אותו. ההערה הצביעה על האשם הלא נכון במשך חודשים.
+#
+# מה שנשאר הוא ההשוואה שבאמת מגלה תקלה: **במסד מול בייצוא.**
 
 PARK_ID = {
     "Magic Kingdom": "mk",
@@ -380,53 +384,50 @@ EXPORT = {
     "wheelchair_null": sum(1 for e in emitted if e["wheelchair"] is None),
 }
 HELD = len(skipped)
-held_note = (f"⚠️ הפרש מול המאסטר, כי {HELD} שורות נעצרו בכוונה. "
-             f"לא נמעך במעבר — ראה את השורה האחרונה")
 
 
-def check(ord_, label, found_sql, export_key, master_key, note_ok, note_bad):
+def check(ord_, label, found_sql, export_key, note_ok):
+    """שורה אחת בטבלת האימות.
+
+    ⚠️ **שתי עמודות ולא שלוש.** ההשוואה היחידה שמגלה תקלה היא במסד מול
+    בייצוא — כלומר "האם משהו נמעך במעבר". השוואה למספר שנמסר בעבר על
+    המאסטר אינה בדיקה; היא ⚠️ שמופיע בכל מנת תוכן חדשה ושולח לחפש
+    תקלה שאינה קיימת."""
     ex = EXPORT[export_key]
-    ms = "'—'" if master_key is None else q(str(MASTER[master_key]))
-    mismatch_master = (master_key is not None and MASTER[master_key] != ex)
     return f"""  select {ord_} as ord,
          {q(label)} as "בדיקה",
          ({found_sql})::text as "במסד",
          '{ex}' as "בייצוא",
-         {ms} as "אצלך",
          case when ({found_sql}) <> {ex} then '❌ נמעך במעבר — במסד יש משהו אחר ממה שיצא'
-              when {str(mismatch_master).lower()} then {q(note_bad)}
               else {q(note_ok)} end as "מצב\""""
 
 
 checks = [
-    check(1, "שורות ב-experience", "select count(*) from experience", "rows", None,
-          "✅ תקין", ""),
+    check(1, "שורות ב-experience", "select count(*) from experience", "rows",
+          "✅ תקין"),
     check(2, "height > 0 (יש מגבלה)",
           "select count(*) from experience where height_requirement_cm > 0",
-          "height_gt0", "height_gt0", "✅ תקין", held_note),
+          "height_gt0", "✅ תקין"),
     check(3, "height = 0 (נבדק, אין מגבלה)",
           "select count(*) from experience where height_requirement_cm = 0",
-          "height_eq0", "height_eq0", "✅ תקין", held_note),
+          "height_eq0", "✅ תקין"),
+    # ⚠️ הכלל, ולא הפילוח: NULL אינו "מתאים לכל המשפחה".
     check(4, "height NULL (לא נבדק)",
           "select count(*) from experience where height_requirement_cm is null",
-          "height_null", "height_null", "✅ תקין", ""),
+          "height_null", "✅ תקין"),
     check(5, "gets_wet = 'na'",
           "select count(*) from experience where gets_wet = 'na'",
-          "gets_wet_na", "gets_wet_na",
-          "✅ תקין",
-          "⚠️ לא נמעך במעבר — הייצוא עצמו כותב תא ריק במקום na. ראה שורה 6"),
-    check(6, "gets_wet NULL",
+          "gets_wet_na", "✅ תקין — 'na' הוא מופע, וזו תשובה"),
+    # ⚠️ NULL הוא "לא נבדק". שהוא אפס — זה הכלל.
+    check(6, "gets_wet NULL (לא נבדק)",
           "select count(*) from experience where gets_wet is null",
-          "gets_wet_null", "gets_wet_null",
-          "✅ תקין",
-          "⚠️ אלה אותן 66 שורות של שורה 5, עם NULL במקום na. פער בייצוא, לא במעבר"),
+          "gets_wet_null", "✅ תקין"),
     check(7, "intensity NULL",
           "select count(*) from experience where intensity is null",
-          "intensity_null", "intensity_null", "✅ תקין", ""),
+          "intensity_null", "✅ תקין"),
     check(8, "wheelchair NULL",
           "select count(*) from experience where wheelchair is null",
-          "wheelchair_null", "wheelchair_null",
-          "✅ תקין — Tike's Peak, וזה נכון", ""),
+          "wheelchair_null", "✅ תקין — Tike's Peak, וזה נכון"),
 ]
 
 SKIP = Counter(SKIP_LINE[(e.get("fastAccess") or {}).get("summary")] for e in emitted)
@@ -443,7 +444,6 @@ extra = f"""  select 9,
          'שם עברי לכל שורה',
          (select count(*) from experience where name_i18n->>'he' is null or name_i18n->>'he' = '')::text,
          '0',
-         '—',
          case when (select count(*) from experience where name_i18n->>'he' is null or name_i18n->>'he' = '') = 0
                 then '✅ תקין — לכל השורות יש שם עברי'
               else '❌ שורות בלי שם עברי' end
@@ -454,7 +454,6 @@ extra = f"""  select 9,
          (select string_agg(status || ': ' || n, ' · ' order by status)
             from (select status, count(*) as n from experience group by status) s),
          '{STATUS_TALLY}',
-         '—',
          case when (select count(*) from experience where status = 'closed') > 0
                 then '✅ תקין — הסגורים נשמרו כסגורים'
               else '❌ הכל נטען כ-open. מתקן סגור שמוצג כפתוח הוא באג' end
@@ -464,7 +463,6 @@ extra = f"""  select 9,
          'פארקים מיוצגים',
          (select count(distinct park_id) from experience)::text,
          '10',
-         '—',
          case when (select count(distinct park_id) from experience) = 10
                 then '✅ תקין' else '❌ פארק חסר' end
 
@@ -474,7 +472,6 @@ extra = f"""  select 9,
          (select string_agg(coalesce(skip_line_system,'(לא נבדק)') || ': ' || n, ' · ' order by n desc)
             from (select skip_line_system, count(*) as n from experience group by 1) s),
          '{SKIP_TALLY}',
-         '—',
          case when (select count(*) from experience where skip_line_system is null) = {SKIP_NULL}
                and (select count(*) from experience where skip_line_system = 'none') = {SKIP_NONE}
                 then '✅ תקין — NULL הוא "לא נבדק", לא "אין"'
@@ -485,7 +482,6 @@ extra = f"""  select 9,
          'שורות שנעצרו בכוונה',
          '{HELD}',
          '{HELD}',
-         '0',
          {held_row}
 """
 
@@ -493,13 +489,16 @@ JOINED = "\n\n  union all\n".join(checks)
 
 VERIFY = f"""-- ── אימות התוכן ──────────────────────────────────────────────────────
 -- ספירה לבדה תגיד "232 שורות" גם אם שלושת המצבים נמעכו. הבדיקה הזו
--- משווה שלושה מספרים לכל שדה:
+-- משווה שני מספרים לכל שדה:
 --   במסד   — מה שיש עכשיו בסופאבייס
 --   בייצוא — מה שיש בקובץ שממנו נוצר ה-SQL הזה
---   אצלך   — מה שנמסר על המאסטר
 --
--- במסד ≠ בייצוא  → ❌ משהו נמעך במעבר. זו תקלה.
--- במסד = בייצוא ≠ אצלך → ⚠️ הגיע ככה מהייצוא. פער תוכן, לא תקלת העברה.
+-- ⚠️ **שתי עמודות ולא שלוש.** הייתה כאן עמודה שלישית, "אצלך", שהשוותה
+-- למספרים שנמסרו על המאסטר. היא הפסיקה להיות נחוצה כשהייצוא נבנה
+-- מהמאסטר עצמו, והמספרים שבה נשארו קפואים — כלומר היא הדליקה ⚠️ על
+-- טעינה תקינה בכל מנת תוכן חדשה.
+--
+-- במסד ≠ בייצוא → ❌ משהו נמעך במעבר. זו ההשוואה שמגלה תקלה.
 --
 -- אפשר להריץ אותה שוב בכל רגע, לבד.
 
@@ -509,7 +508,7 @@ with checks as (
   union all
 {extra}
 )
-select "בדיקה", "במסד", "בייצוא", "אצלך", "מצב" from checks order by ord;
+select "בדיקה", "במסד", "בייצוא", "מצב" from checks order by ord;
 """
 
 
