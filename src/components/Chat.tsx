@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 import { useContent } from "../data/content";
 import { clear, load, save } from "../lib/persist";
 import { applyPatch, emptyProfile, questions, type Profile } from "../lib/profile";
@@ -29,6 +30,7 @@ const restored = load();
 export function Chat() {
   const { t } = useTranslation();
   const { coverage, parks: allParks } = useContent();
+  const [params, setParams] = useSearchParams();
   const [started, setStarted] = useState(restored?.started ?? false);
   const [step, setStep] = useState(restored?.step ?? 0);
   const [profile, setProfile] = useState<Profile>(restored?.profile ?? emptyProfile);
@@ -151,8 +153,17 @@ export function Chat() {
    */
   const [timAnswers, setTimAnswers] = useState<Record<string, TimReply | "asking">>({});
 
-  const submit = () => {
-    const text = draft.trim();
+  /**
+   * שאלה שהגיעה ממסך הכניסה.
+   *
+   * ⚠️ **נצרכת פעם אחת ונמחקת מה-URL.** אחרת רענון היה שואל את אותה
+   * שאלה שוב — ועל נקודת קצה שעולה כסף, "שוב" הוא לא רק מציק.
+   */
+  const submit = (raw?: string) => {
+    // ⚠️ הטקסט מתקבל כארגומנט ולא נקרא מ-state. שאלה שמגיעה מה-URL
+    // מגיעה לפני ש-setDraft הספיק להתעדכן, וקריאה מה-state הייתה
+    // שולחת את הערך הקודם — כלומר את השאלה הקודמת, או ריק.
+    const text = (raw ?? draft).trim();
     if (!text) return;
     setDraft("");
 
@@ -230,6 +241,20 @@ export function Chat() {
   const toggleUnrated = () =>
     setProfile((current) => ({ ...current, includeUnrated: !current.includeUnrated }));
 
+  /**
+   * שאלה שהגיעה ממסך הכניסה.
+   *
+   * ⚠️ **נצרכת פעם אחת ונמחקת מה-URL.** אחרת רענון היה שואל את אותה
+   * שאלה שוב — ועל נקודת קצה שעולה כסף, "שוב" אינו רק מציק.
+   */
+  const fromUrl = params.get("q");
+  useEffect(() => {
+    if (!fromUrl) return;
+    setParams({}, { replace: true });
+    submit(fromUrl);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fromUrl]);
+
   return (
     <div className="thread" aria-live="polite" aria-atomic="false">
       <div className="msg">
@@ -274,7 +299,7 @@ export function Chat() {
                 submit();
               }}
             />
-            <button type="button" className="send" onClick={submit} aria-label={t("ask.send")}>
+            <button type="button" className="send" onClick={() => submit()} aria-label={t("ask.send")}>
               {/* ⚠️ אייקון כיווני, ולא תו חץ. חץ שנכתב כתו הוא החלטה
                   קשיחה על שפה — חץ שמאלה נכון בעברית ושגוי באנגלית, ודפדפן
                   אינו מהפך אותו לפי dir. הוא מצויר כאן בכיוון הקנוני

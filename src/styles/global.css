@@ -799,3 +799,107 @@ button {
   color: var(--pw-ink-2);
   border-inline-start: 3px solid var(--pw-urgent-600, var(--pw-ink-3));
 }
+
+/* ---- מסך הכניסה ------------------------------------------------------------
+   לפי design/canvas/TimHomeLaylaInspired.dc.html. הערכים מהטוקנים ולא
+   מה-artboard: הוא כותב #2B2420 ישירות, וכאן זה --pw-ink.                 */
+.home { padding-block-start: var(--pw-s5); }
+
+.greet { text-align: center; padding-block-end: var(--pw-s6); }
+.greet__title {
+  font: var(--pw-t-display, 400 25px/1.35 var(--pw-font-display));
+  font-family: var(--pw-font-display);
+  font-size: 25px;
+  line-height: 1.35;
+  color: var(--pw-ink);
+  margin-block: var(--pw-s4) var(--pw-s2);
+  /* ⚠️ הכותרת נשברת לשתי שורות בניסוח עצמו (\n ב-he.json). */
+  white-space: pre-line;
+}
+.greet__lead {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--pw-ink-3);
+  max-inline-size: 32ch;
+  margin-inline: auto;
+}
+.greet__trust {
+  font-size: 10.5px;
+  line-height: 1.4;
+  color: var(--pw-ink-4);
+  margin-block-start: var(--pw-s4);
+}
+
+/* התיבה — הדבר הראשון שאפשר לגעת בו */
+.composer {
+  display: flex;
+  align-items: center;
+  gap: var(--pw-s2);
+  margin-block-start: var(--pw-s5);
+  padding: 8px;
+  background: var(--pw-bg-card, #fff);
+  border: 1px solid var(--pw-hairline);
+  border-radius: 24px;
+  box-shadow: var(--pw-shadow-card, 0 12px 28px rgba(43, 36, 32, .12));
+}
+.composer__input {
+  flex: 1;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 14.5px;
+  color: var(--pw-ink);
+  padding: 10px 14px;
+}
+.composer__input::placeholder { color: var(--pw-ink-muted); }
+.composer__input:focus { outline: none; }
+.composer:focus-within { border-color: var(--pw-hairline-strong); }
+.composer__send {
+  flex-shrink: 0;
+  inline-size: 38px;
+  block-size: 38px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--pw-tim-600, var(--pw-ink));
+  color: var(--pw-ink-on-dark);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  justify-content: center;
+  margin-block-start: var(--pw-s3);
+}
+.chip {
+  padding: 8px 13px;
+  border-radius: 999px;
+  border: 1px solid var(--pw-hairline);
+  background: var(--pw-bg-card, #fff);
+  font: inherit;
+  font-size: 12px;
+  color: var(--pw-ink-2);
+  cursor: pointer;
+}
+.chip:hover { border-color: var(--pw-hairline-strong); }
+
+.sect__title { font-size: 13.5px; font-weight: 800; color: var(--pw-ink); margin-block-end: 3px; }
+.sect__lead  { font-size: 11.5px; color: var(--pw-ink-4); margin-block-end: var(--pw-s4); }
+
+/* ⚠️ מסילה אופקית ולא רשת. "החליקו בין הפארקים" הוא מה שה-artboard אומר,
+   וגלילה אופקית חייבת להיות בתוך המסילה ולא בגוף הדף.                     */
+.parkrail {
+  display: flex;
+  gap: var(--pw-s3);
+  overflow-x: auto;
+  padding-block-end: var(--pw-s3);
+  margin-inline: calc(var(--pw-s4) * -1);
+  padding-inline: var(--pw-s4);
+  scroll-snap-type: x mandatory;
+  list-style: none;
+}
+.parkrail > li { flex: 0 0 auto; scroll-snap-align: start; }
+.parkrail .parkcard { inline-size: 200px; }
