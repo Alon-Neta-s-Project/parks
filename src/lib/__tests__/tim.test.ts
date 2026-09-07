@@ -22,7 +22,10 @@ describe("טים מהדפדפן", () => {
     reply({ answer: "x" });
     await askTim("היי");
     const [url, init] = (fetch as unknown as ReturnType<typeof vi.fn>).mock.calls[0]!;
-    expect(url).toBe("https://p.supabase.co/functions/v1/tim");
+    // ⚠️ ה-slug האמיתי בסופהבייס, ולא השם שמוצג שם בממשק. הבדיקה נכתבה
+    // מול "tim" ועברה, בעוד הכתובת החיה החזירה 404 — כלומר היא אימתה את
+    // מה שהנחנו במקום את מה שקיים.
+    expect(url).toBe("https://p.supabase.co/functions/v1/quick-worker");
     expect((init.headers as Record<string, string>).apikey).toBe("anon-key");
     expect(JSON.stringify(init.headers)).not.toContain("AIza");
   });

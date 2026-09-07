@@ -24,9 +24,30 @@ export type TimFailure =
   | "unreachable"
   | "upstream";
 
+/**
+ * ⚠️ **`quick-worker` ולא `tim`, וזה אינו שיבוש.**
+ *
+ * הפונקציה בסופהבייס נוצרה בשם `quick-worker`, ושמה בממשק שונה מאוחר יותר
+ * ל-Tim. סופהבייס אומרת את זה במפורש במסך ההגדרות — "your slug and endpoint
+ * URL will remain the same" — כלומר השם שרואים והשם שבכתובת הם שני דברים,
+ * ורק השני קובע.
+ *
+ * 🔴 וזה עלה לנו סבב שלם בעלייה הראשונה לאוויר: הכתובת החזירה 404, סופהבייס
+ * מחזירה 404 בלי כותרות CORS, הדפדפן חוסם את התשובה — והמסך הציג "לא הצלחתי
+ * להגיע לשרת", שהוא בדיוק התיאור הלא נכון. השרת נענה. הנתיב לא היה קיים.
+ *
+ * ⚠️ **וזו התבנית המוכרת בלבוש חדש**: שם שהוצג כאילו הוא השם, בעוד השם האמיתי
+ * שוכב במקום אחר. אותה משפחה של "ערך שנקרא כמשהו שהוא אינו".
+ *
+ * לניקוי: ליצור בסופהבייס פונקציה חדשה שה-slug שלה `tim`, להדביק בה את אותו
+ * קוד, ולהחזיר את השורה הזו ל-"tim". ה-Secrets משותפים לכל הפרויקט ואינם
+ * צריכים הגדרה מחדש.
+ */
+const TIM_FUNCTION = "quick-worker";
+
 const timUrl = () => {
   const base = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-  return base ? `${base.replace(/\/$/, "")}/functions/v1/tim` : null;
+  return base ? `${base.replace(/\/$/, "")}/functions/v1/${TIM_FUNCTION}` : null;
 };
 
 export async function askTim(question: string, signal?: AbortSignal): Promise<TimReply> {
