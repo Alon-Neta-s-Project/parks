@@ -632,6 +632,20 @@ button {
   border: 1px solid var(--pw-hairline); border-radius: var(--pw-r-md);
   text-decoration: none; color: inherit; background: var(--pw-surface-2);
 }
+/* תצלומי הפארקים, דנה 07.09. מאגר חינמי, בלי דרישת קרדיט.
+   ⚠️ התמונה יוצאת אל שולי הכרטיס בעזרת שוליים שליליים לוגיים, ולכן
+   `margin-inline` ולא left/right — נאכף בבדיקה. */
+.parkcard__img {
+  inline-size: auto;
+  margin-block-start: calc(var(--pw-s4) * -1);
+  margin-inline: calc(var(--pw-s4) * -1);
+  margin-block-end: var(--pw-s3);
+  aspect-ratio: 400 / 260;
+  object-fit: cover;
+  border-start-start-radius: var(--pw-r-md);
+  border-start-end-radius: var(--pw-r-md);
+  background: var(--pw-surface-3, var(--pw-surface-2));
+}
 .parkcard:hover { border-color: var(--pw-way-400); }
 .parkcard__n { font: 600 15px var(--pw-font-name); unicode-bidi: isolate; }
 .parkcard__r { font: var(--pw-t-micro); color: var(--pw-way-600); unicode-bidi: isolate; }

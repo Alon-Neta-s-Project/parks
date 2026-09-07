@@ -94,6 +94,25 @@ export function HomePage() {
           {parks.map((park) => (
             <li key={park.name}>
               <Link to={`/park/${encodeURIComponent(park.name)}`} className="parkcard">
+                {/* ⚠️ הקובץ נקרא לפי ה-slug של הפארק ולא לפי מפת שמות.
+                    מפה הייתה מסמך שלישי שצריך לתחזק, ומסמך כזה מתיישן
+                    בשקט — פארק שישנה שם היה מקבל תמונה של פארק אחר.
+
+                    ⚠️ ו-onError מסתיר את התמונה במקום להשאיר אייקון
+                    שבור: הכרטיס נבנה כך שהוא שלם גם בלי תמונה, ולכן
+                    תמונה חסרה מורידה קישוט ולא הופכת שורה לתקולה.
+                    alt ריק בכוונה — התמונה דקורטיבית, והשם כתוב לידה. */}
+                <img
+                  className="parkcard__img"
+                  src={`/parks/${park.slug}.webp`}
+                  alt=""
+                  loading="lazy"
+                  width={400}
+                  height={260}
+                  onError={(e) => {
+                    e.currentTarget.hidden = true;
+                  }}
+                />
                 <span className="parkcard__n en">{park.name}</span>
                 <span className="parkcard__r en">{park.resort}</span>
                 <span className="parkcard__s">{t("park.count", { count: park.count })}</span>

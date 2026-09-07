@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { experiences, parks } from "../../data";
@@ -333,5 +333,31 @@ describe("gets_wet holds four states, not three", () => {
     expect(shows.length).toBeGreaterThan(0);
     expect(experiences.some((e) => e.getsWet === "na")).toBe(true);
     expect(shows.every((e) => e.getsWet !== null)).toBe(true);
+  });
+});
+
+describe("every park carries its own photo", () => {
+  // ⚠️ הקובץ נקרא לפי slug בזמן ריצה, ולכן פארק שישנה slug מקבל 404
+  // ושורת הפארקים מאבדת תמונה בלי שאיש ידע. הבדיקה הזו היא מה שהופך
+  // את זה לכשל שרואים.
+  it("has a webp named for every park slug, and no orphans", () => {
+    const dir = join(process.cwd(), "public/parks");
+    const files = readdirSync(dir).filter((f) => f.endsWith(".webp"));
+    const have = new Set(files.map((f) => f.replace(/\.webp$/, "")));
+    const want = new Set(parks.map((p) => p.slug));
+
+    for (const slug of want) expect(have).toContain(slug);
+    // תמונה בלי פארק היא פארק שהוסר ותמונה שנשארה — פחות חמור, אבל
+    // אותו סוג של פער בין שני מקורות.
+    for (const slug of have) expect(want).toContain(slug);
+  });
+
+  it("keeps each photo small enough for a rail of ten", () => {
+    // עשר תמונות נטענות במסך הכניסה. המקור היה 3 MB; ⚠️ תמונה אחת
+    // שתחזור בגודל המקורי מחזירה את הטעינה למקום שממנו באנו.
+    const dir = join(process.cwd(), "public/parks");
+    for (const file of readdirSync(dir).filter((f) => f.endsWith(".webp"))) {
+      expect(statSync(join(dir, file)).size).toBeLessThan(120_000);
+    }
   });
 });
