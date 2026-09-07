@@ -252,6 +252,73 @@ for (const row of rows) {
 }
 
 /**
+ * Flag corrections approved before the master carries them.
+ *
+ * ⚠️ This patch OVERWRITES, and the name patch deliberately does not. The
+ * difference is not a relaxation — it is the whole reason this is a separate
+ * file with a separate rule.
+ *
+ * The case it was built for: Adventures with Kevin carried
+ * sens_loud_sudden = FALSE. Not empty — FALSE. So a family that asked Tim to
+ * avoid sudden loud noises was being told Kevin was fine, and nothing looked
+ * wrong, because a false is exactly what "checked and clear" looks like. Roni's
+ * second source says the puppet shrieks loudly on approach and startles small
+ * children. The row had no description at all until now, which is why nobody
+ * could catch it by reading.
+ *
+ * ⚠️ And because it overwrites, every row must declare what it expects to
+ * replace. If the master's current value is not `from`, the import STOPS. A
+ * patch that overwrote whatever it found would erase a later correction from
+ * the master and leave no trace — which is the same silent-overwrite failure in
+ * a new costume.
+ */
+const sensPatchPath = join(ROOT, "data/source/sens_patch.csv");
+interface SensPatch { key: string; column: string; from: string; to: string }
+const sensPatches: SensPatch[] = existsSync(sensPatchPath)
+  ? parseCsv(readFileSync(sensPatchPath, "utf8"))
+      .map((r) => ({
+        key: (r["Key"] ?? "").trim(),
+        column: (r["column"] ?? "").trim(),
+        from: (r["from"] ?? "").trim(),
+        to: (r["to"] ?? "").trim(),
+      }))
+      .filter((r) => r.key && r.column)
+  : [];
+
+const sensApplied: string[] = [];
+const sensRedundant: string[] = [];
+for (const patch of sensPatches) {
+  // ⚠️ Only the four flags. A patch that could reach any column would be a
+  // second master, and this file lives in data/source/ where that is the one
+  // thing the rule forbids.
+  if (!/^sens_(enclosed_dark|heights|loud_sudden|strobe)$/.test(patch.column)) {
+    console.error(`✗ ABORT — sens_patch may only touch the four sens_* columns.`);
+    console.error(`  ${patch.key} → ${patch.column}`);
+    process.exit(1);
+  }
+  const row = rows.find((r) => (r["Key"] ?? "").trim() === patch.key);
+  if (!row) {
+    console.error(`✗ ABORT — sens_patch names a key that is not in the export.`);
+    console.error(`  ${patch.key}`);
+    process.exit(1);
+  }
+  const current = (row[patch.column] ?? "").trim();
+  if (current.toUpperCase() === patch.to.toUpperCase()) {
+    sensRedundant.push(`${patch.key.split("|").pop()} · ${patch.column}`);
+    continue;
+  }
+  if (current.toUpperCase() !== patch.from.toUpperCase()) {
+    console.error(`✗ ABORT — the master no longer holds the value this patch replaces.`);
+    console.error(`  ${patch.key}`);
+    console.error(`  ${patch.column}: master has ${current || "(ריק)"}, patch expected ${patch.from}`);
+    console.error(`  Someone changed it. Decide which is right, then update or delete the patch row.`);
+    process.exit(1);
+  }
+  row[patch.column] = patch.to;
+  sensApplied.push(`${patch.key.split("|").pop()} · ${patch.column}: ${patch.from} → ${patch.to}`);
+}
+
+/**
  * Subtype carries 141 free-text descriptions; the schema needs two closed enums.
  * The translation lives in an approved map, so it is visible and reviewable in
  * one place rather than spread across 232 rows.
@@ -466,6 +533,17 @@ if (patchRedundant.length) {
   console.log(`\n  ✅ ${patchRedundant.length} שורות בטלאי — המאסטר כבר מכיל אותן.`);
   for (const k of patchRedundant) console.log(`    ${k.split("|").pop()}`);
   console.log(`  אפשר למחוק אותן מ-data/source/name_he_patch.csv.`);
+}
+if (sensApplied.length) {
+  console.log(`\n  🔴 ${sensApplied.length} תיקוני דגל מ-sens_patch.csv:`);
+  for (const k of sensApplied) console.log(`    ${k}`);
+  console.log(`  ⚠️ אלה **דריסות** של ערך קיים, לא מילוי ריק. הייצוא הבא ידרוס אותן חזרה`);
+  console.log(`     אם המאסטר לא יתוקן.`);
+}
+if (sensRedundant.length) {
+  console.log(`\n  ✅ ${sensRedundant.length} תיקוני דגל בטלים — המאסטר כבר מתוקן:`);
+  for (const k of sensRedundant) console.log(`    ${k}`);
+  console.log(`  אפשר למחוק אותם מ-data/source/sens_patch.csv.`);
 }
 if (patchOrphaned.size) {
   console.log(`\n  ⚠️ ${patchOrphaned.size} שורות בטלאי מצביעות על מפתח שאינו בייצוא:`);

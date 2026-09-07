@@ -99,6 +99,9 @@ describe("the master never reaches the repo", () => {
       // לכאן ולא לתיקייה אחרת כי הצינור קורא אותו בזמן הייבוא — אבל
       // ההיתר מותנה, והמבחן הבא הוא מה שמתנה אותו.
       "name_he_patch.csv",
+      // ⚠️ תיקוני דגל מאושרים שהמאסטר עדיין אינו נושא. אותו היתר מותנה,
+      // ובדיקה משלו מתחתיו.
+      "sens_patch.csv",
     ]);
     for (const file of readdirSync(join(process.cwd(), "data/source"))) {
       expect(allowed).toContain(file);
@@ -109,6 +112,28 @@ describe("the master never reaches the repo", () => {
   // ששומרת עליה. שתי עמודות בלבד: מפתח ושם עברי. עמודה שלישית — עוצמה,
   // מגבלת גובה, מקור — הופכת את הטלאי לדלת אחורית למאסטר, וזה בדיוק מה
   // שהכלל בא למנוע.
+  // ⚠️ הטלאי הזה **דורס** ערך קיים, ולכן הוא מסוכן יותר מזה של השמות.
+  // שלוש הדרישות כאן הן מה שמונע ממנו להיות מאסטר שני: רק ארבע עמודות
+  // הרגישות, כל שורה מצהירה מה היא מחליפה, ובלי URL — המקורות שייכים
+  // למאסטר ולעולם לא לייצוא.
+  it("keeps the flag patch to the four sens_* columns, and every row declares what it replaces", () => {
+    const path = join(process.cwd(), "data/source/sens_patch.csv");
+    if (!existsSync(path)) return; // נמחק כשהמאסטר משלים אותו — וזה תקין
+    const [header = "", ...lines] = readFileSync(path, "utf8").trim().split(/\r?\n/);
+    expect(header.trim()).toBe("Key,column,from,to");
+    for (const line of lines) {
+      const cells = line.split(",");
+      expect(cells).toHaveLength(4);
+      const [, column, from, to] = cells;
+      expect(column).toMatch(/^sens_(enclosed_dark|heights|loud_sudden|strobe)$/);
+      // ⚠️ from ריק פירושו "דרוס מה שתמצא", וזו בדיוק הדריסה השקטה
+      // שהטלאי הזה בנוי למנוע.
+      expect(from!.trim()).not.toBe("");
+      expect(to!.trim()).not.toBe("");
+      expect(line).not.toMatch(/https?:\/\//);
+    }
+  });
+
   it("keeps the Hebrew-name patch to two columns and nothing more", () => {
     const path = join(process.cwd(), "data/source/name_he_patch.csv");
     if (!existsSync(path)) return; // נמחק כשהמאסטר משלים אותו — וזה תקין

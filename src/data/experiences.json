@@ -939,7 +939,7 @@
   "lastVerified": "2026-09-06",
   "sensEnclosedDark": false,
   "sensHeights": null,
-  "sensLoudSudden": false,
+  "sensLoudSudden": true,
   "sensStrobe": false,
   "youtubeId": null,
   "videoCreator": null,
