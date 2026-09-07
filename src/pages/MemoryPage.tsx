@@ -119,7 +119,7 @@ export function MemoryPage() {
             <h2>{t("memory.preferences")}</h2>
             <div className="facts">
               {/* ⚠️ כל שדה שלא נענה מוצג כ"עוד לא נאמר" ולא מוסתר. מסך
-                  שמראה רק את מה שידוע נראה מלא גם כשהוא ריק, והמשתמשת אינה
+                  שמראה רק את מה שידוע נראה מלא גם כשהוא ריק, והמשתמש אינה
                   יכולה לדעת מה טים בכלל שאל. */}
               <div className="fact">
                 <span className="fact__k">{t("memory.attractionTypes")}</span>

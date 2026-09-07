@@ -30,7 +30,7 @@
 -- עושה דבר — והטיפוס vector יושב ב-extensions ולא ב-public, ולכן בלוק
 -- האימות היה נופל על "type vector does not exist" בסופהבייס. זו אותה
 -- נפילת search_path שכבר תפסה אותי כאן, וזה הדפוס שכל שאר המיגרציות
--- כבר משתמשות בו.
+-- כבר משתמשים בו.
 BEGIN;
 
 set local search_path = public, extensions;

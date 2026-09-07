@@ -86,7 +86,7 @@ STATUS_DECIDED = {
     ("disney-s-hollywood-studios-the-magic-of-disney-animation", "check"): "coming_soon",
     # Meet Moana at Character Landing — הכרעת פולה, 06.09: נכנס כ"לא קבוע /
     # תלוי מעבר דמות", כמו "סגור זמנית" ולא כמפגש בלוח קבוע. הסטטוס אומר
-    # למשתמשת שאי אפשר לסמוך על נוכחות הדמות, וזו בדיוק המשמעות.
+    # למשתמש שאי אפשר לסמוך על נוכחות הדמות, וזו בדיוק המשמעות.
     ("disney-s-animal-kingdom-meet-moana-at-character-landing", "check"): "temporarily_closed",
 }
 TYPE = {"attraction", "show", "parade", "meet_greet", "walkthrough"}

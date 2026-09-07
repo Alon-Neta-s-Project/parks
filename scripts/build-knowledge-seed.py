@@ -31,7 +31,7 @@ REQUIRED = ["id", "title", "doc_type", "authority_tier", "scope_resort",
             "product_family", "audience", "v1_priority", "purchase_type"]
 
 # ⚠️ המסמכים אינם תוכן קהילתי. הם נאספו ואומתו מול מקורות רשמיים, ולכן
-# הם נכנסים כ-approved. תוכן שנשלח על ידי משתמשות לעולם אינו נכנס
+# הם נכנסים כ-approved. תוכן שנשלח על ידי משתמשים לעולם אינו נכנס
 # לאינדקס לפני אישור אדם — הכלל הזה נשמר, הוא פשוט אינו חל כאן.
 REVIEW_STATUS = "approved"
 

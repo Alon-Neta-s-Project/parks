@@ -14,7 +14,7 @@ import { isConfigured } from "./supabase";
  */
 export type TimReply =
   | { status: "ok"; answer: string }
-  /** ⚠️ לכל כישלון יש טקסט משלו. "משהו השתבש" אינו אומר למשתמשת מה לעשות. */
+  /** ⚠️ לכל כישלון יש טקסט משלו. "משהו השתבש" אינו אומר למשתמש מה לעשות. */
   | { status: "failed"; reason: TimFailure; detail?: string };
 
 export type TimFailure =
