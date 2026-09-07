@@ -158,7 +158,15 @@ mig(n, ok) as (values
           where conname = 'trip_member_sensitivities_vocab')
         and not (select attnotnull from pg_attribute
                   where attrelid = to_regclass('public.trip_member')
-                    and attname = 'sensitivities')))
+                    and attname = 'sensitivities'))),
+  -- ⚠️ היעדר מדיניות פתוחה **וגם** RLS פעילה. טבלה בלי RLS פתוחה
+  -- לגמרי, ומחיקת המדיניות האחרונה ממנה אינה סוגרת דבר.
+  (35, (select not exists (select 1 from pg_policies
+          where schemaname='public' and tablename='experience_source'
+            and cmd in ('SELECT','ALL')
+            and coalesce(qual,'') not like '%is_admin%')
+        and (select relrowsecurity from pg_class
+              where oid = to_regclass('public.experience_source'))))
 ),
 -- ⚠️ הסה"כ נספר מרשימת הגלאים ואינו נכתב כמספר. "32" היה כתוב כאן
 -- ביד, ולכן הוספת הגלאי ה-33 הדליקה ❌ על מסד תקין לגמרי — הפעם
