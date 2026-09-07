@@ -903,3 +903,29 @@ button {
 }
 .parkrail > li { flex: 0 0 auto; scroll-snap-align: start; }
 .parkrail .parkcard { inline-size: 200px; }
+
+/* התצלום מאחורי מסך הכניסה. מאושר 07.09 — מאגר חינמי, בלי קרדיט. */
+.greet { position: relative; isolation: isolate; }
+.greet__bg { position: absolute; inset-block-start: 0; inset-inline: 0; block-size: 100%; z-index: -1; overflow: hidden; }
+.greet__photo {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  /* 15% מלמעלה — כך הטירה יושבת בשליש העליון ולא נחתכת באמצע. */
+  object-position: center 15%;
+  display: block;
+}
+.greet__veil { position: absolute; inset-inline: 0; }
+.greet__veil--top {
+  inset-block-start: 0;
+  block-size: 150px;
+  background: linear-gradient(180deg, rgba(255,255,255,.6) 0%, rgba(255,255,255,0) 100%);
+}
+/* ⚠️ רמפה מוקדמת ותלולה — ראה ההערה ברכיב. */
+.greet__veil--bottom {
+  inset-block-end: 0;
+  block-size: 75%;
+  background: linear-gradient(180deg,
+    rgba(251,246,239,0) 0%, rgba(251,246,239,.5) 28%,
+    rgba(251,246,239,.86) 58%, rgba(251,246,239,.98) 100%);
+}

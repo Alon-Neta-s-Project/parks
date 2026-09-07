@@ -38,3 +38,29 @@ describe("מסך הכניסה", () => {
     expect((h.chip1 ?? "").length).toBeGreaterThan(3);
   });
 });
+
+/**
+ * ⚠️ **התמונה מאושרת, והייחוס אסור.**
+ *
+ * דנה אישרה את תצלום הטירה (07.09) ממאגר חינמי, בלי דרישת קרדיט. הכלל
+ * הכללי בפרויקט הוא **אין מקורות בממשק** — והוא חל גם כאן: שורת קרדיט
+ * שאיש לא דרש היא ייחוס למקור, ומי שיראה אותה יסיק שיש לנו מדיניות
+ * קרדיטים. אין.
+ */
+describe("תצלום מסך הכניסה", () => {
+  it("קיים כקובץ ולא כ-base64 ברכיב", async () => {
+    const { statSync } = await import("node:fs");
+    const s = statSync("public/home-hero.jpg");
+    expect(s.size).toBeGreaterThan(10_000);
+  });
+
+  it("הרכיב אינו נושא שורת קרדיט", async () => {
+    const { readFileSync } = await import("node:fs");
+    const src = readFileSync("src/pages/HomePage.tsx", "utf8");
+    // ⚠️ בגוף ה-JSX בלבד. ההערה בראש הקובץ כן מסבירה שהאישור ניתן.
+    const jsx = src.slice(src.indexOf("return ("));
+    for (const word of ["קרדיט", "צילום:", "Photo by", "Unsplash", "Pexels"]) {
+      expect(jsx, word).not.toContain(word);
+    }
+  });
+});
