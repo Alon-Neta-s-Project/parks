@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Rubik', 'Segoe UI', Arial, sans-serif; }
+  </style>
+</helmet>
+
+<!-- Layla-inspired, added 07.09: the missing Signup screen for this page (5/7 -> 7/7 gap, see from-דנה.md / to-קודי.md). Same functional content as the approved pilot Signup.dc.html (save-the-list + free-questions-to-Tim + skip option), reskinned: a real park photo banner (echoing the photo-led hero pattern already used on TimHomeLaylaInspired / WorkspaceLaylaInspired) with the mascot badge, instead of a plain white/text-only screen - so signup doesn't feel like a jarring drop-out of the branded experience right before the guides open. -->
+<div dir="rtl" lang="he" style="width:390px;height:844px;background:#FBF6EF;color:#2B2420;display:flex;flex-direction:column;overflow:hidden;position:relative;">
+
+  <div style="position:relative;height:168px;flex-shrink:0;">
+    <img src="data:image/jpeg;base64,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" style="width:100%;height:100%;object-fit:cover;display:block;"/>
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(30,25,20,0.05) 0%,rgba(30,25,20,0.15) 55%,rgba(251,246,239,1) 100%);"></div>
+    <div style="position:absolute;top:14px;left:16px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.92);display:flex;align-items:center;justify-content:center;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2B2420" stroke-width="2.2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </div>
+    <div style="position:absolute;bottom:10px;right:16px;display:flex;align-items:center;gap:7px;background:rgba(255,255,255,0.92);border-radius:999px;padding:5px 12px 5px 6px;">
+      <div style="width:22px;height:22px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;"><svg width="19" height="19" viewBox="0 0 100 100">
+          <defs><linearGradient id="tmgsu1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#FFD98A"/><stop offset="100%" stop-color="#E8894A"/></linearGradient></defs>
+          <path d="M50 14 C70 14 82 32 82 52 C82 72 68 88 50 88 C32 88 18 72 18 52 C18 32 30 14 50 14 Z" fill="url(#tmgsu1)"/>
+          <path d="M32 20 L38 4 L42 22 Z" fill="#FFD98A"/>
+          <path d="M68 20 L62 4 L58 22 Z" fill="#FFD98A"/>
+          <path d="M32 40 Q38 34 44 40" stroke="#3B2A1E" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+          <path d="M56 40 Q62 34 68 40" stroke="#3B2A1E" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+          <path d="M38 62 Q50 72 62 62" stroke="#3B2A1E" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+          <circle cx="28" cy="54" r="6" fill="#F0653A" opacity="0.4"/><circle cx="72" cy="54" r="6" fill="#F0653A" opacity="0.4"/>
+        </svg></div>
+      <span style="font-size:12px;font-weight:700;color:#2B2420;">טים מכין לכם את המדריך</span>
+    </div>
+  </div>
+
+  <div style="padding:18px 24px 0;display:flex;flex-direction:column;gap:8px;">
+    <div style="font-size:22px;font-weight:800;">עוד רגע אחד</div>
+    <div style="font-size:14px;line-height:1.55;color:#4A4038;">שמרו את הרשימה שלכם, ותנו לטים לענות על כל שאלה שתשאלו — בעברית, על כל מתקן.</div>
+  </div>
+
+  <div style="padding:16px 24px 0;display:flex;flex-direction:column;gap:10px;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7A9E6E" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+      <span style="font-size:13.5px;">שמירת הרשימה, לא מתחילים מאפס בפעם הבאה</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7A9E6E" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+      <span style="font-size:13.5px;">שאלות חופשיות לטים, על כל מתקן</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7A9E6E" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+      <span style="font-size:13.5px;">כל הטיפים - לא רק הטעימה</span>
+    </div>
+  </div>
+
+  <div style="padding:0 24px;display:flex;flex-direction:column;gap:11px;margin-top:16px;">
+    <div style="width:100%;padding:14px 16px;border-radius:14px;border:1.5px solid #DDD2C4;background:#fff;font-size:14px;color:#8A8074;">כתובת אימייל</div>
+    <button style="width:100%;padding:15px;border-radius:999px;border:none;background:#E8674A;color:#fff;font-size:15.5px;font-weight:700;font-family:inherit;cursor:pointer;">המשיכו</button>
+
+    <div style="display:flex;align-items:center;gap:10px;margin:4px 0;">
+      <div style="flex:1;height:1px;background:#E3D9C9;"></div>
+      <span style="font-size:11.5px;color:#8A8074;">או</span>
+      <div style="flex:1;height:1px;background:#E3D9C9;"></div>
+    </div>
+
+    <button style="width:100%;padding:14px;border-radius:999px;border:1.5px solid #DDD2C4;background:#fff;font-size:14px;font-weight:600;font-family:inherit;color:#2B2420;cursor:pointer;">המשיכו עם Google</button>
+
+    <div style="text-align:center;font-size:11.5px;color:#8A8074;margin-top:2px;">בלי לחייב אשראי, בלי ספאם</div>
+    <div style="text-align:center;font-size:12.5px;color:#8A8074;margin-top:10px;text-decoration:underline;">לא עכשיו, המשך לעיין במדריך</div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>
