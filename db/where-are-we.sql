@@ -34,6 +34,7 @@ x(k, n) as (
     ('h_zero', 'experience', 'height_requirement_cm = 0'),
     ('h_null', 'experience', 'height_requirement_cm is null'),
     ('wet_na', 'experience', $q$gets_wet = 'na'$q$),
+    ('wet_null', 'experience', 'gets_wet is null'),
     ('he_bad', 'experience', $q$name_i18n->>'he' is null or name_i18n->>'he' = ''$q$),
     ('closed', 'experience', $q$status <> 'open'$q$),
     ('skip_null', 'experience', 'skip_line_system is null'),
@@ -150,7 +151,7 @@ g(passed, missing) as (
   from mig
 ),
 n(experience, park, land, profile, trip, conversation, knowledge_doc, chunks, vectors,
-  h_pos, h_zero, h_null, wet_na, he_bad, closed, skip_null, skip_none,
+  h_pos, h_zero, h_null, wet_na, wet_null, he_bad, closed, skip_null, skip_none,
   tables, policies, passed, missing) as (
   select (select n from c where name='experience'),
          (select n from c where name='park'),
@@ -165,6 +166,7 @@ n(experience, park, land, profile, trip, conversation, knowledge_doc, chunks, ve
          (select n from x where k='h_zero'),
          (select n from x where k='h_null'),
          (select n from x where k='wet_na'),
+         (select n from x where k='wet_null'),
          (select n from x where k='he_bad'),
          (select n from x where k='closed'),
          (select n from x where k='skip_null'),
@@ -195,10 +197,13 @@ report(ord, "מה", "מצב") as (
               else policies || ' מתוך 29 ❌' end from n
   union all
   select 4, 'התוכן — מתקנים',
-         case when experience is null then 'הטבלה לא קיימת ❌'
-              when experience = 232 then '232 מתוך 232 ✅'
-              when experience = 0   then 'ריק ❌ — לא הורץ קובץ התוכן'
-              else experience || ' מתוך 232 ⚠️ — הטעינה לא הושלמה' end from n
+         -- ⚠️ **מדווח, לא משווה למספר קפוא.** מספר השורות משתנה בכל מנת
+              -- תוכן, וגלאי שנשאר על הישן מדווח ⚠️ על מסד תקין ושולח לחפש
+              -- תקלה שאינה קיימת. זה קרה כאן חמש פעמים. הבדיקה שהטעינה
+              -- הושלמה יושבת בקובץ התוכן עצמו, שם יש עם מה להשוות.
+              case when experience is null then 'הטבלה לא קיימת ❌'
+              when experience = 0 then 'ריק ❌ — לא הורץ קובץ התוכן'
+              else experience || ' מתקנים' end from n
   union all
   select 5, 'התוכן — פארקים',
          case when park is null then 'הטבלה לא קיימת ❌'
@@ -209,19 +214,27 @@ report(ord, "מה", "מצב") as (
   select 6, 'שם עברי לכל מתקן',
          case when experience is null or experience = 0 then 'אין תוכן עדיין'
               when he_bad = 0 then 'לכולם יש ✅'
-              else he_bad || ' מתקנים בלי שם עברי ❌' end from n
+              -- ⚠️ פער תוכן אמיתי, לא גלאי ישן: מפגשי הדמויות שנוספו
+              -- ב-v7_10 הגיעו בלי שם עברי.
+              else he_bad || ' בלי שם עברי ❌ — פער תוכן' end from n
   union all
   select 7, 'גובה — שלושת המצבים',
          case when experience is null or experience = 0 then 'אין תוכן עדיין'
-              when h_pos = 78 and h_zero = 154 and h_null = 0
-                then '78 עם מגבלה · 154 בלי · 0 לא נבדקו ✅'
-              else h_pos || ' עם מגבלה · ' || h_zero || ' בלי · ' || h_null
-                   || ' לא נבדקו ⚠️ — לא תואם למאסטר' end from n
+              -- ⚠️ **הכלל הוא h_null = 0, לא הפילוח.** כמה מתקנים יש
+              -- מגבלה וכמה אין זה תיאור שמשתנה עם התוכן; מה שאסור הוא
+              -- מתקן שגובהו לא נבדק, כי NULL אינו "מתאים לכל המשפחה".
+              when h_null = 0
+                then h_pos || ' עם מגבלה · ' || h_zero || ' בלי · 0 לא נבדקו ✅'
+              else h_null || ' מתקנים שגובהם לא נבדק ❌' end from n
   union all
   select 8, 'gets_wet',
          case when experience is null or experience = 0 then 'אין תוכן עדיין'
-              when wet_na = 66 then '66 שורות na ✅'
-              else wet_na || ' שורות na במקום 66 ⚠️ — הייצוא כותב תא ריק. פער תוכן, לא תקלה' end from n
+              -- ⚠️ **הכלל הוא שאין NULL.** 'na' הוא מופע — השאלה אינה
+              -- חלה, וזו תשובה. NULL הוא "לא נבדק". הגלאי הישן ציפה
+              -- ל-66 בדיוק ותיאר את הפער כ"הייצוא כותב תא ריק" — וזה
+              -- התברר כלא נכון: המאסטר כתב N/A והייבוא שלנו זרק אותו.
+              when wet_null = 0 then wet_na || ' na · 0 לא נבדקו ✅'
+              else wet_null || ' מתקנים שלא נבדקו ❌' end from n
   union all
   select 9, 'מתקנים שאינם פתוחים',
          case when experience is null or experience = 0 then 'אין תוכן עדיין'
@@ -230,20 +243,20 @@ report(ord, "מה", "מצב") as (
   union all
   select 9.5, 'מוצר דילוג בתור',
          case when experience is null or experience = 0 then 'אין תוכן עדיין'
-              when skip_null = 74 and skip_none = 75
-                then '74 לא נבדקו · 75 נבדקו ואין ✅'
-              when skip_null = 0 and skip_none = 232
-                then 'כל 232 מסומנים "אין" ❌ — לא הורצה מיגרציה 016'
-              else skip_null || ' לא נבדקו · ' || skip_none || ' נבדקו ואין ⚠️' end from n
+              -- ⚠️ מדווח. הכשל האמיתי הוא כיווץ: אם אף שורה אינה NULL,
+              -- מישהו הפך "לא נבדק" ל-'none' בשקט.
+              when skip_null = 0 and skip_none = experience
+                then 'כל השורות מסומנות "אין" ❌ — הכיווץ חזר'
+              else skip_null || ' לא נבדקו · ' || skip_none || ' נבדקו ואין' end from n
   union all
   select 10, 'אזורים בפארקים (land)',
          case when land is null then 'הטבלה לא קיימת ❌'
               -- ⚠️ 79 ולא 77. "Park-wide" מופיע בשלושה פארקים, ונספר פעם
               -- אחת ברשימת השמות הייחודיים. הציפייה כאן אמרה 77 והשתילה
               -- הצליחה — כלומר הבדיקה דיווחה ⚠️ על מסד תקין לחלוטין.
-              when land = 0 then 'ריק — 79 האזורים עוד לא נשתלו ⏳'
-              when land = 79 then '79 אזורים ✅'
-              else land || ' אזורים מתוך 79 ⚠️' end from n
+              -- ⚠️ מדווח. מספר האזורים משתנה עם התוכן.
+              when land = 0 then 'ריק — האזורים עוד לא נשתלו ⏳'
+              else land || ' אזורים ✅' end from n
   union all
   select 11, 'מאגר הידע',
          case when knowledge_doc is null then 'הטבלה לא קיימת ❌'
