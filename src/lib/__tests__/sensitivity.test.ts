@@ -174,7 +174,29 @@ describe("the sensitivity question rides along with the group question", () => {
 
   it("offers every sensitivity, so none is collectable but unaskable", () => {
     const q = questions.find((x) => x.id === "sensitivities")!;
-    expect(q.options?.map((o) => o.id).sort()).toEqual([...sensitivities].sort());
+    const offered = q.options?.map((o) => o.id) ?? [];
+    for (const s of sensitivities) expect(offered).toContain(s);
+  });
+
+  // ⚠️ "אין רגישויות" הוא תשובה, ודילוג אינו. בלי האפשרות הזו משפחה בלי
+  // רגישויות הייתה חייבת לדלג, וטים היה רושם שהשאלה נשאלה ולא נענתה —
+  // שני מצבים שכלל הברזל החמישי מבחין ביניהם.
+  it("offers 'no sensitivities' as an answer, and only it is exclusive", () => {
+    const q = questions.find((x) => x.id === "sensitivities")!;
+    const none = q.options?.find((o) => o.id === "none");
+    expect(none).toBeDefined();
+    expect(none!.exclusive).toBe(true);
+    expect(none!.patch.sensitivities).toEqual([]);
+    // Every real sensitivity combines freely; only "none" cannot.
+    const exclusives = q.options?.filter((o) => o.exclusive).map((o) => o.id);
+    expect(exclusives).toEqual(["none"]);
+  });
+
+  // ⚠️ "none" אינו רגישות. אילו היה נכנס לרשימה, כל מסנן היה מקבל ערך
+  // שאין לו עמודה — ו-uncheckedFor היה מדפיס "לא נבדק" על כל 242 השורות.
+  it("keeps 'none' out of the sensitivity vocabulary itself", () => {
+    expect(sensitivities as string[]).not.toContain("none");
+    expect(rideSensitivities as string[]).not.toContain("none");
   });
 
   it("starts empty, and empty is not an answer", () => {
