@@ -109,6 +109,15 @@ export const emptyProfile: Profile = {
 export interface Option {
   id: string;
   patch: Partial<Profile>;
+  /**
+   * An answer that cannot be combined with any other in the same question.
+   *
+   * ⚠️ Built for "no particular sensitivities", where the alternative is worse
+   * than untidy: "none" alongside "afraid of the dark" is not a preference, it
+   * is two contradictory claims about the same child, and whichever one the
+   * merge happened to keep would be a coin flip nobody could see.
+   */
+  exclusive?: boolean;
 }
 
 export interface Question {
@@ -120,6 +129,8 @@ export interface Question {
   multi?: boolean;
   /** Free text is always available beside the chips. */
   freeText?: boolean;
+  /** A one-line reason shown under the prompt, when the question needs one. */
+  why?: boolean;
   /**
    * Asked in the same breath as another question, and not counted separately.
    *
@@ -143,7 +154,7 @@ export interface Question {
  * phrasing — never the order, the fields, or the number of questions.
  */
 export const questions: Question[] = [
-  { id: "group", kind: "members", freeText: true },
+  { id: "group", kind: "members", freeText: true, why: true },
   {
     // ⚠️ Numbered 0, not 2. It rides along with the group question and the
     // counter does not advance for it — the interface says "1/6" through both.
@@ -152,6 +163,7 @@ export const questions: Question[] = [
     followUpTo: "group",
     multi: true,
     freeText: true,
+    why: true,
     options: [
       { id: "dark", patch: { sensitivities: ["dark"] } },
       { id: "loudSudden", patch: { sensitivities: ["loudSudden"] } },
@@ -160,6 +172,11 @@ export const questions: Question[] = [
       { id: "motionSickness", patch: { sensitivities: ["motionSickness"] } },
       { id: "accessibility", patch: { sensitivities: ["accessibility"] } },
       { id: "longQueues", patch: { sensitivities: ["longQueues"] } },
+      // ⚠️ "אין רגישויות" הוא תשובה, ודילוג אינו. בלי האפשרות הזו משפחה
+      // בלי רגישויות הייתה חייבת לדלג — וטים היה רושם שהשאלה נשאלה ולא
+      // נענתה, במקום שנענתה בשלילה. אלה שני מצבים שונים, וכלל הברזל
+      // החמישי מבחין ביניהם: על שאלה שדולגה שואלים פעם נוספת אחת.
+      { id: "none", patch: { sensitivities: [] }, exclusive: true },
     ],
   },
   {

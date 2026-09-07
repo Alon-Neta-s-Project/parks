@@ -13,6 +13,7 @@ import {
 import type { TFunction } from "i18next";
 import { HEIGHT_ASK_BELOW_AGE, type Member } from "../lib/group";
 import { GroupBuilder } from "./GroupBuilder";
+import { acknowledge } from "../lib/acknowledge";
 import { FactAnswer } from "./FactAnswer";
 import { classify, findExperience, whichFact, type FactKey } from "../lib/intent";
 import { askTim, type TimReply } from "../lib/tim";
@@ -213,10 +214,25 @@ export function Chat() {
   };
 
   const answer = (key: string, label: string, patch: Partial<Profile>, reply?: string) => {
-    setProfile((current) => applyPatch(current, patch));
+    // ⚠️ נגזר מהפרופיל **שאחרי** התשובה ולא מזה שלפניה, אחרת המספר
+    // שהמשפחה קוראת שייך לתשובה הקודמת שלה. והחישוב יושב כאן ולא בתוך
+    // ה-setProfile: תופעת לוואי בתוך מעדכן־מצב נקראת פעמיים ב-StrictMode,
+    // וכל תשובה הייתה נרשמת פעמיים ביומן.
+    const next = applyPatch(profile, patch);
+    const ack = reply ? null : acknowledge(key, next);
+    const note = ack
+      ? t(ack.key, { count: ack.count, total: ack.total, list: ack.list })
+      : reply;
+
+    setProfile(next);
     setTurns((current) => [
       ...current,
-      { id: `${key}-${current.length}`, prompt: t(`questions.${key}.prompt`), answer: label, reply },
+      {
+        id: `${key}-${current.length}`,
+        prompt: t(`questions.${key}.prompt`),
+        answer: label,
+        reply: note,
+      },
     ]);
     setStep((current) => current + 1);
   };
@@ -403,8 +419,12 @@ export function Chat() {
             <Orb />
             <div className="bubble bubble--tim">
               {t(`questions.${question.id}.prompt`)}
-              {question.id === "group" && (
-                <div className="bubble__note">{t("questions.group.why")}</div>
+              {/* ⚠️ נגזר מהשאלה ולא מ-id קשיח. הבדיקה "האם זו שאלת הקבוצה"
+                  הייתה משאירה כל שאלה חדשה בלי ההסבר שלה — והשאלה הבאה
+                  שנוספה, הרגישויות, היא בדיוק כזו: היא שואלת דבר אישי
+                  וההסבר למה הוא הדבר שמצדיק לשאול. */}
+              {question.why && (
+                <div className="bubble__note">{t(`questions.${question.id}.why`)}</div>
               )}
             </div>
           </div>
@@ -432,11 +452,18 @@ export function Chat() {
                     className="option"
                     aria-pressed={chosen}
                     onClick={() =>
-                      setDraftMulti((current) =>
-                        chosen
-                          ? current.filter((id) => id !== option.id)
-                          : [...current, option.id],
-                      )
+                      setDraftMulti((current) => {
+                        if (chosen) return current.filter((id) => id !== option.id);
+                        // ⚠️ תשובה בלעדית מנקה את השאר, וכל שאר התשובות
+                        // מנקות אותה. "אין רגישויות" לצד "פחד מחושך" אינן
+                        // העדפה — הן שתי טענות סותרות על אותו ילד, ומיזוג
+                        // שקט היה בוחר אחת מהן בלי שאיש יראה.
+                        if (option.exclusive) return [option.id];
+                        const exclusives = new Set(
+                          question.options?.filter((o) => o.exclusive).map((o) => o.id),
+                        );
+                        return [...current.filter((id) => !exclusives.has(id)), option.id];
+                      })
                     }
                   >
                     {t(`questions.${question.id}.${option.id}`)}
