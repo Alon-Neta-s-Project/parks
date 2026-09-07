@@ -1,3 +1,5 @@
+import { readFileSync, readdirSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { experiences } from "../../data";
 import type { Experience } from "../../data/schema";
@@ -204,5 +206,67 @@ describe("the sensitivity question rides along with the group question", () => {
     // Nothing avoided means nothing withheld — including the unchecked rows,
     // which are only strict once someone has actually named a sensitivity.
     expect(matchesFilters(base({}), { avoidSensitivities: [] })).toBe(true);
+  });
+});
+
+describe("the database and the code share one vocabulary", () => {
+  // 🔴 עד מיגרציה 034 היו שניים. מיגרציה 010 תיעדה
+  // motion_sickness · fear_dark · fear_heights · claustrophobia,
+  // והקוד — שנבנה מול העמודות שקיימות בפועל — מכיר משהו אחר לגמרי.
+  // הם לא התנגשו רק מפני שהאפליקציה עוד אינה כותבת ל-trip_member.
+  //
+  // ⚠️ הבדיקה קוראת את האילוץ מקובץ המיגרציה ומשווה למערך כאן. סחיפה
+  // בכל אחד משני הכיוונים מפילה אותה — הוספת ערך בקוד בלי מיגרציה,
+  // או מיגרציה שמוסיפה ערך שהקוד אינו מכיר.
+  it("locks the same seven values in the migration and in the type", () => {
+    const sql = readFileSync(
+      join(process.cwd(), "db/migrations/034_sensitivities_vocabulary.sql"),
+      "utf8",
+    );
+    const block = sql.slice(
+      sql.indexOf("add constraint trip_member_sensitivities_vocab"),
+    );
+    const arrayLiteral = block.slice(block.indexOf("array["), block.indexOf("]::text[]"));
+    const inSql = [...arrayLiteral.matchAll(/'([^']+)'/g)].map((m) => m[1]!);
+
+    expect(inSql.sort()).toEqual([...sensitivities].sort());
+  });
+
+  // ⚠️ ולא רק שהערכים זהים — שהעמודה יכולה להחזיק "לא נשאל". NOT NULL
+  // DEFAULT '{}' היה מוחק את ההבחנה בכניסה, וזו התבנית שנתפסה כאן
+  // תשע פעמים.
+  it("lets the column say 'not asked' at all", () => {
+    const sql = readFileSync(
+      join(process.cwd(), "db/migrations/034_sensitivities_vocabulary.sql"),
+      "utf8",
+    );
+    expect(sql).toMatch(/alter column sensitivities drop not null/);
+    expect(sql).toMatch(/alter column sensitivities drop default/);
+  });
+});
+
+describe("trip_member stays anonymous, whatever the business becomes", () => {
+  // 🔴 סוכן נסיעות מורשה חייב שם מלא ותאריך לידה. הפיתוי יהיה להוסיף
+  // אותם כאן, וזה בדיוק מה שאסור: ברגע שהם באותה שורה, ההבטחה
+  // "איננו יודעים מי הילד הזה" מתה לגבי כל מי שנרשם — כולל מי שרק
+  // תכנן יום ולא הזמין דבר.
+  //
+  // ⚠️ זו בדיקה על **קבצי המיגרציה**, ולא על טיפוס. אפשר להוסיף עמודה
+  // למסד בלי לגעת בשורת קוד אחת, וזה בדיוק המסלול שצריך לחסום.
+  it("never gains a name, a birth date, or a document number", () => {
+    const dir = join(process.cwd(), "db/migrations");
+    const forbidden =
+      /\b(full_name|first_name|last_name|surname|given_name|birth_date|date_of_birth|dob|passport|id_number|national_id)\b/i;
+
+    for (const file of readdirSync(dir).filter((f) => f.endsWith(".sql"))) {
+      const sql = readFileSync(join(dir, file), "utf8");
+      // רק בלוקים שנוגעים ל-trip_member, כדי שטבלת הזמנות נפרדת בעתיד
+      // תוכל להחזיק בדיוק את השדות האלה — שם הוא המקום הנכון להם.
+      for (const stmt of sql.split(";")) {
+        if (!/trip_member/.test(stmt)) continue;
+        if (!/^\s*(create table|alter table)/im.test(stmt)) continue;
+        expect(stmt, `${file} מוסיף שדה מזהה ל-trip_member`).not.toMatch(forbidden);
+      }
+    }
   });
 });

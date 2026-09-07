@@ -150,7 +150,15 @@ mig(n, ok) as (values
   (33, (select exists (select 1 from pg_trigger
           where tgrelid = to_regclass('public.knowledge_chunk')
             and tgname = 'knowledge_chunk_content_changed'
-            and not tgisinternal)))
+            and not tgisinternal))),
+  -- ⚠️ האילוץ **וגם** היעדר ה-NOT NULL. אילוץ שהותקן על עמודה שעדיין
+  -- NOT NULL DEFAULT '{}' נראה מותקן ואינו פותר כלום — ההבחנה בין
+  -- "לא נשאל" ל"אין" נמחקת לפני שהאילוץ בכלל נבדק.
+  (34, (select exists (select 1 from pg_constraint
+          where conname = 'trip_member_sensitivities_vocab')
+        and not (select attnotnull from pg_attribute
+                  where attrelid = to_regclass('public.trip_member')
+                    and attname = 'sensitivities')))
 ),
 -- ⚠️ הסה"כ נספר מרשימת הגלאים ואינו נכתב כמספר. "32" היה כתוב כאן
 -- ביד, ולכן הוספת הגלאי ה-33 הדליקה ❌ על מסד תקין לגמרי — הפעם
