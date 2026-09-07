@@ -961,6 +961,16 @@ button {
 .bubble__body { white-space: pre-line; }
 .bubble__typing { color: var(--pw-ink-3); }
 .bubble__error { color: var(--pw-ink-2); }
+/* ⚠️ הסיבה הטכנית יורדת לשורה משלה. `.bubble__note` נכתב עבור div, ובתוך
+   span הוא נמרח על אותה שורה יחד עם הקו המפריד.
+
+   ⚠️ ו-`overflow-wrap` אינו קישוט: הטקסט הזה מגיע מהשרת באנגלית, מילה
+   אחת ארוכה בו הייתה מרחיבה את הבועה וגוררת גלילה אופקית — בדיוק הבאג
+   שנמדד כאן בצ'יפ של שאלת הדוגמה. */
+.bubble__error .bubble__note {
+  display: block;
+  overflow-wrap: anywhere;
+}
 /* ⚠️ צ'יפ במסך הזה נושא שאלה שלמה ולא מילה. בלי שבירה הוא נשאר שורה
    אחת ברוחב 395px, יוצא מהמסך משמאל, וגורר גלילה אופקית — נמדד
    בדפדפן, לא נחזה. `text-align: start` ולא left, כמו כל השאר. */

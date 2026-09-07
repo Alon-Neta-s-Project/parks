@@ -127,6 +127,18 @@ export default function TimOnlyApp() {
                      לפעולות שונות לגמרי. */
                   <span className="bubble__error">
                     {t(`ask.timFailed.${turn.reply.reason}`)}
+                    {/* ⚠️ הסיבה שהשרת מסר, ולא רק הקטגוריה. `upstream` מכנס
+                        חמש תקלות שונות למשפט אחד, והפרט שמפריד ביניהן הגיע
+                        בתשובה ונזרק. זו אותה נפילה שקטה שהכלל אוסר — והיא
+                        עלתה עשר דקות של ניחושים בעלייה הראשונה לאוויר.
+
+                        הטקסט מגיע מהפונקציה שלנו, שמוחקת ממנו מחרוזות שנראות
+                        כמו מפתח לפני שהוא יוצא (`upstreamReason`). */}
+                    {turn.reply.detail && (
+                      <span className="bubble__note">
+                        {t("ask.timFailedDetail", { detail: turn.reply.detail })}
+                      </span>
+                    )}
                   </span>
                 )}
               </div>
