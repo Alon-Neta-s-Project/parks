@@ -47,7 +47,25 @@ mig(n, ok) as (values
   ( 3, to_regclass('public.knowledge_doc') is not null),
   ( 4, to_regclass('public.profile') is not null),
   ( 5, to_regclass('public.conversation') is not null),
-  ( 6, (select count(*) from pg_policies where schemaname = 'public') >= 29),
+  -- ⚠️ **ספירה הוחלפה בכלל.** כאן היה `count(*) >= 29`, ומיגרציה 035
+  -- הורידה מדיניות אחת בכוונה — ולכן הגלאי דיווח ❌ על מסד תקין. זו
+  -- הפעם העשירית שציפייה קפואה נקראת ככשל בפרויקט הזה, והפעם היא גם
+  -- הענישה על **תיקון אבטחה**.
+  --
+  -- שני הכללים שבאמת חשובים, ושניהם עומדים בעצמם:
+  --   א. RLS פעילה על כל טבלה ב-public. טבלה בלעדיה פתוחה לגמרי.
+  --   ב. הטבלאות הפרטיות אינן נגישות בלי זהות — כל מדיניות עליהן
+  --      חייבת להיות מותנית ב-auth.uid() או ב-is_admin().
+  ( 6, (select count(*) = 0 from pg_class c
+          join pg_namespace n on n.oid = c.relnamespace
+         where n.nspname = 'public' and c.relkind = 'r'
+           and not c.relrowsecurity)
+       and (select count(*) = 0 from pg_policies
+             where schemaname = 'public'
+               and tablename in ('profile','profile_fact','trip','trip_day',
+                                 'trip_member','conversation','message')
+               and coalesce(qual, '') not like '%auth.uid%'
+               and coalesce(qual, '') not like '%is_admin%')),
   ( 7, to_regclass('public.experience_motion_sickness_idx') is not null),
   ( 8, (select exists (select 1 from pg_constraint where conname = 'experience_must_be_stated'))),
   ( 9, to_regclass('public.plan_item_interest_idx') is not null),
@@ -201,7 +219,8 @@ n(experience, park, land, profile, trip, conversation, knowledge_doc, chunks, ve
          (select n from x where k='skip_none'),
          (select count(*) from information_schema.tables
             where table_schema='public' and table_type='BASE TABLE'),
-         (select count(*) from pg_policies where schemaname='public'),
+         (select count(*) from pg_class c join pg_namespace n on n.oid=c.relnamespace
+           where n.nspname='public' and c.relkind='r' and not c.relrowsecurity),
          (select passed from g), (select total from g), (select missing from g)
 ),
 report(ord, "מה", "מצב") as (
@@ -221,8 +240,11 @@ report(ord, "מה", "מצב") as (
               else tables || ' טבלאות מתוך 21 ❌' end from n
   union all
   select 3, 'הרשאות (RLS)',
-         case when policies >= 29 then policies || ' מדיניות ✅'
-              else policies || ' מתוך 29 ❌' end from n
+         -- ⚠️ נמדד כ"כמה טבלאות **בלי** RLS", ולא כמה מדיניות יש.
+         -- מספר מדיניות עולה ויורד עם כל תיקון; טבלה בלי RLS היא
+         -- תמיד באג.
+         case when policies = 0 then 'כל הטבלאות עם RLS ✅'
+              else policies || ' טבלאות בלי RLS ❌' end from n
   union all
   select 4, 'התוכן — מתקנים',
          -- ⚠️ **מדווח, לא משווה למספר קפוא.** מספר השורות משתנה בכל מנת
