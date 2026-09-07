@@ -194,7 +194,15 @@ mig(n, ok) as (values
             and coalesce(qual,'') not like '%is_admin%')
         and (select bool_and(relrowsecurity) from pg_class
               where oid in (to_regclass('public.knowledge_doc'),
-                            to_regclass('public.knowledge_chunk')))))
+                            to_regclass('public.knowledge_chunk'))))),
+  -- ⚠️ קיום הפונקציה **וגם** שהגוף באמת קורא לה. פונקציית גג שקיימת
+  -- ואינה נקראת נראית מותקנת ואינה מגינה על דבר — וזה בדיוק מה שקרה
+  -- ב-021.
+  (37, (select exists (select 1 from pg_proc p join pg_namespace ns on ns.oid=p.pronamespace
+          where ns.nspname='public' and p.proname='rate_limit_bucket_daily_cap')
+        and (select pg_get_functiondef(p.oid) like '%rate_limit_bucket_daily_cap%'
+               from pg_proc p join pg_namespace ns on ns.oid=p.pronamespace
+              where ns.nspname='public' and p.proname='check_rate_limit')))
 ),
 -- ⚠️ הסה"כ נספר מרשימת הגלאים ואינו נכתב כמספר. "32" היה כתוב כאן
 -- ביד, ולכן הוספת הגלאי ה-33 הדליקה ❌ על מסד תקין לגמרי — הפעם
