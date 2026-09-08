@@ -1,3 +1,6 @@
+// ⚠️ אוצר המילים מיובא ואינו משוכפל. שתי רשימות בשני קבצים היו נעשות
+// שונות תוך שבוע, ואז אותה שאלה הייתה מסווגת אחרת בשני המסכים.
+import { FACT_WORDS, PLANNING } from "./ask-intent";
 import { experiences } from "../data";
 import type { Experience } from "../data/schema";
 
@@ -16,26 +19,6 @@ import type { Experience } from "../data/schema";
  * request is a failure, not a reasonable default.
  */
 export type Intent = "factual" | "planning" | "unclear";
-
-/** Words that mean "help me plan", not "tell me a fact". */
-const PLANNING = [
-  "תכנן", "תכננו", "לתכנן", "תכנון", "מסלול", "סדר יום", "יום שלם",
-  "עזרו לי", "תעזור", "תעזרו", "המלצות", "תמליץ", "תמליצו", "מה לעשות",
-  "plan", "itinerary", "schedule", "help me",
-];
-
-/** A question about a specific stated fact. */
-const FACT_WORDS = [
-  "גובה", "מגבלת", "ס\"מ", "סנטימטר",
-  "בחילה", "מבחיל", "סחרחורת",
-  "מרטיב", "הרטבה", "רטוב",
-  "כמה זמן", "משך", "אורך",
-  "נגיש", "נגישות", "כיסא", "גלגלים",
-  "ממוזג", "מיזוג",
-  "עוצמ", "אינטנסיב", "מפחיד",
-  "תור", "דילוג", "פאס",
-  "height", "how long", "wet", "nausea", "accessible", "intensity",
-];
 
 /**
  * Match a ride by name.

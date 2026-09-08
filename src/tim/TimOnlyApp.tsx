@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Orb } from "../components/Orb";
 import { Thinking } from "../components/Thinking";
+import { asksUsToChoose } from "../lib/ask-intent";
 import { askTim, type TimReply } from "../lib/tim";
 
 /**
@@ -28,8 +29,10 @@ import { askTim, type TimReply } from "../lib/tim";
 interface Turn {
   id: string;
   question: string;
-  /** null בזמן שהתשובה בדרך. */
-  reply: TimReply | null;
+  /**
+   * null בזמן שהתשובה בדרך, `"clarify"` כשטים שאל חזרה במקום לענות.
+   */
+  reply: TimReply | "clarify" | null;
 }
 
 export default function TimOnlyApp() {
@@ -37,6 +40,8 @@ export default function TimOnlyApp() {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
+  /** השאלה שממתינה לפרטים על מי ששואל, אם נשאלה כזו. */
+  const [pending, setPending] = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -53,6 +58,31 @@ export default function TimOnlyApp() {
     if (!text || busy) return;
 
     const id = `q${turns.length}`;
+
+    /**
+     * ⚠️ **בקשה לבחור עבור מי ששואל אינה נשלחת לטים כמו שהיא.**
+     *
+     * 🔴 שני באגים שדווחו נפלו כאן: "מה דעתך על 3 ימי דיסני ויומיים
+     * יוניברסל" ו"איזה פארק מתאים לזוג בני 30". טים ענה תוכן כללי על
+     * סוגי כרטיסים, או סירב והפנה החוצה — שניהם בלי לשאול דבר על מי
+     * שואל.
+     *
+     * ⚠️ **והשאלות נשאלות באמת, לא כהבטחה.** הניסוח שאושר אומר "שלוש
+     * שאלות קצרות קודם", ומסך שאומר את זה ואינו שואל דבר גרוע מהמצב
+     * הקודם. השאלות מוצגות מיד, והתשובה עליהן נשלחת לטים **יחד עם
+     * השאלה המקורית** — כי `askTim` שולח הודעה בודדת בלי היסטוריה,
+     * ותשובה שתישלח לבדה הייתה מגיעה אליו בלי הקשר בכלל.
+     */
+    if (pending === null && asksUsToChoose(text)) {
+      setTurns((current) => [...current, { id, question: text, reply: "clarify" }]);
+      setPending(text);
+      setDraft("");
+      return;
+    }
+
+    const forTim = pending ? `${pending}\n\nפרטים על מי ששואל: ${text}` : text;
+    setPending(null);
+
     setTurns((current) => [...current, { id, question: text, reply: null }]);
     setDraft("");
     setBusy(true);
@@ -60,7 +90,7 @@ export default function TimOnlyApp() {
     // ⚠️ askTim אינו זורק — הוא מחזיר כישלון מוטבע עם סיבה. זה מכוון:
     // לכל סיבה יש טקסט משלה שאומר למי שקוראת **מה לעשות**, ו-catch אחד
     // היה מכווץ את חמשתן ל"משהו השתבש".
-    const reply = await askTim(text);
+    const reply = await askTim(forTim);
     setTurns((current) => current.map((turn) => (turn.id === id ? { ...turn, reply } : turn)));
     setBusy(false);
   };
@@ -114,7 +144,16 @@ export default function TimOnlyApp() {
             <div className="msg">
               <Orb />
               <div className="bubble bubble--tim">
-                {turn.reply === null ? (
+                {turn.reply === "clarify" ? (
+                  /* ⚠️ הניסוח שאושר, ומיד אחריו השאלות עצמן. מסך שאומר
+                     "שלוש שאלות קצרות קודם" ואינו שואל דבר הוא הבטחה
+                     ריקה — גרועה יותר מהתשובה הכללית שהייתה כאן קודם. */
+                  <>
+                    {t("timOnly.planningFirst")}
+                    <div className="bubble__note">{t("timOnly.planningAsk")}</div>
+                    <div className="bubble__note">{t("timOnly.planningHint")}</div>
+                  </>
+                ) : turn.reply === null ? (
                   <Thinking className="bubble__typing" />
                 ) : turn.reply.status === "ok" ? (
                   /* ⚠️ טקסט ולא HTML. התשובה מגיעה ממודל, כלומר היא קלט
