@@ -164,12 +164,33 @@ function intensity(v: string, key: string) {
   return { value: n as 1 | 2 | 3 | 4, rated: true };
 }
 
-/** Free text with dates inside it. Filtering needs an enum; the sentence still matters. */
-function status(v: string) {
+/**
+ * Free text with dates inside it. Filtering needs an enum; the sentence still matters.
+ *
+ * 🔴 **"closure begins" used to mean closed. It does not — it is a date in the
+ * future.** Nineteen rows carry this exact sentence:
+ *
+ *   "Open as of Aug 24, 2026. Planned park maintenance closure begins Oct 26, 2026."
+ *
+ * The sentence opens with the word *Open*. Every one of those nineteen was
+ * classified `closed`, and Tim told a family that all of Volcano Bay was shut.
+ * Found by Neta on the live screen, 08.09 — not by a test.
+ *
+ * ⚠️ This is the project pattern in its purest form: a value that means one
+ * thing read as another. "Will close in October" became "is closed now". The
+ * substring matched; the meaning inverted.
+ *
+ * ⚠️ And the order below is the fix, not decoration. What the sentence says
+ * about **today** is decided first, and only a sentence that does not open with
+ * a present-tense "Open" is allowed to be read as a closure.
+ */
+export function status(v: string) {
   if (v === "Open / current") return { state: "open" as const, note: null };
-  const low = v.toLowerCase();
-  if (low.includes("temporarily unavailable") || low.includes("closure begins"))
-    return { state: "closed" as const, note: v };
+  const low = v.toLowerCase().trim();
+  // A sentence that begins by saying the row is open, is open. The dates it
+  // goes on to mention are kept in the note, where they belong.
+  if (/^open\b/.test(low)) return { state: "open" as const, note: v };
+  if (low.includes("temporarily unavailable")) return { state: "closed" as const, note: v };
   return { state: "check" as const, note: v };
 }
 

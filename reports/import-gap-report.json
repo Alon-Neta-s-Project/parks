@@ -1,7 +1,7 @@
 {
-  "ranAt": "2026-09-07",
+  "ranAt": "2026-09-08",
   "source": "data/source/product_export.csv",
-  "mode": "write",
+  "mode": "dry-run",
   "rows": {
     "read": 242,
     "accepted": 242,
