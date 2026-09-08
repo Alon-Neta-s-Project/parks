@@ -89,8 +89,24 @@ export function sensitivityStateFor(e: Experience, s: Sensitivity): SensitivityS
     case "heights":
       // ⚠️ Not height_requirement_cm, which is the opposite thing: that is how
       // tall you must be to board. This is whether the ride goes high enough to
-      // frighten someone who is afraid of heights, and 77 of the 242 rows have
-      // never been checked for it — the only one of the four with a real gap.
+      // frighten someone who is afraid of heights.
+      //
+      // 🔴 This comment used to claim 77 of the 242 rows had never been checked
+      // — "the only one of the four with a real gap". That was false. It was
+      // copied from the brief and never measured, and it was about to send a
+      // researcher after 77 rows that are already answered.
+      //
+      // Measured: every one of the 165 attractions carries TRUE or FALSE. The
+      // 77 are all 77 Entertainment rows — shows, parades, character meets —
+      // and the master marks them N/A, which means the question does not
+      // apply. Somebody did look.
+      //
+      // ⚠️ What is real, and is a bug still open: the importer's boolFlag
+      // collapses N/A into null, so this returns "unchecked" for all 77. A
+      // family avoiding heights therefore loses every show from their results
+      // — the very things that suit them — and is told the data was not
+      // checked when it was. quadState keeps "na" as its own value; the four
+      // sens_* columns do not use it. Awaiting Philip's call on the fix.
       return fromFlag(e.sensHeights);
     case "accessibility":
       // ⚠️ Five values, and squeezing them into yes/no was the first thing the

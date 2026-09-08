@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
+import { Thinking } from "./Thinking";
 import { useContent } from "../data/content";
 import { clear, load, save } from "../lib/persist";
 import {
@@ -667,7 +668,7 @@ function TimBubble({ question, state }: { question: string; state?: TimReply | "
   }
   if (state === "asking") {
     return (
-      <div className="bubble bubble--tim" aria-live="polite">{t("ask.thinking")}</div>
+      <div className="bubble bubble--tim"><Thinking /></div>
     );
   }
   if (state?.status === "ok") {

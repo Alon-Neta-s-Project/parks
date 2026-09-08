@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Orb } from "../components/Orb";
+import { Thinking } from "../components/Thinking";
 import { askTim, type TimReply } from "../lib/tim";
 
 /**
@@ -114,7 +115,7 @@ export default function TimOnlyApp() {
               <Orb />
               <div className="bubble bubble--tim">
                 {turn.reply === null ? (
-                  <span className="bubble__typing">{t("ask.thinking")}</span>
+                  <Thinking className="bubble__typing" />
                 ) : turn.reply.status === "ok" ? (
                   /* ⚠️ טקסט ולא HTML. התשובה מגיעה ממודל, כלומר היא קלט
                      חיצוני — ו-React מסמן אותה מעצמו כל עוד היא נשארת
