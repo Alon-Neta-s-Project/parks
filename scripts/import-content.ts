@@ -358,6 +358,66 @@ if (leaked.length) {
 const missingColumns = mapping.requiredColumns.filter((c: string) => !headers.includes(c));
 const unexpectedColumns = headers.filter((h) => !mapping.requiredColumns.includes(h));
 
+/**
+ * The five rows whose height number is a ceiling, not a floor.
+ *
+ * 🔴 The master has one height column and it means "minimum to ride". For five
+ * toddler water areas the number in it is the **maximum allowed**, so the same
+ * figure said the exact opposite of what it meant: Tim told a family that
+ * Tike's Peak requires 122 cm, when in truth it admits nobody *over* 122.
+ *
+ * Found by an inconsistency inside our own data — the gentlest intensity band
+ * held the highest number in the table, above Hulk (137) and Doctor Doom (132).
+ * Verified against sources by Roni, approved by Paula, 08.09.
+ *
+ * ⚠️ **Declared per row, like sens_patch, and for the same reason.** Every row
+ * states the value it expects to find. If the master ever corrects one of these
+ * — moving the number to a real maximum column, or changing it — the import
+ * STOPS rather than silently re-interpreting a number that now means something
+ * else. A rule that guessed which rows are ceilings would be a second master.
+ *
+ * ⚠️ **And it cannot be derived from Subtype.** Four of the five are
+ * "Water play area"; Bay Slides is "Body slide". A subtype rule would have
+ * missed the one with the largest error in it.
+ */
+const maxHeightPath = join(ROOT, "data/source/max_height.csv");
+const maxHeights = new Map<string, number>();
+if (existsSync(maxHeightPath)) {
+  for (const r of parseCsv(readFileSync(maxHeightPath, "utf8"))) {
+    const key = (r["Key"] ?? "").trim();
+    const from = (r["from"] ?? "").trim();
+    const max = Number((r["max_cm"] ?? "").trim());
+    if (!key) continue;
+
+    const row = rows.find((x) => (x["Key"] ?? "").trim() === key);
+    if (!row) {
+      console.error(`✗ ABORT — max_height names a key that is not in the export.`);
+      console.error(`  ${key}`);
+      process.exit(1);
+    }
+    const current = (row["height_requirement_cm"] ?? "").trim();
+    if (current !== from) {
+      console.error(`✗ ABORT — the master no longer holds the value max_height expects.`);
+      console.error(`  ${key}`);
+      console.error(`  master: ${current}`);
+      console.error(`  expected: ${from}`);
+      console.error(`  The row may have been corrected upstream. Re-read it before deleting this line.`);
+      process.exit(1);
+    }
+    if (!Number.isInteger(max) || max < 50 || max > 200) {
+      console.error(`✗ ABORT — max_height carries a max_cm outside 50..200: ${key} → ${max}`);
+      process.exit(1);
+    }
+    maxHeights.set(key, max);
+
+    // ⚠️ The minimum is emptied and **not set to 0**. Roni verified the
+    // ceiling; nobody verified that there is no floor. 0 here means "checked,
+    // and there is none" — a claim no one made. Empty means not checked, which
+    // is the truth.
+    row["height_requirement_cm"] = "";
+  }
+}
+
 const experiences: Experience[] = [];
 const rejected: { key: string; reason: string }[] = [];
 const seen = new Set<string>();
@@ -431,6 +491,7 @@ for (const row of rows) {
     usesLargeScreensOr3d: quadState(row["uses_large_screens_or_3d"] ?? "", key, "uses_large_screens_or_3d"),
     getsWet: enumOrNull(row["gets_wet"] ?? "", ["none", "may_get_wet", "may_get_soaked", "na"], key, "gets_wet"),
     heightRequirementCm: heightCm,
+    maxHeightRequirementCm: maxHeights.get(key.trim()) ?? null,
     wheelchair: (row["wheelchair"] ?? "").trim() === "" ? null : (row["wheelchair"] as never),
     // Column name in the export, field name in the schema — see content-mapping.json.
     motionSicknessWarning: quadState(
@@ -560,6 +621,15 @@ if (sensApplied.length) {
   for (const k of sensApplied) console.log(`    ${k}`);
   console.log(`  ⚠️ אלה **דריסות** של ערך קיים, לא מילוי ריק. הייצוא הבא ידרוס אותן חזרה`);
   console.log(`     אם המאסטר לא יתוקן.`);
+}
+// ⚠️ נאמר בכל ייבוא, כמו שני הטלאים האחרים ומאותה סיבה: טלאי ששותק הופך
+// עם הזמן למקור אמת שני. חמש השורות האלה מפרשות מחדש מספר שהמאסטר מחזיק,
+// וזו אמירה שצריכה להיראות בכל פעם.
+if (maxHeights.size) {
+  console.log(`\n  🔴 ${maxHeights.size} שורות שבהן הגובה הוא **תקרה** ולא רצפה (max_height.csv):`);
+  for (const [k, v] of maxHeights) console.log(`    ${k.split("|").pop()} · עד ${v} ס"מ`);
+  console.log(`  ⚠️ המינימום שלהן רוקן ל"לא נבדק" ולא ל-0. רוני אימתה את התקרה;`);
+  console.log(`     איש לא אימת שאין רצפה, ו-0 היה הצהרה שלא נבדקה.`);
 }
 if (sensRedundant.length) {
   console.log(`\n  ✅ ${sensRedundant.length} תיקוני דגל בטלים — המאסטר כבר מתוקן:`);

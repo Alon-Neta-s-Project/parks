@@ -25,8 +25,8 @@ with checks as (
   select 2 as ord,
          'height > 0 (יש מגבלה)' as "בדיקה",
          (select count(*) from experience where height_requirement_cm > 0)::text as "במסד",
-         '79' as "בייצוא",
-         case when (select count(*) from experience where height_requirement_cm > 0) <> 79 then '❌ נמעך במעבר — במסד יש משהו אחר ממה שיצא'
+         '74' as "בייצוא",
+         case when (select count(*) from experience where height_requirement_cm > 0) <> 74 then '❌ נמעך במעבר — במסד יש משהו אחר ממה שיצא'
               else '✅ תקין' end as "מצב"
 
   union all
@@ -41,8 +41,8 @@ with checks as (
   select 4 as ord,
          'height NULL (לא נבדק)' as "בדיקה",
          (select count(*) from experience where height_requirement_cm is null)::text as "במסד",
-         '0' as "בייצוא",
-         case when (select count(*) from experience where height_requirement_cm is null) <> 0 then '❌ נמעך במעבר — במסד יש משהו אחר ממה שיצא'
+         '5' as "בייצוא",
+         case when (select count(*) from experience where height_requirement_cm is null) <> 5 then '❌ נמעך במעבר — במסד יש משהו אחר ממה שיצא'
               else '✅ תקין' end as "מצב"
 
   union all
@@ -91,7 +91,7 @@ with checks as (
          'status — לא הכל open',
          (select string_agg(status || ': ' || n, ' · ' order by status)
             from (select status, count(*) as n from experience group by status) s),
-         '217 open · 22 closed · 2 temporarily_closed · 1 coming_soon',
+         '236 open · 3 closed · 2 temporarily_closed · 1 coming_soon',
          case when (select count(*) from experience where status = 'closed') > 0
                 then '✅ תקין — הסגורים נשמרו כסגורים'
               else '❌ הכל נטען כ-open. מתקן סגור שמוצג כפתוח הוא באג' end

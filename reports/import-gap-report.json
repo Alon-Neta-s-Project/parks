@@ -35,7 +35,7 @@
     },
     {
       "field": "heightRequirementCm",
-      "filled": 242,
+      "filled": 237,
       "notApplicable": 0,
       "total": 242
     },
@@ -612,13 +612,38 @@
     "Disney's Hollywood Studios|Entertainment|The Record Setters: inversions is not a whole number: \"N/A\" — left empty"
   ],
   "rejected": [],
-  "pagesComplete": 241,
-  "incompleteCount": 1,
+  "pagesComplete": 237,
+  "incompleteCount": 5,
   "incomplete": [
     {
       "key": "Disney's Blizzard Beach|Attraction|Tike's Peak",
       "missing": [
+        "heightRequirementCm",
         "wheelchair"
+      ]
+    },
+    {
+      "key": "Disney's Typhoon Lagoon|Attraction|Ketchakiddee Creek",
+      "missing": [
+        "heightRequirementCm"
+      ]
+    },
+    {
+      "key": "Disney's Typhoon Lagoon|Attraction|Bay Slides",
+      "missing": [
+        "heightRequirementCm"
+      ]
+    },
+    {
+      "key": "Universal Volcano Bay|Attraction|Runamukka Reef",
+      "missing": [
+        "heightRequirementCm"
+      ]
+    },
+    {
+      "key": "Universal Volcano Bay|Attraction|Tot Tiki Reef",
+      "missing": [
+        "heightRequirementCm"
       ]
     }
   ]

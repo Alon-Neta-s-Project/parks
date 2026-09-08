@@ -87,6 +87,11 @@ export interface ExperienceRow {
   max_speed_kmh: number | string | null;
   inversions: number | null;
   height_requirement_cm: number | null;
+  /**
+   * ⚠️ אופציונלי בכוונה: מסד שעדיין לא קיבל את מיגרציה 038 אינו מחזיר את
+   * העמודה, והקוד אמור להמשיך לעבוד ולקרוא אותה כ"לא נבדק" — ולא ליפול.
+   */
+  max_height_requirement_cm?: number | null;
   gets_wet: string | null;
   environment: string | null;
   air_conditioned: string | null;
@@ -213,6 +218,12 @@ export function toExperience(row: ExperienceRow): Experience | { refused: string
     usesLargeScreensOr3d: quad(row.uses_large_screens_or_3d),
     getsWet: row.gets_wet as Experience["getsWet"],
     heightRequirementCm: row.height_requirement_cm as Experience["heightRequirementCm"],
+    // ⚠️ הכיוון ההפוך: עד כמה מותר להיות גבוה. עמודה חדשה, ומסד שעוד לא
+    // קיבל את המיגרציה מחזיר undefined — שאינו null ואינו עובר את הסכמה.
+    // ההמרה המפורשת היא מה שהופך "המסד מפגר אחרי הקוד" לשורה שנקראת
+    // כ"לא נבדק" במקום לחריגה.
+    maxHeightRequirementCm:
+      (row.max_height_requirement_cm as number | null | undefined) ?? null,
     wheelchair: row.wheelchair as Experience["wheelchair"],
     motionSicknessWarning: quad(row.motion_sickness_warning),
     lastVerified: row.last_verified,

@@ -295,6 +295,14 @@ export interface ExperienceRow {
   status_note: string | null;
   intensity: number | null;
   height_cm: number | null;
+  /**
+   * ⚠️ ההפך מ-`height_cm`: עד כמה מותר להיות גבוה.
+   *
+   * `undefined` ולא רק `null` בכוונה — מסד שעדיין לא קיבל את מיגרציה 038
+   * אינו מחזיר את השדה כלל, והפונקציה אמורה להמשיך לעבוד ולא לומר דבר,
+   * במקום להדפיס "undefined ס״מ" בתשובה למשפחה.
+   */
+  max_height_cm?: number | null;
   gets_wet: string | null;
   skip_line: string | null;
   last_verified: string | null;
@@ -333,6 +341,17 @@ export function formatExperiences(rows: ExperienceRow[]): string {
           ? "אין מגבלת גובה"
           : `גובה מינימום: ${r.height_cm} ס"מ`,
       );
+      // 🔴 **התקרה, והיא ההפך מהרצפה.** חמישה אזורי מים לפעוטות מגבילים
+      // גובה כלפי מעלה. כל עוד היה כאן רק "גובה מינימום", אותו מספר נאמר
+      // בכיוון ההפוך: "מגבלת הגובה בטייקס פיק היא 122" שלחה ילדה בגובה
+      // 130 למתקן שלא ייתן לה לעלות, ולא הזהירה נער בגובה 160.
+      //
+      // ⚠️ ונאמר במילים ולא במספר לבדו. "122" ליד "גובה מינימום" ו-"122"
+      // ליד "גובה מקסימלי" נראים דומים מדי במשפט אחד, והמודל הוא זה
+      // שמנסח. המילה "עד" עושה את ההבדל.
+      if (r.max_height_cm !== null && r.max_height_cm !== undefined) {
+        bits.push(`⚠️ גובה מקסימלי: עד ${r.max_height_cm} ס"מ בלבד — מי שגבוה יותר אינו יכול לעלות`);
+      }
       if (r.fits === true) bits.push("מתאים לגובה שנמסר");
       if (r.fits === false) bits.push("לא מתאים לגובה שנמסר");
       // ⚠️ fits === null אינו נאמר כ"מתאים". הוא פשוט לא נאמר.
@@ -888,7 +907,18 @@ export async function handle(req: Request, env: Record<string, string | undefine
  * עוד לפני שהריצה שורה אחת. שלושת הכשלים שנטע מצאה היום במסך חי יושבים
  * כולם בפונקציות טהורות בקובץ הזה, וכולם היו ניתנים לתפיסה בבדיקה.
  * ב-Deno התנאי מתקיים והשרת עולה בדיוק כמו קודם.
+ *
+ * ⚠️ וההצהרה למטה היא המינימום שמאפשר ל-tsc של הפרויקט (שאינו מכיר Deno)
+ * לקמפל את הקובץ. היא מתארת רק את מה שנקרא כאן, ובכוונה — הצהרה רחבה
+ * הייתה מסתירה שימוש ב-API שאינו קיים בפועל בסביבת ההרצה.
  */
+declare const Deno:
+  | {
+      serve: (handler: (req: Request) => Promise<Response>) => void;
+      env: { toObject(): Record<string, string | undefined> };
+    }
+  | undefined;
+
 if (typeof Deno !== "undefined") Deno.serve(async (req) => {
   try {
     return await handle(req, Deno.env.toObject());

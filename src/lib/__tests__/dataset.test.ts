@@ -102,6 +102,10 @@ describe("the master never reaches the repo", () => {
       // ⚠️ תיקוני דגל מאושרים שהמאסטר עדיין אינו נושא. אותו היתר מותנה,
       // ובדיקה משלו מתחתיו.
       "sens_patch.csv",
+      // ⚠️ חמש שורות שבהן הגובה במאסטר הוא תקרה ולא רצפה. גם כאן ההיתר
+      // מותנה: כל שורה מצהירה איזה ערך היא מצפה למצוא, והייבוא נעצר אם
+      // המאסטר השתנה. אושר על ידי פולה, 08.09.
+      "max_height.csv",
     ]);
     for (const file of readdirSync(join(process.cwd(), "data/source"))) {
       expect(allowed).toContain(file);

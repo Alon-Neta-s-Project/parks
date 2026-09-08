@@ -140,6 +140,30 @@ export const experienceSchema = z.object({
    */
   heightRequirementCm: z.union([z.literal(0), z.number().int().min(50).max(200)]).nullable(),
 
+  /**
+   * The other direction: how tall you may be and still be allowed on.
+   *
+   * 🔴 **Five toddler water areas carried their maximum in the minimum column,
+   * and the same number therefore said the opposite of what it meant.** Tim
+   * told a family that Tike's Peak requires 122 cm; it in fact admits nobody
+   * *over* 122. A 130 cm child was turned away from a ride built for her, and a
+   * 160 cm teenager who genuinely cannot ride was never warned.
+   *
+   * Found 08.09 by an inconsistency inside our own data — the gentlest
+   * category held the highest number in the table, above Hulk and Doctor Doom —
+   * then verified against sources by Roni and approved by Paula.
+   *
+   * ⚠️ **A separate field and not a cleared value.** Blanking those five to
+   * `0` would have been the same lie facing the other way: `0` here means
+   * "checked, and there is no limit", and these rides do have one. We would
+   * have swapped a barred short child for an invited tall one.
+   *
+   * ⚠️ **And `heightRequirementCm` on those five is `null`, not `0`.** Roni
+   * verified the ceiling; nobody verified the absence of a floor. `0` would be
+   * a claim no one made.
+   */
+  maxHeightRequirementCm: z.number().int().min(50).max(200).nullable(),
+
   wheelchair: wheelchairSchema,
 
   /**
