@@ -47,8 +47,8 @@ describe("an unchecked sensitivity is not a clean bill", () => {
 
   it("is excluded by default when the group asked to avoid it", () => {
     const unchecked = base({ sensLoudSudden: null });
-    const clear = base({ sensLoudSudden: false });
-    const flagged = base({ sensLoudSudden: true });
+    const clear = base({ sensLoudSudden: "false" });
+    const flagged = base({ sensLoudSudden: "true" });
     const filters = { avoidSensitivities: ["loudSudden" as const] };
 
     expect(matchesFilters(flagged, filters)).toBe(false);
@@ -62,7 +62,7 @@ describe("an unchecked sensitivity is not a clean bill", () => {
       includeUncheckedSensitivity: true,
     };
     expect(matchesFilters(base({ sensLoudSudden: null }), filters)).toBe(true);
-    expect(matchesFilters(base({ sensLoudSudden: true }), filters)).toBe(false);
+    expect(matchesFilters(base({ sensLoudSudden: "true" }), filters)).toBe(false);
   });
 
   it("is reported as a number rather than silently dropped", () => {
@@ -93,14 +93,14 @@ describe("dark is read from the column and never from the category", () => {
   });
 
   it("keeps a dark_ride that was checked and found not enclosed", () => {
-    const checked = base({ subtype: "dark_ride", sensEnclosedDark: false });
+    const checked = base({ subtype: "dark_ride", sensEnclosedDark: "false" });
     expect(matchesFilters(checked, { avoidSensitivities: ["dark"] })).toBe(true);
   });
 });
 
 describe("dark and noise are separate answers", () => {
   it("a ride flagged only for noise is not withheld from someone avoiding the dark", () => {
-    const loudButLit = base({ sensLoudSudden: true, sensEnclosedDark: false });
+    const loudButLit = base({ sensLoudSudden: "true", sensEnclosedDark: "false" });
     expect(matchesFilters(loudButLit, { avoidSensitivities: ["dark"] })).toBe(true);
     expect(matchesFilters(loudButLit, { avoidSensitivities: ["loudSudden"] })).toBe(false);
   });
@@ -128,12 +128,26 @@ describe("accessibility carries five values, not two", () => {
 });
 
 describe("motion sickness keeps its four states", () => {
-  it("does not read 'na' as no warning", () => {
-    // "na" answers the question, not the ride. A show with no motion at all is
-    // not a ride that was checked for nausea and cleared.
+  it("'לא רלוונטי' אינו 'לא נבדק', ואינו מוציא את השורה", () => {
+    // 🔴 **הבדיקה הזו הפוכה ממה שהייתה, וזה התיקון עצמו.**
+    //
+    // קודם היא דרשה ש-"na" ייקרא "unchecked" ושהשורה תוצא מהתוצאות. זה
+    // היה נכון כל עוד לא היה מצב שאומר "לא חל" — אבל המחיר היה שמשפחה
+    // שביקשה להימנע ממחלת ים איבדה את **כל המופעים**, שהם בדיוק מה
+    // שמתאים לה. מצעד אינו יכול לגרום למחלת ים.
+    //
+    // ⚠️ וההבחנה אינה סמנטית: "לא נבדק" מחייב זהירות, "לא חל" הוא תשובה
+    // מלאה. מי שמתייחס לשניהם אותו דבר בוחר על איזו מהן לשקר.
+    //
+    // אושר על ידי פולה דרך פיליפ, 08.09.
     const na = base({ motionSicknessWarning: "na" });
-    expect(sensitivityStateFor(na, "motionSickness")).toBe("unchecked");
-    expect(matchesFilters(na, { avoidSensitivities: ["motionSickness"] })).toBe(false);
+    expect(sensitivityStateFor(na, "motionSickness")).toBe("notApplicable");
+    expect(matchesFilters(na, { avoidSensitivities: ["motionSickness"] })).toBe(true);
+
+    // ⚠️ ומה שלא השתנה: "לא נבדק" עדיין מוציא. זו הגדר שהתיקון לא נגע בה.
+    const unchecked = base({ motionSicknessWarning: null });
+    expect(sensitivityStateFor(unchecked, "motionSickness")).toBe("unchecked");
+    expect(matchesFilters(unchecked, { avoidSensitivities: ["motionSickness"] })).toBe(false);
   });
 
   it("separates an explicit false from an unanswered one only by opting in", () => {

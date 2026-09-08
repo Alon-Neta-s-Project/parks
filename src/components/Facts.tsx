@@ -55,12 +55,21 @@ export function Facts({ experience: e }: { experience: Experience }) {
 
       {/* Not tagged is stated, not left silent — and nothing here is inferred
           from category. A dark_ride is an indoor tracked ride, not a scary one. */}
+      {/* 🔴 **קודם כל ערך שאינו null הוצג כ"כן".** כלומר שורה שנבדקה
+          ונמצא שאין בה חושך — `false` — הוצגה כ"כן, יש חושך". זה היפוך
+          מלא של הנתון, על השדה שמשפחה עם ילד שמפחד מחושך קוראת.
+
+          ⚠️ ומאז מיגרציה 040 יש כאן גם "na": מופע שהשאלה אינה חלה עליו.
+          `Quad` הוא אותו רכיב שמשמש את שאר העמודות הארבע־מצביות, והוא
+          מבדיל בין ארבעתם. */}
       <Row
         label={t("facts.sensitivities")}
         missing={e.sensEnclosedDark === null}
         note={e.sensEnclosedDark === null ? t("facts.notTaggedWhy") : undefined}
       >
-        {e.sensEnclosedDark === null ? t("facts.notTagged") : t("facts.yes")}
+        {e.sensEnclosedDark === null
+          ? t("facts.notTagged")
+          : <Quad value={e.sensEnclosedDark} />}
       </Row>
 
       <Row label={t("facts.motionWarning")} missing={isMissing(e.motionSicknessWarning)}>

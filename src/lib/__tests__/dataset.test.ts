@@ -241,9 +241,11 @@ describe("what must never be inferred", () => {
     // כי ארבע העמודות לא היו בחוזה הייצוא. במאסטר יש להן ערך כמעט
     // לכל שורה, והן נזרקו בדרך. זהו המופע השני מתוך שבעה של התבנית,
     // והוא נסגר כאן.
+    // ⚠️ מחרוזות ולא בוליאנים, מאז מיגרציה 040. הטיפוס עבר לארבעה מצבים
+    // כדי ש-N/A לא ייקרא כ"לא נבדק".
     for (const f of ["sensEnclosedDark", "sensLoudSudden", "sensStrobe"] as const) {
-      const yes = experiences.filter((e) => e[f] === true).length;
-      const no = experiences.filter((e) => e[f] === false).length;
+      const yes = experiences.filter((e) => e[f] === "true").length;
+      const no = experiences.filter((e) => e[f] === "false").length;
       expect(yes, f).toBeGreaterThan(0);
       expect(no, f).toBeGreaterThan(0);
     }
@@ -253,8 +255,19 @@ describe("what must never be inferred", () => {
     // ⚠️ sens_heights נושא N/A ב-77 שורות — מופעים, שאין להם "חשיפה
     // לגובה". N/A הוא "לא חל", והוא **אינו** false. false פירושו נבדק
     // ואין רגישות, וזו אמירה שמשפחה מסתמכת עליה.
-    const unchecked = experiences.filter((e) => e.sensHeights === null).length;
-    expect(unchecked).toBeGreaterThan(0);
+    //
+    // 🔴 והבדיקה הזו נכתבה כשלא הייתה דרך לומר "לא חל", ולכן היא דרשה
+    // שהשורות יישארו `null`. זה היה הפשרה, לא המטרה: `null` פירושו "לא
+    // נבדק", ומשפחה שביקשה להימנע מגבהים איבדה את כל 77 המופעים
+    // מהתוצאות. מיגרציה 040 נתנה ל-N/A מצב משלו, והבדיקה אוכפת עכשיו את
+    // מה שהיא תמיד התכוונה אליו.
+    const na = experiences.filter((e) => e.sensHeights === "na");
+    expect(na.length).toBe(77);
+    // ⚠️ וכולן Entertainment. שורת מתקן שתקבל "לא חל" היא סימן שמישהו
+    // דילג על השאלה ולא שהיא אינה חלה.
+    expect(na.every((e) => e.kind === "entertainment")).toBe(true);
+    // ⚠️ ואף שורת מתקן לא נותרה "לא נבדק" — הן כולן נשאו ערך מלכתחילה.
+    expect(experiences.filter((e) => e.sensHeights === null)).toEqual([]);
   });
 
   it("never lets dark_ride imply enclosed-and-dark", () => {
@@ -273,7 +286,7 @@ describe("what must never be inferred", () => {
     // מסומנים true. פיזור מעורב הוא ההוכחה שהערך מגיע מהמאסטר.
     const darkRides = experiences.filter((e) => e.category === "dark_ride");
     expect(darkRides.length).toBeGreaterThan(0);
-    expect(darkRides.some((e) => e.sensEnclosedDark !== true)).toBe(true);
+    expect(darkRides.some((e) => e.sensEnclosedDark !== "true")).toBe(true);
   });
 
   it("copies numbers from the export instead of transforming them", () => {

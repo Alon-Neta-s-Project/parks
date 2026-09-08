@@ -102,10 +102,13 @@ export interface ExperienceRow {
   big_drops: string | null;
   spinning: string | null;
   skip_line_system: string | null;
-  sens_enclosed_dark: boolean | null;
-  sens_heights: boolean | null;
-  sens_loud_sudden: boolean | null;
-  sens_strobe: boolean | null;
+  // ⚠️ טקסט ולא בוליאני, מאז מיגרציה 040. בוליאני מחזיק שלושה מצבים ואינו
+  // יכול להפריד "לא נבדק" מ"לא רלוונטי", וזה בדיוק ההבדל ש-77 שורות
+  // המופעים נשענות עליו.
+  sens_enclosed_dark: string | null;
+  sens_heights: string | null;
+  sens_loud_sudden: string | null;
+  sens_strobe: string | null;
   last_verified: string | null;
   land: { name: string } | null;
   park: { park_kind: string; resort_id: string } | null;
@@ -228,10 +231,13 @@ export function toExperience(row: ExperienceRow): Experience | { refused: string
     motionSicknessWarning: quad(row.motion_sickness_warning),
     lastVerified: row.last_verified,
 
-    sensEnclosedDark: row.sens_enclosed_dark,
-    sensHeights: row.sens_heights,
-    sensLoudSudden: row.sens_loud_sudden,
-    sensStrobe: row.sens_strobe,
+    // ⚠️ דרך `quad` ולא ישירות. ערך שאינו באוצר המילים הסגור נקרא כ"לא
+    // נבדק" במקום להיכנס כמות שהוא — מסד שנשאר על הטיפוס הבוליאני הישן
+    // היה מחזיר כאן `true`, שאינו תואם לסכמה ומפיל את השורה.
+    sensEnclosedDark: quad(row.sens_enclosed_dark),
+    sensHeights: quad(row.sens_heights),
+    sensLoudSudden: quad(row.sens_loud_sudden),
+    sensStrobe: quad(row.sens_strobe),
 
     youtubeId: null,
     videoCreator: null,

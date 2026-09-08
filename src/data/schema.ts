@@ -199,10 +199,28 @@ export const experienceSchema = z.object({
    * is one. Inferring it would flag a gentle family ride as a claustrophobia
    * risk and destroy trust in the flag entirely.
    */
-  sensEnclosedDark: z.boolean().nullable(),
-  sensHeights: z.boolean().nullable(),
-  sensLoudSudden: z.boolean().nullable(),
-  sensStrobe: z.boolean().nullable(),
+  /**
+   * 🔴 **ארבעה מצבים ולא שלושה, ולא בגלל סדר.**
+   *
+   * המאסטר כותב `N/A` על 77 שורות Entertainment — מופעים, מצעדים ומפגשי
+   * דמויות — ומשמעותו "השאלה אינה חלה". הייבוא כיווץ אותו ל-`null`, שאצלנו
+   * פירושו "לא נבדק", **ושתי אמירות שונות לגמרי נשמעו זהות.**
+   *
+   * ⚠️ ומה שזה עשה בפועל: משפחה שביקשה להימנע מגבהים איבדה את 77 המופעים
+   * מהתוצאות — בדיוק מה שהכי מתאים לה — וקיבלה הודעה שהנתון לא נבדק, בעוד
+   * שהוא כן.
+   *
+   * ⚠️ ו-`boolFlag` לא "שכח" למפות: טיפוס היעד היה `boolean | null`, ולא
+   * היה ל-`na` לאן ללכת. זו הייתה **הופעה שלישית של אותה תבנית**, וזה מה
+   * שהוביל לחוק הבנייה ב-`na-columns.test.ts`: כל עמודה שהמאסטר יכול
+   * לכתוב בה N/A חייבת להיות ארבע־מצבית בכל שכבה.
+   *
+   * הופעה רביעית כבר נראית בארבע העמודות המספריות, והבדיקה תופסת אותן.
+   */
+  sensEnclosedDark: quadStateSchema,
+  sensHeights: quadStateSchema,
+  sensLoudSudden: quadStateSchema,
+  sensStrobe: quadStateSchema,
 
   // ---- held back deliberately ----
   /** Master-only until embedding and commercial use are settled (spec §3.4). */

@@ -65,24 +65,16 @@ const list = (v: string) =>
   v === "" ? [] : v.split(/[;|]/).map((s) => s.trim()).filter(Boolean);
 
 /**
- * דגל שהוא בוליאני או "לא נבדק".
+ * ארבעה מצבים (spec §3.1). ריק הוא "לא נבדק", ונשאר כך.
  *
- * ⚠️ **שלושה מצבים ולא שניים.** ריק הוא "לא נבדק", ו-`N/A` הוא "לא
- * רלוונטי" — ושניהם אינם `false`. `false` פירושו נבדק ואין רגישות,
- * וזו אמירה שמשפחה מסתמכת עליה. הסכמה נושאת `boolean | null`, ולכן
- * "לא נבדק" ו"לא רלוונטי" מתלכדים ל-null; מה שאסור הוא שיתלכדו
- * ל-false.
+ * 🔴 **`boolFlag` נמחקה, ולא נשארה "לכל מקרה".** היא החזירה
+ * `boolean | null`, כלומר שלושה מצבים, ולכן `N/A` מהמאסטר לא היה לו לאן
+ * ללכת והתלכד עם "לא נבדק". זו הייתה ההופעה השלישית של אותה תבנית —
+ * 77 שורות מופעים שנקראו כלא בדוקות.
+ *
+ * ⚠️ פונקציה תלת־מצבית שנשארת בקובץ היא הזמנה להשתמש בה שוב בעמודה
+ * הבאה. מה שמונע את ההופעה החמישית הוא שאין במה.
  */
-function boolFlag(v: string, key: string, col: string): boolean | null {
-  const t = v.trim().toLowerCase();
-  if (t === "" || t === "n/a" || t === "na") return null;
-  if (t === "true" || t === "yes") return true;
-  if (t === "false" || t === "no") return false;
-  note(key, `${col} has an unrecognised value ${JSON.stringify(v)} — left unknown`);
-  return null;
-}
-
-/** Four-state (spec §3.1). Empty means unknown, and stays unknown. */
 function quadState(v: string, key: string, col: string): QuadState {
   const t = v.trim().toLowerCase();
   if (t === "") return null;
@@ -508,10 +500,10 @@ for (const row of rows) {
      * Flight הוא dark ride. גזירה כזו הייתה מסמנת אותו כסיכון
      * קלאוסטרופוביה והורסת את האמון בפילטר הדגל.
      */
-    sensEnclosedDark: boolFlag(row["sens_enclosed_dark"] ?? "", key, "sens_enclosed_dark"),
-    sensHeights: boolFlag(row["sens_heights"] ?? "", key, "sens_heights"),
-    sensLoudSudden: boolFlag(row["sens_loud_sudden"] ?? "", key, "sens_loud_sudden"),
-    sensStrobe: boolFlag(row["sens_strobe"] ?? "", key, "sens_strobe"),
+    sensEnclosedDark: quadState(row["sens_enclosed_dark"] ?? "", key, "sens_enclosed_dark"),
+    sensHeights: quadState(row["sens_heights"] ?? "", key, "sens_heights"),
+    sensLoudSudden: quadState(row["sens_loud_sudden"] ?? "", key, "sens_loud_sudden"),
+    sensStrobe: quadState(row["sens_strobe"] ?? "", key, "sens_strobe"),
     youtubeId: null,
     videoCreator: null,
     editorial: null,

@@ -283,6 +283,13 @@ for e in experiences:
         ("uses_large_screens_or_3d", e["usesLargeScreensOr3d"], QUAD),
         ("big_drops", e["bigDrops"], QUAD),
         ("spinning", e["spinning"], QUAD),
+        # ⚠️ ארבע עמודות הרגישות הצטרפו לרשימה במיגרציה 040. קודם הן נכתבו
+        # כבוליאני ולא עברו דרך בדיקת אוצר המילים כלל — כלומר "na" לא היה
+        # יכול להגיע לכאן, ולא היה נבדק אם היה.
+        ("sens_enclosed_dark", e["sensEnclosedDark"], QUAD),
+        ("sens_heights", e["sensHeights"], QUAD),
+        ("sens_loud_sudden", e["sensLoudSudden"], QUAD),
+        ("sens_strobe", e["sensStrobe"], QUAD),
     ):
         checked[field], good = member(value, allowed, field, label)
         ok = ok and good
@@ -337,10 +344,13 @@ for e in experiences:
         text(checked["big_drops"]),
         text(checked["spinning"]),
         text(LIGHTNING_LANE[lane] if lane in LIGHTNING_LANE else SKIP_LINE[summary]),
-        boolean(e["sensEnclosedDark"]),
-        boolean(e["sensHeights"]),
-        boolean(e["sensLoudSudden"]),
-        boolean(e["sensStrobe"]),
+        # ⚠️ text ולא boolean, מאז מיגרציה 040. בוליאני מחזיק שלושה מצבים
+        # ואינו יכול להפריד "לא נבדק" מ"לא רלוונטי" — וזו בדיוק ההבחנה
+        # ש-77 שורות המופעים נשענות עליה.
+        text(checked["sens_enclosed_dark"]),
+        text(checked["sens_heights"]),
+        text(checked["sens_loud_sudden"]),
+        text(checked["sens_strobe"]),
         # ⚠️ עמודות, לא שק. intensity_factors ירדה ב-023: היא הייתה
         # not null default '{}', כלומר "נבדק, אין מה לדווח" על 210 שורות
         # שאיש לא בדק. NULL כאן אומר לא נבדק, ו-0 היפוכים אומר נבדק ואין.

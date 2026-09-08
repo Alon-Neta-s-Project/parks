@@ -1,4 +1,4 @@
-import type { Experience } from "../data/schema";
+import type { Experience, QuadState } from "../data/schema";
 
 /**
  * The sensitivity question, and what each answer is actually allowed to claim.
@@ -63,10 +63,29 @@ export const rideSensitivities: Sensitivity[] = sensitivities.filter(
  * reading, which is precisely how gets_wet, the four sens_* columns and
  * skip_line_system each got flattened.
  */
-export type SensitivityState = "flagged" | "clear" | "depends" | "unchecked";
+export type SensitivityState =
+  | "flagged"
+  | "clear"
+  | "depends"
+  | "notApplicable"
+  | "unchecked";
 
-const fromFlag = (v: boolean | null): SensitivityState =>
-  v === null ? "unchecked" : v ? "flagged" : "clear";
+/**
+ * 🔴 **חמישה מצבים, והחמישי נוסף אחרי שהיעדרו עלה ב-77 שורות.**
+ *
+ * המאסטר כותב `N/A` על כל 77 שורות ה-Entertainment — מופעים, מצעדים ומפגשי
+ * דמויות — ומשמעותו "השאלה אינה חלה על מופע". הייבוא כיווץ אותו ל-`null`,
+ * הקוד כאן קרא `null` כ"לא נבדק", ומשפחה שביקשה להימנע מגבהים **איבדה את
+ * כל 77 המופעים מהתוצאות** — בדיוק מה שהכי מתאים לה.
+ *
+ * ⚠️ ההבדל אינו סמנטי. "לא נבדק" מחייב זהירות; "לא רלוונטי" הוא תשובה
+ * מלאה. מי שמתייחס לשניהם אותו דבר בוחר איזו מהשתיים לשקר עליה.
+ */
+const fromFlag = (v: QuadState): SensitivityState =>
+  v === null ? "unchecked"
+    : v === "na" ? "notApplicable"
+    : v === "true" ? "flagged"
+    : "clear";
 
 /**
  * Whether this ride carries this sensitivity.
@@ -101,12 +120,10 @@ export function sensitivityStateFor(e: Experience, s: Sensitivity): SensitivityS
       // and the master marks them N/A, which means the question does not
       // apply. Somebody did look.
       //
-      // ⚠️ What is real, and is a bug still open: the importer's boolFlag
-      // collapses N/A into null, so this returns "unchecked" for all 77. A
-      // family avoiding heights therefore loses every show from their results
-      // — the very things that suit them — and is told the data was not
-      // checked when it was. quadState keeps "na" as its own value; the four
-      // sens_* columns do not use it. Awaiting Philip's call on the fix.
+      // ⚠️ ומה שכן היה באג, ותוקן: הייבוא כיווץ את N/A ל-null, ולכן כל 77
+      // המופעים חזרו כ"לא נבדק" — ומשפחה שביקשה להימנע מגבהים איבדה את
+      // כולם מהתוצאות. ארבע העמודות עברו לארבעה מצבים, ו"na" מקבל מצב
+      // משלו. אושר על ידי פולה דרך פיליפ, 08.09.
       return fromFlag(e.sensHeights);
     case "accessibility":
       // ⚠️ Five values, and squeezing them into yes/no was the first thing the
@@ -127,15 +144,11 @@ export function sensitivityStateFor(e: Experience, s: Sensitivity): SensitivityS
         default:
           return "depends";
       }
-    case "motionSickness": {
-      // The four-state string field, mapped onto the same three states. "na"
-      // means the question does not apply to this row, which is an answer
-      // about the question and not about the ride — so it is not a clean bill.
-      const v = e.motionSicknessWarning;
-      if (v === "true") return "flagged";
-      if (v === "false") return "clear";
-      return "unchecked";
-    }
+    case "motionSickness":
+      // ⚠️ אותה מפה בדיוק כמו ארבע העמודות האחרות, מאז ש-039 העבירה אותן
+      // לארבעה מצבים. "na" כאן פירושו שהשאלה אינה חלה על השורה — לא
+      // שהיא לא נבדקה.
+      return fromFlag(e.motionSicknessWarning);
     case "longQueues":
       return "unchecked";
   }
