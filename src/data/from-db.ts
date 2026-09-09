@@ -1,4 +1,5 @@
 import type { Experience, Park, QuadState } from "./schema";
+import { NO_FIXED_LAND } from "../lib/land-label";
 
 /**
  * The database row shape, translated into what the app already speaks.
@@ -156,7 +157,6 @@ export function toExperience(row: ExperienceRow): Experience | { refused: string
   if (!resort) return { refused: `resort_id לא מוכר: ${row.park?.resort_id}` };
   const state = STATUS[row.status];
   if (!state) return { refused: `status לא מוכר: ${row.status}` };
-  if (!row.land?.name) return { refused: "אין אזור" };
   if (!row.last_verified) return { refused: "אין תאריך אימות" };
   if (!row.key) return { refused: "אין Key" };
 
@@ -173,7 +173,19 @@ export function toExperience(row: ExperienceRow): Experience | { refused: string
     kind: row.kind as Experience["kind"],
     type: row.type as Experience["type"],
     category: row.category as Experience["category"],
-    land: row.land.name,
+    // 🔴 **`land_id` ריק אינו "אזור לא ידוע" — הוא "אין מקום קבוע".**
+    //
+    // שמונה אמנים נודדים (JAMMitors, Green Army Drum Corps, The Record
+    // Setters ועוד) נושאים `N/A` בעמודת האזור במאסטר, ובונה הזרע ממיר
+    // אותו ל-`null` כדי לא ליצור שורת אזור ששמה "N/A". עד כאן נכון —
+    // אבל השורה הזו **דחתה** אותם, ושמונה מופעים אמיתיים נעלמו מכל
+    // מסך שקורא מהמסד.
+    //
+    // ⚠️ ומה שמאפשר את המיפוי בבטחה: **במאסטר אין ולו שדה Area ריק
+    // אחד.** 234 שורות עם אזור אמיתי, 8 עם `N/A`, אפס ריקות — ולכן
+    // `null` כאן יכול להגיע רק מ-`N/A`. הייבוא עוצר על Area ריק כדי
+    // שזה יישאר נכון.
+    land: row.land?.name ?? NO_FIXED_LAND,
     subtype: row.subtype ?? "",
 
     // ⚠️ rated is not "value is truthy". Migration 011 forbids 0, so a rated

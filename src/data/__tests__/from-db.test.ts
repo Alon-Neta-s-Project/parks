@@ -103,6 +103,21 @@ describe("מיפוי שורה מהמסד", () => {
     expect(toExperience(bad)).toEqual({ refused: "park_id לא מוכר: atlantis" });
   });
 
+  /**
+   * 🔴 **שמונה אמנים נודדים נזרקו מהמסלול הזה לגמרי.**
+   *
+   * `land_id` שלהם `null` — כי במאסטר כתוב `N/A`, ובונה הזרע אינו יוצר
+   * שורת אזור ששמה "N/A". השורה שדחתה אותם קראה את זה כ"אין אזור",
+   * ו-JAMMitors, Green Army Drum Corps ושישה אחרים לא הגיעו לשום מסך.
+   *
+   * ⚠️ אזור ריק אינו סיבה לדחות שורה. הוא נתון בפני עצמו.
+   */
+  it("שורה בלי אזור נשמרת, ומסומנת כאזור שאינו קבוע", () => {
+    const roaming = toExperience({ ...first, land: null });
+    expect("refused" in roaming).toBe(false);
+    expect((roaming as { land: string }).land).toBe("N/A");
+  });
+
   it("שורה בלי תאריך אימות נדחית", () => {
     const bad = { ...first, last_verified: null };
     expect(toExperience(bad)).toEqual({ refused: "אין תאריך אימות" });
