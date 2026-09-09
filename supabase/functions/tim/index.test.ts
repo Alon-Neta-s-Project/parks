@@ -943,13 +943,13 @@ Deno.test("אזור ריק נאמר כמשתנה, ואינו נשמט", () => {
   };
   for (const land of [null, "N/A"]) {
     const out = formatExperiences([{ ...base, land }]);
-    assertEquals(out.includes("אזור: משתנה"), true, `${land}`);
+    assertEquals(out.includes("אינו משויך לאזור מוגדר"), true, `${land}`);
     assertEquals(out.includes("N/A"), false, "N/A אינו מגיע למסך");
   }
   // ⚠️ ואזור אמיתי נשאר כפי שהוא, בלי התג.
   const real = formatExperiences([{ ...base, land: "World Nature" }]);
   assertEquals(real.includes("World Nature"), true);
-  assertEquals(real.includes("משתנה"), false);
+  assertEquals(real.includes("אינו משויך"), false);
 });
 
 Deno.test("עוצמה שלא דורגה נאמרת ככזו", () => {
