@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Orb } from "../components/Orb";
 import { Thinking } from "../components/Thinking";
 import { asksUsToChoose } from "../lib/ask-intent";
-import { askTim, type TimReply } from "../lib/tim";
+import { askTim, type TimReply, type TimTurn } from "../lib/tim";
 
 /**
  * טים לבדו — הבנייה הראשונה שעולה לאוויר.
@@ -90,7 +90,22 @@ export default function TimOnlyApp() {
     // ⚠️ askTim אינו זורק — הוא מחזיר כישלון מוטבע עם סיבה. זה מכוון:
     // לכל סיבה יש טקסט משלה שאומר למי שקוראת **מה לעשות**, ו-catch אחד
     // היה מכווץ את חמשתן ל"משהו השתבש".
-    const reply = await askTim(forTim);
+    // 🔴 **ההיסטוריה, וזה מה שהיה חסר כשטים שאל שלוש פעמים אותו דבר.**
+    //
+    // נבנית מהתורות שכבר על המסך, ולכן היא בדיוק מה שהמשתמשת רואה —
+    // ולא מבנה מקביל שיכול להיפרד ממנו.
+    //
+    // ⚠️ רק תשובות שהצליחו נכנסות. הודעת שגיאה אינה דבר שטים אמר,
+    // ושליחתה חזרה אליו כאילו אמר אותה מלמדת אותו לחזור עליה.
+    const history: TimTurn[] = turns.flatMap((t) => {
+      const said: TimTurn[] = [{ role: "user", text: t.question }];
+      if (t.reply && t.reply !== "clarify" && t.reply.status === "ok") {
+        said.push({ role: "model", text: t.reply.answer });
+      }
+      return said;
+    });
+
+    const reply = await askTim(forTim, undefined, history);
     setTurns((current) => current.map((turn) => (turn.id === id ? { ...turn, reply } : turn)));
     setBusy(false);
   };

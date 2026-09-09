@@ -42,6 +42,9 @@ const DEFAULT_MODEL = "gemini-3.5-flash";
 // זו אותה משפחה של "נפילה שקטה" שכל הפרויקט בנוי נגדה: שינוי אמיתי
 // שנראה כמו כלום. שם מוצמד נשבר **בקול** — 404 — וזה בדיוק מה שקרה כאן
 // ומה שהוביל אותנו לרשימה האמיתית.
+/** ⚠️ שמונה תורות, ולא "כל השיחה". ראה ההערה ליד קליטת ההיסטוריה. */
+const MAX_HISTORY_TURNS = 8;
+const MAX_HISTORY_CHARS = 1000;
 const MAX_QUESTION_CHARS = 1000;
 
 /**
@@ -753,6 +756,30 @@ export async function handle(req: Request, env: Record<string, string | undefine
     return json({ error: "question_too_long", limit: MAX_QUESTION_CHARS }, 413);
   }
 
+  // 🔴 **טים לא זכר דבר, ולכן שאל את אותה שאלה שלוש פעמים ברצף.**
+  //
+  // נטע ענתה "זוג בני 30 ואין העדפות", והוא שאל שוב "איזה גילים
+  // המטיילים?". כל הודעה הגיעה אליו לבדה — `askTim` שלח `{ question }`
+  // וזהו — ולכן כל תשובה שלה נראתה לו כשאלה חדשה בלי הקשר.
+  //
+  // ⚠️ **וזו הפרה של כלל הברזל החמישי**, שאומר שאלה שדולגה נשאלת פעם
+  // נוספת אחת ואז ממשיכים עם מה שיש. הכלל היה בהוראות; המנגנון שמאפשר
+  // לקיים אותו לא היה קיים. הוראה בלי דרך לקיים אותה אינה כלל.
+  //
+  // ⚠️ **חסום בהיקף בכוונה.** ההיסטוריה היא טקסט של משתמשת שנוסע לספק
+  // חיצוני ונספר לתוך אותה גדר קצב. שמונה תורות אחרונות, וכל אחת
+  // חתוכה — יותר מזה אינו משפר תשובה והוא כן מגדיל עלות ודליפה.
+  const rawHistory = Array.isArray(body.history) ? body.history : [];
+  const history = rawHistory
+    .slice(-MAX_HISTORY_TURNS)
+    .flatMap((t): { role: "user" | "model"; text: string }[] => {
+      if (typeof t !== "object" || t === null) return [];
+      const { role, text } = t as { role?: unknown; text?: unknown };
+      if (typeof text !== "string" || text.trim() === "") return [];
+      if (role !== "user" && role !== "model") return [];
+      return [{ role, text: text.slice(0, MAX_HISTORY_CHARS) }];
+    });
+
   // ── הגבלת קצב ────────────────────────────────────────────────────────
   //
   // ⚠️ נכשלת **סגור**. אם אי אפשר לספור — אין קריאה למודל.
@@ -964,7 +991,12 @@ export async function handle(req: Request, env: Record<string, string | undefine
         // ⚠️ הקטעים לפני השאלה. מודל שמקבל קודם שאלה ואז מקור נוטה לענות
         // מתוך מה שהוא כבר "יודע" ולהשתמש במקור כאישור; הסדר ההפוך מייצר
         // תשובה שנשענת על המקור.
-        contents: [{
+        // ⚠️ ההיסטוריה לפני ההקשר והשאלה, וכתורות אמיתיות ולא כטקסט
+        // מודבק. מודל שמקבל שיחה כפסקה אחת מתייחס אליה כציטוט; תורות
+        // נפרדות הן מה שגורם לו לזכור מה כבר נשאל.
+        contents: [
+          ...history.map((t) => ({ role: t.role, parts: [{ text: t.text }] })),
+          {
           role: "user",
           parts: [{
             // ⚠️ המתקנים לפני המסמכים. עובדה מהטבלה גוברת על פרוזה, ומודל
@@ -975,8 +1007,9 @@ export async function handle(req: Request, env: Record<string, string | undefine
               chunks.length ? formatChunks(chunks) : null,
               `השאלה: ${question}`,
             ].filter(Boolean).join("\n\n---\n\n"),
-          }],
-        }],
+            }],
+          },
+        ],
         generationConfig: {
           temperature: 0.3,
           // ⚠️ 2048 ולא פחות. אסימוני החשיבה נספרים לתוך התקציב הזה,

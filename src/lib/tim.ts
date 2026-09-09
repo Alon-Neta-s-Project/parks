@@ -50,7 +50,34 @@ const timUrl = () => {
   return base ? `${base.replace(/\/$/, "")}/functions/v1/${TIM_FUNCTION}` : null;
 };
 
-export async function askTim(question: string, signal?: AbortSignal): Promise<TimReply> {
+/**
+ * תור בשיחה, כפי שהוא נשלח לטים.
+ *
+ * ⚠️ `model` ולא `tim` — זה אוצר המילים של הספק, והמרה באמצע הדרך היא
+ * עוד מקום שאפשר לטעות בו.
+ */
+export interface TimTurn {
+  role: "user" | "model";
+  text: string;
+}
+
+/**
+ * 🔴 **בלי ההיסטוריה טים שאל את אותה שאלה שלוש פעמים ברצף.**
+ *
+ * נטע ענתה "זוג בני 30 ואין העדפות", והוא שאל שוב "איזה גילים
+ * המטיילים?". הפונקציה הזו שלחה `{ question }` בלבד, ולכן כל תשובה
+ * שלה הגיעה אליו כשאלה חדשה בלי הקשר.
+ *
+ * ⚠️ **כלל הברזל החמישי היה כתוב בהוראות של טים כל הזמן** — שאלה
+ * שדולגה נשאלת פעם נוספת אחת ואז ממשיכים. אבל לא הייתה לו שום דרך
+ * לדעת שהוא כבר שאל. **הוראה בלי מנגנון שמאפשר לקיים אותה אינה כלל,
+ * היא משאלה.**
+ */
+export async function askTim(
+  question: string,
+  signal?: AbortSignal,
+  history: TimTurn[] = [],
+): Promise<TimReply> {
   const url = timUrl();
   const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
   if (!isConfigured || !url || !key) return { status: "failed", reason: "not_configured" };
@@ -65,7 +92,9 @@ export async function askTim(question: string, signal?: AbortSignal): Promise<Ti
         apikey: key,
         Authorization: `Bearer ${key}`,
       },
-      body: JSON.stringify({ question }),
+      // ⚠️ השרת חותך ל-8 תורות ממילא; החיתוך כאן הוא כדי שלא נשלח
+      // שיחה שלמה על הרשת ונשלם עליה, ולא כדי לאכוף את הגבול.
+      body: JSON.stringify({ question, history: history.slice(-8) }),
     });
   } catch {
     return { status: "failed", reason: "unreachable" };
