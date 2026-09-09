@@ -29,6 +29,20 @@ BEGIN;
 
 set local search_path = public, extensions;
 
+-- 🔴 **drop לפני create, ובכוונה.**
+--
+-- `create or replace` אינו יכול לשנות את מבנה הטבלה שהפונקציה מחזירה.
+-- העמודה החדשה משנה אותו, ולכן ההרצה נכשלת עם:
+--   "cannot change return type of existing function"
+--
+-- ⚠️ ומה שזה מוחק יחד עם הפונקציה: **ההרשאות.** drop מסיר גם את
+-- ה-grant ל-anon, וטים היה נופל על 403 בלי ששום דבר ייראה שבור. בלוק
+-- ההרשאות בסוף הקובץ כותב אותן מחדש — הוא לא קישוט.
+--
+-- ⚠️ והכל בתוך טרנזקציה אחת: בין ה-drop ל-create הפונקציה אינה קיימת,
+-- ובלי BEGIN/COMMIT היה חלון שבו טים מחזיר 404.
+drop function if exists public.find_experiences(text, text, int, int);
+
 create or replace function public.find_experiences(
   p_name        text default null,
   p_park        text default null,
