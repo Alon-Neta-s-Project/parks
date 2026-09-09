@@ -104,7 +104,7 @@
 
 ```sh
 npm run dev        # פיתוח
-npm test           # הבדיקות — vitest (210) **וגם** deno על פונקציית טים (63)
+npm test           # הבדיקות — vitest (215) **וגם** deno על פונקציית טים (64)
 npm run test:edge  # רק פונקציית טים
 npm run import     # ייבוא יבש; --write כדי לכתוב
 npm run build      # בנייה + רינדור מוקדם של 243 דפים
