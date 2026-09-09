@@ -1,5 +1,5 @@
 -- ==========================================================================
--- Park Day Companion — מאגר הידע: 53 מסמכים · 259 קטעים
+-- Park Day Companion — מאגר הידע: 56 מסמכים · 271 קטעים
 -- ==========================================================================
 --
 -- נוצר על ידי scripts/build-knowledge-seed.py מתוך knowledge/.
@@ -479,6 +479,77 @@ Express, אירועים מיוחדים, מלון ו-VIP אינם כלולים א
 אין להציג את המוצר כהנחת “חיילים” כללית. נדרש קשר לזכאות הצבאית האמריקאית המוגדרת. אם המשתמש אינו עומד בה, הכרטיס אינו רלוונטי.
 
 לפני רכישה יש לבדוק זכאות, מספר כרטיסים שמותר לרכוש, צורך בהפעלה ודרישות Park Reservation.'),
+('park-character-epic-uor', 'אופי הפארק — Universal Epic Universe', 'guide', 'T3', 'he', 'uor', 'static', '2026-09-08', 'approved', array['https://www.universalorlando.com/web/en/us/theme-parks/epic-universe'], 'park_logistics', 'international_guest', 'core', 'N/A', '## קצב ועוצמה כללית
+
+פארק חדש לגמרי, שנפתח במאי 2025 — הראשון שיוניברסל בונה מאפס מזה כרבע מאה. הקצב שונה מהותית מ-Islands of Adventure: פחות רכבות בסך הכול, אבל כל עולם בנוי כבועה סגורה חזותית ואקוסטית, עם מערכת פורטלים בין העולמות.
+
+מבחינת עוצמה זהו שילוב קוטבי: Stardust Racers היא רכבת לאנץ'' כפולה אינטנסיבית מאוד, לצד אזורים רגועים לגמרי (Isle of Berk, Celestial Park). הוא אינו קיצוני יותר או פחות מ-Islands of Adventure באופן גורף — הוא דורש תכנון מסלול מודע יותר למשפחה מעורבת גילאים.
+
+חוויות אינטראקטיביות (Power-Up Bands, איסוף מפתחות) מוסיפות שכבת משחק.
+
+## האזורים, ולמי כל אחד מדבר
+
+- **Celestial Park** — הרכזת המרכזית, נושא קוסמי. Stardust Racers למבוגרים, לנוער ולחובבי מהירות; קרוסלת Constellation לכל הגילאים.
+- **Super Nintendo World** — מריו ודונקי קונג. משפחות וחובבי גיימינג.
+- **The Wizarding World – Ministry of Magic** — Battle at the Ministry היא דארק־רייד אינטנסיבית יחסית. מעריצים, מבוגרים ונוער יותר מילדים קטנים.
+- **How to Train Your Dragon – Isle of Berk** — האזור הגדול בפארק, עם מתחם משחק. Hiccup''s Wing Gliders ו-Dragon Racer''s Rally עדינים עד בינוניים. משפחות וילדים צעירים.
+- **Dark Universe** — מפלצות יוניברסל הקלאסיות. נוער ומבוגרים, לא לילדים צעירים.
+
+## מה מייחד אותו
+
+הבידול הוא אדריכלי־חווייתי ולא תוכני: חמישה עולמות סגורים סביב רכזת מרכזית, מבודדים חזותית ואקוסטית זה מזה — לעומת אזורים פתוחים ב-Islands of Adventure וב-Universal Studios Florida. הדיינינג ברמה גבוהה יותר (The Atlantic, The Blue Dragon). האפיון הכללי: טבילה נרטיבית ביחד עם טכנולוגיה.
+
+## קשרים לפארקים אחרים
+
+אין קישור הובלה פיזי בין הרכזות — כשלוש עשרה דקות נסיעה, עם הסעות חינם מ-CityWalk ומהמלונות, וחניון נפרד. אין הרחבה של Hogwarts Express לכיוון Epic Universe.
+
+שלוש חוויות הארי פוטר — Ministry of Magic כאן, Diagon Alley ו-Hogsmeade בפארקים האחרים — אינן מקושרות סיפורית זו לזו.'),
+('park-character-ioa-uor', 'אופי הפארק — Universal Islands of Adventure', 'guide', 'T3', 'he', 'uor', 'static', '2026-09-08', 'approved', array['https://www.universalorlando.com/web/en/us/theme-parks/islands-of-adventure'], 'park_logistics', 'international_guest', 'core', 'N/A', '## קצב ועוצמה כללית
+
+הפארק האינטנסיבי מבין שני פארקי יוניברסל הקלאסיים — ריכוז גבוה של רכבות הרים (VelociCoaster, Hulk, Hagrid''s) לצד איים רגועים (Seuss Landing, Hogsmeade). ליבה אדרנלינית חזקה, עטופה באיים מגוונים בעוצמה. אינו פארק שמתאים לכל המשפחה בקלות כמו Universal Studios Florida.
+
+## האזורים, ולמי כל אחד מדבר
+
+- **Marvel Super Hero Island** — נוער ומבוגרים, רכבות הרים.
+- **Toon Lagoon** — משפחות שמוכנות להירטב.
+- **Skull Island** — רוב הגילאים; דארק־רייד עוצמתי בלי רכבת הרים אמיתית.
+- **Jurassic Park** — חובבי דינוזאורים מכל הגילאים, וגם VelociCoaster לחובבי אקסטרים. אזור עם שני פרצופים.
+- **Hogsmeade (The Wizarding World of Harry Potter)** — מעריצי הארי פוטר, כל הגילאים, פחות רועש.
+- **The Lost Continent** — משפחות שרוצות הפוגה או ארוחה טובה.
+- **Seuss Landing** — פעוטות וילדים קטנים.
+
+## מה מייחד אותו
+
+מול Universal Studios Florida: "פארק רכבות ההרים" (כעשר אטרקציות אינטנסיביות) מול "חוויית קולנוע וסיפור". מול Epic Universe: פארק בשל ומוכח, עם רכבות אייקוניות, מול פארק חדש ומאוזן יותר.
+
+## קשרים לפארקים אחרים
+
+Hogwarts Express מחבר את הוגסמיד לתחנת King''s Cross ב-Universal Studios Florida, ודורש כרטיס Park-to-Park. מעריצי הארי פוטר רוצים בדרך כלל את שני הפארקים יחד. אין קישור בין־פארקי נוסף.'),
+('park-character-usf-uor', 'אופי הפארק — Universal Studios Florida', 'guide', 'T3', 'he', 'uor', 'static', '2026-09-08', 'approved', array['https://www.universalorlando.com/web/en/us/theme-parks/universal-studios-florida'], 'park_logistics', 'international_guest', 'core', 'N/A', '## קצב ועוצמה כללית
+
+כמעט ההפך המדויק מ-Islands of Adventure — פארק של חוויית קולנוע, ולא פארק רכבות הרים. כשלוש רכבות הרים בלבד, מול כעשר ב-Islands of Adventure, ואף אחת מהן אינה ברמת אקסטרים דומה. מתאים יותר למשפחות עם ילדים קטנים ולמי שמחפש סיפור.
+
+Hollywood Rip Ride Rockit נסגרה סופית. מחליפתה העתידית, Fast & Furious "Hollywood Drift", טרם נפתחה.
+
+## האזורים, ולמי כל אחד מדבר
+
+- **Production Central** — באתחול, פחות רלוונטי כרגע.
+- **Illumination''s Minion Land** — ילדים צעירים ומשפחות.
+- **New York** — נוער ומבוגרים; האזור האינטנסיבי ביותר בפארק (Mummy, Transformers).
+- **San Francisco** — אזור אווירה ואוכל; Fast & Furious בתהליך סגירה.
+- **Diagon Alley (The Wizarding World of Harry Potter)** — כל הגילאים, כולל מבוגרים בלי ילדים.
+- **World Expo** — משפחות (MIB, E.T.).
+- **Springfield** — משפחות.
+- **DreamWorks Land** — ילדים צעירים מאוד וגיל גן.
+- **Hollywood** — קהל כללי, מופעי רחוב.
+
+## מה מייחד אותו
+
+מול Islands of Adventure: "חוויית קולנוע וסיפור" מול "פארק רכבות ההרים". מול Epic Universe: הפארק הוותיק, שמשלב קלאסיקות (Mummy, MIB) עם תוספות עדכניות. Diagon Alley הוא נקודת משיכה עצמאית בפני עצמה.
+
+## קשרים לפארקים אחרים
+
+Hogwarts Express מחבר את תחנת King''s Cross להוגסמיד ב-Islands of Adventure, ודורש כרטיס Park-to-Park.'),
 ('park-hopper-in-practice-wdw', 'Park Hopper בפועל — וולט דיסני וורלד', 'tip', 'T3', 'he', 'wdw', 'seasonal', '2026-09-01', 'approved', array['https://www.disneytouristblog.com/park-hopping-disney-world-tips/', 'https://www.mousehacking.com/blog/how-to-park-hop-at-disney-world'], 'park_hopping', 'international_guest', 'core', 'paid_addon', '## למי Park Hopper מועיל?
 
 הוא מועיל במיוחד למי שרוצה לחזור בערב לפארק אחר, לשלב יום קצר עם מופע לילה, או להשאיר גמישות כשפארק מסוים עמוס. הוא יכול להתאים גם למי שלן באזור עם תחבורה נוחה לכמה פארקים.
@@ -1455,6 +1526,68 @@ Express, אירועים מיוחדים, מלון ו-VIP אינם כלולים א
 אין להציג את המוצר כהנחת “חיילים” כללית. נדרש קשר לזכאות הצבאית האמריקאית המוגדרת. אם המשתמש אינו עומד בה, הכרטיס אינו רלוונטי.
 
 לפני רכישה יש לבדוק זכאות, מספר כרטיסים שמותר לרכוש, צורך בהפעלה ודרישות Park Reservation.', 'T1', 'he', 'approved'),
+('park-character-epic-uor', 0, '## קצב ועוצמה כללית
+
+פארק חדש לגמרי, שנפתח במאי 2025 — הראשון שיוניברסל בונה מאפס מזה כרבע מאה. הקצב שונה מהותית מ-Islands of Adventure: פחות רכבות בסך הכול, אבל כל עולם בנוי כבועה סגורה חזותית ואקוסטית, עם מערכת פורטלים בין העולמות.
+
+מבחינת עוצמה זהו שילוב קוטבי: Stardust Racers היא רכבת לאנץ'' כפולה אינטנסיבית מאוד, לצד אזורים רגועים לגמרי (Isle of Berk, Celestial Park). הוא אינו קיצוני יותר או פחות מ-Islands of Adventure באופן גורף — הוא דורש תכנון מסלול מודע יותר למשפחה מעורבת גילאים.
+
+חוויות אינטראקטיביות (Power-Up Bands, איסוף מפתחות) מוסיפות שכבת משחק.', 'T3', 'he', 'approved'),
+('park-character-epic-uor', 1, '## האזורים, ולמי כל אחד מדבר
+
+- **Celestial Park** — הרכזת המרכזית, נושא קוסמי. Stardust Racers למבוגרים, לנוער ולחובבי מהירות; קרוסלת Constellation לכל הגילאים.
+- **Super Nintendo World** — מריו ודונקי קונג. משפחות וחובבי גיימינג.
+- **The Wizarding World – Ministry of Magic** — Battle at the Ministry היא דארק־רייד אינטנסיבית יחסית. מעריצים, מבוגרים ונוער יותר מילדים קטנים.
+- **How to Train Your Dragon – Isle of Berk** — האזור הגדול בפארק, עם מתחם משחק. Hiccup''s Wing Gliders ו-Dragon Racer''s Rally עדינים עד בינוניים. משפחות וילדים צעירים.
+- **Dark Universe** — מפלצות יוניברסל הקלאסיות. נוער ומבוגרים, לא לילדים צעירים.', 'T3', 'he', 'approved'),
+('park-character-epic-uor', 2, '## מה מייחד אותו
+
+הבידול הוא אדריכלי־חווייתי ולא תוכני: חמישה עולמות סגורים סביב רכזת מרכזית, מבודדים חזותית ואקוסטית זה מזה — לעומת אזורים פתוחים ב-Islands of Adventure וב-Universal Studios Florida. הדיינינג ברמה גבוהה יותר (The Atlantic, The Blue Dragon). האפיון הכללי: טבילה נרטיבית ביחד עם טכנולוגיה.', 'T3', 'he', 'approved'),
+('park-character-epic-uor', 3, '## קשרים לפארקים אחרים
+
+אין קישור הובלה פיזי בין הרכזות — כשלוש עשרה דקות נסיעה, עם הסעות חינם מ-CityWalk ומהמלונות, וחניון נפרד. אין הרחבה של Hogwarts Express לכיוון Epic Universe.
+
+שלוש חוויות הארי פוטר — Ministry of Magic כאן, Diagon Alley ו-Hogsmeade בפארקים האחרים — אינן מקושרות סיפורית זו לזו.', 'T3', 'he', 'approved'),
+('park-character-ioa-uor', 0, '## קצב ועוצמה כללית
+
+הפארק האינטנסיבי מבין שני פארקי יוניברסל הקלאסיים — ריכוז גבוה של רכבות הרים (VelociCoaster, Hulk, Hagrid''s) לצד איים רגועים (Seuss Landing, Hogsmeade). ליבה אדרנלינית חזקה, עטופה באיים מגוונים בעוצמה. אינו פארק שמתאים לכל המשפחה בקלות כמו Universal Studios Florida.', 'T3', 'he', 'approved'),
+('park-character-ioa-uor', 1, '## האזורים, ולמי כל אחד מדבר
+
+- **Marvel Super Hero Island** — נוער ומבוגרים, רכבות הרים.
+- **Toon Lagoon** — משפחות שמוכנות להירטב.
+- **Skull Island** — רוב הגילאים; דארק־רייד עוצמתי בלי רכבת הרים אמיתית.
+- **Jurassic Park** — חובבי דינוזאורים מכל הגילאים, וגם VelociCoaster לחובבי אקסטרים. אזור עם שני פרצופים.
+- **Hogsmeade (The Wizarding World of Harry Potter)** — מעריצי הארי פוטר, כל הגילאים, פחות רועש.
+- **The Lost Continent** — משפחות שרוצות הפוגה או ארוחה טובה.
+- **Seuss Landing** — פעוטות וילדים קטנים.', 'T3', 'he', 'approved'),
+('park-character-ioa-uor', 2, '## מה מייחד אותו
+
+מול Universal Studios Florida: "פארק רכבות ההרים" (כעשר אטרקציות אינטנסיביות) מול "חוויית קולנוע וסיפור". מול Epic Universe: פארק בשל ומוכח, עם רכבות אייקוניות, מול פארק חדש ומאוזן יותר.', 'T3', 'he', 'approved'),
+('park-character-ioa-uor', 3, '## קשרים לפארקים אחרים
+
+Hogwarts Express מחבר את הוגסמיד לתחנת King''s Cross ב-Universal Studios Florida, ודורש כרטיס Park-to-Park. מעריצי הארי פוטר רוצים בדרך כלל את שני הפארקים יחד. אין קישור בין־פארקי נוסף.', 'T3', 'he', 'approved'),
+('park-character-usf-uor', 0, '## קצב ועוצמה כללית
+
+כמעט ההפך המדויק מ-Islands of Adventure — פארק של חוויית קולנוע, ולא פארק רכבות הרים. כשלוש רכבות הרים בלבד, מול כעשר ב-Islands of Adventure, ואף אחת מהן אינה ברמת אקסטרים דומה. מתאים יותר למשפחות עם ילדים קטנים ולמי שמחפש סיפור.
+
+Hollywood Rip Ride Rockit נסגרה סופית. מחליפתה העתידית, Fast & Furious "Hollywood Drift", טרם נפתחה.', 'T3', 'he', 'approved'),
+('park-character-usf-uor', 1, '## האזורים, ולמי כל אחד מדבר
+
+- **Production Central** — באתחול, פחות רלוונטי כרגע.
+- **Illumination''s Minion Land** — ילדים צעירים ומשפחות.
+- **New York** — נוער ומבוגרים; האזור האינטנסיבי ביותר בפארק (Mummy, Transformers).
+- **San Francisco** — אזור אווירה ואוכל; Fast & Furious בתהליך סגירה.
+- **Diagon Alley (The Wizarding World of Harry Potter)** — כל הגילאים, כולל מבוגרים בלי ילדים.
+- **World Expo** — משפחות (MIB, E.T.).
+- **Springfield** — משפחות.
+- **DreamWorks Land** — ילדים צעירים מאוד וגיל גן.
+- **Hollywood** — קהל כללי, מופעי רחוב.', 'T3', 'he', 'approved'),
+('park-character-usf-uor', 2, '## מה מייחד אותו
+
+מול Islands of Adventure: "חוויית קולנוע וסיפור" מול "פארק רכבות ההרים". מול Epic Universe: הפארק הוותיק, שמשלב קלאסיקות (Mummy, MIB) עם תוספות עדכניות. Diagon Alley הוא נקודת משיכה עצמאית בפני עצמה.', 'T3', 'he', 'approved'),
+('park-character-usf-uor', 3, '## קשרים לפארקים אחרים
+
+Hogwarts Express מחבר את תחנת King''s Cross להוגסמיד ב-Islands of Adventure, ודורש כרטיס Park-to-Park.', 'T3', 'he', 'approved'),
 ('park-hopper-in-practice-wdw', 0, '## למי Park Hopper מועיל?
 
 הוא מועיל במיוחד למי שרוצה לחזור בערב לפארק אחר, לשלב יום קצר עם מופע לילה, או להשאיר גמישות כשפארק מסוים עמוס. הוא יכול להתאים גם למי שלן באזור עם תחבורה נוחה לכמה פארקים.', 'T3', 'he', 'approved'),
