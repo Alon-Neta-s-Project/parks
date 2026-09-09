@@ -4,7 +4,7 @@ title: Disney PhotoPass ו-Memory Maker — וולט דיסני וורלד
 doc_type: guide
 authority_tier: T1
 scope_resort: wdw
-volatility: volatile
+volatility: static
 source_url: https://disneyworld.disney.go.com/guest-services/photopass-service/, https://disneyworld.disney.go.com/faq/photopass/missing-photos/
 last_verified: 2026-09-01
 product_family: photo

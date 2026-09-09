@@ -4,7 +4,7 @@ title: Early Park Admission — יוניברסל אורלנדו
 doc_type: policy
 authority_tier: T1
 scope_resort: uor
-volatility: volatile
+volatility: static
 source_url: https://www.universalorlando.com/web/en/gb/early-park-admission
 last_verified: 2026-09-01
 product_family: hotel_benefit

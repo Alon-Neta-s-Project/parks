@@ -4,7 +4,7 @@ title: Universal Express Pass — יוניברסל אורלנדו
 doc_type: policy
 authority_tier: T1
 scope_resort: uor
-volatility: volatile
+volatility: static
 source_url: https://store.universalorlando.com/en/us/store/c/uo_ice_default_pb_express
 last_verified: 2026-09-01
 product_family: queue_access

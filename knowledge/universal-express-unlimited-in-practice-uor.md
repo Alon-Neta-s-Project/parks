@@ -4,7 +4,7 @@ title: Universal Express Unlimited בפועל — יוניברסל אורלנד�
 doc_type: tip
 authority_tier: T3
 scope_resort: uor
-volatility: volatile
+volatility: static
 source_url: https://www.reddit.com/r/UniversalOrlando/comments/1rgbm3p/, https://touringplans.com/blog/universals-best-secret-complementary-hotel-express-pass/
 last_verified: 2026-09-01
 product_family: queue_access

@@ -4,7 +4,7 @@ title: כרטיס לאירוע מיוחד — יוניברסל אורלנדו
 doc_type: policy
 authority_tier: T1
 scope_resort: uor
-volatility: volatile
+volatility: seasonal
 source_url: https://www.universalorlando.com/web/en/us/all-products
 last_verified: 2026-09-01
 product_family: event_ticket

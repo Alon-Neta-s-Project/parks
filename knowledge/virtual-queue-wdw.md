@@ -4,7 +4,7 @@ title: Virtual Queue — וולט דיסני וורלד
 doc_type: policy
 authority_tier: T1
 scope_resort: wdw
-volatility: volatile
+volatility: static
 source_url: https://disneyworld.disney.go.com/faq/virtual-queues/
 last_verified: 2026-09-01
 product_family: queue_access

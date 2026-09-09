@@ -4,7 +4,7 @@ title: Disney Private VIP Tour
 doc_type: policy
 authority_tier: T1
 scope_resort: wdw
-volatility: volatile
+volatility: static
 source_url: https://disneyworld.disney.go.com/events-tours/private-vip-tours/
 last_verified: 2026-09-01
 product_family: queue_access

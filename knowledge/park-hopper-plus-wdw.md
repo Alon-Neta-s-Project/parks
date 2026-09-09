@@ -4,7 +4,7 @@ title: Park Hopper Plus — וולט דיסני וורלד
 doc_type: policy
 authority_tier: T1
 scope_resort: wdw
-volatility: volatile
+volatility: static
 source_url: https://disneyworld.disney.go.com/destinations/water-parks/
 last_verified: 2026-09-01
 product_family: park_hopping

@@ -4,7 +4,7 @@ title: כרטיס לאירוע מיוחד — וולט דיסני וורלד
 doc_type: policy
 authority_tier: T1
 scope_resort: wdw
-volatility: volatile
+volatility: seasonal
 source_url: https://disneyworld.disney.go.com/tickets/events/
 last_verified: 2026-09-01
 product_family: event_ticket

@@ -4,7 +4,7 @@ title: כניסה ל-Epic Universe — יוניברסל אורלנדו
 doc_type: policy
 authority_tier: T1
 scope_resort: uor
-volatility: volatile
+volatility: static
 source_url: https://www.universalorlando.com/web/en/us/tickets-packages/park-tickets/epic-products
 last_verified: 2026-09-01
 product_family: admission

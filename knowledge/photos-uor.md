@@ -4,7 +4,7 @@ title: My Universal Photos — יוניברסל אורלנדו
 doc_type: guide
 authority_tier: T1
 scope_resort: uor
-volatility: volatile
+volatility: static
 source_url: https://www.universalorlando.com/web/en/us/My-Universal-Photo, https://www.universalorlando.com/web/en/us/plan-your-visit/hours-information/contact-us
 last_verified: 2026-09-01
 product_family: photo
