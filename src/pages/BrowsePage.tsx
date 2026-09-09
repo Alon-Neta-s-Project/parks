@@ -5,6 +5,7 @@ import { useContent } from "../data/content";
 import type { Experience, IntensityLevel } from "../data/schema";
 import { Intensity } from "../components/Intensity";
 import { searchExperiences } from "../lib/recommend";
+import { landLabel } from "../lib/land-label";
 
 /**
  * Park page and cross-park browse are the same component. The brief calls this
@@ -76,7 +77,7 @@ export function BrowsePage() {
           <select className="fselect" value={land ?? ""} onChange={(e) => setLand(e.target.value || null)}
                   aria-label={t("filters.land")}>
             <option value="">{t("filters.land")} — {t("filters.any")}</option>
-            {lands.map((l) => <option key={l} value={l}>{l}</option>)}
+            {lands.map((l) => <option key={l} value={l}>{landLabel(l, t)}</option>)}
           </select>
 
           <select className="fselect" value={kind ?? ""}
@@ -153,7 +154,7 @@ function ResultRow({ experience: e, showPark }: { experience: Experience; showPa
           <span className="rrow__n en">{e.nameEn}</span>
           <span className="rrow__sub en">{e.subtype}</span>
         </span>
-        <span className="rrow__meta en">{showPark ? `${e.park} · ${e.land}` : e.land}</span>
+        <span className="rrow__meta en">{showPark ? `${e.park} · ${landLabel(e.land, t)}` : landLabel(e.land, t)}</span>
         <span className="rrow__tags">
           <Intensity value={e.intensity.value} />
           {e.fastAccess.singlePassRequired && <span className="chip chip--warn">{t("card.singlePass")}</span>}

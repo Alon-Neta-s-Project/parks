@@ -3,6 +3,7 @@ import type { Member } from "../lib/group";
 import type { Sensitivity } from "../lib/sensitivity";
 import type { Recommendation as Result } from "../lib/recommend";
 import { ExperienceCard } from "./ExperienceCard";
+import { landLabel } from "../lib/land-label";
 
 /**
  * The answer. Grouped by land, with everything that would mislead the reader if
@@ -53,7 +54,7 @@ export function Recommendation({
         <section className="landgroup" key={`${group.park}/${group.land}`}>
           <header className="landgroup__head">
             <span className="landgroup__title">
-              <b>{group.land}</b>
+              <b>{landLabel(group.land, t)}</b>
               {multiPark && <span className="landgroup__park">{group.park}</span>}
             </span>
             <span className="num">{group.items.length}</span>
