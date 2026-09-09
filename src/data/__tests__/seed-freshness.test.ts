@@ -1,4 +1,7 @@
 import { execFileSync } from "node:child_process";
+import { mkdtempSync, readFileSync, readdirSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 /**
@@ -16,6 +19,31 @@ import { describe, expect, it } from "vitest";
  * היא לא בודקת דבר — בדיוק הכשל של 915 שורות הבדיקות שלא רצו.
  */
 describe("קובצי הזרע מעודכנים מול המקור שלהם", () => {
+  /**
+   * ⚠️ **242 שורות המתקנים, והנתיב הגדול מהשניים.**
+   *
+   * הבנייה כותבת כמה קבצים ומוחקת קודם את הישנים, ולכן ההשוואה נעשית
+   * בבנייה לתיקייה זמנית — ולא בדגל שמנסה לדמות את הכתיבה בלי לכתוב.
+   */
+  it("db/content-seed נבנה מ-experiences.json העדכני", () => {
+    const tmp = mkdtempSync(join(tmpdir(), "seed-"));
+    try {
+      execFileSync("python3", ["scripts/build-content-seed.py"], {
+        env: { ...process.env, CONTENT_SEED_OUT: tmp },
+        stdio: ["ignore", "ignore", "pipe"],
+      });
+      const listing = (dir: string) => readdirSync(dir).filter((f) => f.endsWith(".sql")).sort();
+      const fresh = listing(tmp);
+      expect(fresh).toEqual(listing("db/content-seed"));
+      for (const f of fresh) {
+        expect(readFileSync(join(tmp, f), "utf-8"), f)
+          .toBe(readFileSync(join("db/content-seed", f), "utf-8"));
+      }
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+
   it("knowledge.sql נבנה מ-knowledge/ העדכני", () => {
     const run = () =>
       execFileSync("python3", ["scripts/build-knowledge-seed.py", "--check"], {

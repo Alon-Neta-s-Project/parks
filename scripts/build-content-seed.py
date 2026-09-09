@@ -24,12 +24,22 @@ Three things this enforces structurally rather than by comment:
 Usage: python3 scripts/build-content-seed.py
 """
 import json
+import os
 import pathlib
 from collections import Counter
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SRC = ROOT / "src" / "data" / "experiences.json"
-OUTDIR = ROOT / "db" / "content-seed"
+# 🔴 **ניתן לניתוב, כי הקובץ הנגזר כבר התיישן בשקט פעם אחת.**
+#
+# תיקון תוכן ב-`knowledge/` נערך ולא נבנה, והמסד קיבל את הישן במשך יום.
+# `knowledge.sql` קיבל `--check`; **הנתיב הזה — 242 שורות המתקנים —
+# היה חשוף לאותה תקלה בדיוק**, והוא הגדול מהשניים.
+#
+# ⚠️ הבנייה כותבת כמה קבצים ומוחקת קודם את הישנים, ולכן ההשוואה נעשית
+# על ידי בנייה לתיקייה זמנית — ולא בדגל שמנסה לדמות את הכתיבה.
+OUTDIR = pathlib.Path(os.environ["CONTENT_SEED_OUT"]) if os.environ.get("CONTENT_SEED_OUT") \
+    else ROOT / "db" / "content-seed"
 
 # Roughly how many characters of VALUES rows go into one part. The Supabase
 # SQL editor handles the 75 KB migration bundle comfortably; this keeps each
