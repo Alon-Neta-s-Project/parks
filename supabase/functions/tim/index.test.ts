@@ -822,9 +822,13 @@ Deno.test("שלושת מצבי הגובה נכתבים כשלוש אמירות �
   // תאריך אימות, ושניהם מכילים 0 בלי שום קשר לגובה.
   assertEquals(none.includes('0 ס"מ'), false, '0 ס"מ אסור שיגיע למסך');
   assertEquals(none.includes("גובה מינימום"), false, "0 אינו מגבלת גובה");
-  assertEquals(unchecked.includes("לא בדקנו"), true);
+  assertEquals(unchecked.includes("לא ידוע אם קיימת"), true);
+  // 🔴 ולא "לא ידוע" לבדו — הוא נקרא כ"לא ידוע על מגבלה", כלומר היתר.
+  assertEquals(/לא ידוע(?! אם קיימת)/.test(unchecked), false);
   // ⚠️ ובצעד הבא. "לא בדקנו" לבדו עוצר את הקוראת בלי לומר מה לעשות.
   assertEquals(unchecked.includes("שילוט בכניסה"), true);
+  // ⚠️ ובלי דיווח על עצמנו.
+  assertEquals(unchecked.includes("בדקנו"), false, "אל תדווח על העבודה שלנו");
   assertEquals(unchecked.includes("אין מגבלת גובה"), false);
 });
 
@@ -925,7 +929,7 @@ Deno.test("תקרת הגובה נאמרת לפני הרצפה החסרה", () =>
     status_note: null, intensity: 1, height_cm: null, max_height_cm: 152,
     gets_wet: null, skip_line: null, last_verified: null, fits: null,
   }]);
-  assertEquals(out.indexOf("152") < out.indexOf("לא בדקנו"), true, "החסר נאמר ראשון");
+  assertEquals(out.indexOf("152") < out.indexOf("לא ידוע"), true, "החסר נאמר ראשון");
   assertEquals(out.includes("עד 152"), true);
 });
 
