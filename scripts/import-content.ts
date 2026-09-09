@@ -402,11 +402,28 @@ if (existsSync(maxHeightPath)) {
     }
     maxHeights.set(key, max);
 
-    // ⚠️ The minimum is emptied and **not set to 0**. Roni verified the
-    // ceiling; nobody verified that there is no floor. 0 here means "checked,
-    // and there is none" — a claim no one made. Empty means not checked, which
-    // is the truth.
-    row["height_requirement_cm"] = "";
+    // 🔴 **הרצפה נכתבת רק כשמישהו באמת בדק אותה — ולא כשנוח.**
+    //
+    // רוני בדקה את החמישה (09.09) וחזרה עם **שלוש רמות ביטחון שונות**:
+    // Bay Slides ו-Ketchakiddee Creek ב-high (האתר הרשמי מנוסח במפורש
+    // כמקסימום בלבד); Runamukka ו-Tot Tiki ב-medium-high (האתר הרשמי לא
+    // נטען, תקלת כלי); Tike's Peak ב-medium בלבד, ושם touringplans אף
+    // מתייג בטעות "Minimum Height 48 in" על ניסוח שהוא מקסימום.
+    //
+    // ⚠️ `0` כאן פירושו **"נבדק, ואין"** — טענה. שלוש מהחמש לא הגיעו
+    // לרמה שמצדיקה אותה, ולכן הן נשארות ריקות. אחידות הייתה נוחה יותר
+    // ושקרית על שלוש שורות, על שדה שעניינו בטיחות ילד.
+    const min = (r["min_cm"] ?? "").trim();
+    if (min !== "" && min !== "0") {
+      console.error(`✗ ABORT — max_height.min_cm מקבל רק ריק או 0: ${key} → ${min}`);
+      console.error(`  ריק = לא נבדק · 0 = נבדק ואין. מגבלה אמיתית שייכת למאסטר.`);
+      process.exit(1);
+    }
+    // ⚠️ **"none" ולא "0".** אוצר המילים של המאסטר ל"נבדק ואין" הוא
+    // המחרוזת `none`; `height()` ממירה אותה ל-0, ואילו "0" מפורש נופל
+    // מחוץ לטווח 50-200 וחוזר כ-null בשקט. כלומר כתיבת "0" כאן הייתה
+    // מוחקת בדיוק את הממצא שרוני אימתה, ונראית כאילו עבדה.
+    row["height_requirement_cm"] = min === "0" ? "none" : "";
   }
 }
 
@@ -620,8 +637,8 @@ if (sensApplied.length) {
 if (maxHeights.size) {
   console.log(`\n  🔴 ${maxHeights.size} שורות שבהן הגובה הוא **תקרה** ולא רצפה (max_height.csv):`);
   for (const [k, v] of maxHeights) console.log(`    ${k.split("|").pop()} · עד ${v} ס"מ`);
-  console.log(`  ⚠️ המינימום שלהן רוקן ל"לא נבדק" ולא ל-0. רוני אימתה את התקרה;`);
-  console.log(`     איש לא אימת שאין רצפה, ו-0 היה הצהרה שלא נבדקה.`);
+  console.log(`  ⚠️ הרצפה נכתבת רק לפי min_cm, ובשלוש רמות ביטחון שונות (רוני 09.09):`);
+  console.log(`     0 = נבדק ואין · ריק = טרם אומת ברמה שמצדיקה 0.`);
 }
 if (sensRedundant.length) {
   console.log(`\n  ✅ ${sensRedundant.length} תיקוני דגל בטלים — המאסטר כבר מתוקן:`);

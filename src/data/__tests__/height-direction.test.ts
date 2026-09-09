@@ -69,14 +69,27 @@ describe("כיוון הגובה", () => {
   });
 
   /**
-   * ⚠️ ו-0 אינו תחליף. על חמש השורות רוני אימתה את התקרה בלבד; איש לא
-   * אימת שאין רצפה. 0 אצלנו פירושו "נבדק ואין", והוא היה הצהרה שלא נאמרה.
+   * 🔴 **ורק מי שנבדק באמת מקבל 0 — ולא כל החמש יחד.**
+   *
+   * עד 09.09 אף אחת מהחמש לא נשאה 0, וזה היה נכון: רוני אימתה תקרה בלבד.
+   * ב-09.09 היא בדקה גם את הרצפה, וחזרה עם **שלוש רמות ביטחון**:
+   * Bay Slides ו-Ketchakiddee Creek ב-high (האתר הרשמי מנוסח כמקסימום
+   * בלבד); Runamukka ו-Tot Tiki ב-medium-high (האתר הרשמי לא נטען);
+   * Tike's Peak ב-medium, ושם touringplans אף מתייג בטעות "Minimum
+   * Height 48 in" על ניסוח שהוא מקסימום.
+   *
+   * ⚠️ **0 הוא טענה, לא ברירת מחדל.** שלוש מהחמש לא הגיעו לרמה
+   * שמצדיקה אותה. אחידות הייתה נוחה ושקרית על שלוש שורות, בשדה
+   * שעניינו בטיחות ילד — ולכן הבדיקה אוכפת את ההבחנה, לא את האחידות.
    */
-  it("המינימום שלהן 'לא נבדק' ולא 'נבדק ואין'", () => {
-    const wrong = experiences
-      .filter((e) => e.maxHeightRequirementCm !== null)
-      .filter((e) => e.heightRequirementCm === 0)
-      .map((e) => e.nameEn);
-    expect(wrong).toEqual([]);
+  it("רק שתי השורות שאומתו ב-high נושאות 0", () => {
+    const verified = new Set(["Bay Slides", "Ketchakiddee Creek"]);
+    const withCeiling = experiences.filter((e) => e.maxHeightRequirementCm !== null);
+    expect(withCeiling).toHaveLength(5);
+
+    for (const e of withCeiling) {
+      const expected = verified.has(e.nameEn) ? 0 : null;
+      expect(e.heightRequirementCm, e.nameEn).toBe(expected);
+    }
   });
 });

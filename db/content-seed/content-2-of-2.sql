@@ -203,16 +203,16 @@ with checks as (
   select 3 as ord,
          'height = 0 (נבדק, אין מגבלה)' as "בדיקה",
          (select count(*) from experience where height_requirement_cm = 0)::text as "במסד",
-         '163' as "בייצוא",
-         case when (select count(*) from experience where height_requirement_cm = 0) <> 163 then '❌ נמעך במעבר — במסד יש משהו אחר ממה שיצא'
+         '165' as "בייצוא",
+         case when (select count(*) from experience where height_requirement_cm = 0) <> 165 then '❌ נמעך במעבר — במסד יש משהו אחר ממה שיצא'
               else '✅ תקין' end as "מצב"
 
   union all
   select 4 as ord,
          'height NULL (לא נבדק)' as "בדיקה",
          (select count(*) from experience where height_requirement_cm is null)::text as "במסד",
-         '5' as "בייצוא",
-         case when (select count(*) from experience where height_requirement_cm is null) <> 5 then '❌ נמעך במעבר — במסד יש משהו אחר ממה שיצא'
+         '3' as "בייצוא",
+         case when (select count(*) from experience where height_requirement_cm is null) <> 3 then '❌ נמעך במעבר — במסד יש משהו אחר ממה שיצא'
               else '✅ תקין' end as "מצב"
 
   union all
