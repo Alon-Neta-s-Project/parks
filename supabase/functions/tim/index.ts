@@ -321,10 +321,21 @@ export interface ExperienceRow {
    *
    * אופציונליים, כמו התקרה: מסד בלי מיגרציה 039 אינו מחזיר אותם.
    */
-  sens_dark?: boolean | null;
-  sens_heights?: boolean | null;
-  sens_loud?: boolean | null;
-  sens_strobe?: boolean | null;
+  /**
+   * 🔴 **טקסט ולא בוליאני, מאז מיגרציה 040 — וזה היה באג חי.**
+   *
+   * הטיפוס כאן נכתב כ-`boolean | null` כשהעמודות היו בוליאניות, ו-040
+   * העבירה אותן ל-`"true" | "false" | "na" | null`. הקוד שקורא אותן
+   * השווה ל-`true` — השוואה שלעולם אינה מתקיימת על מחרוזת — ולכן **אף
+   * רגישות מסומנת לא הייתה מגיעה לטים.**
+   *
+   * ⚠️ ו-TypeScript לא תפס את זה: הטיפוס מתאר מה שאני **מצהיר** שמגיע
+   * מהרשת, לא מה שבאמת מגיע. הצהרה שגויה עוברת קומפילציה בשקט.
+   */
+  sens_dark?: string | null;
+  sens_heights?: string | null;
+  sens_loud?: string | null;
+  sens_strobe?: string | null;
   gets_wet: string | null;
   skip_line: string | null;
   last_verified: string | null;
@@ -388,18 +399,33 @@ export function formatExperiences(rows: ExperienceRow[]): string {
       // ודגל שנבדק ואין בו רגישות נראים זהים אם שותקים על שניהם, ומשפחה
       // שקוראת רשימה נקייה מניחה שהיא נקייה. זה הכלל שכל הפרויקט בנוי
       // סביבו, וכאן הוא נוגע לילד עם רגישות לאור.
-      const sens: [string, boolean | null | undefined][] = [
+      const sens: [string, string | null | undefined][] = [
         ["חושך או מקומות סגורים", r.sens_dark],
         ["גבהים", r.sens_heights],
         ["רעש חזק או פתאומי", r.sens_loud],
         ["הבזקי אור", r.sens_strobe],
       ];
-      const flagged = sens.filter(([, v]) => v === true).map(([k]) => k);
+      const flagged = sens.filter(([, v]) => v === "true").map(([k]) => k);
       const unchecked = sens.filter(([, v]) => v === null).map(([k]) => k);
+      // 🔴 **"לא רלוונטי" נאמר, וזו הרגרסיה השנייה שנטע תפסה.**
+      //
+      // הגרסה הקודמת פלטה שורה רק על מסומנות ועל לא־נבדקות. מופע שכל
+      // ארבע הרגישויות שלו `na` שלח **כלום** — ולטים לא היה במה לענות.
+      //
+      // ⚠️ נטע שאלה "האם הדאפר דנס מפחיד למי שפוחד מגבהים", והוא ענה על
+      // **מגבלת גובה** — שדה אחר לגמרי — כי זה מה שכן הגיע אליו. תשובה
+      // סבירה לשאלה שלא נשאלה.
+      //
+      // ⚠️ ומה שזה מלמד: שתיקה על ערך אינה נייטרלית. היא דוחפת את המודל
+      // לענות ממה שיש, וזה בדיוק הניחוש שכל הכללים אוסרים.
+      const notApplicable = sens.filter(([, v]) => v === "na").map(([k]) => k);
       // ⚠️ `undefined` — מסד בלי 039 — אינו "לא נבדק" ואינו נאמר כלל.
       // אמירה על נתון שלא הגיע היא המצאה, גם כשהיא זהירה.
       if (flagged.length) bits.push(`רגישויות מסומנות: ${flagged.join(" · ")}`);
       if (unchecked.length) bits.push(`רגישויות שלא נבדקו: ${unchecked.join(" · ")}`);
+      if (notApplicable.length) {
+        bits.push(`רגישויות שאינן חלות על השורה הזו: ${notApplicable.join(" · ")}`);
+      }
       if (r.gets_wet) bits.push(wet[r.gets_wet] ?? r.gets_wet);
       if (r.skip_line) bits.push(skip[r.skip_line] ?? r.skip_line);
       else bits.push("מוצר דילוג בתור: לא נבדק");
@@ -445,6 +471,23 @@ export function formatExperiences(rows: ExperienceRow[]): string {
         // כדי שסטטוס חדש ייראה ולא ייבלע.
         const label = say[r.status] ?? `⚠️ סטטוס: ${r.status}`;
         bits.push(`${label}${r.status_note ? ` — ${r.status_note}` : ""}`);
+      } else if (r.status_note) {
+        // 🔴 **הערת סטטוס על שורה פתוחה — וזו רגרסיה שיצרתי אתמול.**
+        //
+        // עד אתמול 19 מתקני Volcano Bay היו מסומנים "סגור" בטעות, וההערה
+        // שלהם — "Planned park maintenance closure begins Oct 26, 2026" —
+        // הגיעה לטים דרך ענף הסטטוס הסגור. תיקנתי את הסיווג ל"פתוח",
+        // **וההערה נעלמה יחד איתו**, כי הענף הזה רץ רק על מה שאינו פתוח.
+        //
+        // ⚠️ נטע שאלה "האם קראקטאו פתוח", וטים ענה "פתוח" בלי לומר מילה
+        // על סגירת התחזוקה. משפחה שמתכננת לסוף אוקטובר לא הייתה יודעת.
+        //
+        // ⚠️ ומה שזה מלמד: **תיקון של סיווג שגוי אינו מסתיים בסיווג.**
+        // המידע שנתלה עליו נוסע איתו, וכשהוא זז — הוא נופל.
+        //
+        // ⚠️ והניסוח כאן שונה מזה שלמעלה בכוונה: השורה **פתוחה**, וכל תג
+        // אזהרה היה סותר את זה. זו הערה על העתיד, לא על היום.
+        bits.push(`פתוח · לתשומת לב: ${r.status_note}`);
       }
       const he = r.name_he ? ` (${r.name_he})` : "";
       const where = r.land ? ` · ${r.land}` : "";
