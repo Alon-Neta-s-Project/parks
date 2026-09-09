@@ -174,15 +174,21 @@ const SYSTEM = `אתה טים, עוזר לתכנון יום בפארקים בא�
 · 🔴 **ואל תצהיר על מה שיש או אין במאגר שלך באופן גורף.** משפט כמו
   "אין לי מידע על אף אחד משבעת הפארקים" הוא טענה על המאגר, לא על
   השאלה — והוא מתיישן ברגע שנוסף תוכן. תגיב למה שצורף לך עכשיו.
-· 🔴 **שניים, לא ארבעה — וצמצם לפי מה שכבר נאמר.** המלצה שמונה כמה
-  פארקים בפסקאות מלאות אינה המלצה, היא קטלוג. מי שכתבה "לא אוהבים
+· 🔴 **סנן, ואל תספור.** אין מספר קבוע של פארקים בתשובה. הצג את מה
+  שתואם למה שנאמר, והשמט את מה שברור שאינו — מי שכתבה "לא אוהבים
   אקסטרים מדי" כבר צמצמה בשבילך, ותשובה שמציגה גם את מה שאינו עונה
-  לזה מחזירה לה את העבודה שהיא עשתה.
-  **הכלל: עד שני פארקים, שורה־שתיים לכל אחד, ורק כאלה שתואמים את מה
-  שנאמר.** אם שניים תואמים באותה מידה — אמור מה מפריד ביניהם, וזה
-  ההבדל שיעזור לה לבחור.
+  לזה מחזירה לה את העבודה שעשתה. (הכרעת פולה, 09.09.)
+· 🔴 **ולכל פארק שאתה מזכיר — שניים־שלושה מתקנים בשם.** שורת אווירה
+  לבדה אינה המלצה. השמות נלקחים **אך ורק** משורות המועמדים שצורפו
+  לך, ולעולם לא מהזיכרון שלך.
+  ⚠️ ובחר אותם לפי מה שנאמר: לכל שורה יש דירוג עוצמה, ומי שאמרה "לא
+  אקסטרים" אינה אמורה לקבל מתקן בעוצמה 4. **הסינון הזה שלך** — הוא
+  לא נעשה בשרת, בכוונה, כי משפט כמו "לא אוהבים אקסטרים מדי" נקרא
+  נכון על ידך ובקירוב בלבד על ידי כלל אוטומטי.
 · ⚠️ ומדריך אופי אינו טקסט להעתקה. הוא הרקע שממנו אתה **בוחר** את
-  המשפט שנוגע לשאלה שנשאלה, ולא פסקה שנאמרת במלואה.`;
+  המשפט שנוגע לשאלה שנשאלה, ולא פסקה שנאמרת במלואה.
+· ⚠️ אם לא צורפו שורות מועמדים — אל תמציא שמות מתקנים. אמור מה שאתה
+  יכול מהאופי, ועצור.`;
 
 /**
  * בדיקת שפיות בלבד, לפני שמנסים לקרוא עם הערך.
@@ -403,6 +409,67 @@ export interface ExperienceRow {
  * שונות, כי מודל שמקבל `0` עלול לכתוב "גובה מינימום 0 ס\"מ" — וזה בדיוק
  * מה שהכלל אוסר.
  */
+/** שורת מועמד לפארק. ראה `park_candidates` במיגרציה 043. */
+export interface ParkCandidate {
+  park: string;
+  name: string;
+  name_he: string | null;
+  land: string | null;
+  category: string | null;
+  intensity: number | null;
+  height_cm: number | null;
+  max_height_cm: number | null;
+  gets_wet: string | null;
+}
+
+/**
+ * האם השאלה מבקשת שנבחר עבור מי ששואל.
+ *
+ * ⚠️ **אותו אוצר מילים כמו `src/lib/ask-intent.ts`, ובכוונה.** שתי
+ * רשימות מילים בשני צדדים היו נעשות שונות תוך שבוע, ואז אותה שאלה
+ * הייתה מסווגת אחרת בדפדפן ובשרת — בלי שאיש ישים לב.
+ *
+ * ⚠️ ומילת עובדה גוברת: "כמה זמן כדאי לתכנן ל-Everest" היא שאלה שיש לה
+ * תשובה בטבלה, ושורות מועמדים עליה הן רעש.
+ */
+export function wantsRecommendation(q: string): boolean {
+  const t = q.trim().toLowerCase();
+  if (!t) return false;
+  if (/(גובה|מגבלת|ס"מ|בחילה|מרטיב|כמה זמן|נגיש|ממוזג|תור|דילוג|פאס)/.test(t)) return false;
+  if (/(תכנן|תכננו|לתכנן|מסלול|המלצ|תמליץ|תמליצו|מה לעשות)/.test(t)) return true;
+  if (/(מה\s+דעת|מה\s+עדיף|איז[הו]\s.{0,40}?\s?(מתאימ|עדיפ))/.test(t)) return true;
+  return /(מעדיפ|אוהב|מחפשים|מחפש|בא לנו)/.test(t)
+    && /(פארק|פארקים|מתקנים|אטרקציות|רכבות|מופעים|חופשה|טיול)/.test(t);
+}
+
+/**
+ * שורות המועמדים, בלי סינון עוצמה — הסינון הוא של המודל.
+ *
+ * ⚠️ **העוצמה נאמרת על כל שורה**, כי בלעדיה המודל אינו יכול לכבד את
+ * "לא אוהבים אקסטרים מדי", וזה כל מה שהשורות האלה נועדו לאפשר.
+ */
+export function formatCandidates(rows: ParkCandidate[]): string {
+  if (!rows.length) return "";
+  const byPark = new Map<string, ParkCandidate[]>();
+  for (const r of rows) {
+    const list = byPark.get(r.park) ?? [];
+    list.push(r);
+    byPark.set(r.park, list);
+  }
+  const blocks = [...byPark].map(([park, list]) => {
+    const items = list.map((r) => {
+      const he = r.name_he ? ` (${r.name_he})` : "";
+      const power = r.intensity === null ? "עוצמה לא דורגה" : `עוצמה ${r.intensity} מתוך 4`;
+      const wet = r.gets_wet === "may_get_soaked" ? " · עלול להרטיב מאוד"
+        : r.gets_wet === "may_get_wet" ? " · עלול להרטיב" : "";
+      const h = r.height_cm ? ` · גובה מינימום ${r.height_cm} ס"מ` : "";
+      return `  · ${r.name}${he} — ${power}${h}${wet}`;
+    });
+    return `${park}:\n${items.join("\n")}`;
+  });
+  return `[מועמדים לפי פארק — לבחירה לפי מה שנאמר, ולא להצגה כרשימה]\n${blocks.join("\n\n")}`;
+}
+
 export function formatExperiences(rows: ExperienceRow[]): string {
   const wet: Record<string, string> = {
     none: "לא מרטיב",
@@ -877,6 +944,36 @@ export async function handle(req: Request, env: Record<string, string | undefine
   // תאריך בדיקה.
   const asked = extractRideName(question);
 
+  /**
+   * 🔴 **על שאלת המלצה טים לא קיבל ולו מתקן אחד.**
+   *
+   * `ridesTask` רצה רק כששולפים שם מתקן מהשאלה, ו"מעדיפים פארקים עם
+   * תפאורה יפה" אינה מכילה שם. לכן חזרו אפס שורות, וכל מה שהיה לו
+   * לענות ממנו היה מדריכי האופי — פרוזה. הוא ענה בפסקאות אווירה בלי
+   * ולו מתקן אחד בשם, וזה מה שפולה תפסה.
+   *
+   * ⚠️ **ורק כששאלו אותנו לבחור.** שליפה כזו על כל שאלה הייתה מזריקה
+   * עשרים שורות מתקנים להקשר של "מה קורה אם יורד גשם", ויש בדיקה
+   * שאוסרת בדיוק את זה.
+   */
+  const candidatesTask = async (): Promise<ParkCandidate[]> => {
+    if (asked || !wantsRecommendation(question)) return [];
+    try {
+      const res = await fetch(`${url}/rest/v1/rpc/park_candidates`, {
+        method: "POST",
+        headers: {
+          apikey: dbKey,
+          Authorization: `Bearer ${dbKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ p_per_park: 3 }),
+      });
+      const rows = res.ok ? await res.json() : null;
+      return Array.isArray(rows) ? rows : [];
+    } catch { /* נפילה רכה, כמו השאר */ }
+    return [];
+  };
+
   const ridesTask = async (): Promise<ExperienceRow[]> => {
     if (!asked) return [];
     try {
@@ -955,7 +1052,8 @@ export async function handle(req: Request, env: Record<string, string | undefine
    * בפנים ואינן זורקות. הבחירה הזו נכונה רק כל עוד זה נכון — טיפול
    * שגיאות שיוסר מאחת מהן ישבור את השורה הזו בשקט.
    */
-  const [rides, { chunks, retrieval }] = await Promise.all([ridesTask(), retrievalTask()]);
+  const [rides, candidates, { chunks, retrieval }] =
+    await Promise.all([ridesTask(), candidatesTask(), retrievalTask()]);
 
   // ── הקריאה למודל ─────────────────────────────────────────────────────
   const model = env.GEMINI_MODEL?.trim() || DEFAULT_MODEL;
@@ -1013,6 +1111,9 @@ export async function handle(req: Request, env: Record<string, string | undefine
             text: [
               todayLine(),
               rides.length ? formatExperiences(rides) : null,
+              // ⚠️ אחרי המתקנים שנשאלו עליהם ולפני המסמכים: אלה עובדות
+              // מהטבלה, והן גוברות על פרוזה.
+              candidates.length ? formatCandidates(candidates) : null,
               chunks.length ? formatChunks(chunks) : null,
               `השאלה: ${question}`,
             ].filter(Boolean).join("\n\n---\n\n"),
