@@ -838,15 +838,93 @@ Deno.test("התאמה לא ידועה אינה נאמרת כהתאמה", () => {
   assertEquals(formatExperiences([{ ...base, fits: false }]).includes("לא מתאים"), true);
 });
 
-Deno.test("מתקן סגור מסומן, עם המשפט שלו", () => {
+// 🔴 **הבדיקה הזו טענה סטטוס שאינו קיים.**
+//
+// היא הריצה את Slush Gusher עם `temporarily_closed` — ערך שהייבוא אינו
+// פולט לעולם (אוצר המילים הוא open · closed · check) — וציפתה לניסוח
+// "אינו פתוח כרגע" שכבר הוחלף בהכרעת פולה. כלומר היא אימתה מצב מדומיין
+// מול ניסוח מת. בפועל Slush Gusher נושא `check`.
+//
+// ⚠️ וזה נחשף רק כשהבדיקות התחילו לרוץ. הן לא רצו כלל: `Deno.serve`
+// נקרא בטעינת המודול ו-`deno test` נפל על הרשאת רשת לפני בדיקה אחת.
+Deno.test("מתקן שדורש אימות מסומן בניסוח פולה, עם המשפט שלו", () => {
   const out = formatExperiences([{
     name: "Slush Gusher", name_he: null, park: "P", land: null,
-    status: "temporarily_closed", status_note: "Closed for refurbishment",
+    status: "check",
+    status_note: "Check current Disney calendar before visit; refurbishment",
     intensity: 4, height_cm: 122, gets_wet: null, skip_line: null,
     last_verified: null, fits: null,
   }]);
-  assertEquals(out.includes("אינו פתוח כרגע"), true);
-  assertEquals(out.includes("Closed for refurbishment"), true);
+  assertEquals(out.includes("יש לוודא לפני ההגעה"), true);
+  assertEquals(out.includes("Check current Disney calendar"), true);
+});
+
+// ⚠️ שלושת הערכים שהייבוא באמת פולט חייבים תג עברי. ערך שנופל לברירת
+// המחדל מגיע למסך כמילה באנגלית — וזה כבר קרה ל-`check`.
+Deno.test("שלושת הסטטוסים של הסכמה מקבלים תג עברי, בלי ברירת מחדל", () => {
+  const base = {
+    name: "X", name_he: null, park: "P", land: null, status_note: null,
+    intensity: 3, height_cm: null, gets_wet: null, skip_line: null,
+    last_verified: null, fits: null,
+  };
+  for (const state of ["closed", "check"]) {
+    const out = formatExperiences([{ ...base, status: state }]);
+    assertEquals(out.includes(`סטטוס: ${state}`), false, `${state} נפל לברירת מחדל`);
+  }
+});
+
+// 🔴 **ארבעת המצבים של דגל רגישות, וכולם נאמרים.**
+//
+// `"false"` שתק, וטים ענה "אין לי את הנתון לגבי רגישות לחושך במתקן
+// Buzz Lightyear" על עמודה שכתוב בה `false`. הבדיקה הזו לא הייתה קיימת.
+Deno.test("כל אחד מארבעת מצבי הרגישות נאמר במפורש", () => {
+  const base = {
+    name: "X", name_he: null, park: "P", land: null, status: "open",
+    status_note: null, intensity: 3, height_cm: null, gets_wet: null,
+    skip_line: null, last_verified: null, fits: null,
+    sens_heights: null, sens_loud: null, sens_strobe: null,
+  };
+  const said = (v: string | null) =>
+    formatExperiences([{ ...base, sens_dark: v }]);
+
+  // ⚠️ הליבה: נבדק־ואין אינו שתיקה. הוא הנתון הכי שימושי שיש לנו.
+  assertEquals(said("false").includes("חושך או מקומות סגורים: נבדק — אין"), true);
+  assertEquals(said("true").includes("חושך או מקומות סגורים: כן"), true);
+  assertEquals(said(null).includes("חושך או מקומות סגורים: לא נבדק"), true);
+  assertEquals(said("na").includes("חושך או מקומות סגורים: לא רלוונטי"), true);
+
+  // ⚠️ ארבעת הדגלים תמיד, גם כשמצבם שונה זה מזה.
+  const mixed = formatExperiences([{
+    ...base, sens_dark: "false", sens_heights: "true",
+    sens_loud: "na", sens_strobe: null,
+  }]);
+  for (const flag of ["חושך או מקומות סגורים", "גבהים", "רעש חזק או פתאומי", "הבזקי אור"]) {
+    assertEquals(mixed.includes(flag), true, `${flag} לא נאמר`);
+  }
+});
+
+// ⚠️ `undefined` אינו "לא נבדק". מסד בלי 039 אינו מייצר אמירה כלל.
+Deno.test("דגל שלא הגיע מהמסד אינו נאמר כלא-נבדק", () => {
+  const out = formatExperiences([{
+    name: "X", name_he: null, park: "P", land: null, status: "open",
+    status_note: null, intensity: 3, height_cm: null, gets_wet: null,
+    skip_line: null, last_verified: null, fits: null,
+  }]);
+  assertEquals(out.includes("רגישויות"), false);
+});
+
+// 🔴 **מה שידוע נאמר לפני מה שחסר.**
+//
+// Bay Slides נושא תקרה מדודה של 152 ורצפה שלא נבדקה. טים פתח ב"לא
+// נבדקה", ומשפחה שקוראת משפט שנפתח בחסר לא מגיעה לנתון שכן יש.
+Deno.test("תקרת הגובה נאמרת לפני הרצפה החסרה", () => {
+  const out = formatExperiences([{
+    name: "Bay Slides", name_he: null, park: "P", land: null, status: "open",
+    status_note: null, intensity: 1, height_cm: null, max_height_cm: 152,
+    gets_wet: null, skip_line: null, last_verified: null, fits: null,
+  }]);
+  assertEquals(out.indexOf("152") < out.indexOf("לא נבדקה"), true, "החסר נאמר ראשון");
+  assertEquals(out.includes("עד 152"), true);
 });
 
 // ⚠️ עוצמה שלא דורגה אינה "עוצמה 0". מתקן בלי דירוג לעולם אינו נכנס

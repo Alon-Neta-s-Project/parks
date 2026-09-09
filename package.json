@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build && tsx scripts/prerender.ts",
     "preview": "vite preview",
-    "test": "vitest run",
+    "test": "vitest run && npm run test:edge",
+    "test:edge": "deno test --allow-env supabase/functions/tim/index.test.ts",
     "import": "tsx scripts/import-content.ts",
     "artifact": "npm run build && python3 scripts/build-artifact.py",
     "build:tim": "tsc -b && vite build --config vite.tim.config.ts && tsx scripts/verify-tim-build.ts"
