@@ -113,6 +113,8 @@ export interface ExperienceRow {
   last_verified: string | null;
   land: { name: string } | null;
   park: { park_kind: string; resort_id: string } | null;
+  description_he?: string | null;
+  meet_location?: string | null;
 }
 
 /** The columns the app needs, named once. */
@@ -251,6 +253,10 @@ export function toExperience(row: ExperienceRow): Experience | { refused: string
     sensLoudSudden: quad(row.sens_loud_sudden),
     sensStrobe: quad(row.sens_strobe),
 
+    // ⚠️ המסד עדיין לא נושא אותם — מיגרציה 042 מוסיפה את העמודות,
+    // והייצוא של רוני ימלא אותן. עד אז null, שפירושו "טרם נכתב".
+    descriptionHe: row.description_he ?? null,
+    meetLocation: row.meet_location ?? null,
     youtubeId: null,
     videoCreator: null,
     editorial: null,

@@ -521,6 +521,18 @@ for (const row of rows) {
     sensHeights: quadState(row["sens_heights"] ?? "", key, "sens_heights"),
     sensLoudSudden: quadState(row["sens_loud_sudden"] ?? "", key, "sens_loud_sudden"),
     sensStrobe: quadState(row["sens_strobe"] ?? "", key, "sens_strobe"),
+    // 🔴 **שני השדות שהנתיב אליהם לא היה קיים.**
+    //
+    // פולה אישרה שמונה תיאורים מלאים ב-07.09. הדגלים שלהם נכנסו, הטקסט
+    // לא — כי לייצוא לא הייתה עמודת תיאור. כאן הצד הקולט, כדי שברגע
+    // שהעמודות יופיעו בייצוא הן פשוט יזרמו בלי שינוי קוד נוסף.
+    //
+    // ⚠️ **ריק הוא null ולא מחרוזת ריקה.** "טרם נכתב" ו"נכתב, וריק" הם
+    // שני מצבים שונים, וזו התבנית שהפילה כאן שבעה שדות.
+    descriptionHe: textOrNull((row["description_he"] ?? "").trim()),
+    // ⚠️ ואינו תחליף ל-land. land הוא האזור הרשמי של הפארק;
+    // meet_location הוא איפה הדבר קורה בפועל.
+    meetLocation: textOrNull((row["meet_location"] ?? "").trim()),
     youtubeId: null,
     videoCreator: null,
     editorial: null,

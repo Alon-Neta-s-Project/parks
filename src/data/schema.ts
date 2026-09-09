@@ -222,6 +222,22 @@ export const experienceSchema = z.object({
   sensLoudSudden: quadStateSchema,
   sensStrobe: quadStateSchema,
 
+  /**
+   * התיאור העובדתי, כשהוא קיים. `null` = טרם נכתב.
+   *
+   * 🔴 הגיע לכאן אחרי שהתגלה שתיאורים שאושרו ב-07.09 מעולם לא הגיעו
+   * אלינו: לייצוא לא הייתה עמודת תיאור, וכל טקסט שרוני כתבה נעצר שם.
+   */
+  descriptionHe: z.string().nullable(),
+  /**
+   * המקום בפועל, כשאין `land` רשמי — למשל "Adventurers Outpost".
+   *
+   * ⚠️ **אינו תחליף ל-`land`.** `land` הוא האזור הרשמי של הפארק;
+   * זהו המקום שבו הדבר קורה. שמונה שורות נושאות `land` ריק, וארבע מהן
+   * מפגשי דמויות שהמקום שלהן כתוב בשם עצמו.
+   */
+  meetLocation: z.string().nullable(),
+
   // ---- held back deliberately ----
   /** Master-only until embedding and commercial use are settled (spec §3.4). */
   youtubeId: z.null(),
