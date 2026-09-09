@@ -183,6 +183,24 @@ select
   (select count(*) from knowledge_doc where cardinality(source_urls) > 1) as "מסמכים עם שני מקורות";
 """
 
+    # 🔴 **`--check` קיים כי הקובץ הזה כבר התיישן בשקט.**
+    #
+    # תיקון התוכן של Premier Pass מ-08.09 נערך ב-`knowledge/*.md`, הזרע
+    # לא נבנה מחדש, והניסוח שפולה אישרה מעולם לא הגיע למסד. טים המשיך
+    # לענות מהטקסט הישן, ואיש לא ראה — כי המקור נכון והנגזר שקרן.
+    #
+    # ⚠️ עמודה נגזרת נשברת בקול כשהמציאות משתנה; **קובץ נגזר שקט.**
+    # `--check` הוא מה שהופך אותו לקולני, והבדיקה מריצה אותו.
+    if "--check" in sys.argv:
+        current = OUT.read_text(encoding="utf-8") if OUT.exists() else None
+        if current == sql:
+            print(f"✅ {OUT.relative_to(ROOT)} מעודכן מול knowledge/")
+            return 0
+        print(f"🔴 {OUT.relative_to(ROOT)} אינו מעודכן מול knowledge/.")
+        print("   מישהו ערך .md ולא בנה מחדש. להריץ:")
+        print("   python3 scripts/build-knowledge-seed.py")
+        return 1
+
     OUT.parent.mkdir(parents=True, exist_ok=True)
     io.open(OUT, "w", encoding="utf-8").write(sql)
     print(f"{OUT.relative_to(ROOT)}  {len(sql) // 1024} KB")

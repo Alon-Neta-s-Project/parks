@@ -1,0 +1,126 @@
+-- Park Day Companion — תיקון תוכן: שתי רשומות Lightning Lane
+-- ────────────────────────────────────────────────────────────────
+-- 📍 להריץ ב: Supabase → SQL Editor
+-- שם השאילתה: תיקון תוכן — זכאות מלונות ב-Lightning Lane (09.09)
+--
+-- ⚠️ ממוקד בכוונה, ולא הזרע המלא. knowledge.sql מוחק ומכניס את כל 259
+-- הקטעים, וכל הווקטורים שלהם היו מתאפסים — חישוב מחדש של מאגר הידע
+-- כולו בשביל שינוי בשני מסמכים. כאן מתאפסים 10 קטעים בלבד.
+--
+-- מה מתוקן:
+-- · lightning-lane-multi-pass-wdw — רשימת המלונות הזכאים לחלון 7 הימים
+--   (ניסוח פולה, 09.09).
+-- · lightning-lane-premier-pass-wdw — התיקון מ-08.09, שנערך במקור
+--   ומעולם לא נבנה לזרע. הוא לא היה במסד עד עכשיו.
+--
+-- אחרי ההרצה הקטעים האלה בלי וקטור, וזה המצב הצפוי.
+
+BEGIN;
+
+insert into knowledge_doc
+  (id, title, doc_type, authority_tier, locale, scope_resort, volatility, last_verified, review_status, source_urls, product_family, audience, v1_priority, purchase_type, body)
+values
+('lightning-lane-multi-pass-wdw', 'Lightning Lane Multi Pass — וולט דיסני וורלד', 'policy', 'T1', 'he', 'wdw', 'volatile', '2026-09-01', 'approved', array['https://disneyworld.disney.go.com/lightning-lane-passes/'], 'queue_access', 'international_guest', 'core', 'paid_addon', '## מה Multi Pass נותן?
+
+Multi Pass מאפשר לבחור מראש עד שלוש חוויות וזמני הגעה בפארק אחד ולהשתמש בכניסת Lightning Lane שלהן. לאחר שמממשים את הבחירה הראשונה ביום הביקור, ניתן לבדוק באפליקציה זמינות לבחירה נוספת, אחת בכל פעם. לכן “שלוש” היא מכסת הבחירה המוקדמת, לא בהכרח המספר המרבי לכל היום.
+
+## מתי אפשר לרכוש?
+
+אורחי מלון Disney Resort (כל מלוני הריזורט הרשמיים בבעלות דיסני — Value/Moderate/Deluxe/DVC, ללא יוצא מן הכלל) יכולים להזמין את חלון הזמן הראשון עד 7 ימים לפני יום ההגעה למלון, והרשאה זו היא חד־פעמית ומכסה את כל השהות עד 14 יום. אותה זכאות חלה גם על אורחי Walt Disney World Swan, Dolphin, Swan Reserve ו-Shades of Green Resort, אף שאינם בבעלות דיסני. מלונות Disney Springs Resort Area Hotels וכל מלון אחר מחוץ לרשימה הזו — כולל כאלה שיש "דיסני" בשמם או במיקומם השיווקי — אינם זכאים, וכפופים לחלון 3 הימים הרגיל. כל שאר האורחים יכולים להזמין עד 3 ימים לפני כל יום ביקור בפארק, בנפרד לכל יום. ההבדל אינו טכני: אורח מלון זכאי מסדר את כל הטיול בפעם אחת, ומי שאינו זכאי חוזר להזמין בכל בוקר. בשני המקרים ההזמנה נפתחת בשעה 7:00 בבוקר לפי שעון מזרח ארצות הברית, ביום הראשון שבו האורח זכאי. רכישת Multi Pass עצמו מתאפשרת רק בתוך אותו חלון זמן — אין שלב רכישה מוקדם יותר לאחר קניית כרטיס הכניסה, ואלה אינם שני מועדים נפרדים אלא אותו מועד. התנאי הנוסף היחיד הוא כרטיס כניסה תקף לאותו יום.
+
+## האם כל המתקנים כלולים?
+
+לא. רק חוויות שמופיעות ברשימת Multi Pass של הפארק. מתקנים מסוימים נמכרים באמצעות Single Pass ואינם חלק מ-Multi Pass. בפארקים מסוימים קיימות קבוצות בחירה שמגבילות כמה מתקנים מבוקשים ניתן לבחור מראש.
+
+## מה עוד נדרש?
+
+נדרש כרטיס כניסה תקף לפארק. Multi Pass אינו כרטיס כניסה ואינו מבטיח זמינות של מתקן או שעה מסוימת. זמני הגעה חייבים להיות ממומשים בחלון שהוקצה, בכפוף למדיניות.
+
+## האם אפשר לשלב מוצרים?
+
+ניתן לרכוש Multi Pass ו-Single Pass לאותו יום. כל מוצר נשאר נפרד ופועל לפי הזמינות והתנאים שלו.'),
+('lightning-lane-premier-pass-wdw', 'Lightning Lane Premier Pass — וולט דיסני וורלד', 'policy', 'T1', 'he', 'wdw', 'volatile', '2026-09-01', 'approved', array['https://disneyworld.disney.go.com/lightning-lane-passes/'], 'queue_access', 'international_guest', 'core', 'paid_addon', '## מה Premier Pass נותן?
+
+Premier Pass מאפשר כניסה חד־פעמית לכל חוויית Lightning Lane זמינה בפארק אחד ביום שנבחר. הוא כולל את חוויות Multi Pass ואת מתקני Single Pass הזמינים באותו פארק, ללא צורך לבחור מראש חלונות הגעה לכל מתקן.
+
+## האם הוא תקף בכל הפארקים?
+
+המוצר נרכש לפארק אחד וליום אחד. הוא אינו הופך אוטומטית ל-Park Hopper ואינו מעניק שימוש ב-Premier Pass בפארק נוסף. כדי להיכנס לפארק עדיין נדרש כרטיס תקף, וכדי לעבור בין פארקים נדרש כרטיס שמאפשר זאת.
+
+## האם ניתן לעלות שוב?
+
+הכניסה היא פעם אחת לכל חוויה זכאית. Premier Pass אינו Express Unlimited ואינו מאפשר חזרות בלתי מוגבלות. מתקנים שאינם מציעים Lightning Lane אינם מתווספים למוצר.
+
+## האם חייבים להזמין שעות?
+
+לא בוחרים חלון הגעה לכל חוויה מראש. משתמשים בכניסת Lightning Lane בזמן שהחוויה פעילה ובמסגרת שעות הפארק והזכאות. עדיין ייתכנו המתנה, השבתה או מגבלות תפעוליות.
+
+## מתי קונים?
+
+אורחי מלון Disney Resort (וכן Swan/Dolphin/Swan Reserve ו-Shades of Green) יכולים לרכוש עד 7 ימים לפני תחילת השהות, באופן חד-פעמי המכסה את כל השהות (עד 14 יום). אורחים שאינם מתארחים במלון דיסני יכולים לרכוש עד 3 ימים מראש, בנפרד לכל יום. בשני המקרים החלון נפתח ב-7:00 בבוקר שעון-מזרח, באפליקציית My Disney Experience. המחיר משתנה לפי פארק ותאריך, וזמינות מוגבלת.')
+on conflict (id) do update set
+  title = excluded.title,
+  doc_type = excluded.doc_type,
+  authority_tier = excluded.authority_tier,
+  locale = excluded.locale,
+  scope_resort = excluded.scope_resort,
+  volatility = excluded.volatility,
+  last_verified = excluded.last_verified,
+  review_status = excluded.review_status,
+  source_urls = excluded.source_urls,
+  product_family = excluded.product_family,
+  audience = excluded.audience,
+  v1_priority = excluded.v1_priority,
+  purchase_type = excluded.purchase_type,
+  body = excluded.body,
+  updated_at = now();
+
+-- ⚠️ הקטעים נמחקים ונכתבים מחדש, ולא מתעדכנים במקום. מסמך שנערך עשוי
+-- להתחלק למספר אחר של קטעים, ועדכון לפי chunk_index היה משאיר קטעים
+-- ישנים תלויים באוויר — עם embedding תקף, ולכן הם היו ממשיכים להישלף.
+
+delete from knowledge_chunk
+ where doc_id in ('lightning-lane-multi-pass-wdw', 'lightning-lane-premier-pass-wdw');
+
+insert into knowledge_chunk
+  (doc_id, chunk_index, content, authority_tier, locale, review_status)
+values
+('lightning-lane-multi-pass-wdw', 0, '## מה Multi Pass נותן?
+
+Multi Pass מאפשר לבחור מראש עד שלוש חוויות וזמני הגעה בפארק אחד ולהשתמש בכניסת Lightning Lane שלהן. לאחר שמממשים את הבחירה הראשונה ביום הביקור, ניתן לבדוק באפליקציה זמינות לבחירה נוספת, אחת בכל פעם. לכן “שלוש” היא מכסת הבחירה המוקדמת, לא בהכרח המספר המרבי לכל היום.', 'T1', 'he', 'approved'),
+('lightning-lane-multi-pass-wdw', 1, '## מתי אפשר לרכוש?
+
+אורחי מלון Disney Resort (כל מלוני הריזורט הרשמיים בבעלות דיסני — Value/Moderate/Deluxe/DVC, ללא יוצא מן הכלל) יכולים להזמין את חלון הזמן הראשון עד 7 ימים לפני יום ההגעה למלון, והרשאה זו היא חד־פעמית ומכסה את כל השהות עד 14 יום. אותה זכאות חלה גם על אורחי Walt Disney World Swan, Dolphin, Swan Reserve ו-Shades of Green Resort, אף שאינם בבעלות דיסני. מלונות Disney Springs Resort Area Hotels וכל מלון אחר מחוץ לרשימה הזו — כולל כאלה שיש "דיסני" בשמם או במיקומם השיווקי — אינם זכאים, וכפופים לחלון 3 הימים הרגיל. כל שאר האורחים יכולים להזמין עד 3 ימים לפני כל יום ביקור בפארק, בנפרד לכל יום. ההבדל אינו טכני: אורח מלון זכאי מסדר את כל הטיול בפעם אחת, ומי שאינו זכאי חוזר להזמין בכל בוקר. בשני המקרים ההזמנה נפתחת בשעה 7:00 בבוקר לפי שעון מזרח ארצות הברית, ביום הראשון שבו האורח זכאי. רכישת Multi Pass עצמו מתאפשרת רק בתוך אותו חלון זמן — אין שלב רכישה מוקדם יותר לאחר קניית כרטיס הכניסה, ואלה אינם שני מועדים נפרדים אלא אותו מועד. התנאי הנוסף היחיד הוא כרטיס כניסה תקף לאותו יום.', 'T1', 'he', 'approved'),
+('lightning-lane-multi-pass-wdw', 2, '## האם כל המתקנים כלולים?
+
+לא. רק חוויות שמופיעות ברשימת Multi Pass של הפארק. מתקנים מסוימים נמכרים באמצעות Single Pass ואינם חלק מ-Multi Pass. בפארקים מסוימים קיימות קבוצות בחירה שמגבילות כמה מתקנים מבוקשים ניתן לבחור מראש.', 'T1', 'he', 'approved'),
+('lightning-lane-multi-pass-wdw', 3, '## מה עוד נדרש?
+
+נדרש כרטיס כניסה תקף לפארק. Multi Pass אינו כרטיס כניסה ואינו מבטיח זמינות של מתקן או שעה מסוימת. זמני הגעה חייבים להיות ממומשים בחלון שהוקצה, בכפוף למדיניות.', 'T1', 'he', 'approved'),
+('lightning-lane-multi-pass-wdw', 4, '## האם אפשר לשלב מוצרים?
+
+ניתן לרכוש Multi Pass ו-Single Pass לאותו יום. כל מוצר נשאר נפרד ופועל לפי הזמינות והתנאים שלו.', 'T1', 'he', 'approved'),
+('lightning-lane-premier-pass-wdw', 0, '## מה Premier Pass נותן?
+
+Premier Pass מאפשר כניסה חד־פעמית לכל חוויית Lightning Lane זמינה בפארק אחד ביום שנבחר. הוא כולל את חוויות Multi Pass ואת מתקני Single Pass הזמינים באותו פארק, ללא צורך לבחור מראש חלונות הגעה לכל מתקן.', 'T1', 'he', 'approved'),
+('lightning-lane-premier-pass-wdw', 1, '## האם הוא תקף בכל הפארקים?
+
+המוצר נרכש לפארק אחד וליום אחד. הוא אינו הופך אוטומטית ל-Park Hopper ואינו מעניק שימוש ב-Premier Pass בפארק נוסף. כדי להיכנס לפארק עדיין נדרש כרטיס תקף, וכדי לעבור בין פארקים נדרש כרטיס שמאפשר זאת.', 'T1', 'he', 'approved'),
+('lightning-lane-premier-pass-wdw', 2, '## האם ניתן לעלות שוב?
+
+הכניסה היא פעם אחת לכל חוויה זכאית. Premier Pass אינו Express Unlimited ואינו מאפשר חזרות בלתי מוגבלות. מתקנים שאינם מציעים Lightning Lane אינם מתווספים למוצר.', 'T1', 'he', 'approved'),
+('lightning-lane-premier-pass-wdw', 3, '## האם חייבים להזמין שעות?
+
+לא בוחרים חלון הגעה לכל חוויה מראש. משתמשים בכניסת Lightning Lane בזמן שהחוויה פעילה ובמסגרת שעות הפארק והזכאות. עדיין ייתכנו המתנה, השבתה או מגבלות תפעוליות.', 'T1', 'he', 'approved'),
+('lightning-lane-premier-pass-wdw', 4, '## מתי קונים?
+
+אורחי מלון Disney Resort (וכן Swan/Dolphin/Swan Reserve ו-Shades of Green) יכולים לרכוש עד 7 ימים לפני תחילת השהות, באופן חד-פעמי המכסה את כל השהות (עד 14 יום). אורחים שאינם מתארחים במלון דיסני יכולים לרכוש עד 3 ימים מראש, בנפרד לכל יום. בשני המקרים החלון נפתח ב-7:00 בבוקר שעון-מזרח, באפליקציית My Disney Experience. המחיר משתנה לפי פארק ותאריך, וזמינות מוגבלת.', 'T1', 'he', 'approved');
+
+-- אימות
+select d.id, d.last_verified,
+       (select count(*) from knowledge_chunk c where c.doc_id = d.id) as "קטעים",
+       (select count(*) from knowledge_chunk c where c.doc_id = d.id and c.embedding is null) as "בלי וקטור"
+  from knowledge_doc d
+ where d.id in ('lightning-lane-multi-pass-wdw', 'lightning-lane-premier-pass-wdw');
+
+COMMIT;
