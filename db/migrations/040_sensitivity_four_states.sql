@@ -224,9 +224,24 @@ declare
   probe_key text := 'probe-040';
   got       text;
 begin
-  insert into experience (id, key, park_id, kind, name, status, sens_heights)
-  select probe_key, probe_key, p.id, e.kind, 'Probe Parade 040', 'open', 'na'
-    from park p, experience e limit 1;
+  -- 🔴 **השורה מועתקת משורה אמיתית, ולא נבנית מאפס.**
+  --
+  -- הגרסה הקודמת מנתה עמודות ביד ונכשלה על `type` — עמודת NOT NULL
+  -- שלא הייתה ברשימה. תיקון עמודה־עמודה היה נכשל שוב על הבאה: הטבלה
+  -- נושאת עשרות עמודות, וכל אחת שנוספת בעתיד הייתה שוברת את הבדיקה.
+  --
+  -- ⚠️ `select *` מעותק של הטבלה מבטיח שכל עמודות החובה מלאות בערכים
+  -- חוקיים, ושרק מה שנבדק כאן נדרס. עמודה חדשה שתתווסף מחר לא תשבור
+  -- כלום.
+  create temporary table probe_row on commit drop as
+    select * from experience limit 1;
+  update probe_row set
+                     id = probe_key, key = probe_key,
+                     name = 'Probe Parade 040',
+                     status = 'open', status_note = null,
+                     -- ⚠️ 'na' ולא null. זו כל הנקודה: הערך חייב לשרוד עד הפונקציה.
+                     sens_heights = 'na';
+  insert into experience select * from probe_row;
 
   select f.sens_heights into got
     from find_experiences('Probe Parade 040', null, null, 5) f limit 1;

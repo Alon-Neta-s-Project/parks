@@ -260,11 +260,26 @@ begin
   -- ג. 🔴 **ההתנהגות, ולא ההגדרה.** שורת בדיקה אמיתית נכנסת לטבלה, נשאלת
   --    דרך הפונקציה בשני גבהים, ונמחקת. בלי זה הבדיקה מאשרת שהצינור בנוי
   --    ולא שהוא מוביל מים.
-  insert into experience (id, key, park_id, kind, name, status,
-                          height_requirement_cm, max_height_requirement_cm)
-  select probe_key, probe_key, p.id, e.kind, 'Probe Tot Area 038', 'open', null, 122
-    from park p, experience e
-   limit 1;
+  -- 🔴 **השורה מועתקת משורה אמיתית, ולא נבנית מאפס.**
+  --
+  -- הגרסה הקודמת מנתה עמודות ביד ונכשלה על `type` — עמודת NOT NULL
+  -- שלא הייתה ברשימה. תיקון עמודה־עמודה היה נכשל שוב על הבאה: הטבלה
+  -- נושאת עשרות עמודות, וכל אחת שנוספת בעתיד הייתה שוברת את הבדיקה.
+  --
+  -- ⚠️ `select *` מעותק של הטבלה מבטיח שכל עמודות החובה מלאות בערכים
+  -- חוקיים, ושרק מה שנבדק כאן נדרס. עמודה חדשה שתתווסף מחר לא תשבור
+  -- כלום.
+  create temporary table probe_row on commit drop as
+    select * from experience limit 1;
+  update probe_row set
+                     id = probe_key, key = probe_key,
+                     name = 'Probe Tot Area 038',
+                     status = 'open', status_note = null,
+                     -- ⚠️ הרצפה ריקה והתקרה מלאה — בדיוק המצב של חמש השורות האמיתיות,
+                     -- והמצב שבו fits חייב להיגזר מהתקרה לבדה.
+                     height_requirement_cm = null,
+                     max_height_requirement_cm = 122;
+  insert into experience select * from probe_row;
 
   -- ילד בגובה 130 גבוה מהתקרה של 122 → **אינו** מתאים
   select f.fits into tall

@@ -213,9 +213,23 @@ begin
 
   -- 🔴 וההתנהגות: דגל שנכתב בטבלה חייב לחזור מהפונקציה. שורת בדיקה
   -- אמיתית, ונמחקת גם בכישלון.
-  insert into experience (id, key, park_id, kind, name, status, sens_enclosed_dark)
-  select probe_key, probe_key, p.id, e.kind, 'Probe Dark Ride 039', 'open', true
-    from park p, experience e limit 1;
+  -- 🔴 **השורה מועתקת משורה אמיתית, ולא נבנית מאפס.**
+  --
+  -- הגרסה הקודמת מנתה עמודות ביד ונכשלה על `type` — עמודת NOT NULL
+  -- שלא הייתה ברשימה. תיקון עמודה־עמודה היה נכשל שוב על הבאה: הטבלה
+  -- נושאת עשרות עמודות, וכל אחת שנוספת בעתיד הייתה שוברת את הבדיקה.
+  --
+  -- ⚠️ `select *` מעותק של הטבלה מבטיח שכל עמודות החובה מלאות בערכים
+  -- חוקיים, ושרק מה שנבדק כאן נדרס. עמודה חדשה שתתווסף מחר לא תשבור
+  -- כלום.
+  create temporary table probe_row on commit drop as
+    select * from experience limit 1;
+  update probe_row set
+                     id = probe_key, key = probe_key,
+                     name = 'Probe Dark Ride 039',
+                     status = 'open', status_note = null,
+                     sens_enclosed_dark = true;
+  insert into experience select * from probe_row;
 
   select f.sens_dark into got
     from find_experiences('Probe Dark Ride 039', null, null, 5) f limit 1;
