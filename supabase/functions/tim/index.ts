@@ -486,6 +486,47 @@ export interface ParkCandidate {
  * ⚠️ ומילת עובדה גוברת: "כמה זמן כדאי לתכנן ל-Everest" היא שאלה שיש לה
  * תשובה בטבלה, ושורות מועמדים עליה הן רעש.
  */
+/**
+ * כתיבה ליומן התשובות. **נכשלת בשקט, בכוונה.**
+ *
+ * ⚠️ `EdgeRuntime.waitUntil` כשהוא קיים — הוא מאפשר לבקשה להסתיים בלי
+ * לחכות לכתיבה. כשאינו קיים, המתנה **חסומה בזמן**: שנייה אחת ולא יותר.
+ * בלי הגבול הזה מסד איטי היה הופך לעיכוב על המסך של משפחה.
+ */
+function logTurn(
+  url: string,
+  key: string,
+  t: {
+    question: string;
+    answered: boolean;
+    reason: string | null;
+    model: string;
+    usage: { input?: number; output?: number } | null;
+  },
+): void {
+  const write = fetch(`${url}/rest/v1/rpc/log_turn`, {
+    method: "POST",
+    headers: {
+      apikey: key,
+      Authorization: `Bearer ${key}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      p_question: t.question,
+      p_answered: t.answered,
+      p_refusal_reason: t.reason,
+      p_model: t.model,
+      p_input_tokens: t.usage?.input ?? null,
+      p_output_tokens: t.usage?.output ?? null,
+    }),
+    signal: AbortSignal.timeout(1000),
+  }).catch(() => {});
+
+  const rt = (globalThis as { EdgeRuntime?: { waitUntil?: (p: Promise<unknown>) => void } })
+    .EdgeRuntime;
+  if (typeof rt?.waitUntil === "function") rt.waitUntil(write);
+}
+
 export function wantsRecommendation(q: string): boolean {
   const t = q.trim().toLowerCase();
   if (!t) return false;
@@ -1245,8 +1286,15 @@ export async function handle(req: Request, env: Record<string, string | undefine
   // הערכה שלי מתוך שתי מחרוזות שמדדתי. גוגל מחזירה את המספרים האמיתיים
   // ב-usageMetadata, וההערכה עלתה לנו כבר פעם אחת בפי עשרים.
   //
-  // ⚠️ לא נשמר במסד ולא מוצג למבקרת — רק מוחזר, כדי שאפשר יהיה לקרוא
-  // אותו בבדיקה ידנית. לוג של שימוש לכל שיחה הוא מסלול קצר לדליפת תוכן.
+  // ⚠️ **עודכן 10.09: נשמר במסד, ובאישור גיא.** ההערה כאן אמרה קודם
+  // "לא נשמר", והנימוק היה נכון: לוג שימוש לכל שיחה הוא מסלול קצר
+  // לדליפת תוכן.
+  //
+  // מה שהשתנה הוא **המבנה, לא הרצון**. ב-044 נשמרות ספירות בלבד; טקסט
+  // השאלה נשמר רק כשטים לא ידע לענות, ואין מזהה שיחה כלל. כלומר אין
+  // דרך לקשר ספירה לתוכן או לאדם — וזה מה שהפך את זה למותר.
+  //
+  // ⚠️ ולעולם לא מוצג למבקרת.
   const u = data?.usageMetadata;
   const usage = u && typeof u === "object"
     ? {
@@ -1265,6 +1313,31 @@ export async function handle(req: Request, env: Record<string, string | undefine
   // ⚠️ `tiers` הוא לבדיקות, לא לממשק. הוא אומר על מה התשובה נשענה,
   // ובלעדיו "must_cite_tier" בסט הזהב אינו ניתן לאכיפה.
   const tiers = [...new Set(chunks.map((c) => c.authority_tier).filter(Boolean))];
+
+  // ── יומן התשובות (044) ───────────────────────────────────────────
+  //
+  // ⚠️ **best-effort, ולעולם לא על חשבון התשובה.** תשובה למשפחה חשובה
+  // מרישום, ולכן כישלון כאן נבלע: אין throw, אין await ללא גבול, ואין
+  // מצב שבו תקלה במסד מעכבת את מה שמופיע על המסך. שורה שאבדה היא נתון
+  // חסר; תשובה שנתקעה היא מוצר שבור.
+  //
+  // 🔴 **וההערכה כאן משוערת, ואומרת זאת.** `answered` נגזר משילוב של
+  // איתותים — אפס מקורות, ולשון סירוב שההוראות שלנו עצמן מכתיבות —
+  // ולא מהצהרה של המודל. זו הערכה טובה מספיק כדי לראות מגמה, **ולא
+  // מספיק כדי להסיק ממנה על שורה בודדת.** מי שיקרא את היומן צריך לדעת
+  // את זה, ולכן זה כתוב כאן ולא רק בראש שלי.
+  const noSources = rides.length === 0 && chunks.length === 0 && candidates.length === 0;
+  const refusalPhrasing = /(אין לי את הנתון|אין לנו את הנתון|לא ידוע אם קיימת|לא נבדק)/
+    .test(answer ?? "");
+  const answered = !(noSources && refusalPhrasing);
+  logTurn(url, dbKey, {
+    question,
+    answered,
+    reason: answered ? null : (retrieval === "failed" ? "unverified" : "no_data"),
+    model,
+    usage,
+  });
+
   return json({
     answer, model, usage, retrieval,
     chunks: chunks.length, rides: rides.length, tiers,
