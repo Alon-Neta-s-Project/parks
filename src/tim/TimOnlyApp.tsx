@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Orb } from "../components/Orb";
 import { Thinking } from "../components/Thinking";
-import { asksUsToChoose } from "../lib/ask-intent";
+import { shouldAskUpFront } from "../lib/ask-intent";
 import { askTim, type TimReply, type TimTurn } from "../lib/tim";
 
 /**
@@ -73,7 +73,20 @@ export default function TimOnlyApp() {
      * השאלה המקורית** — כי `askTim` שולח הודעה בודדת בלי היסטוריה,
      * ותשובה שתישלח לבדה הייתה מגיעה אליו בלי הקשר בכלל.
      */
-    if (pending === null && asksUsToChoose(text)) {
+    // 🔴 **שאלת הבירור נשאלה גם באמצע שיחה שכבר ענתה עליה.**
+    //
+    // נטע ניהלה שיחה שלמה — משפחה עם ילדים בני 5 ו-7, ארבעה ימי פארקים,
+    // עולמות דיסני והארי פוטר — ואז שאלה "מעדיפים פארקים עם תפאורה
+    // יפה". המסך פתח מחדש ב"כמה שאלות קצרות קודם", כאילו לא ידע עליה
+    // דבר. **וזה קרה בלי שטים בכלל נשאל**, כי הענף הזה עוצר לפניו.
+    //
+    // ⚠️ הכלל "לשאול לפני שממליצים" יושם בלי תנאי, והתעלם ממה שכבר
+    // נאמר — אותה תבנית שחזרה כאן היום: כלל נכון שהוחל באופן גורף.
+    //
+    // ⚠️ **ומהרגע שיש היסטוריה, ההכרעה אינה כאן.** טים מקבל את השיחה
+    // כולה מאז v12, והוא זה שיודע אם עדיין חסר לו משהו. מסך שחוסם
+    // לפניו מונע ממנו להשתמש במה שכבר יש.
+    if (pending === null && shouldAskUpFront(text, turns.length > 0)) {
       setTurns((current) => [...current, { id, question: text, reply: "clarify" }]);
       setPending(text);
       setDraft("");

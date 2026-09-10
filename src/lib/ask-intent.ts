@@ -98,3 +98,23 @@ export function asksUsToChoose(text: string): boolean {
   if (PREFERENCE.test(q) && BROAD_SCOPE.test(q)) return true;
   return PLANNING.some((w) => q.includes(w)) || OPINION.some((re) => re.test(q));
 }
+
+/**
+ * האם לפתוח בשאלת בירור, לפני שהשאלה נשלחת לטים.
+ *
+ * 🔴 **התנאי הזה היה `asksUsToChoose` לבדו, וזה היה באג.** נטע ניהלה
+ * שיחה שלמה — משפחה עם ילדים בני 5 ו-7, ארבעה ימי פארקים, עולמות דיסני
+ * והארי פוטר — ואז שאלה "מעדיפים פארקים עם תפאורה יפה". המסך פתח מחדש
+ * ב"כמה שאלות קצרות קודם", כאילו לא ידע עליה דבר.
+ *
+ * ⚠️ **וזה קרה בלי שטים בכלל נשאל.** הענף עוצר לפניו, ולכן כל ההיסטוריה
+ * שהוא כן מקבל מאז v12 לא נכנסה לתמונה.
+ *
+ * ⚠️ **הכלל: לשאול רק בתחילת שיחה.** מהרגע שיש היסטוריה, טים הוא שיודע
+ * אם עדיין חסר לו משהו — הוא רואה את כל מה שנאמר. מסך שחוסם לפניו מונע
+ * ממנו להשתמש במה שכבר יש.
+ */
+export function shouldAskUpFront(text: string, hasHistory: boolean): boolean {
+  if (hasHistory) return false;
+  return asksUsToChoose(text);
+}
