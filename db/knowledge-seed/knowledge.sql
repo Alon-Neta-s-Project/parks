@@ -1,5 +1,5 @@
 -- ==========================================================================
--- Park Day Companion — מאגר הידע: 59 מסמכים · 283 קטעים
+-- Park Day Companion — מאגר הידע: 60 מסמכים · 287 קטעים
 -- ==========================================================================
 --
 -- נוצר על ידי scripts/build-knowledge-seed.py מתוך knowledge/.
@@ -752,6 +752,33 @@ Park-to-Park אינו כולל Universal Express, Early Park Admission, אירו
 ## מתי קונים?
 
 אפשר לרכוש מוצר Park-to-Park מלכתחילה או לשאול על שדרוג כרטיס זכאי. השדרוג עשוי לחול על מלוא הכרטיס הרב־יומי ולא רק על יום אחד. יש לבדוק את העלות והתוקף לפני ביצוע שינוי.'),
+('partner-hotels-uor', 'Universal Partner Hotels — מלונות שותפים', 'guide', 'T3', 'he', 'uor', 'static', '2026-09-10', 'approved', array['https://www.universalorlandovacations.com/Hotels/Partner.aspx'], 'hotel_benefit', 'international_guest', 'appendix', 'N/A', '## מה זו התוכנית
+
+תוכנית רשמית של יוניברסל אורלנדו למלונות **שאינם בבעלותה ואינם מופעלים על ידה**. היא נפרדת ממלונות יוניברסל עצמם, וההטבות בה שונות.
+
+## מה כלול
+
+- הנחות על מרצ''נדייז במיקומים נבחרים בפארקים.
+- הנחות על אוכל ומשקאות לא אלכוהוליים בפארקים וב-CityWalk.
+- הסעה מתוזמנת לאתר וממנו.
+
+## Early Park Admission — לא כלול
+
+**Early Park Admission אינה הטבה של תוכנית המלונות השותפים.** היא מגיעה עם מלונות יוניברסל שבבעלות מלאה, ולא עם מלון שותף.
+
+⚠️ ייתכן חריג: רכישת **חבילת נופש** של יוניברסל דרך מלון שותף — להבדיל מהזמנת חדר בלבד — עשויה לכלול Early Park Admission כחלק מהחבילה. זהו ממצא ממקור בודד ואינו מאומת מול יוניברסל.
+
+## אילו מלונות
+
+הרשימה מתחלקת לשלוש שכבות. מלון ברשימה הזו הוא מלון שותף, ולא מלון יוניברסל.
+
+**Moderate, עד מייל אחד:** Avanti Palms Resort and Conference Center · Best Western Orlando Gateway · CoCo Key Hotel and Water Resort · DoubleTree by Hilton at the Entrance to Universal Orlando · Four Points by Sheraton Orlando International Drive · Holiday Inn & Suites Across from Universal Orlando · Homewood Suites by Hilton · Home2 Suites Nearest Universal · Hyatt Place Orlando · Orlando International Resort Club · Westgate Palace
+
+**Moderate, שלושה מייל ומעלה:** Mystic Dunes Resort & Golf Club · Westgate Lakes Resort & Spa · Avanti Resort · AC Hotel by Marriott Orlando Lake Buena Vista · Aloft Orlando International Drive · Tru by Hilton · Hilton Garden Inn · Drury Inn & Suites Orlando
+
+**Value:** Clarion Inn & Suites Orlando · Comfort Inn & Suites · Comfort Suites Orlando · Fairfield Inn & Suites near Universal Orlando · Hampton Inn Orlando Near Universal Blvd/International Drive · Holiday Inn Express Hotel & Suites · Rosen Inn International · Rosen Inn · The Rosen Inn at Pointe Orlando
+
+⚠️ הרשימה נאספה ממקור משני, והעמוד הרשמי לא נקרא ישירות. מלון שאינו מופיע כאן אינו בהכרח מחוץ לתוכנית — כדאי לוודא מול יוניברסל.'),
 ('photopass-wdw', 'Disney PhotoPass ו-Memory Maker — וולט דיסני וורלד', 'guide', 'T1', 'he', 'wdw', 'static', '2026-09-01', 'approved', array['https://disneyworld.disney.go.com/guest-services/photopass-service/', 'https://disneyworld.disney.go.com/faq/photopass/missing-photos/'], 'photo', 'international_guest', 'core', 'paid_addon', '## מהו Disney PhotoPass?
 
 צלמי Disney PhotoPass מצלמים אורחים במיקומים ברחבי הריזורט. שירות הצילום עצמו מאפשר לקשר תמונות לחשבון, אך הורדה של תמונות ללא סימן מים דורשת רכישה מתאימה. בחלק מהמתקנים נוצרים גם תמונות או סרטונים אוטומטיים.
@@ -1836,6 +1863,30 @@ Park-to-Park אינו כולל Universal Express, Early Park Admission, אירו
 ('park-to-park-uor', 4, '## מתי קונים?
 
 אפשר לרכוש מוצר Park-to-Park מלכתחילה או לשאול על שדרוג כרטיס זכאי. השדרוג עשוי לחול על מלוא הכרטיס הרב־יומי ולא רק על יום אחד. יש לבדוק את העלות והתוקף לפני ביצוע שינוי.', 'T1', 'he', 'approved'),
+('partner-hotels-uor', 0, '## מה זו התוכנית
+
+תוכנית רשמית של יוניברסל אורלנדו למלונות **שאינם בבעלותה ואינם מופעלים על ידה**. היא נפרדת ממלונות יוניברסל עצמם, וההטבות בה שונות.', 'T3', 'he', 'approved'),
+('partner-hotels-uor', 1, '## מה כלול
+
+- הנחות על מרצ''נדייז במיקומים נבחרים בפארקים.
+- הנחות על אוכל ומשקאות לא אלכוהוליים בפארקים וב-CityWalk.
+- הסעה מתוזמנת לאתר וממנו.', 'T3', 'he', 'approved'),
+('partner-hotels-uor', 2, '## Early Park Admission — לא כלול
+
+**Early Park Admission אינה הטבה של תוכנית המלונות השותפים.** היא מגיעה עם מלונות יוניברסל שבבעלות מלאה, ולא עם מלון שותף.
+
+⚠️ ייתכן חריג: רכישת **חבילת נופש** של יוניברסל דרך מלון שותף — להבדיל מהזמנת חדר בלבד — עשויה לכלול Early Park Admission כחלק מהחבילה. זהו ממצא ממקור בודד ואינו מאומת מול יוניברסל.', 'T3', 'he', 'approved'),
+('partner-hotels-uor', 3, '## אילו מלונות
+
+הרשימה מתחלקת לשלוש שכבות. מלון ברשימה הזו הוא מלון שותף, ולא מלון יוניברסל.
+
+**Moderate, עד מייל אחד:** Avanti Palms Resort and Conference Center · Best Western Orlando Gateway · CoCo Key Hotel and Water Resort · DoubleTree by Hilton at the Entrance to Universal Orlando · Four Points by Sheraton Orlando International Drive · Holiday Inn & Suites Across from Universal Orlando · Homewood Suites by Hilton · Home2 Suites Nearest Universal · Hyatt Place Orlando · Orlando International Resort Club · Westgate Palace
+
+**Moderate, שלושה מייל ומעלה:** Mystic Dunes Resort & Golf Club · Westgate Lakes Resort & Spa · Avanti Resort · AC Hotel by Marriott Orlando Lake Buena Vista · Aloft Orlando International Drive · Tru by Hilton · Hilton Garden Inn · Drury Inn & Suites Orlando
+
+**Value:** Clarion Inn & Suites Orlando · Comfort Inn & Suites · Comfort Suites Orlando · Fairfield Inn & Suites near Universal Orlando · Hampton Inn Orlando Near Universal Blvd/International Drive · Holiday Inn Express Hotel & Suites · Rosen Inn International · Rosen Inn · The Rosen Inn at Pointe Orlando
+
+⚠️ הרשימה נאספה ממקור משני, והעמוד הרשמי לא נקרא ישירות. מלון שאינו מופיע כאן אינו בהכרח מחוץ לתוכנית — כדאי לוודא מול יוניברסל.', 'T3', 'he', 'approved'),
 ('photopass-wdw', 0, '## מהו Disney PhotoPass?
 
 צלמי Disney PhotoPass מצלמים אורחים במיקומים ברחבי הריזורט. שירות הצילום עצמו מאפשר לקשר תמונות לחשבון, אך הורדה של תמונות ללא סימן מים דורשת רכישה מתאימה. בחלק מהמתקנים נוצרים גם תמונות או סרטונים אוטומטיים.', 'T1', 'he', 'approved'),
