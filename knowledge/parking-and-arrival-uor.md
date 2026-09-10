@@ -1,0 +1,53 @@
+---
+id: parking-and-arrival-uor
+title: חניה והגעה לפארק ברכב — יוניברסל אורלנדו
+doc_type: guide
+authority_tier: T3
+scope_resort: uor
+volatility: volatile
+source_url: https://www.universalorlando.com/web/en/us/plan-your-visit/directions-parking
+last_verified: 2026-09-09
+product_family: park_logistics
+audience: international_guest
+v1_priority: core
+purchase_type: N/A
+---
+
+## 🔴 שני קמפוסים, לא ארבעה חניונים — וזה שונה מהותית מדיסני
+
+- **הקמפוס הראשי** משרת את Universal Studios Florida, את Islands of Adventure, את Volcano Bay ואת CityWalk — כולם מאותם חניונים רב־קומתיים.
+- **הקמפוס הדרומי** הוא חניון שטח נפרד, ל-Epic Universe בלבד.
+
+## ההגעה מהחניון — הליכה, לא טרם
+
+בקמפוס הראשי אין טרם. ההגעה היא בהליכה ובמדרגות נעות, דרך CityWalk:
+
+1. **חניון ← הרכזת** — חמש עד עשר דקות.
+2. **CityWalk ← Universal Studios או Islands of Adventure** — עוד חמש עד עשר דקות הליכה.
+3. **CityWalk ← Volcano Bay** — שאטל חינם, ולא הליכה.
+
+**זמן כולל: כרבע שעה בממוצע, ויותר בעומס.**
+
+שני הפארקים חולקים את אותה שרשרת בדיוק, ואין ביניהם הבדל מבני.
+
+⚠️ **בדיקת הביטחון נעשית ברכזת המרכזית ולא בשער הפארק** — שונה מדיסני, ושווה לדעת מראש.
+
+## Epic Universe
+
+חניון שטח, ולא רב־קומתי, עם אזורים בשמות נושאיים. **אין טרם ואין מדרגות נעות — ההליכה ישירה.**
+
+חלופה: אפשר לחנות בקמפוס הראשי ולנסוע בהסעת אוטובוס חינם ל-Epic Universe.
+
+## מחירי החניה
+
+- **Self-Parking** — כ-32 דולר בהזמנה מראש, כ-35 בקופה. זהה בשני הקמפוסים.
+- **Prime Parking** — כ-50 עד 60 דולר. ב-Epic Universe כולל חניה מקורה תחת פאנלים סולאריים.
+- **RV או אוטובוס** — כ-45 דולר.
+- **Valet**, ב-CityWalk בלבד — כ-38 עד 81 דולר.
+- **חינם אחרי 18:00**, למעט לילות אירועים.
+
+בעלי Annual Pass: Premier — חינם ב-Valet וב-Prime. Preferred — Self-Parking חינם, וחצי מחיר ב-Valet.
+
+## CityWalk
+
+אינו חניון נפרד. מגיעים אליו דרך חניוני הקמפוס הראשי, באותה שרשרת בדיוק.
