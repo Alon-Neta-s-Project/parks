@@ -1,0 +1,81 @@
+#!/usr/bin/env python3
+"""בונה את בלוק כללי ההתאמה בהוראות של טים מתוך src/i18n/he.json.
+
+🔴 **קיים כי יצרתי מקור אמת שני.** ההיגיון "מתאים / לא ידוע אם מתאים /
+חסר לנו הגובה" נכתב פעם ב-he.json למסך התוצאות, ופעם בהוראות של טים —
+שני טקסטים שמתארים אותו דבר, בלי שום קשר ביניהם. מי שיעדכן את he.json
+(וזה הכלל: כל המחרוזות שם) לא ייגע בהוראות, ואותה משפחה תקבל שתי
+תשובות שונות על אותו מתקן.
+
+⚠️ **וכאן זה לא נתפס בבדיקה רגילה.** שני הקבצים תקינים כל אחד לעצמו.
+
+הרצה:  python3 scripts/build-tim-prompt.py [--check]
+"""
+import hashlib
+import json
+import pathlib
+import re
+import sys
+
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+HE = ROOT / "src" / "i18n" / "he.json"
+FN = ROOT / "supabase" / "functions" / "tim" / "index.ts"
+
+# ⚠️ המפתחות שהם המקור. מפתח שנמחק מ-he.json מפיל כאן, ולא נעלם בשקט.
+KEYS = ["everyone", "unknown", "unknownWhy", "unmeasuredWhy", "childSwap"]
+
+
+def build() -> tuple[str, str]:
+    fit = json.loads(HE.read_text(encoding="utf-8"))["fit"]
+    missing = [k for k in KEYS if k not in fit]
+    if missing:
+        raise SystemExit(f"🔴 חסרים מפתחות ב-he.json תחת fit: {', '.join(missing)}")
+
+    # ⚠️ הניסוח נלקח מ-he.json כלשונו. הטקסט הוא של פולה, לא שלי.
+    rules = (
+        "\n· ⚠️ **שלושת מצבי ההתאמה, ואלה בדיוק אותם שלושה שהמסך מציג:**\n"
+        f'  **"{fit["everyone"]}"** · **"{fit["unknown"]}"** '
+        f'({fit["unknownWhy"]}) · **{fit["unmeasuredWhy"]}**.\n'
+        '  שלושה דברים שונים, ואף אחד מהם אינו "לא מתאים".\n'
+        "· ⚠️ ומתקן שאינו פתוח לילד עדיין שווה להזכיר כשאפשר "
+        f'**{fit["childSwap"]}** — המבוגרים מתחלפים והילד אינו נשאר לבד. '
+        "זו תשובה שימושית, לא פסילה."
+    )
+    stamp = hashlib.sha256(rules.encode("utf-8")).hexdigest()[:12]
+    return rules, stamp
+
+
+def render(rules: str, stamp: str) -> str:
+    return (
+        "// <fit-rules>\n"
+        f'const FIT_STAMP = "{stamp}";\n'
+        f"const FIT_RULES = {json.dumps(rules, ensure_ascii=False)};\n"
+        "// </fit-rules>"
+    )
+
+
+def main() -> int:
+    rules, stamp = build()
+    src = FN.read_text(encoding="utf-8")
+    block = re.search(r"// <fit-rules>.*?// </fit-rules>", src, re.S)
+    if not block:
+        raise SystemExit("🔴 אין בלוק <fit-rules> ב-index.ts")
+    updated = src[: block.start()] + render(rules, stamp) + src[block.end():]
+
+    if "--check" in sys.argv:
+        if updated == src:
+            print(f"✅ הוראות טים מסונכרנות עם he.json · חותם {stamp}")
+            return 0
+        print("🔴 הוראות טים אינן מסונכרנות עם he.json.")
+        print("   מישהו ערך את אחד מהשניים ולא בנה מחדש. להריץ:")
+        print("   python3 scripts/build-tim-prompt.py")
+        return 1
+
+    FN.write_text(updated, encoding="utf-8")
+    print(f"✅ נכתב · חותם {stamp}")
+    print(f"   ⚠️ החותם הזה חוזר מ-diagnose. אפשר להשוות אותו למה שחי בסופהבייס.")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

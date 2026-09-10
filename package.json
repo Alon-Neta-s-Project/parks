@@ -11,7 +11,7 @@
     "test:edge": "deno test --allow-env supabase/functions/tim/index.test.ts",
     "import": "tsx scripts/import-content.ts",
     "artifact": "npm run build && python3 scripts/build-artifact.py",
-    "build:tim": "tsc -b && vite build --config vite.tim.config.ts && tsx scripts/verify-tim-build.ts"
+    "build:tim": "python3 scripts/build-tim-prompt.py --check && tsc -b && vite build --config vite.tim.config.ts && tsx scripts/verify-tim-build.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.4",
