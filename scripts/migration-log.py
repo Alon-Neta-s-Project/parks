@@ -71,9 +71,13 @@ PROBES: dict[str, str] = {
     "027_ingest_rpc.sql":              "pg_temp.has_fn('ingest_set_key')",
     "028_match_knowledge.sql":         "pg_temp.has_fn('match_knowledge')",
     "029_find_experiences.sql":        "pg_temp.has_fn('find_experiences')",
-    "030_find_experiences_by_words.sql": "pg_temp.fn_src('find_experiences') like '%ilike%'",
+    # ⚠️ `ilike` לבדו קיים כבר ב-029 — הבדיקה הזו הייתה עוברת בלי 030
+    # בכלל. `park_name` הוא מה ש-030 הוסיפה בפועל.
+    "030_find_experiences_by_words.sql": "pg_temp.fn_src('find_experiences') like '%park_name%'",
     "031_alias_candidates.sql":        "to_regclass('public.alias_candidate') is not null",
-    "032_alias_reject_useless.sql":    "pg_temp.has_fn('alias_add')",
+    # ⚠️ `alias_add` נוצרה כבר ב-031 — קיומה אינה ראיה ל-032.
+    # לוגיקת הדחייה (`lower(...)`) היא מה ש-032 הוסיפה.
+    "032_alias_reject_useless.sql":    "pg_temp.fn_src('alias_add') like '%lower%'",
     "033_embedding_follows_content.sql": "exists (select 1 from pg_trigger where tgname = 'knowledge_chunk_content_changed')",
     # ⚠️ שתי 034 — ולכל אחת טביעה אחרת לגמרי. זו הסיבה שהמפתח הוא שם.
     "034_eight_hebrew_names.sql":      "exists (select 1 from experience\n                   where key = 'EPCOT|Entertainment|JAMMitors'\n                     and name_i18n->>'he' is not null)",
@@ -337,6 +341,26 @@ def main() -> int:
             return 1
         (DEPLOY / deploy_name(name)).write_text(stamped(src), encoding="utf-8")
         print(f"✅ {deploy_name(name)}")
+        return 0
+
+    # ── מטריצת הבדיקות ───────────────────────────────────────────────
+    # 🔴 **שאלת גיא: מי בודק את הבודקות?** בדיקה שנכתבה שגוי עוברת
+    # בשקט. תפסתי אחת כזו בעצמי — `011` חיפשה את `park_kind` בטבלה
+    # הלא נכונה — ורק במקרה, כי המסד המקומי חשף אותה.
+    #
+    # ⚠️ **הכלל כאן הוא אותו כלל של כל בדיקה: היא חייבת להיראות
+    # נכשלת לפני שהיא עוברת.** הפלט הזה מחזיר שורה לכל בדיקה, ומי
+    # שמריץ אותו אחרי כל מיגרציה בנפרד רואה בדיוק מתי כל אחת התהפכה.
+    # ⚠️ **בדיקה אחת בכל פעם, ולא 45 באיחוד.** על מסד שבו המיגרציה עוד
+    # לא רצה, בדיקה שמזכירה טבלה שאינה קיימת נופלת בניתוח — **ומפילה
+    # איתה את כל האיחוד.** כלומר הכלי שנועד לבדוק "האם ההשפעה קיימת"
+    # היה מחזיר ריק על בדיוק המצב שהוא נועד לזהות.
+    if "--probe" in sys.argv:
+        want = sys.argv[sys.argv.index("--probe") + 1]
+        if want not in PROBES:
+            print(f"✗ אין בדיקה ל-{want}")
+            return 1
+        print(HELPERS + f"\nselect ({PROBES[want]}) as found;")
         return 0
 
     check = "--check" in args

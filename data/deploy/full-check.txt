@@ -172,13 +172,13 @@ insert into probe (filename, checksum, found)
          (pg_temp.has_fn('find_experiences'))
   union all
   select '030_find_experiences_by_words.sql'::text, 'sha256:219641a14cbe15dde0367b4f2da4b08b'::text,
-         (pg_temp.fn_src('find_experiences') like '%ilike%')
+         (pg_temp.fn_src('find_experiences') like '%park_name%')
   union all
   select '031_alias_candidates.sql'::text, 'sha256:392fce61473b0ac71cd42b651dac73fe'::text,
          (to_regclass('public.alias_candidate') is not null)
   union all
   select '032_alias_reject_useless.sql'::text, 'sha256:6bb4c7604d8cb4ee25b1bd7d932eae8a'::text,
-         (pg_temp.has_fn('alias_add'))
+         (pg_temp.fn_src('alias_add') like '%lower%')
   union all
   select '033_embedding_follows_content.sql'::text, 'sha256:9409c400147bf52bbecaf4e55965bb1f'::text,
          (exists (select 1 from pg_trigger where tgname = 'knowledge_chunk_content_changed'))

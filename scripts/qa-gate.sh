@@ -26,6 +26,12 @@ python3 scripts/migration-log.py --check
 step "קובצי הזרע מעודכנים מול המקור"
 python3 scripts/build-knowledge-seed.py --check
 
+# ⚠️ **לא בשער.** הבדיקה הזו דורשת Postgres מקומי, ולכן היא אינה
+# חלק מ-npm run qa — היא מורצת ידנית אחרי הוספת מיגרציה:
+#     bash scripts/verify-probes.sh
+# 🔴 ולציין את זה כאן, כי בדיקה שלא רצה אינה בדיקה — ובדיקה שחושבים
+# שהיא בשער והיא לא, גרועה משתיהן.
+
 step "טיפוסים"
 npx tsc -b --noEmit
 
