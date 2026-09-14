@@ -149,10 +149,10 @@ create or replace function pg_temp.has_policy(t text, p text) returns boolean
 $fn$;
 """
 
-VERIFY_HEAD = """-- verify-migration-log — לבדוק במסד מה באמת רץ (14.09.2026)
+VERIFY_HEAD = """-- full-check — בדיקה אחת: המיגרציות, ותנאי גיא על יומן התשובות
 -- ────────────────────────────────────────────────────────────────────
 -- 📍 להריץ ב: Supabase ← SQL Editor
--- שם השאילתה: verify-migration-log (כלי חוזר — לא צריך מספר)
+-- שם השאילתה: full-check (כלי חוזר — לא צריך מספר)
 -- ⚠️ להריץ **אחרי** 000.
 --
 -- 🔴 **הוא אינו סומך על אף רשימה — הוא שואל את המסד.** לכל מיגרציה
@@ -176,6 +176,20 @@ set local search_path = public, extensions;
 
 """
 
+SELFTEST = """
+-- ── בדיקת יומן התשובות ──────────────────────────────────────────────
+-- 🔴 שלוש קריאות: נענתה · לא נענתה · ארוכה מאוד. הן נמחקות מיד אחרי
+-- שהתוצאה נלכדת, ולכן אינן משאירות זכר ביומן האמיתי.
+select public.log_turn('שאלת בדיקה שנענתה',    true,  null,      'selftest',      10, 20);
+select public.log_turn('שאלת בדיקה שלא נענתה', false, 'no_data', 'selftest',      10, 5);
+select public.log_turn(repeat('א', 900),        false, 'no_data', 'selftest-long', null, null);
+
+create temp table selftest on commit drop as
+  select * from turn_log where model like 'selftest%';
+delete from turn_log where model like 'selftest%';
+"""
+
+
 VERIFY_TAIL = """
 -- ── הרישום ──────────────────────────────────────────────────────────
 insert into schema_migration (filename, checksum, applied_by, evidence)
@@ -187,13 +201,42 @@ on conflict (filename) do update
       evidence   = excluded.evidence
   where schema_migration.evidence = 'assumed';
 
--- ── 1. מה לא נמצא במסד — וזו השורה שחשוב לקרוא ──────────────────────
-select filename as "לא נמצאה במסד — לבדוק ביד"
-  from probe where not found order by filename;
+-- ── התוצאה ──────────────────────────────────────────────────────────
+-- 🔴 **שאילתה אחת, ובכוונה.** ה-SQL Editor של סופהבייס מציג רק את
+-- תוצאת השאילתה האחרונה. קובץ עם שלוש טבלאות מראה אחת, והשתיים
+-- החשובות נעלמות — וזה בדיוק מה שקרה כאן: רשימת החסרות הייתה ראשונה,
+-- ולכן איש לא ראה אותה.
+--
+-- ⚠️ **וזו אותה תבנית שהקובץ הזה קיים בשבילה:** משהו לא הוצג, ולכן
+-- נקרא כאילו אינו קיים.
+with missing as (select filename from probe where not found),
+     summary as (select evidence, count(*) as n from schema_migration group by evidence)
+select
+  case when exists (select 1 from missing)
+       then '🔴 לא נמצאה במסד — לבדוק ביד'
+       else '✅ כל המיגרציות נמצאו' end                as "מה",
+  coalesce((select string_agg(filename, ', ' order by filename) from missing), '—') as "פרט"
+union all
+select 'ראיה: ' || evidence, n::text from summary
 
--- ── 2. סיכום ────────────────────────────────────────────────────────
-select evidence as "ראיה", count(*) as "מיגרציות"
-  from schema_migration group by evidence order by 1;
+-- ── ותנאי גיא על יומן התשובות, באותה טבלה ───────────────────────────
+-- ⚠️ שלוש קריאות בדיקה נכתבו למעלה ונמחקו לפני ההצגה.
+union all select 'turn_log — דליפה: תשובה שנענתה ששמרה טקסט (צפוי 0)',
+  (select count(*)::text from selftest where answered and question is not null)
+union all select 'turn_log — שאלות שנשמרו מתוך 3 קריאות (צפוי 2)',
+  (select count(*)::text from selftest where question is not null)
+union all select 'turn_log — אורך אחרי חיתוך של 900 תווים (צפוי 500)',
+  (select coalesce(max(length(question)),0)::text from selftest where model = 'selftest-long')
+union all select 'turn_log — RLS פעיל · נאכף · policies (צפוי t/t/0)',
+  (select relrowsecurity::text || ' / ' || relforcerowsecurity::text || ' / ' ||
+          (select count(*) from pg_policies
+            where schemaname='public' and tablename='turn_log')::text
+     from pg_class where relname = 'turn_log')
+union all select 'turn_log — עמודות שיכולות להחזיק מזהה (צפוי 0)',
+  (select count(*)::text from pg_attribute
+    where attrelid = 'turn_log'::regclass and attnum > 0 and not attisdropped
+      and attname in ('user_id','conversation_id','ip','session_id'))
+order by 1;
 
 COMMIT;
 """
@@ -246,7 +289,7 @@ def build_verify() -> str:
         + "\n  union all\n".join(rows)
         + ";\n"
     )
-    return VERIFY_HEAD + HELPERS + "\n" + probe + VERIFY_TAIL
+    return VERIFY_HEAD + HELPERS + "\n" + probe + SELFTEST + VERIFY_TAIL
 
 
 def main() -> int:
@@ -283,10 +326,10 @@ def main() -> int:
             if not check:
                 out.write_text(want, encoding="utf-8")
 
-    verify = DEPLOY / "verify-migration-log.txt"
+    verify = DEPLOY / "full-check.txt"
     want_verify = build_verify()
     if not verify.exists() or verify.read_text(encoding="utf-8") != want_verify:
-        bad.append("verify-migration-log.txt — אינו מעודכן")
+        bad.append("full-check.txt — אינו מעודכן")
         if not check:
             verify.write_text(want_verify, encoding="utf-8")
 
