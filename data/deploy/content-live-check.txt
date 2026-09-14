@@ -43,6 +43,7 @@ with expected (doc_id, chunks) as (
     ('military-ticket-uor', 5),
     ('military-ticket-wdw', 5),
     ('park-character-animal-kingdom-wdw', 4),
+    ('park-character-epcot-wdw', 5),
     ('park-character-epic-uor', 4),
     ('park-character-hollywood-studios-wdw', 4),
     ('park-character-ioa-uor', 4),

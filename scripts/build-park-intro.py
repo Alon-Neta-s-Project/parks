@@ -32,8 +32,9 @@ PARK_ID = {
     "park-character-usf-uor": "us",
     "park-character-ioa-uor": "ioa",
     "park-character-epic-uor": "epic",
-    # ⚠️ EPCOT חסר בכוונה — אין לו מדריך אופי. הוא יישאר NULL,
-    # וזה ייראה. ראה Issue על החוסר.
+    # ⚠️ EPCOT נוסף ב-14.09. הטקסט היה קיים ומאושר מ-09.09 ופשוט לא
+    # נטען — פער טעינה, לא פער מחקר. מצאה פולה.
+    "park-character-epcot-wdw": "epcot",
 }
 
 HEAD = """-- park-intro — פתיח אופי הפארק, נגזר ממדריכי האופי
