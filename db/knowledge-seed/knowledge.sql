@@ -1,5 +1,5 @@
 -- ==========================================================================
--- Park Day Companion — מאגר הידע: 63 מסמכים · 302 קטעים
+-- Park Day Companion — מאגר הידע: 63 מסמכים · 301 קטעים
 -- ==========================================================================
 --
 -- נוצר על ידי scripts/build-knowledge-seed.py מתוך knowledge/.
@@ -1117,7 +1117,13 @@ Express Unlimited מאפשר להשתמש בתור Express מספר פעמים �
 
 ## מי מקבל אותו דרך מלון?
 
-אורחי מלונות נבחרים מקבלים Express Unlimited **לכל ימי השהייה** — כולל יום הצ’ק-אין, כל הלילות שביניהם, ויום הצ’ק-אאוט. רשימת המלונות והפארקים המכוסים עשויה להשתנות ויש לבדוק לפני הזמנה.'),
+שלושה מלונות, ולא "מלונות נבחרים": **Portofino Bay · Hard Rock · Royal Pacific**. בשלושתם Express Unlimited כלול בשהייה, **לכל ימי השהייה** — כולל יום הצ’ק-אין, כל הלילות שביניהם, ויום הצ’ק-אאוט.
+
+ההטבה תקפה ב-Universal Studios Florida וב-Islands of Adventure בלבד.
+
+**בכל שאר מלונות יוניברסל — Sapphire Falls, Cabana Bay, Aventura, Endless Summer, Helios Grand, Stella Nova ו-Terra Luna — Express Unlimited אינו כלול בשהייה.**
+
+**וב-Epic Universe אין Express Unlimited כהטבת מלון לאף מלון, כולל Helios Grand.** ההטבה קשורה בחוזה לשלושת מלונות Loews המקוריים ולשני הפארקים הישנים.'),
 ('universal-express-uor', 'Universal Express Pass — יוניברסל אורלנדו', 'policy', 'T1', 'he', 'uor', 'static', '2026-09-01', 'approved', array['https://store.universalorlando.com/en/us/store/c/uo_ice_default_pb_express'], 'queue_access', 'international_guest', 'core', 'paid_addon', '## מה Express נותן?
 
 Universal Express מאפשר להשתמש בתור Express פעם אחת בכל מתקן משתתף הכלול במוצר שנרכש. הוא מקצר את התור הרגיל, אך אינו מבטיח עלייה מיידית או אפס המתנה.
@@ -1141,13 +1147,7 @@ Universal Express מאפשר להשתמש בתור Express פעם אחת בכל 
 
 מלונות יוניברסל עצמם מתחלקים לשש קטגוריות, וההטבות **שונות בין קטגוריה לקטגוריה**. מלון שותף אינו אחד מהם — הוא תוכנית נפרדת עם הטבות אחרות לגמרי.
 
-## Express Unlimited — שלושה מלונות בלבד
-
-**Portofino Bay · Hard Rock · Royal Pacific** — קטגוריית Legacy Signature. בשלושת אלה Express Unlimited כלול בשהייה, לכל ימי השהייה, ותקף ב-Universal Studios Florida וב-Islands of Adventure.
-
-**בכל שאר מלונות יוניברסל — Sapphire Falls, Cabana Bay, Aventura, Endless Summer, Helios Grand, Stella Nova ו-Terra Luna — Express Unlimited אינו כלול.** ניתן לרכוש אותו בנפרד.
-
-**ב-Epic Universe אין Express Unlimited כהטבת מלון לאף מלון, כולל Helios Grand.**
+המסמך הזה עוסק בכניסה המוקדמת ובתחבורה. Express Unlimited הוא מוצר נפרד עם מדיניות משלו.
 
 ## Early Park Admission — כלול בכל מלונות יוניברסל
 
@@ -2282,7 +2282,13 @@ Express Unlimited מאפשר להשתמש בתור Express מספר פעמים �
 לא. רק מתקנים משתתפים. Unlimited מתאר את מספר השימושים, לא כיסוי מלא של כל אטרקציה. גם בתור Express יכולה להיות המתנה.', 'T1', 'he', 'approved'),
 ('universal-express-unlimited-uor', 4, '## מי מקבל אותו דרך מלון?
 
-אורחי מלונות נבחרים מקבלים Express Unlimited **לכל ימי השהייה** — כולל יום הצ’ק-אין, כל הלילות שביניהם, ויום הצ’ק-אאוט. רשימת המלונות והפארקים המכוסים עשויה להשתנות ויש לבדוק לפני הזמנה.', 'T1', 'he', 'approved'),
+שלושה מלונות, ולא "מלונות נבחרים": **Portofino Bay · Hard Rock · Royal Pacific**. בשלושתם Express Unlimited כלול בשהייה, **לכל ימי השהייה** — כולל יום הצ’ק-אין, כל הלילות שביניהם, ויום הצ’ק-אאוט.
+
+ההטבה תקפה ב-Universal Studios Florida וב-Islands of Adventure בלבד.
+
+**בכל שאר מלונות יוניברסל — Sapphire Falls, Cabana Bay, Aventura, Endless Summer, Helios Grand, Stella Nova ו-Terra Luna — Express Unlimited אינו כלול בשהייה.**
+
+**וב-Epic Universe אין Express Unlimited כהטבת מלון לאף מלון, כולל Helios Grand.** ההטבה קשורה בחוזה לשלושת מלונות Loews המקוריים ולשני הפארקים הישנים.', 'T1', 'he', 'approved'),
 ('universal-express-uor', 0, '## מה Express נותן?
 
 Universal Express מאפשר להשתמש בתור Express פעם אחת בכל מתקן משתתף הכלול במוצר שנרכש. הוא מקצר את התור הרגיל, אך אינו מבטיח עלייה מיידית או אפס המתנה.', 'T1', 'he', 'approved'),
@@ -2300,27 +2306,22 @@ Universal Express מאפשר להשתמש בתור Express פעם אחת בכל 
 ב-Universal Express הרגיל — פעם אחת בכל מתקן משתתף. שימוש חוזר דורש תור רגיל או מוצר Express Unlimited, אם הוא מוצע ומתאים לפארק.', 'T1', 'he', 'approved'),
 ('universal-onsite-hotels-uor', 0, '## שש קטגוריות, ולא רשימה אחת של מלונות
 
-מלונות יוניברסל עצמם מתחלקים לשש קטגוריות, וההטבות **שונות בין קטגוריה לקטגוריה**. מלון שותף אינו אחד מהם — הוא תוכנית נפרדת עם הטבות אחרות לגמרי.', 'T3', 'he', 'approved'),
-('universal-onsite-hotels-uor', 1, '## Express Unlimited — שלושה מלונות בלבד
+מלונות יוניברסל עצמם מתחלקים לשש קטגוריות, וההטבות **שונות בין קטגוריה לקטגוריה**. מלון שותף אינו אחד מהם — הוא תוכנית נפרדת עם הטבות אחרות לגמרי.
 
-**Portofino Bay · Hard Rock · Royal Pacific** — קטגוריית Legacy Signature. בשלושת אלה Express Unlimited כלול בשהייה, לכל ימי השהייה, ותקף ב-Universal Studios Florida וב-Islands of Adventure.
-
-**בכל שאר מלונות יוניברסל — Sapphire Falls, Cabana Bay, Aventura, Endless Summer, Helios Grand, Stella Nova ו-Terra Luna — Express Unlimited אינו כלול.** ניתן לרכוש אותו בנפרד.
-
-**ב-Epic Universe אין Express Unlimited כהטבת מלון לאף מלון, כולל Helios Grand.**', 'T3', 'he', 'approved'),
-('universal-onsite-hotels-uor', 2, '## Early Park Admission — כלול בכל מלונות יוניברסל
+המסמך הזה עוסק בכניסה המוקדמת ובתחבורה. Express Unlimited הוא מוצר נפרד עם מדיניות משלו.', 'T3', 'he', 'approved'),
+('universal-onsite-hotels-uor', 1, '## Early Park Admission — כלול בכל מלונות יוניברסל
 
 **EPA כלול בכל שש הקטגוריות, בלי יוצא מן הכלל.** זו ההטבה המשותפת לכל מלונות יוניברסל, ובה הם נבדלים ממלונות שותפים.
 
 בשלושת מלונות Epic Universe — Helios Grand, Stella Nova ו-Terra Luna — ה-EPA כולל גם את Epic Universe עצמו.', 'T3', 'he', 'approved'),
-('universal-onsite-hotels-uor', 3, '## התחבורה — שלוש צורות
+('universal-onsite-hotels-uor', 2, '## התחבורה — שלוש צורות
 
 **סירות ואוטובוסים:** Portofino Bay, Hard Rock, Royal Pacific ו-Sapphire Falls. התחבורה הזו מגיעה לפארקים המקוריים, **ואינה מגיעה ל-Epic Universe**.
 
 **אוטובוס בלבד:** Cabana Bay, Aventura, Endless Summer ו-Terra Luna.
 
 **הליכה:** ל-Helios Grand כניסה ייעודית ישירות לתוך Epic Universe. מ-Stella Nova ההליכה ל-Epic Universe אורכת כרבע שעה.', 'T3', 'he', 'approved'),
-('universal-onsite-hotels-uor', 4, '## הקטגוריות במלואן
+('universal-onsite-hotels-uor', 3, '## הקטגוריות במלואן
 
 | קטגוריה | מלונות |
 |---|---|

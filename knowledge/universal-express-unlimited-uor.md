@@ -31,4 +31,10 @@ Express Unlimited מאפשר להשתמש בתור Express מספר פעמים �
 
 ## מי מקבל אותו דרך מלון?
 
-אורחי מלונות נבחרים מקבלים Express Unlimited **לכל ימי השהייה** — כולל יום הצ’ק-אין, כל הלילות שביניהם, ויום הצ’ק-אאוט. רשימת המלונות והפארקים המכוסים עשויה להשתנות ויש לבדוק לפני הזמנה.
+שלושה מלונות, ולא "מלונות נבחרים": **Portofino Bay · Hard Rock · Royal Pacific**. בשלושתם Express Unlimited כלול בשהייה, **לכל ימי השהייה** — כולל יום הצ’ק-אין, כל הלילות שביניהם, ויום הצ’ק-אאוט.
+
+ההטבה תקפה ב-Universal Studios Florida וב-Islands of Adventure בלבד.
+
+**בכל שאר מלונות יוניברסל — Sapphire Falls, Cabana Bay, Aventura, Endless Summer, Helios Grand, Stella Nova ו-Terra Luna — Express Unlimited אינו כלול בשהייה.**
+
+**וב-Epic Universe אין Express Unlimited כהטבת מלון לאף מלון, כולל Helios Grand.** ההטבה קשורה בחוזה לשלושת מלונות Loews המקוריים ולשני הפארקים הישנים.

@@ -17,13 +17,7 @@ purchase_type: included_benefit
 
 מלונות יוניברסל עצמם מתחלקים לשש קטגוריות, וההטבות **שונות בין קטגוריה לקטגוריה**. מלון שותף אינו אחד מהם — הוא תוכנית נפרדת עם הטבות אחרות לגמרי.
 
-## Express Unlimited — שלושה מלונות בלבד
-
-**Portofino Bay · Hard Rock · Royal Pacific** — קטגוריית Legacy Signature. בשלושת אלה Express Unlimited כלול בשהייה, לכל ימי השהייה, ותקף ב-Universal Studios Florida וב-Islands of Adventure.
-
-**בכל שאר מלונות יוניברסל — Sapphire Falls, Cabana Bay, Aventura, Endless Summer, Helios Grand, Stella Nova ו-Terra Luna — Express Unlimited אינו כלול.** ניתן לרכוש אותו בנפרד.
-
-**ב-Epic Universe אין Express Unlimited כהטבת מלון לאף מלון, כולל Helios Grand.**
+המסמך הזה עוסק בכניסה המוקדמת ובתחבורה. Express Unlimited הוא מוצר נפרד עם מדיניות משלו.
 
 ## Early Park Admission — כלול בכל מלונות יוניברסל
 
