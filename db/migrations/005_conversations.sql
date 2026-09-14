@@ -63,3 +63,10 @@ create view unanswered_questions as
      and m.answered = false;
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('005_conversations.sql', 'sha256:449870fb67f196bbf5b03d1e6a57f82a',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

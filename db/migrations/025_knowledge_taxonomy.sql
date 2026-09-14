@@ -108,3 +108,10 @@ create index if not exists knowledge_chunk_pending_idx
   on knowledge_chunk (doc_id) where embedding is null;
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('025_knowledge_taxonomy.sql', 'sha256:75d3755b81d9e8b2156a825e3112d4a9',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

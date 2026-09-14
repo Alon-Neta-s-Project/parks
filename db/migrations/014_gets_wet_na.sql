@@ -28,3 +28,10 @@ comment on column experience.gets_wet is
   'ערך = נבדק · ''none'' = נבדק ואינו מרטיב · ''na'' = לא רלוונטי (מופע) · NULL = לא נבדק. ארבעה מצבים, לא שלושה.';
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('014_gets_wet_na.sql', 'sha256:e1c81fbefd428f39dd19e287bb2c470d',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

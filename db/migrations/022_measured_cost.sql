@@ -57,3 +57,10 @@ comment on view usage_today is
   'כמה שאלות נשאלו ב-24 השעות האחרונות, וכמה נשאר עד הגדר. העלות מוערכת לפי estimated_cost_per_message().';
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('022_measured_cost.sql', 'sha256:a182cff4178674577faa5db87b224389',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

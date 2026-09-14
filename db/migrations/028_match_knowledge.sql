@@ -85,3 +85,10 @@ end
 $$;
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('028_match_knowledge.sql', 'sha256:e004bee033d83d0b459a2eb476a51e43',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

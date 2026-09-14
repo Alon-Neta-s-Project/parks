@@ -1,0 +1,17 @@
+-- migration-status — מה רץ על המסד, ומה חסר
+-- ────────────────────────────────────────────────────────────────────
+-- 📍 להריץ ב: Supabase ← SQL Editor
+-- שם השאילתה: migration-status (כלי חוזר — לא צריך מספר)
+--
+-- ⚠️ **כלי חוזר.** אפשר להריץ מתי שרוצים, כמה פעמים שרוצים. הוא לא
+-- משנה כלום — רק קורא.
+
+-- 1. כמה מיגרציות רשומות, ואילו מהן באמת נצפו
+select evidence as "ראיה", count(*) as "מיגרציות",
+       max(applied_at)::date as "אחרונה"
+  from schema_migration group by evidence order by 1;
+
+-- 2. עשר האחרונות, לפי סדר ההרצה
+select filename as "קובץ", applied_by as "מי הריץ",
+       evidence as "ראיה", applied_at as "מתי"
+  from schema_migration order by applied_at desc limit 10;

@@ -29,3 +29,10 @@ comment on table api_call is
   'דלי הגבלת קצב. bucket הוא גיבוב של כתובת עם מלח, לא הכתובת. שורות ישנות מ-24 שעות חסרות ערך וניתן למחוק אותן.';
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('018_rate_limit.sql', 'sha256:0e6a6814952cf9f9e553c9e2549d0f32',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

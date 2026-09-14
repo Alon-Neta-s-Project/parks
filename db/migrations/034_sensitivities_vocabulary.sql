@@ -143,3 +143,10 @@ end $$;
 COMMIT;
 
 select '✅ 034 הותקנה' as "מצב";
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('034_sensitivities_vocabulary.sql', 'sha256:9c822a6a6a2b7fe4f1653882b3340ac5',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

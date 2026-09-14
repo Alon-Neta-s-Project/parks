@@ -67,3 +67,10 @@ comment on column experience.inversions is
   'מספר היפוכים. NULL = לא נבדק · 0 = נבדק ואין. 20 שורות נושאות ערך.';
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('023_speed_and_inversions.sql', 'sha256:3d6d140682399ec1c1c3c66456989978',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

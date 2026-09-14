@@ -45,3 +45,10 @@ alter table experience alter column sens_strobe        drop not null;
 alter table experience alter column sens_strobe        drop default;
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('011_conformance_fixes.sql', 'sha256:b1281393d538698f09aaba3699ba166c',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

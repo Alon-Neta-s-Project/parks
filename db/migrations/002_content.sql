@@ -181,3 +181,10 @@ create table experience_source (
 create index experience_source_exp_idx on experience_source (experience_id);
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('002_content.sql', 'sha256:007b31bbf386302575564d417f0f7a5f',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

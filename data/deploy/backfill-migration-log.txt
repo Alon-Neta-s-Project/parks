@@ -1,0 +1,67 @@
+-- backfill — לסמן את המיגרציות שכבר רצו (14.09.2026)
+-- ─────────────────────────────────────────────────────────────────────
+-- 📍 להריץ ב: Supabase ← SQL Editor
+-- שם השאילתה: backfill — מיגרציות שכבר רצו (14.09)
+-- ⚠️ להריץ **אחרי** 000, ופעם אחת בלבד.
+--
+-- 🔴 **כל השורות כאן הן `assumed`, וזו אינה ענוות.**
+-- אי אפשר לשחזר מהמסד אילו מהן רצו — רובן `create or replace`
+-- על אותה פונקציה, או עדכוני נתונים בלי אובייקט חדש בכלל.
+-- לכתוב אותן כ-`observed` היה להצהיר שמישהו בדק, ואיש לא בדק.
+--
+-- ✅ **מהמיגרציה שאחרי 041 והלאה הרישום אמיתי.** כל מיגרציה נושאת בסופה
+-- שורת רישום שרצה איתה, ולכן נרשמת כ-`observed`.
+
+BEGIN;
+
+insert into schema_migration (filename, checksum, applied_by, evidence)
+values
+  ('001_extensions_and_taxonomy.sql', 'sha256:febd46240e77a8da36dea66f41ed0e65', 'backfill', 'assumed'),
+  ('002_content.sql', 'sha256:007b31bbf386302575564d417f0f7a5f', 'backfill', 'assumed'),
+  ('003_knowledge.sql', 'sha256:113dc2b23be1e8c5803b4d76200d22bd', 'backfill', 'assumed'),
+  ('004_users_trips.sql', 'sha256:b5ef6a32ad6597498ce3e7a7335fcf6b', 'backfill', 'assumed'),
+  ('005_conversations.sql', 'sha256:449870fb67f196bbf5b03d1e6a57f82a', 'backfill', 'assumed'),
+  ('006_rls.sql', 'sha256:e2181e2c7d0f8293e7372df689e708f0', 'backfill', 'assumed'),
+  ('007_content_fields.sql', 'sha256:ba04dc1d8636c84d0e41db0bf0159584', 'backfill', 'assumed'),
+  ('008_profile_axes.sql', 'sha256:a9ad8de88a58e9334065170cb6938e7f', 'backfill', 'assumed'),
+  ('009_plan_item_interest.sql', 'sha256:5f6beab9801549e1a1b6edce10191fc4', 'backfill', 'assumed'),
+  ('010_trip_members.sql', 'sha256:96fa5d133486ccd82b91215c7587c92d', 'backfill', 'assumed'),
+  ('011_conformance_fixes.sql', 'sha256:b1281393d538698f09aaba3699ba166c', 'backfill', 'assumed'),
+  ('012_height_none.sql', 'sha256:32705b093ef3b15f4b1dab642ef86294', 'backfill', 'assumed'),
+  ('013_scenic_ride.sql', 'sha256:537b8b77b11e65ad212fad1550c6d577', 'backfill', 'assumed'),
+  ('014_gets_wet_na.sql', 'sha256:e1c81fbefd428f39dd19e287bb2c470d', 'backfill', 'assumed'),
+  ('015_trip_park_days.sql', 'sha256:e27135b6a662d3c0ee7e71797ece82dd', 'backfill', 'assumed'),
+  ('016_skip_line_neutral.sql', 'sha256:9a5c76a1bd5fd8c4ec7f34c188111e6e', 'backfill', 'assumed'),
+  ('017_drop_skip_line_extra_cost.sql', 'sha256:6f77d1fab9c67752db3c52674f336155', 'backfill', 'assumed'),
+  ('018_rate_limit.sql', 'sha256:0e6a6814952cf9f9e553c9e2549d0f32', 'backfill', 'assumed'),
+  ('019_content_fields_from_export.sql', 'sha256:b01b39e913d0b678813c0dbd2418e0f2', 'backfill', 'assumed'),
+  ('020_rate_limit_rpc.sql', 'sha256:2b5f1dc15ec0cd8a51ead08816057caa', 'backfill', 'assumed'),
+  ('021_global_daily_cap.sql', 'sha256:6a77b32f3cac6170e5d8d4654f71cadd', 'backfill', 'assumed'),
+  ('022_measured_cost.sql', 'sha256:a182cff4178674577faa5db87b224389', 'backfill', 'assumed'),
+  ('023_speed_and_inversions.sql', 'sha256:3d6d140682399ec1c1c3c66456989978', 'backfill', 'assumed'),
+  ('024_embedding_1536.sql', 'sha256:53083620830633412a6d721d4db03129', 'backfill', 'assumed'),
+  ('025_knowledge_taxonomy.sql', 'sha256:75d3755b81d9e8b2156a825e3112d4a9', 'backfill', 'assumed'),
+  ('026_rate_limit_caps_not_arguments.sql', 'sha256:5e397ca0fc13b9b3bd803a803591173d', 'backfill', 'assumed'),
+  ('027_ingest_rpc.sql', 'sha256:1f500c8be4515a4e4ef1433899cf6eda', 'backfill', 'assumed'),
+  ('028_match_knowledge.sql', 'sha256:e004bee033d83d0b459a2eb476a51e43', 'backfill', 'assumed'),
+  ('029_find_experiences.sql', 'sha256:df969b0e6b22357e56b7069a9df283fa', 'backfill', 'assumed'),
+  ('030_find_experiences_by_words.sql', 'sha256:219641a14cbe15dde0367b4f2da4b08b', 'backfill', 'assumed'),
+  ('031_alias_candidates.sql', 'sha256:392fce61473b0ac71cd42b651dac73fe', 'backfill', 'assumed'),
+  ('032_alias_reject_useless.sql', 'sha256:6bb4c7604d8cb4ee25b1bd7d932eae8a', 'backfill', 'assumed'),
+  ('033_embedding_follows_content.sql', 'sha256:9409c400147bf52bbecaf4e55965bb1f', 'backfill', 'assumed'),
+  ('034_eight_hebrew_names.sql', 'sha256:9c3815daa05b88913c37951a9641db64', 'backfill', 'assumed'),
+  ('034_sensitivities_vocabulary.sql', 'sha256:9c822a6a6a2b7fe4f1653882b3340ac5', 'backfill', 'assumed'),
+  ('035_sources_are_not_public.sql', 'sha256:8cb16bb8493d794a21962391abbaf216', 'backfill', 'assumed'),
+  ('036_knowledge_is_not_public.sql', 'sha256:e1960194177c70bf62a45326d6eec657', 'backfill', 'assumed'),
+  ('037_bucket_daily_cap.sql', 'sha256:8b7b0c2f1477aa9a2e27eb3a4e6b0064', 'backfill', 'assumed'),
+  ('038_max_height.sql', 'sha256:a3d4d18cb6811b99c45cc25ea10c548d', 'backfill', 'assumed'),
+  ('039_sensitivity_flags_to_tim.sql', 'sha256:7470162c5a7eca7d8c06977fd1191f8a', 'backfill', 'assumed'),
+  ('040_sensitivity_four_states.sql', 'sha256:83465f62943fcdb016eb8c31ba594e92', 'backfill', 'assumed'),
+  ('041_park_intro.sql', 'sha256:87781504e654dea6cefc46f6c17dfb14', 'backfill', 'assumed')
+on conflict (filename) do nothing;
+
+-- אימות
+select evidence as "ראיה", count(*) as "מיגרציות"
+  from schema_migration group by evidence order by 1;
+
+COMMIT;

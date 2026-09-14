@@ -117,3 +117,10 @@ end
 $$;
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('031_alias_candidates.sql', 'sha256:392fce61473b0ac71cd42b651dac73fe',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

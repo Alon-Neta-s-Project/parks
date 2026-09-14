@@ -57,3 +57,10 @@ comment on column experience.sens_strobe        is 'לא בהיקף שלב 1. ל
 create index experience_motion_sickness_idx on experience (motion_sickness_warning);
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('007_content_fields.sql', 'sha256:ba04dc1d8636c84d0e41db0bf0159584',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

@@ -125,3 +125,10 @@ end $$;
 COMMIT;
 
 select '✅ 033 הותקנה' as "מצב";
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('033_embedding_follows_content.sql', 'sha256:9409c400147bf52bbecaf4e55965bb1f',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

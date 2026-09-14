@@ -151,3 +151,10 @@ end
 $$;
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('030_find_experiences_by_words.sql', 'sha256:219641a14cbe15dde0367b4f2da4b08b',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

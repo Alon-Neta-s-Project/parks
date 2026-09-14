@@ -122,3 +122,10 @@ end
 $$;
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('029_find_experiences.sql', 'sha256:df969b0e6b22357e56b7069a9df283fa',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

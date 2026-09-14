@@ -20,6 +20,9 @@ python3 scripts/check-secrets.py
 step "הוראות טים מסונכרנות עם he.json"
 python3 scripts/build-tim-prompt.py --check
 
+step "יומן המיגרציות — כל מיגרציה חתומה, וקובץ הפריסה זהה לה"
+python3 scripts/migration-log.py --check
+
 step "קובצי הזרע מעודכנים מול המקור"
 python3 scripts/build-knowledge-seed.py --check
 

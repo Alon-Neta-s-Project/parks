@@ -111,3 +111,10 @@ end $$;
 COMMIT;
 
 select '✅ 036 הותקנה' as "מצב";
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('036_knowledge_is_not_public.sql', 'sha256:e1960194177c70bf62a45326d6eec657',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

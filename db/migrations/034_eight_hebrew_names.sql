@@ -29,3 +29,10 @@ COMMIT;
 select count(*) filter (where name_i18n->>'he' is null or name_i18n->>'he' = '') as "בלי שם עברי (צפוי: 0)",
        count(*) as "סך השורות (צפוי: 242)"
   from experience;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('034_eight_hebrew_names.sql', 'sha256:9c3815daa05b88913c37951a9641db64',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

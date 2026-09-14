@@ -76,3 +76,10 @@ comment on function public.alias_add(text, text, text, text) is
 delete from alias_candidate where source = 'model' and status = 'pending';
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('032_alias_reject_useless.sql', 'sha256:6bb4c7604d8cb4ee25b1bd7d932eae8a',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

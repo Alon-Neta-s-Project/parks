@@ -41,3 +41,10 @@ comment on column experience.skip_line_system is
   'מוצר דילוג בתור, בשם ניטרלי למפעיל. multi_pass/single_pass = דיסני · express = יוניברסל · none = נבדק ואין · NULL = לא נבדק, ולעולם אינו "אין".';
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('016_skip_line_neutral.sql', 'sha256:9a5c76a1bd5fd8c4ec7f34c188111e6e',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

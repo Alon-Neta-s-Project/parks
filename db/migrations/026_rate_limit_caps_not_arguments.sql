@@ -119,3 +119,10 @@ end
 $$;
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('026_rate_limit_caps_not_arguments.sql', 'sha256:5e397ca0fc13b9b3bd803a803591173d',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
