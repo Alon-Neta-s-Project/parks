@@ -1,0 +1,112 @@
+-- universal-onsite-hotels-uor — עדכון מסמך ידע בודד
+-- ────────────────────────────────────────────────────────────────────
+-- 📍 להריץ ב: Supabase ← SQL Editor
+-- שם השאילתה: universal-onsite-hotels-uor (כלי חוזר — לא צריך מספר)
+--
+-- ⚠️ **נוצר מ-knowledge/universal-onsite-hotels-uor.md. אין לערוך ביד.**
+--
+-- 🔴 **אחרי ההרצה חובה להריץ embed.** הקטעים נמחקים ונכתבים מחדש בלי
+-- וקטור. קטע בלי וקטור אינו נשלף, וטים עונה כאילו הוא אינו קיים.
+
+BEGIN;
+
+set local search_path = public, extensions;
+
+insert into knowledge_doc
+  (id, title, doc_type, authority_tier, locale, scope_resort, volatility, last_verified, review_status, source_urls, product_family, audience, v1_priority, purchase_type, body)
+values
+('universal-onsite-hotels-uor', 'מלונות יוניברסל On-Site — הטבות לפי קטגוריה', 'guide', 'T3', 'he', 'uor', 'static', '2026-09-14', 'approved', array['https://www.universalorlandovacations.com/hotels', 'https://allears.net', 'https://touringplans.com', 'https://orlandoinformer.com'], 'hotel_benefit', 'international_guest', 'core', 'included_benefit', '## שש קטגוריות, ולא רשימה אחת של מלונות
+
+מלונות יוניברסל עצמם מתחלקים לשש קטגוריות, וההטבות **שונות בין קטגוריה לקטגוריה**. מלון שותף אינו אחד מהם — הוא תוכנית נפרדת עם הטבות אחרות לגמרי.
+
+## Express Unlimited — שלושה מלונות בלבד
+
+**Portofino Bay · Hard Rock · Royal Pacific** — קטגוריית Legacy Signature. בשלושת אלה Express Unlimited כלול בשהייה, לכל ימי השהייה, ותקף ב-Universal Studios Florida וב-Islands of Adventure.
+
+**בכל שאר מלונות יוניברסל — Sapphire Falls, Cabana Bay, Aventura, Endless Summer, Helios Grand, Stella Nova ו-Terra Luna — Express Unlimited אינו כלול.** ניתן לרכוש אותו בנפרד.
+
+**ב-Epic Universe אין Express Unlimited כהטבת מלון לאף מלון, כולל Helios Grand.**
+
+## Early Park Admission — כלול בכל מלונות יוניברסל
+
+**EPA כלול בכל שש הקטגוריות, בלי יוצא מן הכלל.** זו ההטבה המשותפת לכל מלונות יוניברסל, ובה הם נבדלים ממלונות שותפים.
+
+בשלושת מלונות Epic Universe — Helios Grand, Stella Nova ו-Terra Luna — ה-EPA כולל גם את Epic Universe עצמו.
+
+## התחבורה — שלוש צורות
+
+**סירות ואוטובוסים:** Portofino Bay, Hard Rock, Royal Pacific ו-Sapphire Falls. התחבורה הזו מגיעה לפארקים המקוריים, **ואינה מגיעה ל-Epic Universe**.
+
+**אוטובוס בלבד:** Cabana Bay, Aventura, Endless Summer ו-Terra Luna.
+
+**הליכה:** ל-Helios Grand כניסה ייעודית ישירות לתוך Epic Universe. מ-Stella Nova ההליכה ל-Epic Universe אורכת כרבע שעה.
+
+## הקטגוריות במלואן
+
+| קטגוריה | מלונות |
+|---|---|
+| Legacy Signature | Portofino Bay · Hard Rock · Royal Pacific |
+| Preferred | Sapphire Falls |
+| Prime Value | Cabana Bay · Aventura · Endless Summer (Surfside ו-Dockside) |
+| Epic Universe — Premier | Helios Grand |
+| Epic Universe — Preferred | Stella Nova |
+| Epic Universe — Value | Terra Luna |')
+on conflict (id) do update set
+  title = excluded.title,
+  doc_type = excluded.doc_type,
+  authority_tier = excluded.authority_tier,
+  locale = excluded.locale,
+  scope_resort = excluded.scope_resort,
+  volatility = excluded.volatility,
+  last_verified = excluded.last_verified,
+  review_status = excluded.review_status,
+  source_urls = excluded.source_urls,
+  product_family = excluded.product_family,
+  audience = excluded.audience,
+  v1_priority = excluded.v1_priority,
+  purchase_type = excluded.purchase_type,
+  body = excluded.body,
+  updated_at = now();
+
+delete from knowledge_chunk where doc_id = 'universal-onsite-hotels-uor';
+
+insert into knowledge_chunk
+  (doc_id, chunk_index, content, authority_tier, locale, review_status)
+values
+('universal-onsite-hotels-uor', 0, '## שש קטגוריות, ולא רשימה אחת של מלונות
+
+מלונות יוניברסל עצמם מתחלקים לשש קטגוריות, וההטבות **שונות בין קטגוריה לקטגוריה**. מלון שותף אינו אחד מהם — הוא תוכנית נפרדת עם הטבות אחרות לגמרי.', 'T3', 'he', 'approved'),
+('universal-onsite-hotels-uor', 1, '## Express Unlimited — שלושה מלונות בלבד
+
+**Portofino Bay · Hard Rock · Royal Pacific** — קטגוריית Legacy Signature. בשלושת אלה Express Unlimited כלול בשהייה, לכל ימי השהייה, ותקף ב-Universal Studios Florida וב-Islands of Adventure.
+
+**בכל שאר מלונות יוניברסל — Sapphire Falls, Cabana Bay, Aventura, Endless Summer, Helios Grand, Stella Nova ו-Terra Luna — Express Unlimited אינו כלול.** ניתן לרכוש אותו בנפרד.
+
+**ב-Epic Universe אין Express Unlimited כהטבת מלון לאף מלון, כולל Helios Grand.**', 'T3', 'he', 'approved'),
+('universal-onsite-hotels-uor', 2, '## Early Park Admission — כלול בכל מלונות יוניברסל
+
+**EPA כלול בכל שש הקטגוריות, בלי יוצא מן הכלל.** זו ההטבה המשותפת לכל מלונות יוניברסל, ובה הם נבדלים ממלונות שותפים.
+
+בשלושת מלונות Epic Universe — Helios Grand, Stella Nova ו-Terra Luna — ה-EPA כולל גם את Epic Universe עצמו.', 'T3', 'he', 'approved'),
+('universal-onsite-hotels-uor', 3, '## התחבורה — שלוש צורות
+
+**סירות ואוטובוסים:** Portofino Bay, Hard Rock, Royal Pacific ו-Sapphire Falls. התחבורה הזו מגיעה לפארקים המקוריים, **ואינה מגיעה ל-Epic Universe**.
+
+**אוטובוס בלבד:** Cabana Bay, Aventura, Endless Summer ו-Terra Luna.
+
+**הליכה:** ל-Helios Grand כניסה ייעודית ישירות לתוך Epic Universe. מ-Stella Nova ההליכה ל-Epic Universe אורכת כרבע שעה.', 'T3', 'he', 'approved'),
+('universal-onsite-hotels-uor', 4, '## הקטגוריות במלואן
+
+| קטגוריה | מלונות |
+|---|---|
+| Legacy Signature | Portofino Bay · Hard Rock · Royal Pacific |
+| Preferred | Sapphire Falls |
+| Prime Value | Cabana Bay · Aventura · Endless Summer (Surfside ו-Dockside) |
+| Epic Universe — Premier | Helios Grand |
+| Epic Universe — Preferred | Stella Nova |
+| Epic Universe — Value | Terra Luna |', 'T3', 'he', 'approved');
+
+COMMIT;
+
+select count(*) as "קטעים בלי וקטור — להריץ embed"
+  from knowledge_chunk where embedding is null;

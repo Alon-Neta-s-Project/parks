@@ -1,5 +1,5 @@
 -- ==========================================================================
--- Park Day Companion — מאגר הידע: 62 מסמכים · 297 קטעים
+-- Park Day Companion — מאגר הידע: 63 מסמכים · 302 קטעים
 -- ==========================================================================
 --
 -- נוצר על ידי scripts/build-knowledge-seed.py מתוך knowledge/.
@@ -1099,7 +1099,7 @@ Rider Switch אינו כרטיס כניסה ואינו מחליף דרישות �
 סופרים כמה מתקנים באמת רוצים לחזור עליהם ומי בקבוצה יעלה. אם רק אדם אחד רוצה חזרות, אין הכרח שכל הקבוצה תקבל אותו מוצר.
 
 Unlimited מעניק חזרות בתורים משתתפים; הוא אינו מעניק זמן נוסף ביום או פתרון להשבתות.'),
-('universal-express-unlimited-uor', 'Universal Express Unlimited — יוניברסל אורלנדו', 'policy', 'T1', 'he', 'uor', 'static', '2026-09-14', 'approved', array['https://store.universalorlando.com/en/us/store/c/uo_ice_default_pb_express'], 'queue_access', 'international_guest', 'core', 'paid_addon', '## מה Unlimited נותן?
+('universal-express-unlimited-uor', 'Universal Express Unlimited — יוניברסל אורלנדו', 'policy', 'T1', 'he', 'uor', 'static', '2026-09-14', 'approved', array['https://store.universalorlando.com/en/us/store/c/uo_ice_default_pb_express', 'https://www.loewshotels.com', 'https://allears.net', 'https://touringplans.com'], 'queue_access', 'international_guest', 'core', 'paid_addon', '## מה Unlimited נותן?
 
 Express Unlimited מאפשר להשתמש בתור Express מספר פעמים במתקנים משתתפים, במקום פעם אחת בלבד בכל מתקן. הוא תקף רק לפארק, לתאריך ולמוצר שמופיעים ברכישה.
 
@@ -1137,6 +1137,42 @@ Universal Express מאפשר להשתמש בתור Express פעם אחת בכל 
 ## כמה פעמים אפשר להשתמש?
 
 ב-Universal Express הרגיל — פעם אחת בכל מתקן משתתף. שימוש חוזר דורש תור רגיל או מוצר Express Unlimited, אם הוא מוצע ומתאים לפארק.'),
+('universal-onsite-hotels-uor', 'מלונות יוניברסל On-Site — הטבות לפי קטגוריה', 'guide', 'T3', 'he', 'uor', 'static', '2026-09-14', 'approved', array['https://www.universalorlandovacations.com/hotels', 'https://allears.net', 'https://touringplans.com', 'https://orlandoinformer.com'], 'hotel_benefit', 'international_guest', 'core', 'included_benefit', '## שש קטגוריות, ולא רשימה אחת של מלונות
+
+מלונות יוניברסל עצמם מתחלקים לשש קטגוריות, וההטבות **שונות בין קטגוריה לקטגוריה**. מלון שותף אינו אחד מהם — הוא תוכנית נפרדת עם הטבות אחרות לגמרי.
+
+## Express Unlimited — שלושה מלונות בלבד
+
+**Portofino Bay · Hard Rock · Royal Pacific** — קטגוריית Legacy Signature. בשלושת אלה Express Unlimited כלול בשהייה, לכל ימי השהייה, ותקף ב-Universal Studios Florida וב-Islands of Adventure.
+
+**בכל שאר מלונות יוניברסל — Sapphire Falls, Cabana Bay, Aventura, Endless Summer, Helios Grand, Stella Nova ו-Terra Luna — Express Unlimited אינו כלול.** ניתן לרכוש אותו בנפרד.
+
+**ב-Epic Universe אין Express Unlimited כהטבת מלון לאף מלון, כולל Helios Grand.**
+
+## Early Park Admission — כלול בכל מלונות יוניברסל
+
+**EPA כלול בכל שש הקטגוריות, בלי יוצא מן הכלל.** זו ההטבה המשותפת לכל מלונות יוניברסל, ובה הם נבדלים ממלונות שותפים.
+
+בשלושת מלונות Epic Universe — Helios Grand, Stella Nova ו-Terra Luna — ה-EPA כולל גם את Epic Universe עצמו.
+
+## התחבורה — שלוש צורות
+
+**סירות ואוטובוסים:** Portofino Bay, Hard Rock, Royal Pacific ו-Sapphire Falls. התחבורה הזו מגיעה לפארקים המקוריים, **ואינה מגיעה ל-Epic Universe**.
+
+**אוטובוס בלבד:** Cabana Bay, Aventura, Endless Summer ו-Terra Luna.
+
+**הליכה:** ל-Helios Grand כניסה ייעודית ישירות לתוך Epic Universe. מ-Stella Nova ההליכה ל-Epic Universe אורכת כרבע שעה.
+
+## הקטגוריות במלואן
+
+| קטגוריה | מלונות |
+|---|---|
+| Legacy Signature | Portofino Bay · Hard Rock · Royal Pacific |
+| Preferred | Sapphire Falls |
+| Prime Value | Cabana Bay · Aventura · Endless Summer (Surfside ו-Dockside) |
+| Epic Universe — Premier | Helios Grand |
+| Epic Universe — Preferred | Stella Nova |
+| Epic Universe — Value | Terra Luna |'),
 ('vacation-package-uor', 'חבילת מלון וכרטיסים — יוניברסל אורלנדו', 'policy', 'T1', 'he', 'uor', 'static', '2026-09-01', 'approved', array['https://www.universalorlando.com/web/en/us/tickets-packages/vacation-basics'], 'admission', 'international_guest', 'appendix', 'ticket', '## מהי חבילת נופש?
 
 חבילה משלבת לינה, כרטיסי פארק ולעיתים הטבות נוספות. ההרכב משתנה לפי מלון ומבצע. אין להניח ש-Express, Park-to-Park או Epic Universe כלולים ללא ציון מפורש.
@@ -2262,6 +2298,38 @@ Universal Express מאפשר להשתמש בתור Express פעם אחת בכל 
 ('universal-express-uor', 4, '## כמה פעמים אפשר להשתמש?
 
 ב-Universal Express הרגיל — פעם אחת בכל מתקן משתתף. שימוש חוזר דורש תור רגיל או מוצר Express Unlimited, אם הוא מוצע ומתאים לפארק.', 'T1', 'he', 'approved'),
+('universal-onsite-hotels-uor', 0, '## שש קטגוריות, ולא רשימה אחת של מלונות
+
+מלונות יוניברסל עצמם מתחלקים לשש קטגוריות, וההטבות **שונות בין קטגוריה לקטגוריה**. מלון שותף אינו אחד מהם — הוא תוכנית נפרדת עם הטבות אחרות לגמרי.', 'T3', 'he', 'approved'),
+('universal-onsite-hotels-uor', 1, '## Express Unlimited — שלושה מלונות בלבד
+
+**Portofino Bay · Hard Rock · Royal Pacific** — קטגוריית Legacy Signature. בשלושת אלה Express Unlimited כלול בשהייה, לכל ימי השהייה, ותקף ב-Universal Studios Florida וב-Islands of Adventure.
+
+**בכל שאר מלונות יוניברסל — Sapphire Falls, Cabana Bay, Aventura, Endless Summer, Helios Grand, Stella Nova ו-Terra Luna — Express Unlimited אינו כלול.** ניתן לרכוש אותו בנפרד.
+
+**ב-Epic Universe אין Express Unlimited כהטבת מלון לאף מלון, כולל Helios Grand.**', 'T3', 'he', 'approved'),
+('universal-onsite-hotels-uor', 2, '## Early Park Admission — כלול בכל מלונות יוניברסל
+
+**EPA כלול בכל שש הקטגוריות, בלי יוצא מן הכלל.** זו ההטבה המשותפת לכל מלונות יוניברסל, ובה הם נבדלים ממלונות שותפים.
+
+בשלושת מלונות Epic Universe — Helios Grand, Stella Nova ו-Terra Luna — ה-EPA כולל גם את Epic Universe עצמו.', 'T3', 'he', 'approved'),
+('universal-onsite-hotels-uor', 3, '## התחבורה — שלוש צורות
+
+**סירות ואוטובוסים:** Portofino Bay, Hard Rock, Royal Pacific ו-Sapphire Falls. התחבורה הזו מגיעה לפארקים המקוריים, **ואינה מגיעה ל-Epic Universe**.
+
+**אוטובוס בלבד:** Cabana Bay, Aventura, Endless Summer ו-Terra Luna.
+
+**הליכה:** ל-Helios Grand כניסה ייעודית ישירות לתוך Epic Universe. מ-Stella Nova ההליכה ל-Epic Universe אורכת כרבע שעה.', 'T3', 'he', 'approved'),
+('universal-onsite-hotels-uor', 4, '## הקטגוריות במלואן
+
+| קטגוריה | מלונות |
+|---|---|
+| Legacy Signature | Portofino Bay · Hard Rock · Royal Pacific |
+| Preferred | Sapphire Falls |
+| Prime Value | Cabana Bay · Aventura · Endless Summer (Surfside ו-Dockside) |
+| Epic Universe — Premier | Helios Grand |
+| Epic Universe — Preferred | Stella Nova |
+| Epic Universe — Value | Terra Luna |', 'T3', 'he', 'approved'),
 ('vacation-package-uor', 0, '## מהי חבילת נופש?
 
 חבילה משלבת לינה, כרטיסי פארק ולעיתים הטבות נוספות. ההרכב משתנה לפי מלון ומבצע. אין להניח ש-Express, Park-to-Park או Epic Universe כלולים ללא ציון מפורש.', 'T1', 'he', 'approved'),

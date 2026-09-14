@@ -5,7 +5,7 @@ doc_type: policy
 authority_tier: T1
 scope_resort: uor
 volatility: static
-source_url: https://store.universalorlando.com/en/us/store/c/uo_ice_default_pb_express
+source_url: https://store.universalorlando.com/en/us/store/c/uo_ice_default_pb_express, https://www.loewshotels.com, https://allears.net, https://touringplans.com
 last_verified: 2026-09-14
 product_family: queue_access
 audience: international_guest

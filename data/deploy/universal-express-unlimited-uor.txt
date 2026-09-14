@@ -15,7 +15,7 @@ set local search_path = public, extensions;
 insert into knowledge_doc
   (id, title, doc_type, authority_tier, locale, scope_resort, volatility, last_verified, review_status, source_urls, product_family, audience, v1_priority, purchase_type, body)
 values
-('universal-express-unlimited-uor', 'Universal Express Unlimited — יוניברסל אורלנדו', 'policy', 'T1', 'he', 'uor', 'static', '2026-09-14', 'approved', array['https://store.universalorlando.com/en/us/store/c/uo_ice_default_pb_express'], 'queue_access', 'international_guest', 'core', 'paid_addon', '## מה Unlimited נותן?
+('universal-express-unlimited-uor', 'Universal Express Unlimited — יוניברסל אורלנדו', 'policy', 'T1', 'he', 'uor', 'static', '2026-09-14', 'approved', array['https://store.universalorlando.com/en/us/store/c/uo_ice_default_pb_express', 'https://www.loewshotels.com', 'https://allears.net', 'https://touringplans.com'], 'queue_access', 'international_guest', 'core', 'paid_addon', '## מה Unlimited נותן?
 
 Express Unlimited מאפשר להשתמש בתור Express מספר פעמים במתקנים משתתפים, במקום פעם אחת בלבד בכל מתקן. הוא תקף רק לפארק, לתאריך ולמוצר שמופיעים ברכישה.
 
