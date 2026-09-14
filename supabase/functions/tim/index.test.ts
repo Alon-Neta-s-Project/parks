@@ -969,7 +969,7 @@ Deno.test("קישור ומפתח אינם יוצאים בתשובה", () => {
   assertEquals(a.clean.includes("באתר הרשמי"), true);
   assertEquals(a.hits.includes("url"), true);
 
-  const b = scrubAnswer("המפתח הוא AIzaSyC8kL2mNp9QrStUvWxYz1234567890abcd");
+  const b = scrubAnswer("המפתח הוא AIzaSyTESTKEY0000000000000000000000000000");
   assertEquals(/AIza/.test(b.clean), false);
   assertEquals(b.hits.includes("key"), true);
 
