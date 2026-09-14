@@ -1,0 +1,46 @@
+-- check-044-original — האם הגרסה שנפלה של 044 השאירה משהו במסד
+-- ────────────────────────────────────────────────────────────────────
+-- 📍 להריץ ב: Supabase ← SQL Editor
+-- שם השאילתה: check-044-original (כלי חוזר — לא צריך מספר)
+--
+-- 🔴 **שאלת גיא:** האם 044 המקורי — זה שנגע ב-conversation/message —
+-- רץ בפרודקשן לפני שנכתב מחדש?
+--
+-- ⚠️ **אני לא עונה על זה מהזיכרון.** הגרסה ההיא נפלה עם
+-- `null value in column "user_id"`, וכל הקובץ היה בתוך BEGIN/COMMIT
+-- אחד — כלומר היא הייתה אמורה להתגלגל אחורה במלואה. "הייתה אמורה"
+-- אינו "קרה", ולכן הקובץ הזה מחפש את הטביעות שלה.
+--
+-- שלוש טביעות, וכל אחת ייחודית לגרסה שנפלה:
+--   1. אינדקס `message_age_idx` — נוצר רק שם, ואינו קיים בשום מיגרציה אחרת.
+--   2. RLS כפוי על conversation/message — הגרסה ההיא סגרה אותן.
+--   3. גוף `log_turn` שמזכיר `conversation` במקום `turn_log`.
+--
+-- ✅ שלוש שורות ❌ = היא לא רצה, ולא השאירה כלום.
+-- 🔴 ולו אחת ✅ = היא השאירה שריד, ויש מה לנקות.
+
+select
+  'אינדקס message_age_idx קיים' as "הטביעה",
+  (select count(*) > 0 from pg_indexes
+    where schemaname = 'public' and indexname = 'message_age_idx')::text as "יצא",
+  'false' as "צפוי"
+union all
+select 'RLS כפוי על conversation',
+  (select relforcerowsecurity::text from pg_class where relname = 'conversation'),
+  'false'
+union all
+select 'RLS כפוי על message',
+  (select relforcerowsecurity::text from pg_class where relname = 'message'),
+  'false'
+union all
+select 'log_turn מזכירה conversation',
+  (select (string_agg(pg_get_functiondef(p.oid), ' ') like '%insert into conversation%')::text
+     from pg_proc p join pg_namespace s on s.oid = p.pronamespace
+    where s.nspname = 'public' and p.proname = 'log_turn'),
+  'false'
+union all
+select 'log_turn מזכירה turn_log (הגרסה הנוכחית)',
+  (select (string_agg(pg_get_functiondef(p.oid), ' ') like '%turn_log%')::text
+     from pg_proc p join pg_namespace s on s.oid = p.pronamespace
+    where s.nspname = 'public' and p.proname = 'log_turn'),
+  'true';
