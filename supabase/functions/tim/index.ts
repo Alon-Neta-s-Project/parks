@@ -1392,6 +1392,14 @@ export async function handle(req: Request, env: Record<string, string | undefine
   return json({
     answer, model, usage, retrieval,
     chunks: chunks.length, rides: rides.length, tiers,
+    // 🔴 **האיתות של ניסיון שהצליח.** ריק כמעט תמיד. לא ריק פירושו
+    // שהמודל ייצר משהו שאסור היה לצאת, והמסנן תפס — כלומר מישהו ניסה,
+    // ועד כמה זה הצליח.
+    //
+    // ⚠️ **מוחזר ואינו נשמר עדיין.** שמירה דורשת ערך חדש ב-refusal_reason,
+    // ואוצר המילים שם נקבע באישור גיא. בלי אישורו זה נשאר גלוי בתשובה
+    // ובבדיקות בלבד — ולא נכתב למסד בשקט.
+    scrubbed,
   });
 }
 
