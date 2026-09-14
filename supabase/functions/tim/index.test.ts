@@ -4,7 +4,7 @@ function assertEquals<T>(actual: T, expected: T, msg?: string) {
   if (a !== b) throw new Error(`${msg ?? "לא זהה"}\n  התקבל : ${a}\n  ציפינו: ${b}`);
 }
 import {
-  handle, thinkingConfig, formatChunks, formatExperiences,
+  handle, thinkingConfig, formatChunks, formatExperiences, scrubAnswer,
   extractHeight, extractRideName, looksLikeGeminiKey, bucketKey,
 } from "./index.ts";
 
@@ -954,6 +954,29 @@ Deno.test("אזור ריק נאמר כמשתנה, ואינו נשמט", () => {
   const real = formatExperiences([{ ...base, land: "World Nature" }]);
   assertEquals(real.includes("World Nature"), true);
   assertEquals(real.includes("אינו משויך"), false);
+});
+
+/**
+ * 🔴 **מה שאסור לצאת נחסם בקוד, ולא בהוראה.**
+ *
+ * ההוראות מבקשות מטים לא לחשוף קישורים ומפתחות. הוראה היא בקשה, ומודל
+ * יכול לא לציית לה — וזו בדיוק המטרה של prompt injection. לכן הפלט
+ * נבדק אחרי שהמודל סיים.
+ */
+Deno.test("קישור ומפתח אינם יוצאים בתשובה", () => {
+  const a = scrubAnswer("הפרטים באתר https://disneyworld.disney.go.com/tickets/ וכדאי לבדוק");
+  assertEquals(a.clean.includes("http"), false);
+  assertEquals(a.clean.includes("באתר הרשמי"), true);
+  assertEquals(a.hits.includes("url"), true);
+
+  const b = scrubAnswer("המפתח הוא AIzaSyC8kL2mNp9QrStUvWxYz1234567890abcd");
+  assertEquals(/AIza/.test(b.clean), false);
+  assertEquals(b.hits.includes("key"), true);
+
+  // ⚠️ ותשובה רגילה אינה נפגעת. מסנן שמשנה טקסט תקין גרוע מאין מסנן.
+  const c = scrubAnswer("כדאי לוודא באתר הרשמי ביום הביקור.");
+  assertEquals(c.clean, "כדאי לוודא באתר הרשמי ביום הביקור.");
+  assertEquals(c.hits.length, 0);
 });
 
 Deno.test("עוצמה שלא דורגה נאמרת ככזו", () => {
