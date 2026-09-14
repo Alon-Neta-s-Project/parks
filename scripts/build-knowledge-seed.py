@@ -180,7 +180,15 @@ union all
 select 'מסמכים במסד', (select count(*) from knowledge_doc)::text
 union all
 select 'קטעים בלי וקטור (צפוי 0)',
-       (select count(*) from knowledge_chunk where embedding is null)::text;
+       (select count(*) from knowledge_chunk where embedding is null)::text
+-- ⚠️ **מצב רביעי שלא חיפשתי בהתחלה.** וקטור שנוצר במודל ישן אינו
+-- NULL, ולכן כל הבדיקות למעלה עוברות עליו — אבל הוא מושווה לשאילתה
+-- שנוצרה במודל אחר, והשליפה פשוט מחזירה את הדברים הלא נכונים.
+-- 🔴 בשקט. בלי שגיאה. מיגרציה 024 קיימת בדיוק בגלל מעבר כזה.
+union all
+select 'מודלים שונים בשימוש (צפוי: אחד)',
+       coalesce((select string_agg(distinct embedding_model, ' · ')
+                   from knowledge_chunk where embedding_model is not null), '— אין וקטורים —');
 """
 
 
