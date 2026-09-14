@@ -1099,7 +1099,7 @@ Rider Switch אינו כרטיס כניסה ואינו מחליף דרישות �
 סופרים כמה מתקנים באמת רוצים לחזור עליהם ומי בקבוצה יעלה. אם רק אדם אחד רוצה חזרות, אין הכרח שכל הקבוצה תקבל אותו מוצר.
 
 Unlimited מעניק חזרות בתורים משתתפים; הוא אינו מעניק זמן נוסף ביום או פתרון להשבתות.'),
-('universal-express-unlimited-uor', 'Universal Express Unlimited — יוניברסל אורלנדו', 'policy', 'T1', 'he', 'uor', 'static', '2026-09-01', 'approved', array['https://store.universalorlando.com/en/us/store/c/uo_ice_default_pb_express'], 'queue_access', 'international_guest', 'core', 'paid_addon', '## מה Unlimited נותן?
+('universal-express-unlimited-uor', 'Universal Express Unlimited — יוניברסל אורלנדו', 'policy', 'T1', 'he', 'uor', 'static', '2026-09-14', 'approved', array['https://store.universalorlando.com/en/us/store/c/uo_ice_default_pb_express'], 'queue_access', 'international_guest', 'core', 'paid_addon', '## מה Unlimited נותן?
 
 Express Unlimited מאפשר להשתמש בתור Express מספר פעמים במתקנים משתתפים, במקום פעם אחת בלבד בכל מתקן. הוא תקף רק לפארק, לתאריך ולמוצר שמופיעים ברכישה.
 
@@ -1117,7 +1117,7 @@ Express Unlimited מאפשר להשתמש בתור Express מספר פעמים �
 
 ## מי מקבל אותו דרך מלון?
 
-אורחי מלונות נבחרים מקבלים Express Unlimited בהתאם לתנאי המלון, בדרך כלל ליום הצ’ק-אין וליום הצ’ק-אאוט. רשימת המלונות והפארקים המכוסים עשויה להשתנות ויש לבדוק לפני הזמנה.'),
+אורחי מלונות נבחרים מקבלים Express Unlimited **לכל ימי השהייה** — כולל יום הצ’ק-אין, כל הלילות שביניהם, ויום הצ’ק-אאוט. רשימת המלונות והפארקים המכוסים עשויה להשתנות ויש לבדוק לפני הזמנה.'),
 ('universal-express-uor', 'Universal Express Pass — יוניברסל אורלנדו', 'policy', 'T1', 'he', 'uor', 'static', '2026-09-01', 'approved', array['https://store.universalorlando.com/en/us/store/c/uo_ice_default_pb_express'], 'queue_access', 'international_guest', 'core', 'paid_addon', '## מה Express נותן?
 
 Universal Express מאפשר להשתמש בתור Express פעם אחת בכל מתקן משתתף הכלול במוצר שנרכש. הוא מקצר את התור הרגיל, אך אינו מבטיח עלייה מיידית או אפס המתנה.
@@ -2246,7 +2246,7 @@ Express Unlimited מאפשר להשתמש בתור Express מספר פעמים �
 לא. רק מתקנים משתתפים. Unlimited מתאר את מספר השימושים, לא כיסוי מלא של כל אטרקציה. גם בתור Express יכולה להיות המתנה.', 'T1', 'he', 'approved'),
 ('universal-express-unlimited-uor', 4, '## מי מקבל אותו דרך מלון?
 
-אורחי מלונות נבחרים מקבלים Express Unlimited בהתאם לתנאי המלון, בדרך כלל ליום הצ’ק-אין וליום הצ’ק-אאוט. רשימת המלונות והפארקים המכוסים עשויה להשתנות ויש לבדוק לפני הזמנה.', 'T1', 'he', 'approved'),
+אורחי מלונות נבחרים מקבלים Express Unlimited **לכל ימי השהייה** — כולל יום הצ’ק-אין, כל הלילות שביניהם, ויום הצ’ק-אאוט. רשימת המלונות והפארקים המכוסים עשויה להשתנות ויש לבדוק לפני הזמנה.', 'T1', 'he', 'approved'),
 ('universal-express-uor', 0, '## מה Express נותן?
 
 Universal Express מאפשר להשתמש בתור Express פעם אחת בכל מתקן משתתף הכלול במוצר שנרכש. הוא מקצר את התור הרגיל, אך אינו מבטיח עלייה מיידית או אפס המתנה.', 'T1', 'he', 'approved'),

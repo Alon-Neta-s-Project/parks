@@ -6,7 +6,7 @@ authority_tier: T1
 scope_resort: uor
 volatility: static
 source_url: https://store.universalorlando.com/en/us/store/c/uo_ice_default_pb_express
-last_verified: 2026-09-01
+last_verified: 2026-09-14
 product_family: queue_access
 audience: international_guest
 v1_priority: core
@@ -31,4 +31,4 @@ Express Unlimited מאפשר להשתמש בתור Express מספר פעמים �
 
 ## מי מקבל אותו דרך מלון?
 
-אורחי מלונות נבחרים מקבלים Express Unlimited בהתאם לתנאי המלון, בדרך כלל ליום הצ’ק-אין וליום הצ’ק-אאוט. רשימת המלונות והפארקים המכוסים עשויה להשתנות ויש לבדוק לפני הזמנה.
+אורחי מלונות נבחרים מקבלים Express Unlimited **לכל ימי השהייה** — כולל יום הצ’ק-אין, כל הלילות שביניהם, ויום הצ’ק-אאוט. רשימת המלונות והפארקים המכוסים עשויה להשתנות ויש לבדוק לפני הזמנה.
