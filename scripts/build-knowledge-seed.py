@@ -85,6 +85,42 @@ def chunks(body):
     return out
 
 
+DOC_DEPLOY = """-- {want} — עדכון מסמך ידע בודד
+-- ────────────────────────────────────────────────────────────────────
+-- 📍 להריץ ב: Supabase ← SQL Editor
+-- שם השאילתה: {want} (כלי חוזר — לא צריך מספר)
+--
+-- ⚠️ **נוצר מ-knowledge/{want}.md. אין לערוך ביד.**
+--
+-- 🔴 **אחרי ההרצה חובה להריץ embed.** הקטעים נמחקים ונכתבים מחדש בלי
+-- וקטור. קטע בלי וקטור אינו נשלף, וטים עונה כאילו הוא אינו קיים.
+
+BEGIN;
+
+set local search_path = public, extensions;
+
+insert into knowledge_doc
+  ({cols})
+values
+{doc}
+on conflict (id) do update set
+  {doc_set},
+  updated_at = now();
+
+delete from knowledge_chunk where doc_id = '{want}';
+
+insert into knowledge_chunk
+  (doc_id, chunk_index, content, authority_tier, locale, review_status)
+values
+{chunks};
+
+COMMIT;
+
+select count(*) as "קטעים בלי וקטור — להריץ embed"
+  from knowledge_chunk where embedding is null;
+"""
+
+
 def main() -> int:
     files = sorted(DIR.glob("*.md"))
     if not files:
@@ -182,6 +218,25 @@ select
   (select count(*) from knowledge_chunk where embedding is null)      as "בלי וקטור (צפוי: כל הקטעים)",
   (select count(*) from knowledge_doc where cardinality(source_urls) > 1) as "מסמכים עם שני מקורות";
 """
+
+    # ── קובץ פריסה למסמך אחד ────────────────────────────────────────
+    # 🔴 **קיים כי קובצי הפריסה נכתבו ביד.** `data/deploy/parking-and-
+    # arrival.txt` היה עותק ידני של מסמך הידע — בדיוק התבנית שהפילה את
+    # הזרע: תיקון נערך במקור, והעותק המשיך לחיות.
+    if "--doc" in sys.argv:
+        want = sys.argv[sys.argv.index("--doc") + 1]
+        docs = [v for v in doc_rows if v.startswith("('" + want + "'")]
+        rows = [v for v in chunk_rows if v.startswith("('" + want + "'")]
+        if not docs:
+            print("\u2717 \u05d0\u05d9\u05df \u05de\u05e1\u05de\u05da \u05d1\u05e9\u05dd " + want)
+            return 1
+        out = ROOT / "data" / "deploy" / (want + ".txt")
+        sep = ",\n"
+        out.write_text(DOC_DEPLOY.format(
+            want=want, cols=", ".join(DOC_COLS), doc=docs[0],
+            doc_set=doc_set, chunks=sep.join(rows)), encoding="utf-8")
+        print("\u2705 " + str(out.relative_to(ROOT)) + " \u00b7 " + str(len(rows)) + " \u05e7\u05d8\u05e2\u05d9\u05dd")
+        return 0
 
     # 🔴 **`--check` קיים כי הקובץ הזה כבר התיישן בשקט.**
     #

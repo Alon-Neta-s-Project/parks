@@ -1,5 +1,5 @@
 -- ==========================================================================
--- Park Day Companion — מאגר הידע: 62 מסמכים · 296 קטעים
+-- Park Day Companion — מאגר הידע: 62 מסמכים · 297 קטעים
 -- ==========================================================================
 --
 -- נוצר על ידי scripts/build-knowledge-seed.py מתוך knowledge/.
@@ -752,7 +752,12 @@ Park-to-Park אינו כולל Universal Express, Early Park Admission, אירו
 ## מתי קונים?
 
 אפשר לרכוש מוצר Park-to-Park מלכתחילה או לשאול על שדרוג כרטיס זכאי. השדרוג עשוי לחול על מלוא הכרטיס הרב־יומי ולא רק על יום אחד. יש לבדוק את העלות והתוקף לפני ביצוע שינוי.'),
-('parking-and-arrival-uor', 'חניה והגעה לפארק ברכב — יוניברסל אורלנדו', 'guide', 'T3', 'he', 'uor', 'volatile', '2026-09-09', 'approved', array['https://www.universalorlando.com/web/en/us/plan-your-visit/directions-parking'], 'park_logistics', 'international_guest', 'core', 'N/A', '## 🔴 שני קמפוסים, לא ארבעה חניונים — וזה שונה מהותית מדיסני
+('parking-and-arrival-uor', 'חניה והגעה לפארק ברכב — יוניברסל אורלנדו', 'guide', 'T3', 'he', 'uor', 'volatile', '2026-09-14', 'approved', array['https://www.universalorlando.com/web/en/us/plan-your-visit/directions-parking'], 'park_logistics', 'international_guest', 'core', 'N/A', '## שני מונחים שחוזרים כאן, ואין להם מקבילה מוכרת בעברית
+
+- **קמפוס** — מתחם שלם של פארקים, חניונים ומלונות. ליוניברסל אורלנדו יש שניים, והמעבר ביניהם הוא נסיעה ולא הליכה.
+- **טרם** (Tram) — רכבת כבישים קטנה שמסיעה מהחניון לכניסה, כמו בדיסני. **ביוניברסל אין כזו**, וזה ההבדל שמפתיע ישראלים שכבר היו בדיסני.
+
+## 🔴 שני קמפוסים, לא ארבעה חניונים — וזה שונה מהותית מדיסני
 
 - **הקמפוס הראשי** משרת את Universal Studios Florida, את Islands of Adventure, את Volcano Bay ואת CityWalk — כולם מאותם חניונים רב־קומתיים.
 - **הקמפוס הדרומי** הוא חניון שטח נפרד, ל-Epic Universe בלבד.
@@ -1937,11 +1942,15 @@ Park-to-Park אינו כולל Universal Express, Early Park Admission, אירו
 ('park-to-park-uor', 4, '## מתי קונים?
 
 אפשר לרכוש מוצר Park-to-Park מלכתחילה או לשאול על שדרוג כרטיס זכאי. השדרוג עשוי לחול על מלוא הכרטיס הרב־יומי ולא רק על יום אחד. יש לבדוק את העלות והתוקף לפני ביצוע שינוי.', 'T1', 'he', 'approved'),
-('parking-and-arrival-uor', 0, '## 🔴 שני קמפוסים, לא ארבעה חניונים — וזה שונה מהותית מדיסני
+('parking-and-arrival-uor', 0, '## שני מונחים שחוזרים כאן, ואין להם מקבילה מוכרת בעברית
+
+- **קמפוס** — מתחם שלם של פארקים, חניונים ומלונות. ליוניברסל אורלנדו יש שניים, והמעבר ביניהם הוא נסיעה ולא הליכה.
+- **טרם** (Tram) — רכבת כבישים קטנה שמסיעה מהחניון לכניסה, כמו בדיסני. **ביוניברסל אין כזו**, וזה ההבדל שמפתיע ישראלים שכבר היו בדיסני.', 'T3', 'he', 'approved'),
+('parking-and-arrival-uor', 1, '## 🔴 שני קמפוסים, לא ארבעה חניונים — וזה שונה מהותית מדיסני
 
 - **הקמפוס הראשי** משרת את Universal Studios Florida, את Islands of Adventure, את Volcano Bay ואת CityWalk — כולם מאותם חניונים רב־קומתיים.
 - **הקמפוס הדרומי** הוא חניון שטח נפרד, ל-Epic Universe בלבד.', 'T3', 'he', 'approved'),
-('parking-and-arrival-uor', 1, '## ההגעה מהחניון — הליכה, לא טרם
+('parking-and-arrival-uor', 2, '## ההגעה מהחניון — הליכה, לא טרם
 
 בקמפוס הראשי אין טרם. ההגעה היא בהליכה ובמדרגות נעות, דרך CityWalk:
 
@@ -1954,12 +1963,12 @@ Park-to-Park אינו כולל Universal Express, Early Park Admission, אירו
 שני הפארקים חולקים את אותה שרשרת בדיוק, ואין ביניהם הבדל מבני.
 
 ⚠️ **בדיקת הביטחון נעשית ברכזת המרכזית ולא בשער הפארק** — שונה מדיסני, ושווה לדעת מראש.', 'T3', 'he', 'approved'),
-('parking-and-arrival-uor', 2, '## Epic Universe
+('parking-and-arrival-uor', 3, '## Epic Universe
 
 חניון שטח, ולא רב־קומתי, עם אזורים בשמות נושאיים. **אין טרם ואין מדרגות נעות — ההליכה ישירה.**
 
 חלופה: אפשר לחנות בקמפוס הראשי ולנסוע בהסעת אוטובוס חינם ל-Epic Universe.', 'T3', 'he', 'approved'),
-('parking-and-arrival-uor', 3, '## מחירי החניה
+('parking-and-arrival-uor', 4, '## מחירי החניה
 
 - **Self-Parking** — כ-32 דולר בהזמנה מראש, כ-35 בקופה. זהה בשני הקמפוסים.
 - **Prime Parking** — כ-50 עד 60 דולר. ב-Epic Universe כולל חניה מקורה תחת פאנלים סולאריים.
@@ -1968,7 +1977,7 @@ Park-to-Park אינו כולל Universal Express, Early Park Admission, אירו
 - **חינם אחרי 18:00**, למעט לילות אירועים.
 
 בעלי Annual Pass: Premier — חינם ב-Valet וב-Prime. Preferred — Self-Parking חינם, וחצי מחיר ב-Valet.', 'T3', 'he', 'approved'),
-('parking-and-arrival-uor', 4, '## CityWalk
+('parking-and-arrival-uor', 5, '## CityWalk
 
 אינו חניון נפרד. מגיעים אליו דרך חניוני הקמפוס הראשי, באותה שרשרת בדיוק.', 'T3', 'he', 'approved'),
 ('parking-and-arrival-wdw', 0, '## תשלום החניה

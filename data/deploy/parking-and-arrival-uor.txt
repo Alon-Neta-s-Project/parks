@@ -1,0 +1,125 @@
+-- parking-and-arrival-uor — עדכון מסמך ידע בודד
+-- ────────────────────────────────────────────────────────────────────
+-- 📍 להריץ ב: Supabase ← SQL Editor
+-- שם השאילתה: parking-and-arrival-uor (כלי חוזר — לא צריך מספר)
+--
+-- ⚠️ **נוצר מ-knowledge/parking-and-arrival-uor.md. אין לערוך ביד.**
+--
+-- 🔴 **אחרי ההרצה חובה להריץ embed.** הקטעים נמחקים ונכתבים מחדש בלי
+-- וקטור. קטע בלי וקטור אינו נשלף, וטים עונה כאילו הוא אינו קיים.
+
+BEGIN;
+
+set local search_path = public, extensions;
+
+insert into knowledge_doc
+  (id, title, doc_type, authority_tier, locale, scope_resort, volatility, last_verified, review_status, source_urls, product_family, audience, v1_priority, purchase_type, body)
+values
+('parking-and-arrival-uor', 'חניה והגעה לפארק ברכב — יוניברסל אורלנדו', 'guide', 'T3', 'he', 'uor', 'volatile', '2026-09-14', 'approved', array['https://www.universalorlando.com/web/en/us/plan-your-visit/directions-parking'], 'park_logistics', 'international_guest', 'core', 'N/A', '## שני מונחים שחוזרים כאן, ואין להם מקבילה מוכרת בעברית
+
+- **קמפוס** — מתחם שלם של פארקים, חניונים ומלונות. ליוניברסל אורלנדו יש שניים, והמעבר ביניהם הוא נסיעה ולא הליכה.
+- **טרם** (Tram) — רכבת כבישים קטנה שמסיעה מהחניון לכניסה, כמו בדיסני. **ביוניברסל אין כזו**, וזה ההבדל שמפתיע ישראלים שכבר היו בדיסני.
+
+## 🔴 שני קמפוסים, לא ארבעה חניונים — וזה שונה מהותית מדיסני
+
+- **הקמפוס הראשי** משרת את Universal Studios Florida, את Islands of Adventure, את Volcano Bay ואת CityWalk — כולם מאותם חניונים רב־קומתיים.
+- **הקמפוס הדרומי** הוא חניון שטח נפרד, ל-Epic Universe בלבד.
+
+## ההגעה מהחניון — הליכה, לא טרם
+
+בקמפוס הראשי אין טרם. ההגעה היא בהליכה ובמדרגות נעות, דרך CityWalk:
+
+1. **חניון ← הרכזת** — חמש עד עשר דקות.
+2. **CityWalk ← Universal Studios או Islands of Adventure** — עוד חמש עד עשר דקות הליכה.
+3. **CityWalk ← Volcano Bay** — שאטל חינם, ולא הליכה.
+
+**זמן כולל: כרבע שעה בממוצע, ויותר בעומס.**
+
+שני הפארקים חולקים את אותה שרשרת בדיוק, ואין ביניהם הבדל מבני.
+
+⚠️ **בדיקת הביטחון נעשית ברכזת המרכזית ולא בשער הפארק** — שונה מדיסני, ושווה לדעת מראש.
+
+## Epic Universe
+
+חניון שטח, ולא רב־קומתי, עם אזורים בשמות נושאיים. **אין טרם ואין מדרגות נעות — ההליכה ישירה.**
+
+חלופה: אפשר לחנות בקמפוס הראשי ולנסוע בהסעת אוטובוס חינם ל-Epic Universe.
+
+## מחירי החניה
+
+- **Self-Parking** — כ-32 דולר בהזמנה מראש, כ-35 בקופה. זהה בשני הקמפוסים.
+- **Prime Parking** — כ-50 עד 60 דולר. ב-Epic Universe כולל חניה מקורה תחת פאנלים סולאריים.
+- **RV או אוטובוס** — כ-45 דולר.
+- **Valet**, ב-CityWalk בלבד — כ-38 עד 81 דולר.
+- **חינם אחרי 18:00**, למעט לילות אירועים.
+
+בעלי Annual Pass: Premier — חינם ב-Valet וב-Prime. Preferred — Self-Parking חינם, וחצי מחיר ב-Valet.
+
+## CityWalk
+
+אינו חניון נפרד. מגיעים אליו דרך חניוני הקמפוס הראשי, באותה שרשרת בדיוק.')
+on conflict (id) do update set
+  title = excluded.title,
+  doc_type = excluded.doc_type,
+  authority_tier = excluded.authority_tier,
+  locale = excluded.locale,
+  scope_resort = excluded.scope_resort,
+  volatility = excluded.volatility,
+  last_verified = excluded.last_verified,
+  review_status = excluded.review_status,
+  source_urls = excluded.source_urls,
+  product_family = excluded.product_family,
+  audience = excluded.audience,
+  v1_priority = excluded.v1_priority,
+  purchase_type = excluded.purchase_type,
+  body = excluded.body,
+  updated_at = now();
+
+delete from knowledge_chunk where doc_id = 'parking-and-arrival-uor';
+
+insert into knowledge_chunk
+  (doc_id, chunk_index, content, authority_tier, locale, review_status)
+values
+('parking-and-arrival-uor', 0, '## שני מונחים שחוזרים כאן, ואין להם מקבילה מוכרת בעברית
+
+- **קמפוס** — מתחם שלם של פארקים, חניונים ומלונות. ליוניברסל אורלנדו יש שניים, והמעבר ביניהם הוא נסיעה ולא הליכה.
+- **טרם** (Tram) — רכבת כבישים קטנה שמסיעה מהחניון לכניסה, כמו בדיסני. **ביוניברסל אין כזו**, וזה ההבדל שמפתיע ישראלים שכבר היו בדיסני.', 'T3', 'he', 'approved'),
+('parking-and-arrival-uor', 1, '## 🔴 שני קמפוסים, לא ארבעה חניונים — וזה שונה מהותית מדיסני
+
+- **הקמפוס הראשי** משרת את Universal Studios Florida, את Islands of Adventure, את Volcano Bay ואת CityWalk — כולם מאותם חניונים רב־קומתיים.
+- **הקמפוס הדרומי** הוא חניון שטח נפרד, ל-Epic Universe בלבד.', 'T3', 'he', 'approved'),
+('parking-and-arrival-uor', 2, '## ההגעה מהחניון — הליכה, לא טרם
+
+בקמפוס הראשי אין טרם. ההגעה היא בהליכה ובמדרגות נעות, דרך CityWalk:
+
+1. **חניון ← הרכזת** — חמש עד עשר דקות.
+2. **CityWalk ← Universal Studios או Islands of Adventure** — עוד חמש עד עשר דקות הליכה.
+3. **CityWalk ← Volcano Bay** — שאטל חינם, ולא הליכה.
+
+**זמן כולל: כרבע שעה בממוצע, ויותר בעומס.**
+
+שני הפארקים חולקים את אותה שרשרת בדיוק, ואין ביניהם הבדל מבני.
+
+⚠️ **בדיקת הביטחון נעשית ברכזת המרכזית ולא בשער הפארק** — שונה מדיסני, ושווה לדעת מראש.', 'T3', 'he', 'approved'),
+('parking-and-arrival-uor', 3, '## Epic Universe
+
+חניון שטח, ולא רב־קומתי, עם אזורים בשמות נושאיים. **אין טרם ואין מדרגות נעות — ההליכה ישירה.**
+
+חלופה: אפשר לחנות בקמפוס הראשי ולנסוע בהסעת אוטובוס חינם ל-Epic Universe.', 'T3', 'he', 'approved'),
+('parking-and-arrival-uor', 4, '## מחירי החניה
+
+- **Self-Parking** — כ-32 דולר בהזמנה מראש, כ-35 בקופה. זהה בשני הקמפוסים.
+- **Prime Parking** — כ-50 עד 60 דולר. ב-Epic Universe כולל חניה מקורה תחת פאנלים סולאריים.
+- **RV או אוטובוס** — כ-45 דולר.
+- **Valet**, ב-CityWalk בלבד — כ-38 עד 81 דולר.
+- **חינם אחרי 18:00**, למעט לילות אירועים.
+
+בעלי Annual Pass: Premier — חינם ב-Valet וב-Prime. Preferred — Self-Parking חינם, וחצי מחיר ב-Valet.', 'T3', 'he', 'approved'),
+('parking-and-arrival-uor', 5, '## CityWalk
+
+אינו חניון נפרד. מגיעים אליו דרך חניוני הקמפוס הראשי, באותה שרשרת בדיוק.', 'T3', 'he', 'approved');
+
+COMMIT;
+
+select count(*) as "קטעים בלי וקטור — להריץ embed"
+  from knowledge_chunk where embedding is null;
