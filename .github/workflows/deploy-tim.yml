@@ -1,0 +1,63 @@
+# פריסת הפונקציה של טים — אוטומטית, בדחיפה ל-release
+#
+# 🔴 **קיים כי ההדבקה הידנית היא עבודה של נטע, והיא לא צריכה לעשות
+# אותה.** עד היום כל שינוי בטים עבר דרכה: אני שולח קובץ, היא מדביקה.
+#
+# ⚠️ **וזה גם בטוח יותר, לא רק נוח יותר.** בהדבקה ידנית הקוד עובר דרך
+# הצ'אט ודרך הורדה למחשב. כאן הוא נוסע מהרפו ישירות, ולא עובר בשום מקום.
+#
+# ⚠️ **הטוקן אינו מגיע אליי.** נטע שמה אותו כ-Secret ב-GitHub, ו-GitHub
+# מריץ את הפריסה. אני רואה רק את התוצאה.
+#
+# ⚠️ **מה זה לא משנה:** האתר. הפרסום שלו נשאר ידני, כהכרעת גיא.
+# ⚠️ **ומה כן:** `release` הוא ענף שאני דוחף אליו **בכוונה** ולא בכל
+# commit — כלומר הדחיפה עצמה היא השער, במקום ההדבקה.
+
+name: פריסת טים
+
+on:
+  push:
+    branches: [release]
+    # ⚠️ רק כשהפונקציה עצמה השתנתה. דחיפה שנוגעת באתר בלבד אינה אמורה
+    # לפרוס מחדש את טים — פריסה מיותרת היא הזדמנות לתקלה מיותרת.
+    paths:
+      - "supabase/functions/tim/**"
+      - ".github/workflows/deploy-tim.yml"
+  workflow_dispatch:      # ⚠️ וגם ידנית, לכשצריך לפרוס בלי שינוי קוד.
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # 🔴 **שער ה-QA רץ לפני הפריסה, ולא אחריה.**
+      #
+      # בלי זה הפריסה האוטומטית היא הידרדרות ולא שיפור: היום נטע מדביקה
+      # קובץ שאני בדקתי; אוטומציה בלי בדיקה פורסת גם את מה שלא בדקתי.
+      - name: התקנה
+        run: npm ci
+
+      - name: שער QA
+        run: npm run qa
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      # ⚠️ ה-slug הוא `quick-worker` ולא `tim`. השם בדשבורד אינו הכתובת,
+      # וזה כבר עלה לנו שעה. ראה docs/edge-functions-slugs.md.
+      - name: פריסה
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          cp supabase/functions/tim/index.ts supabase/functions/quick-worker-index.ts
+          mkdir -p supabase/functions/quick-worker
+          mv supabase/functions/quick-worker-index.ts supabase/functions/quick-worker/index.ts
+          supabase functions deploy quick-worker \
+            --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}" \
+            --no-verify-jwt
