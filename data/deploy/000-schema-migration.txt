@@ -2,6 +2,8 @@
 -- ────────────────────────────────────────────────────────────────────
 -- 📍 להריץ ב: Supabase → SQL Editor
 -- שם השאילתה: 000 — יומן המיגרציות (14.09)
+-- 🔵 **גרסה 2** — מוסיפה את המצב `verified`, ומשדרגת טבלה שכבר קיימת.
+--    אם הרצת גרסה קודמת של הקובץ הזה — להריץ שוב. הוא בטוח להרצה חוזרת.
 --
 -- 🔴 **המסד אינו יודע אילו מ-45 המיגרציות רצו עליו.** הידע הזה חי
 -- ברשימת השאילתות השמורות ב-SQL Editor ובהיסטוריית הצ'אט. זה עבד כל
@@ -38,7 +40,7 @@ create table if not exists schema_migration (
   filename   text primary key,
   checksum   text not null,          -- sha256 של גוף הקובץ, בלי בלוק הרישום
   applied_at timestamptz not null default now(),
-  applied_by text not null check (applied_by in ('sql-editor','ci','verify')),
+  applied_by text not null check (applied_by in ('sql-editor','ci','verify','backfill')),
   evidence   text not null check (evidence in ('observed','verified','assumed'))
 );
 
@@ -48,6 +50,23 @@ comment on column schema_migration.checksum is
   'sha256 של הקובץ בלי בלוק הרישום. שינוי בקובץ שכבר רץ נתפס כסטייה.';
 comment on column schema_migration.evidence is
   'observed = נרשם בזמן ההרצה · verified = לא ראינו, אבל התוצאה נמצאת במסד · assumed = הנחנו, ואיש לא בדק.';
+
+-- ── שדרוג טבלה קיימת ────────────────────────────────────────────────
+-- 🔴 **`create table if not exists` אינו משנה טבלה שכבר קיימת.** אם
+-- הורצה כאן גרסה מוקדמת של הקובץ, האילוצים שלה נשארו — ו-`verified`
+-- היה נופל על אילוץ שאינו מכיר אותו.
+--
+-- ⚠️ **קרה בפועל:** גרסה ראשונה של הקובץ הזה הורצה עם שני מצבי ראיה
+-- בלבד, ועם `backfill` כמקור. שתי השורות הבאות מעדכנות את האילוצים
+-- במקום להניח שהטבלה חדשה. `backfill` נשאר מותר כי יש שורות שנושאות
+-- אותו, ומחיקת ערך שקיים בנתונים אינה שדרוג — היא שבירה.
+alter table schema_migration drop constraint if exists schema_migration_evidence_check;
+alter table schema_migration add  constraint schema_migration_evidence_check
+  check (evidence in ('observed','verified','assumed'));
+
+alter table schema_migration drop constraint if exists schema_migration_applied_by_check;
+alter table schema_migration add  constraint schema_migration_applied_by_check
+  check (applied_by in ('sql-editor','ci','verify','backfill'));
 
 -- ⚠️ הטבלה סגורה. היא נכתבת מה-SQL Editor או מ-CI, לא מהאפליקציה.
 alter table schema_migration enable row level security;
@@ -89,6 +108,6 @@ COMMIT;
 -- <migration-log>
 -- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
 -- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
-select public.record_migration('000_schema_migration.sql', 'sha256:40fccc4ac899aac074ae0c1273192f5f',
+select public.record_migration('000_schema_migration.sql', 'sha256:8ce64729b52ffa50f9ceb0681e0b550f',
   coalesce(current_setting('app.migration_source', true), 'sql-editor'));
 -- </migration-log>

@@ -1,0 +1,57 @@
+-- turn-log-selftest — לבדוק שארבעת התנאים של גיא נאכפים בפועל
+-- ────────────────────────────────────────────────────────────────────
+-- 📍 להריץ ב: Supabase ← SQL Editor
+-- שם השאילתה: turn-log-selftest (כלי חוזר — לא צריך מספר)
+-- ⚠️ להריץ **אחרי** 044.
+--
+-- 🔴 **הבדיקה הזו הייתה אמורה להיות בתוך 044, ונשמטה ממנה כשכתבתי
+-- אותה מחדש.** אמרתי לנטע לחפש "שאלות שנשמרו: 1" בפלט של 044, והשורה
+-- הזו לא הייתה שם. הקובץ הזה מחזיר אותה.
+--
+-- ⚠️ **כלי חוזר.** אפשר להריץ כמה פעמים שרוצים. הוא כותב שורות בדיקה
+-- ומוחק אותן בסוף, ולכן אינו משאיר זכר.
+
+BEGIN;
+
+set local search_path = public, extensions;
+
+-- ⚠️ אם יש כבר שורות אמיתיות ביומן — לא נוגעים בהן. הבדיקה סופרת רק
+-- מה שנוסף מרגע זה.
+create temp table before_count on commit drop as select count(*) as n from turn_log;
+
+-- ── שתי קריאות: אחת שנענתה ואחת שלא ─────────────────────────────────
+select public.log_turn('שאלת בדיקה שנענתה',     true,  null,      'selftest', 10, 20);
+select public.log_turn('שאלת בדיקה שלא נענתה',  false, 'no_data', 'selftest', 10, 5);
+
+-- ── מה שצריך לצאת ───────────────────────────────────────────────────
+-- 🔴 **"שאלות שנשמרו" חייב להיות 1.** אם יהיה 2, תנאי 4 של גיא אינו
+-- נאכף: גם תשובה שנענתה שמרה את הטקסט.
+select
+  count(*) filter (where question is not null)              as "שאלות שנשמרו (צפוי: 1)",
+  count(*) filter (where answered = false)                  as "לא נענו (צפוי: 1)",
+  count(*) filter (where answered and question is not null) as "דליפה (צפוי: 0)",
+  count(*)                                                  as "שורות שנוספו (צפוי: 2)"
+from turn_log where model = 'selftest';
+
+-- ── תקרת האורך ──────────────────────────────────────────────────────
+-- ⚠️ שאלה באורך 900 תווים נכנסת, ונשמרת חתוכה ל-500.
+select public.log_turn(repeat('א', 900), false, 'no_data', 'selftest-long', null, null);
+
+select length(question) as "אורך אחרי חיתוך (צפוי: 500)"
+  from turn_log where model = 'selftest-long';
+
+-- ── והטבלה סגורה ────────────────────────────────────────────────────
+-- ⚠️ RLS פעיל ובלי policy — כלומר anon אינו יכול לקרוא ולא לכתוב.
+select relrowsecurity as "RLS פעיל (צפוי: t)",
+       relforcerowsecurity as "נאכף גם לבעלים (צפוי: t)",
+       (select count(*) from pg_policies
+         where schemaname='public' and tablename='turn_log') as "policies (צפוי: 0)"
+  from pg_class where relname = 'turn_log';
+
+-- ── ניקוי ───────────────────────────────────────────────────────────
+delete from turn_log where model in ('selftest', 'selftest-long');
+
+select (select n from before_count) as "היו לפני",
+       (select count(*) from turn_log) as "יש אחרי (צריך להיות זהה)";
+
+COMMIT;
