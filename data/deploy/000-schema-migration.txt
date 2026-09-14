@@ -4,29 +4,31 @@
 -- שם השאילתה: 000 — יומן המיגרציות (14.09)
 --
 -- 🔴 **המסד אינו יודע אילו מ-45 המיגרציות רצו עליו.** הידע הזה חי
--- בזיכרון של נטע ובהיסטוריית הצ'אט. זה עבד כל עוד הרצנו קובץ ביום;
--- זה נשבר ברגע שקובץ אחד ידולג, יורץ פעמיים, או יתוקן אחרי שכבר רץ.
+-- ברשימת השאילתות השמורות ב-SQL Editor ובהיסטוריית הצ'אט. זה עבד כל
+-- עוד הרצנו קובץ ביום; זה נשבר ברגע שקובץ אחד ידולג, יורץ פעמיים, או
+-- יתוקן אחרי שכבר רץ.
 --
--- ⚠️ **וזו בדיוק התבנית שחוזרת כאן.** "בדיקה שלא רצה אינה בדיקה",
--- "קובץ נגזר מתיישן בשקט" — ובשני המקרים הכשל היה **היעדר רישום**:
--- משהו לא קרה, ואיש לא ידע שהוא לא קרה. מיגרציה היא המקרה השלישי,
--- והיחיד שבו החוסר יושב במסד עצמו.
+-- ⚠️ **ושאילתה שמורה אינה הרצה שהצליחה.** 044 יושבת ברשימה הזו, קיבלה
+-- שם, הודבקה — ונפלה. מי שיקרא את הרשימה יראה אותה ויסיק שהיא רצה.
 --
 -- ── מפתח לפי שם קובץ, לא לפי מספר ─────────────────────────────────
 -- 🔴 יש **שתי** מיגרציות 034: `034_eight_hebrew_names.sql` ו-
 -- `034_sensitivities_vocabulary.sql`. מפתח לפי מספר היה מאבד אחת מהן
 -- בשקט. השם המלא הוא המזהה.
 --
--- ── `evidence` — ומה שהעמודה הזו מודה בו ──────────────────────────
--- 🔴 **ל-44 המיגרציות שכבר רצו אין לנו ראיה.** אי אפשר לשחזר מהמסד
--- אילו מהן רצו: רובן `create or replace` על אותה פונקציה, או עדכוני
--- נתונים בלי אובייקט חדש בכלל. `034_eight_hebrew_names` ו-
--- `035_sources_are_not_public` אינן משאירות טביעה שניתן לזהות.
+-- ── `evidence` — שלושה מצבים, ולא שניים ───────────────────────────
+-- ל-44 המיגרציות שכבר רצו אין רישום שנכתב בזמן ההרצה. אבל **יש להן
+-- טביעות אצבע במסד עצמו** — עמודה, אילוץ, הערה על עמודה, או גוף
+-- פונקציה. `verify-migration-log` בודק אותן אחת אחת.
 --
--- ✅ **ולכן העמודה מודה בזה במקום להסתיר.** `assumed` = הנחנו שרץ,
--- איש לא ראה. `observed` = נרשם ברגע שרץ. שורת backfill שהייתה
--- נכתבת כ-`observed` הייתה בדיוק `NOT NULL DEFAULT` על שדה שאיש
--- לא בדק — התבנית שנספרה כאן שבע פעמים.
+-- 🔴 **ולכן שלושה מצבים, ולכל אחד מילה:**
+--   `observed` — נרשם ברגע שהמיגרציה רצה.
+--   `verified` — לא ראינו אותה רצה, אבל התוצאה שלה נמצאת במסד.
+--   `assumed`  — הנחנו, ואיש לא בדק.
+--
+-- ⚠️ **וההפרדה בין השניים האחרונים היא כל העניין.** שורה שהייתה
+-- נכתבת כ-`observed` בלי שאיש בדק הייתה בדיוק `NOT NULL DEFAULT`
+-- על שדה שאיש לא בדק — התבנית שנספרה כאן שבע פעמים.
 
 BEGIN;
 
@@ -36,8 +38,8 @@ create table if not exists schema_migration (
   filename   text primary key,
   checksum   text not null,          -- sha256 של גוף הקובץ, בלי בלוק הרישום
   applied_at timestamptz not null default now(),
-  applied_by text not null check (applied_by in ('sql-editor','ci','backfill')),
-  evidence   text not null check (evidence in ('observed','assumed'))
+  applied_by text not null check (applied_by in ('sql-editor','ci','verify')),
+  evidence   text not null check (evidence in ('observed','verified','assumed'))
 );
 
 comment on table schema_migration is
@@ -45,7 +47,7 @@ comment on table schema_migration is
 comment on column schema_migration.checksum is
   'sha256 של הקובץ בלי בלוק הרישום. שינוי בקובץ שכבר רץ נתפס כסטייה.';
 comment on column schema_migration.evidence is
-  'observed = נרשם בזמן ההרצה · assumed = הנחת backfill, איש לא ראה.';
+  'observed = נרשם בזמן ההרצה · verified = לא ראינו, אבל התוצאה נמצאת במסד · assumed = הנחנו, ואיש לא בדק.';
 
 -- ⚠️ הטבלה סגורה. היא נכתבת מה-SQL Editor או מ-CI, לא מהאפליקציה.
 alter table schema_migration enable row level security;
@@ -56,6 +58,9 @@ revoke all on schema_migration from anon, authenticated;
 -- ⚠️ **upsert, ולא insert.** קובץ שרץ פעם שנייה (תיקון, הרצה חוזרת)
 -- מעדכן את החתימה ואת הזמן במקום ליפול — ההרצה החוזרת היא עובדה,
 -- והרישום צריך לשקף אותה ולא להתעלם ממנה.
+--
+-- 🔴 **ורישום בזמן הרצה דורס `verified`.** ראיה ישירה גוברת על בדיקה
+-- עקיפה, לעולם לא להפך.
 create or replace function public.record_migration(
   p_filename text,
   p_checksum text,
@@ -84,6 +89,6 @@ COMMIT;
 -- <migration-log>
 -- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
 -- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
-select public.record_migration('000_schema_migration.sql', 'sha256:f95a7fd55860024378d1c9181e81291c',
+select public.record_migration('000_schema_migration.sql', 'sha256:40fccc4ac899aac074ae0c1273192f5f',
   coalesce(current_setting('app.migration_source', true), 'sql-editor'));
 -- </migration-log>
