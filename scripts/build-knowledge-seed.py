@@ -121,6 +121,69 @@ select count(*) as "קטעים בלי וקטור — להריץ embed"
 """
 
 
+LIVE_CHECK = """-- content-live-check — האם התוכן שכתבנו באמת נשלף
+-- ────────────────────────────────────────────────────────────────────
+-- 📍 להריץ ב: Supabase ← SQL Editor
+-- שם השאילתה: content-live-check (כלי חוזר — לא צריך מספר)
+-- ⚠️ להריץ **אחרי** embed.
+--
+-- 🔴 **תנאי מחייב של גיא (14.09), ולא בדיקה שנחמד שתהיה.**
+--
+-- כתיבת תוכן יושבת בטרנזקציה אחת ומתגלגלת אחורה בכישלון. אבל
+-- ה-embed רץ **אחריה**, מחוץ לטרנזקציה — ובין השניים הקטעים קיימים
+-- בלי וקטור. **קטע בלי וקטור אינו נשלף, וטים עונה כאילו המסמך אינו
+-- קיים.**
+--
+-- ⚠️ כלומר כתיבה שהצליחה במלואה יכולה להשאיר את התוכן **בלתי נראה**,
+-- ושום דבר לא יצעק. זו בדיוק המחלקה של כשלים שהמוצר בנוי נגדה:
+-- "אין נפילה שקטה" ו"שתיקה על ערך נקראת כהעדר".
+--
+-- 🔴 **הכתיבה אינה נחשבת שהצליחה עד שהשורה האחרונה כאן מחזירה ✅.**
+
+with expected (doc_id, chunks) as (
+  values
+{rows}
+),
+actual as (
+  select d.id as doc_id,
+         count(c.id)                                    as chunks,
+         count(c.id) filter (where c.embedding is null) as no_vector
+    from knowledge_doc d
+    left join knowledge_chunk c on c.doc_id = d.id
+   group by d.id
+),
+problems as (
+  select e.doc_id,
+         case
+           when a.doc_id is null            then 'המסמך אינו במסד'
+           when a.no_vector > 0             then 'קטעים בלי וקטור: ' || a.no_vector
+           when a.chunks <> e.chunks        then 'מספר קטעים שונה מהרפו: ' || a.chunks || ' מול ' || e.chunks
+         end as problem
+    from expected e
+    left join actual a on a.doc_id = e.doc_id
+)
+select
+  case when exists (select 1 from problems where problem is not null)
+       then '🔴 תוכן שאינו נשלף — הכתיבה לא הושלמה'
+       else '✅ כל המסמכים במסד, עם וקטור, ובמספר הקטעים הנכון' end as "מה",
+  -- ⚠️ חמישה ראשונים בלבד. רשימה של 65 מסמכים בתא אחד אינה קריאה,
+  -- ובדיקה שלא קוראים אותה אינה בדיקה.
+  coalesce((select string_agg(doc_id || ' — ' || problem, ' · ' order by doc_id)
+              from (select * from problems where problem is not null
+                     order by doc_id limit 5) t)
+           || case when (select count(*) from problems where problem is not null) > 5
+                   then ' · ועוד ' || ((select count(*) from problems where problem is not null) - 5) || ' מסמכים'
+                   else '' end, '—') as "פרט"
+union all
+select 'מסמכים ברפו', (select count(*) from expected)::text
+union all
+select 'מסמכים במסד', (select count(*) from knowledge_doc)::text
+union all
+select 'קטעים בלי וקטור (צפוי 0)',
+       (select count(*) from knowledge_chunk where embedding is null)::text;
+"""
+
+
 def main() -> int:
     files = sorted(DIR.glob("*.md"))
     if not files:
@@ -218,6 +281,18 @@ select
   (select count(*) from knowledge_chunk where embedding is null)      as "בלי וקטור (צפוי: כל הקטעים)",
   (select count(*) from knowledge_doc where cardinality(source_urls) > 1) as "מסמכים עם שני מקורות";
 """
+
+    # ── בדיקת "האם זה באמת נשלף" ─────────────────────────────────────
+    # 🔴 תנאי מחייב של גיא: כתיבה שהצליחה אינה מספיקה. התוכן חייב
+    # להיות **נראה** — כלומר עם וקטור, ובמספר הקטעים שהרפו מצפה לו.
+    if "--live-check" in sys.argv:
+        from collections import Counter
+        counts = Counter(v.split("'")[1] for v in chunk_rows)
+        rows = ",\n".join(f"    ('{d}', {n})" for d, n in sorted(counts.items()))
+        out = ROOT / "data" / "deploy" / "content-live-check.txt"
+        out.write_text(LIVE_CHECK.format(rows=rows), encoding="utf-8")
+        print(f"✅ {out.relative_to(ROOT)} · {len(counts)} מסמכים")
+        return 0
 
     # ── קובץ פריסה למסמך אחד ────────────────────────────────────────
     # 🔴 **קיים כי קובצי הפריסה נכתבו ביד.** `data/deploy/parking-and-

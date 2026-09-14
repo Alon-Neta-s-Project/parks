@@ -26,6 +26,10 @@ python3 scripts/migration-log.py --check
 step "קובצי הזרע מעודכנים מול המקור"
 python3 scripts/build-knowledge-seed.py --check
 
+# ⚠️ ובדיקת "האם התוכן באמת נשלף" נבנית כאן, ורצה על המסד החי
+# אחרי embed. תנאי מחייב של גיא — כתיבה שהצליחה אינה מספיקה.
+python3 scripts/build-knowledge-seed.py --live-check
+
 # ⚠️ **לא בשער.** הבדיקה הזו דורשת Postgres מקומי, ולכן היא אינה
 # חלק מ-npm run qa — היא מורצת ידנית אחרי הוספת מיגרציה:
 #     bash scripts/verify-probes.sh
