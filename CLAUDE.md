@@ -120,8 +120,9 @@
 ## פקודות
 
 ```sh
+npm run qa         # 🔴 **שער ה-QA — לפני כל דחיפה ל-release**
 npm run dev        # פיתוח
-npm test           # הבדיקות — vitest (215) **וגם** deno על פונקציית טים (64)
+npm test           # הבדיקות — vitest (221) **וגם** deno על פונקציית טים (66)
 npm run test:edge  # רק פונקציית טים
 npm run import     # ייבוא יבש; --write כדי לכתוב
 npm run build      # בנייה + רינדור מוקדם של 243 דפים
