@@ -2,7 +2,7 @@
 id: universal-express-in-practice-uor
 title: Universal Express בפועל — יוניברסל אורלנדו
 doc_type: tip
-authority_tier: T3
+authority_tier: T4
 scope_resort: uor
 volatility: static
 source_url: https://www.reddit.com/r/UniversalOrlando/comments/1sol625/, https://touringplans.com/universal-orlando/universal-express

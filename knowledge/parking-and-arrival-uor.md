@@ -2,7 +2,7 @@
 id: parking-and-arrival-uor
 title: חניה והגעה לפארק ברכב — יוניברסל אורלנדו
 doc_type: guide
-authority_tier: T3
+authority_tier: T1
 scope_resort: uor
 volatility: volatile
 source_url: https://www.universalorlando.com/web/en/us/plan-your-visit/directions-parking

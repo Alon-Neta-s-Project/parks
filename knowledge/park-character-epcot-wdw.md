@@ -2,7 +2,7 @@
 id: park-character-epcot-wdw
 title: אופי הפארק — EPCOT
 doc_type: guide
-authority_tier: T3
+authority_tier: T1
 scope_resort: wdw
 volatility: static
 source_url: https://disneyworld.disney.go.com/destinations/epcot/

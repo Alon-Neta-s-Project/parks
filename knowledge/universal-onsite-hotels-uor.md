@@ -2,7 +2,7 @@
 id: universal-onsite-hotels-uor
 title: מלונות יוניברסל On-Site — הטבות לפי קטגוריה
 doc_type: guide
-authority_tier: T3
+authority_tier: T1
 scope_resort: uor
 volatility: static
 source_url: https://www.universalorlandovacations.com/hotels, https://allears.net, https://touringplans.com, https://orlandoinformer.com

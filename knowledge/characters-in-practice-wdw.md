@@ -2,7 +2,7 @@
 id: characters-in-practice-wdw
 title: מפגש עם דמויות בפועל — וולט דיסני וורלד
 doc_type: tip
-authority_tier: T3
+authority_tier: T4
 scope_resort: wdw
 volatility: seasonal
 source_url: https://www.newyorker.com/magazine/2022/05/30/larping-goes-to-disney-world

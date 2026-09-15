@@ -2,7 +2,7 @@
 id: park-character-epic-uor
 title: אופי הפארק — Universal Epic Universe
 doc_type: guide
-authority_tier: T3
+authority_tier: T1
 scope_resort: uor
 volatility: static
 source_url: https://www.universalorlando.com/web/en/us/theme-parks/epic-universe

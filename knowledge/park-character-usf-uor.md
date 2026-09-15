@@ -2,7 +2,7 @@
 id: park-character-usf-uor
 title: אופי הפארק — Universal Studios Florida
 doc_type: guide
-authority_tier: T3
+authority_tier: T1
 scope_resort: uor
 volatility: static
 source_url: https://www.universalorlando.com/web/en/us/theme-parks/universal-studios-florida

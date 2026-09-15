@@ -2,7 +2,7 @@
 id: partner-hotels-uor
 title: Universal Partner Hotels — מלונות שותפים
 doc_type: guide
-authority_tier: T3
+authority_tier: T1
 scope_resort: uor
 volatility: static
 source_url: https://www.universalorlandovacations.com/Hotels/Partner.aspx

@@ -2,7 +2,7 @@
 id: park-hopper-in-practice-wdw
 title: Park Hopper בפועל — וולט דיסני וורלד
 doc_type: tip
-authority_tier: T3
+authority_tier: T4
 scope_resort: wdw
 volatility: seasonal
 source_url: https://www.disneytouristblog.com/park-hopping-disney-world-tips/, https://www.mousehacking.com/blog/how-to-park-hop-at-disney-world

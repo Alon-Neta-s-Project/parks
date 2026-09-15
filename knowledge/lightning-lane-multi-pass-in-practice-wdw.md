@@ -2,7 +2,7 @@
 id: lightning-lane-multi-pass-in-practice-wdw
 title: Lightning Lane Multi Pass בפועל — וולט דיסני וורלד
 doc_type: tip
-authority_tier: T3
+authority_tier: T4
 scope_resort: wdw
 volatility: static
 source_url: https://www.reddit.com/r/WaltDisneyWorld/comments/1sksdbd/, https://www.disneytouristblog.com/lightning-lane-multi-pass-worth-money-disney-world-lower-crowds/

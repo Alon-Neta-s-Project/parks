@@ -2,7 +2,7 @@
 id: lightning-lane-premier-pass-in-practice-wdw
 title: Lightning Lane Premier Pass בפועל — וולט דיסני וורלד
 doc_type: tip
-authority_tier: T3
+authority_tier: T4
 scope_resort: wdw
 volatility: static
 source_url: https://www.reddit.com/r/WaltDisneyWorld/comments/1n9fej3/, https://www.disneytouristblog.com/lightning-lane-premier-pass-disney-world-guide-faq/

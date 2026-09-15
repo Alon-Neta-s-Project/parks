@@ -2,7 +2,7 @@
 id: parking-and-arrival-wdw
 title: חניה והגעה לפארק ברכב — וולט דיסני וורלד
 doc_type: guide
-authority_tier: T3
+authority_tier: T1
 scope_resort: wdw
 volatility: volatile
 source_url: https://disneyworld.disney.go.com/guest-services/parking/

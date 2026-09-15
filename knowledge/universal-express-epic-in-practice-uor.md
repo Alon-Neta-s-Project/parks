@@ -2,7 +2,7 @@
 id: universal-express-epic-in-practice-uor
 title: Universal Express ב-Epic Universe בפועל — סדר גודל של מחיר
 doc_type: tip
-authority_tier: T3
+authority_tier: T4
 scope_resort: uor
 volatility: volatile
 source_url: https://touringplans.com, https://deeparrival.com

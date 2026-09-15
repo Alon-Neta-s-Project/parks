@@ -2,7 +2,7 @@
 id: park-character-ioa-uor
 title: אופי הפארק — Universal Islands of Adventure
 doc_type: guide
-authority_tier: T3
+authority_tier: T1
 scope_resort: uor
 volatility: static
 source_url: https://www.universalorlando.com/web/en/us/theme-parks/islands-of-adventure

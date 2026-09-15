@@ -2,7 +2,7 @@
 id: park-to-park-in-practice-uor
 title: Park-to-Park בפועל — יוניברסל אורלנדו
 doc_type: tip
-authority_tier: T3
+authority_tier: T4
 scope_resort: uor
 volatility: seasonal
 source_url: https://themeparkpro.com/universal-orlando-park-to-park-ticket-worth-it/, https://www.reddit.com/r/UniversalOrlando/comments/tyhva9/is_park_to_park_worth_it_for_hogwarts_express/

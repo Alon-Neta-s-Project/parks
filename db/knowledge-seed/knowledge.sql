@@ -136,7 +136,7 @@ Character Dining הוא ארוחה במסעדה שבה מופיעות דמויו
 יש להשתמש ברשימת הבידור והדמויות באתר או באפליקציה, לבחור את הפארק ולבדוק את המיקום ואת שעות הפעילות ביום הביקור. מידע על דמות, שעה ומקום הוא מידע משתנה ואינו נשמר כאן כרשימה קבועה.
 
 מפגש עם דמות אינו כלול אוטומטית בכל מסעדה או בכל אירוע. רק חוויה שמסומנת רשמית כ-Character Experience או Character Dining צריכה להיות מוצגת ככזו, וההרכב עשוי להשתנות ללא התחייבות לדמות מסוימת.'),
-('characters-in-practice-uor', 'מפגש עם דמויות בפועל — יוניברסל אורלנדו', 'tip', 'T3', 'he', 'uor', 'seasonal', '2026-09-01', 'approved', array['https://orlandoinformer.com/universal/orlando-characters'], 'characters', 'international_guest', 'core', 'N/A', '## האם הדמויות עומדות רק במקום קבוע?
+('characters-in-practice-uor', 'מפגש עם דמויות בפועל — יוניברסל אורלנדו', 'tip', 'T4', 'he', 'uor', 'seasonal', '2026-09-01', 'approved', array['https://orlandoinformer.com/universal/orlando-characters'], 'characters', 'international_guest', 'core', 'N/A', '## האם הדמויות עומדות רק במקום קבוע?
 
 לא. ביוניברסל קיימים שני דפוסים: דמויות עם הופעות מתוזמנות במקום מוגדר, ודמויות שמופיעות מעת לעת ולעיתים מסתובבות באזור שלהן. ב-Epic Universe, למשל, יש דמויות עם נקודת מפגש קבועה לצד דמויות או performers ניידים בעולמות מסוימים.
 
@@ -157,7 +157,7 @@ Character Dining הוא ארוחה במסעדה שבה מופיעות דמויו
 ביוניברסל קיימות חוויות אוכל עם דמויות, אך חלקן מתקיימות רק בתקופות או בערבים נבחרים. יש לבדוק את ההיצע הפעיל ואת הצורך בהזמנה. אין להסיק מאירוע שהיה זמין בעונה קודמת שהוא עדיין פועל.
 
 המידע במסמך מבוסס על מדריכי מבקרים ואינו התחייבות של יוניברסל.'),
-('characters-in-practice-wdw', 'מפגש עם דמויות בפועל — וולט דיסני וורלד', 'tip', 'T3', 'he', 'wdw', 'seasonal', '2026-09-01', 'approved', array['https://www.newyorker.com/magazine/2022/05/30/larping-goes-to-disney-world'], 'characters', 'international_guest', 'core', 'N/A', '## האם פוגשים דמויות במקרה ברחוב?
+('characters-in-practice-wdw', 'מפגש עם דמויות בפועל — וולט דיסני וורלד', 'tip', 'T4', 'he', 'wdw', 'seasonal', '2026-09-01', 'approved', array['https://www.newyorker.com/magazine/2022/05/30/larping-goes-to-disney-world'], 'characters', 'international_guest', 'core', 'N/A', '## האם פוגשים דמויות במקרה ברחוב?
 
 לא נכון לבנות על מפגש אקראי. רוב המפגשים עם הדמויות המבוקשות מתקיימים במיקום ייעודי ובשעות מוגדרות, ולעיתים כרוכים בתור. מבקרים שמגיעים בציפייה שמיקי או נסיכות פשוט יסתובבו לידם עלולים לסיים את היום בלי לפגוש אותם.
 
@@ -317,7 +317,7 @@ Extended Evening Theme Park Hours מאפשרת לאורחים זכאים להי�
 מסמך זה לא יישלף יוזמתית לתייר ישראלי. אם משתמש שואל במפורש, יש להסביר קודם את דרישת התושבות ולא להציג את ההנחה כאפשרות כללית.
 
 יש לבדוק את תנאי ההצעה הפעילה ואת מסמכי הזכאות באתר הרשמי לפני תשלום.'),
-('lightning-lane-multi-pass-in-practice-wdw', 'Lightning Lane Multi Pass בפועל — וולט דיסני וורלד', 'tip', 'T3', 'he', 'wdw', 'static', '2026-09-01', 'approved', array['https://www.reddit.com/r/WaltDisneyWorld/comments/1sksdbd/', 'https://www.disneytouristblog.com/lightning-lane-multi-pass-worth-money-disney-world-lower-crowds/'], 'queue_access', 'international_guest', 'core', 'paid_addon', '## למי הוא עשוי להשתלם?
+('lightning-lane-multi-pass-in-practice-wdw', 'Lightning Lane Multi Pass בפועל — וולט דיסני וורלד', 'tip', 'T4', 'he', 'wdw', 'static', '2026-09-01', 'approved', array['https://www.reddit.com/r/WaltDisneyWorld/comments/1sksdbd/', 'https://www.disneytouristblog.com/lightning-lane-multi-pass-worth-money-disney-world-lower-crowds/'], 'queue_access', 'international_guest', 'core', 'paid_addon', '## למי הוא עשוי להשתלם?
 
 Multi Pass מועיל למשפחה עם יום פארק מוגבל, ילדים שמתקשים בתורים ארוכים או רשימת מתקנים מבוקשים. הוא מספק כמה זמנים ידועים מראש ויכול להפחית אי־ודאות בתחילת היום.
 
@@ -357,7 +357,7 @@ Multi Pass מאפשר לבחור מראש עד שלוש חוויות וזמני 
 ## האם אפשר לשלב מוצרים?
 
 ניתן לרכוש Multi Pass ו-Single Pass לאותו יום. כל מוצר נשאר נפרד ופועל לפי הזמינות והתנאים שלו.'),
-('lightning-lane-premier-pass-in-practice-wdw', 'Lightning Lane Premier Pass בפועל — וולט דיסני וורלד', 'tip', 'T3', 'he', 'wdw', 'static', '2026-09-01', 'approved', array['https://www.reddit.com/r/WaltDisneyWorld/comments/1n9fej3/', 'https://www.disneytouristblog.com/lightning-lane-premier-pass-disney-world-guide-faq/'], 'queue_access', 'international_guest', 'core', 'paid_addon', '## מה הערך המעשי?
+('lightning-lane-premier-pass-in-practice-wdw', 'Lightning Lane Premier Pass בפועל — וולט דיסני וורלד', 'tip', 'T4', 'he', 'wdw', 'static', '2026-09-01', 'approved', array['https://www.reddit.com/r/WaltDisneyWorld/comments/1n9fej3/', 'https://www.disneytouristblog.com/lightning-lane-premier-pass-disney-world-guide-faq/'], 'queue_access', 'international_guest', 'core', 'paid_addon', '## מה הערך המעשי?
 
 Premier Pass מפחית את הצורך לנהל חלונות חזרה בטלפון. מבקרים מתארים חופש לעצור לאוכל, לילדים או למנוחה ולבחור את סדר המתקנים בלי לרדוף אחרי הזמנות.
 
@@ -397,7 +397,7 @@ Premier Pass מאפשר כניסה חד־פעמית לכל חוויית Lightnin
 ## מתי קונים?
 
 אורחי מלון Disney Resort (וכן Swan/Dolphin/Swan Reserve ו-Shades of Green) יכולים לרכוש עד 7 ימים לפני תחילת השהות, באופן חד-פעמי המכסה את כל השהות (עד 14 יום). אורחים שאינם מתארחים במלון דיסני יכולים לרכוש עד 3 ימים מראש, בנפרד לכל יום. בשני המקרים החלון נפתח ב-7:00 בבוקר שעון-מזרח, באפליקציית My Disney Experience. המחיר משתנה לפי פארק ותאריך, וזמינות מוגבלת.'),
-('lightning-lane-single-pass-in-practice-wdw', 'Lightning Lane Single Pass בפועל — וולט דיסני וורלד', 'tip', 'T3', 'he', 'wdw', 'static', '2026-09-01', 'approved', array['https://www.undercovertourist.com/blog/disney-lightning-lane-faq/', 'https://www.mousehacking.com/blog/magic-kingdom-lightning-lanes-rides-and-strategy'], 'queue_access', 'international_guest', 'core', 'paid_addon', '## למי Single Pass מועיל?
+('lightning-lane-single-pass-in-practice-wdw', 'Lightning Lane Single Pass בפועל — וולט דיסני וורלד', 'tip', 'T4', 'he', 'wdw', 'static', '2026-09-01', 'approved', array['https://www.undercovertourist.com/blog/disney-lightning-lane-faq/', 'https://www.mousehacking.com/blog/magic-kingdom-lightning-lanes-rides-and-strategy'], 'queue_access', 'international_guest', 'core', 'paid_addon', '## למי Single Pass מועיל?
 
 הוא מתאים כאשר מתקן אחד הוא עדיפות גבוהה והמשפחה אינה רוצה להקדיש לו תור ארוך. במקום לרכוש חבילת מתקנים, משלמים על חלון חזרה לאטרקציה מסוימת.
 
@@ -479,7 +479,7 @@ Express, אירועים מיוחדים, מלון ו-VIP אינם כלולים א
 אין להציג את המוצר כהנחת “חיילים” כללית. נדרש קשר לזכאות הצבאית האמריקאית המוגדרת. אם המשתמש אינו עומד בה, הכרטיס אינו רלוונטי.
 
 לפני רכישה יש לבדוק זכאות, מספר כרטיסים שמותר לרכוש, צורך בהפעלה ודרישות Park Reservation.'),
-('park-character-animal-kingdom-wdw', 'אופי הפארק — Disney''s Animal Kingdom', 'guide', 'T3', 'he', 'wdw', 'static', '2026-09-09', 'approved', array['https://disneyworld.disney.go.com/destinations/animal-kingdom/'], 'park_logistics', 'international_guest', 'core', 'N/A', '## קצב ועוצמה כללית
+('park-character-animal-kingdom-wdw', 'אופי הפארק — Disney''s Animal Kingdom', 'guide', 'T1', 'he', 'wdw', 'static', '2026-09-09', 'approved', array['https://disneyworld.disney.go.com/destinations/animal-kingdom/'], 'park_logistics', 'international_guest', 'core', 'N/A', '## קצב ועוצמה כללית
 
 הפארק הרגוע והאימרסיבי ביותר מבין ארבעת שערי דיסני וורלד, וגם הגדול בשטח. מעט מתקני אקסטרים אמיתיים: Expedition Everest (רכבת הרים בינונית) ו-Kali River Rapids (ראפטינג רטוב) הם החזקים ביותר. Avatar Flight of Passage עוצמתי חושית, אך אינו מתקן של כוחות פיזיים.
 
@@ -505,7 +505,7 @@ Express, אירועים מיוחדים, מלון ו-VIP אינם כלולים א
 **אין ל-Animal Kingdom קו תחבורה ייעודי לאף פארק אחר** — והוא היחיד מבין ארבעת השערים שאינו על קו המונוריל ואינו על ה-Skyliner. הגישה אליו היא באוטובוסי דיסני הרגילים בלבד.
 
 זה שונה מהותית מ-Magic Kingdom (מונוריל) ומ-Hollywood Studios ו-EPCOT (Skyliner), ולכן נאמר במפורש ולא נשאר ריק.'),
-('park-character-epcot-wdw', 'אופי הפארק — EPCOT', 'guide', 'T3', 'he', 'wdw', 'static', '2026-09-09', 'approved', array['https://disneyworld.disney.go.com/destinations/epcot/'], 'park_logistics', 'international_guest', 'core', 'N/A', '## קצב ועוצמה כללית
+('park-character-epcot-wdw', 'אופי הפארק — EPCOT', 'guide', 'T1', 'he', 'wdw', 'static', '2026-09-09', 'approved', array['https://disneyworld.disney.go.com/destinations/epcot/'], 'park_logistics', 'international_guest', 'core', 'N/A', '## קצב ועוצמה כללית
 
 EPCOT הוא הפארק הרגוע ביותר מבין ארבעת פארקי הנושא של וולט דיסני וורלד — לא בכמות מה שיש בו, אלא בקצב שהוא מזמין. יש בו **שתי רכבות הרים בלבד**: Guardians of the Galaxy: Cosmic Rewind, האטרקציה האינטנסיבית בפארק, שאין בה היפוכים; ו-Test Track, שהיא סימולציית נהיגה מהירה ולא רכבת הרים קלאסית.
 
@@ -559,7 +559,7 @@ EPCOT מארח את מרבית הפסטיבלים העונתיים של וולט
 🔴 **ואין בין EPCOT לפארק אחר קישור סיפורי כמו Hogwarts Express ביוניברסל.** ה-Skyliner הוא תחבורה, לא חוויה משותפת בין שני פארקים. מי שמכיר את הרכבת של הארי פוטר ומצפה למקבילה — לא ימצא אותה.
 
 מעבר ל-Skyliner, אין קו ישיר בין EPCOT לבין Magic Kingdom או Animal Kingdom. מעבר אליהם דורש אוטובוס או מונורייל עם החלפה.'),
-('park-character-epic-uor', 'אופי הפארק — Universal Epic Universe', 'guide', 'T3', 'he', 'uor', 'static', '2026-09-08', 'approved', array['https://www.universalorlando.com/web/en/us/theme-parks/epic-universe'], 'park_logistics', 'international_guest', 'core', 'N/A', '## קצב ועוצמה כללית
+('park-character-epic-uor', 'אופי הפארק — Universal Epic Universe', 'guide', 'T1', 'he', 'uor', 'static', '2026-09-08', 'approved', array['https://www.universalorlando.com/web/en/us/theme-parks/epic-universe'], 'park_logistics', 'international_guest', 'core', 'N/A', '## קצב ועוצמה כללית
 
 פארק חדש לגמרי, שנפתח במאי 2025 — הראשון שיוניברסל בונה מאפס מזה כרבע מאה. הקצב שונה מהותית מ-Islands of Adventure: פחות רכבות בסך הכול, אבל כל עולם בנוי כבועה סגורה חזותית ואקוסטית, עם מערכת פורטלים בין העולמות.
 
@@ -584,7 +584,7 @@ EPCOT מארח את מרבית הפסטיבלים העונתיים של וולט
 אין קישור הובלה פיזי בין הרכזות — כשלוש עשרה דקות נסיעה, עם הסעות חינם מ-CityWalk ומהמלונות, וחניון נפרד. אין הרחבה של Hogwarts Express לכיוון Epic Universe.
 
 שלוש חוויות הארי פוטר — Ministry of Magic כאן, Diagon Alley ו-Hogsmeade בפארקים האחרים — אינן מקושרות סיפורית זו לזו.'),
-('park-character-hollywood-studios-wdw', 'אופי הפארק — Disney''s Hollywood Studios', 'guide', 'T3', 'he', 'wdw', 'static', '2026-09-09', 'approved', array['https://disneyworld.disney.go.com/destinations/hollywood-studios/'], 'park_logistics', 'international_guest', 'core', 'N/A', '## קצב ועוצמה כללית
+('park-character-hollywood-studios-wdw', 'אופי הפארק — Disney''s Hollywood Studios', 'guide', 'T1', 'he', 'wdw', 'static', '2026-09-09', 'approved', array['https://disneyworld.disney.go.com/destinations/hollywood-studios/'], 'park_logistics', 'international_guest', 'core', 'N/A', '## קצב ועוצמה כללית
 
 פארק מעורב עוצמה, עם קיטוב ברור: מתקן נפילה אינטנסיבי (Tower of Terror) ודארק־רייד טכנולוגי אינטנסיבי (Star Wars: Rise of the Resistance), לצד Toy Story Land המשפחתי והקליל.
 
@@ -612,7 +612,7 @@ Galaxy''s Edge נחשב לאזור האימרסיבי ביותר פיזית בכ
 ⚠️ הקו נסגר בסופות רעמים וברוחות חזקות, שנפוצות בקיץ הפלורידי — כלומר קשר אמין, אך לא מובטח בכל שעה.
 
 אין קישור ייעודי ל-Magic Kingdom או ל-Animal Kingdom.'),
-('park-character-ioa-uor', 'אופי הפארק — Universal Islands of Adventure', 'guide', 'T3', 'he', 'uor', 'static', '2026-09-08', 'approved', array['https://www.universalorlando.com/web/en/us/theme-parks/islands-of-adventure'], 'park_logistics', 'international_guest', 'core', 'N/A', '## קצב ועוצמה כללית
+('park-character-ioa-uor', 'אופי הפארק — Universal Islands of Adventure', 'guide', 'T1', 'he', 'uor', 'static', '2026-09-08', 'approved', array['https://www.universalorlando.com/web/en/us/theme-parks/islands-of-adventure'], 'park_logistics', 'international_guest', 'core', 'N/A', '## קצב ועוצמה כללית
 
 הפארק האינטנסיבי מבין שני פארקי יוניברסל הקלאסיים — ריכוז גבוה של רכבות הרים (VelociCoaster, Hulk, Hagrid''s) לצד איים רגועים (Seuss Landing, Hogsmeade). ליבה אדרנלינית חזקה, עטופה באיים מגוונים בעוצמה. אינו פארק שמתאים לכל המשפחה בקלות כמו Universal Studios Florida.
 
@@ -635,7 +635,7 @@ Galaxy''s Edge נחשב לאזור האימרסיבי ביותר פיזית בכ
 ## קשרים לפארקים אחרים
 
 Hogwarts Express מחבר את הוגסמיד לתחנת King''s Cross ב-Universal Studios Florida, ודורש כרטיס Park-to-Park. מעריצי הארי פוטר רוצים בדרך כלל את שני הפארקים יחד. אין קישור בין־פארקי נוסף.'),
-('park-character-magic-kingdom-wdw', 'אופי הפארק — Magic Kingdom', 'guide', 'T3', 'he', 'wdw', 'static', '2026-09-09', 'approved', array['https://disneyworld.disney.go.com/destinations/magic-kingdom/'], 'park_logistics', 'international_guest', 'core', 'N/A', '## קצב ועוצמה כללית
+('park-character-magic-kingdom-wdw', 'אופי הפארק — Magic Kingdom', 'guide', 'T1', 'he', 'wdw', 'static', '2026-09-09', 'approved', array['https://disneyworld.disney.go.com/destinations/magic-kingdom/'], 'park_logistics', 'international_guest', 'core', 'N/A', '## קצב ועוצמה כללית
 
 הפארק המשפחתי הקלאסי מבין ארבעת שערי דיסני וורלד — ואינו פארק אקסטרים. רוב המתקנים קלילים עד בינוניים: Space Mountain, Big Thunder Mountain, Seven Dwarfs Mine Train ו-Tron Lightcycle Run הן רכבות משפחתיות־נועזות, ולא רכבות תלולות כמו ביוניברסל.
 
@@ -661,7 +661,7 @@ Hogwarts Express מחבר את הוגסמיד לתחנת King''s Cross ב-Univer
 המונוריל מחבר את Magic Kingdom ל-EPCOT ולמלונות Contemporary, Polynesian ו-Grand Floridian, דרך שני קווים נפרדים (Express ו-Resort) עם החלפה ב-TTC — ולא בנסיעה ישירה. זהו קשר תחבורה בלבד, ולא קשר עלילתי כמו Hogwarts Express ביוניברסל.
 
 אין קישור ייעודי ל-Hollywood Studios או ל-Animal Kingdom — אליהם מגיעים באוטובוסי דיסני הרגילים.'),
-('park-character-usf-uor', 'אופי הפארק — Universal Studios Florida', 'guide', 'T3', 'he', 'uor', 'static', '2026-09-08', 'approved', array['https://www.universalorlando.com/web/en/us/theme-parks/universal-studios-florida'], 'park_logistics', 'international_guest', 'core', 'N/A', '## קצב ועוצמה כללית
+('park-character-usf-uor', 'אופי הפארק — Universal Studios Florida', 'guide', 'T1', 'he', 'uor', 'static', '2026-09-08', 'approved', array['https://www.universalorlando.com/web/en/us/theme-parks/universal-studios-florida'], 'park_logistics', 'international_guest', 'core', 'N/A', '## קצב ועוצמה כללית
 
 כמעט ההפך המדויק מ-Islands of Adventure — פארק של חוויית קולנוע, ולא פארק רכבות הרים. כשלוש רכבות הרים בלבד, מול כעשר ב-Islands of Adventure, ואף אחת מהן אינה ברמת אקסטרים דומה. מתאים יותר למשפחות עם ילדים קטנים ולמי שמחפש סיפור.
 
@@ -688,7 +688,7 @@ Hollywood Rip Ride Rockit נסגרה סופית. מחליפתה העתידית, 
 ## קשרים לפארקים אחרים
 
 Hogwarts Express מחבר את תחנת King''s Cross להוגסמיד ב-Islands of Adventure, ודורש כרטיס Park-to-Park.'),
-('park-hopper-in-practice-wdw', 'Park Hopper בפועל — וולט דיסני וורלד', 'tip', 'T3', 'he', 'wdw', 'seasonal', '2026-09-01', 'approved', array['https://www.disneytouristblog.com/park-hopping-disney-world-tips/', 'https://www.mousehacking.com/blog/how-to-park-hop-at-disney-world'], 'park_hopping', 'international_guest', 'core', 'paid_addon', '## למי Park Hopper מועיל?
+('park-hopper-in-practice-wdw', 'Park Hopper בפועל — וולט דיסני וורלד', 'tip', 'T4', 'he', 'wdw', 'seasonal', '2026-09-01', 'approved', array['https://www.disneytouristblog.com/park-hopping-disney-world-tips/', 'https://www.mousehacking.com/blog/how-to-park-hop-at-disney-world'], 'park_hopping', 'international_guest', 'core', 'paid_addon', '## למי Park Hopper מועיל?
 
 הוא מועיל במיוחד למי שרוצה לחזור בערב לפארק אחר, לשלב יום קצר עם מופע לילה, או להשאיר גמישות כשפארק מסוים עמוס. הוא יכול להתאים גם למי שלן באזור עם תחבורה נוחה לכמה פארקים.
 
@@ -770,7 +770,7 @@ Passholders יכולים בדרך כלל להיכנס אחרי השעה שמפר
 ## מה Theme Park Reservation אינה נותנת?
 
 היא אינה כרטיס כניסה, אינה Lightning Lane ואינה מבטיחה כניסה אם הפארק הגיע למגבלת קיבולת. תמיד נדרש אמצעי כניסה תקף.'),
-('park-to-park-in-practice-uor', 'Park-to-Park בפועל — יוניברסל אורלנדו', 'tip', 'T3', 'he', 'uor', 'seasonal', '2026-09-01', 'approved', array['https://themeparkpro.com/universal-orlando-park-to-park-ticket-worth-it/', 'https://www.reddit.com/r/UniversalOrlando/comments/tyhva9/is_park_to_park_worth_it_for_hogwarts_express/'], 'park_hopping', 'international_guest', 'core', 'paid_addon', '## למי Park-to-Park משמעותי?
+('park-to-park-in-practice-uor', 'Park-to-Park בפועל — יוניברסל אורלנדו', 'tip', 'T4', 'he', 'uor', 'seasonal', '2026-09-01', 'approved', array['https://themeparkpro.com/universal-orlando-park-to-park-ticket-worth-it/', 'https://www.reddit.com/r/UniversalOrlando/comments/tyhva9/is_park_to_park_worth_it_for_hogwarts_express/'], 'park_hopping', 'international_guest', 'core', 'paid_addon', '## למי Park-to-Park משמעותי?
 
 הוא כמעט הכרחי למי שרוצה את חוויית Hogwarts Express, משום שהרכבת עצמה מחברת בין שני פארקים ודורשת כרטיס מתאים. הוא מועיל גם למי שרוצה להתייחס ל-Universal Studios ו-Islands of Adventure כיום משולב.
 
@@ -810,7 +810,7 @@ Park-to-Park אינו כולל Universal Express, Early Park Admission, אירו
 ## מתי קונים?
 
 אפשר לרכוש מוצר Park-to-Park מלכתחילה או לשאול על שדרוג כרטיס זכאי. השדרוג עשוי לחול על מלוא הכרטיס הרב־יומי ולא רק על יום אחד. יש לבדוק את העלות והתוקף לפני ביצוע שינוי.'),
-('parking-and-arrival-uor', 'חניה והגעה לפארק ברכב — יוניברסל אורלנדו', 'guide', 'T3', 'he', 'uor', 'volatile', '2026-09-14', 'approved', array['https://www.universalorlando.com/web/en/us/plan-your-visit/directions-parking'], 'park_logistics', 'international_guest', 'core', 'N/A', '## שני מונחים שחוזרים כאן, ואין להם מקבילה מוכרת בעברית
+('parking-and-arrival-uor', 'חניה והגעה לפארק ברכב — יוניברסל אורלנדו', 'guide', 'T1', 'he', 'uor', 'volatile', '2026-09-14', 'approved', array['https://www.universalorlando.com/web/en/us/plan-your-visit/directions-parking'], 'park_logistics', 'international_guest', 'core', 'N/A', '## שני מונחים שחוזרים כאן, ואין להם מקבילה מוכרת בעברית
 
 - **קמפוס** — מתחם שלם של פארקים, חניונים ומלונות. ליוניברסל אורלנדו יש שניים, והמעבר ביניהם הוא נסיעה ולא הליכה.
 - **טרם** (Tram) — רכבת כבישים קטנה שמסיעה מהחניון לכניסה, כמו בדיסני. **ביוניברסל אין כזו**, וזה ההבדל שמפתיע ישראלים שכבר היו בדיסני.
@@ -853,7 +853,7 @@ Park-to-Park אינו כולל Universal Express, Early Park Admission, אירו
 ## CityWalk
 
 אינו חניון נפרד. מגיעים אליו דרך חניוני הקמפוס הראשי, באותה שרשרת בדיוק.'),
-('parking-and-arrival-wdw', 'חניה והגעה לפארק ברכב — וולט דיסני וורלד', 'guide', 'T3', 'he', 'wdw', 'volatile', '2026-09-09', 'approved', array['https://disneyworld.disney.go.com/guest-services/parking/'], 'park_logistics', 'international_guest', 'core', 'N/A', '## תשלום החניה
+('parking-and-arrival-wdw', 'חניה והגעה לפארק ברכב — וולט דיסני וורלד', 'guide', 'T1', 'he', 'wdw', 'volatile', '2026-09-09', 'approved', array['https://disneyworld.disney.go.com/guest-services/parking/'], 'park_logistics', 'international_guest', 'core', 'N/A', '## תשלום החניה
 
 תשלום אחד ליום, **תקף בכל ארבעת הפארקים** — מעבר בין פארקים אינו דורש תשלום נוסף.
 
@@ -889,7 +889,7 @@ Park-to-Park אינו כולל Universal Express, Early Park Admission, אירו
 - **Orange** — מרכזי, שבע עד עשר דקות הליכה.
 - **Lime** — הקרוב ביותר ל-The Landing, חמש עד שבע דקות.
 - **Grapefruit** — הרחוק, עשר עד חמש עשרה דקות.'),
-('partner-hotels-uor', 'Universal Partner Hotels — מלונות שותפים', 'guide', 'T3', 'he', 'uor', 'static', '2026-09-10', 'approved', array['https://www.universalorlandovacations.com/Hotels/Partner.aspx'], 'hotel_benefit', 'international_guest', 'appendix', 'N/A', '## מה זו התוכנית
+('partner-hotels-uor', 'Universal Partner Hotels — מלונות שותפים', 'guide', 'T1', 'he', 'uor', 'static', '2026-09-10', 'approved', array['https://www.universalorlandovacations.com/Hotels/Partner.aspx'], 'hotel_benefit', 'international_guest', 'appendix', 'N/A', '## מה זו התוכנית
 
 תוכנית רשמית של יוניברסל אורלנדו למלונות **שאינם בבעלותה ואינם מופעלים על ידה**. היא נפרדת ממלונות יוניברסל עצמם, וההטבות בה שונות.
 
@@ -954,7 +954,7 @@ My Universal Photos הוא שירות הצילום של Universal Orlando. הא�
 ## מה צריך לבדוק לפני רכישה?
 
 יש לבדוק אילו פארקים ומיקומים מכוסים, מהו חלון השימוש, מי בקבוצה יכול לקשר ולהוריד תמונות, ומהו מועד התפוגה. פרטים אלה עשויים להשתנות ולכן אינם נשמרים כאן כערכים קבועים.'),
-('rain-in-practice-uor', 'גשם ומזג אוויר בפועל — יוניברסל אורלנדו', 'tip', 'T3', 'he', 'uor', 'seasonal', '2026-09-01', 'approved', array['https://www.reddit.com/r/UniversalOrlando/comments/1fczsw5/'], 'weather', 'international_guest', 'core', 'N/A', '## מה קורה בפועל כשמתחיל גשם?
+('rain-in-practice-uor', 'גשם ומזג אוויר בפועל — יוניברסל אורלנדו', 'tip', 'T4', 'he', 'uor', 'seasonal', '2026-09-01', 'approved', array['https://www.reddit.com/r/UniversalOrlando/comments/1fczsw5/'], 'weather', 'international_guest', 'core', 'N/A', '## מה קורה בפועל כשמתחיל גשם?
 
 גשם אינו אומר שכל הפארק נסגר. מתקנים מקורים עשויים להמשיך לפעול, בעוד שמתקנים חיצוניים ומופעי רחוב עלולים להתעכב או להיסגר. ברקים ורוחות עשויים להרחיב את מספר הסגירות. גם מתקן מקורה יכול להיות מושבת מסיבה תפעולית שאינה קשורה ישירות לגשם, ולכן אין להסיק מהמבנה בלבד שהוא יפעל.
 
@@ -971,7 +971,7 @@ Express Pass אינו מבטיח שמתקן יהיה פעיל. אם מתקן ס�
 יש לעקוב באפליקציה אחר זמינות המתקנים והמופעים ולשמור חלופות מקורות. כאשר מופע נדחה, יש לקבוע מראש כמה זמן מוכנים להמתין. אם מזג האוויר פוגע בחלק מהותי מהמוצר שנרכש, יש לתעד את הסגירות ולפנות לשירות האורחים באותו יום.
 
 המידע במסמך מבוסס על ניסיון מבקרים ואינו התחייבות של יוניברסל.'),
-('rain-in-practice-wdw', 'גשם ומזג אוויר בפועל — וולט דיסני וורלד', 'tip', 'T3', 'he', 'wdw', 'seasonal', '2026-09-01', 'approved', array['https://www.reddit.com/r/WaltDisneyWorld/comments/xfyyqg/'], 'weather', 'international_guest', 'core', 'N/A', '## מה קורה בפועל כשמתחיל גשם?
+('rain-in-practice-wdw', 'גשם ומזג אוויר בפועל — וולט דיסני וורלד', 'tip', 'T4', 'he', 'wdw', 'seasonal', '2026-09-01', 'approved', array['https://www.reddit.com/r/WaltDisneyWorld/comments/xfyyqg/'], 'weather', 'international_guest', 'core', 'N/A', '## מה קורה בפועל כשמתחיל גשם?
 
 גשם קל אינו סוגר אוטומטית את הפארק. מתקנים מקורים רבים ממשיכים לפעול, ואילו מתקנים חיצוניים, תהלוכות ומופעי חוץ עלולים להתעכב או להתבטל. ברקים ורוחות משפיעים בדרך כלל יותר מגשם בלבד. ההחלטה מתקבלת בזמן אמת, ולכן חוויה שהופיעה בלוח בבוקר עשויה להידחות בהמשך היום.
 
@@ -1115,7 +1115,7 @@ Rider Switch אינו כרטיס כניסה ואינו מחליף דרישות �
 עגלות אינן מורשות ברוב המתקנים ויש להשתמש באזורי חניית העגלות המסומנים כאשר צוות הפארק מפנה אליהם. צוות דיסני עשוי להזיז עגלות בתוך אזור החניה לצורכי תפעול. אין להשאיר חפצים אישיים בעגלה ללא השגחה.
 
 עגלות אינן מותרות במדרגות נעות. ניתן להשתמש במעליות וברמפות הזמינות במיקומים המיועדים לכך. כאשר עגלה מסומנת לשימוש רפואי, עשויים לחול עליה כללי נגישות אחרים ויש להסדיר זאת מול Guest Relations.'),
-('universal-express-epic-in-practice-uor', 'Universal Express ב-Epic Universe בפועל — סדר גודל של מחיר', 'tip', 'T3', 'he', 'uor', 'volatile', '2026-09-14', 'approved', array['https://touringplans.com', 'https://deeparrival.com'], 'queue_access', 'international_guest', 'core', 'paid_addon', '## איזה סדר גודל נצפה?
+('universal-express-epic-in-practice-uor', 'Universal Express ב-Epic Universe בפועל — סדר גודל של מחיר', 'tip', 'T4', 'he', 'uor', 'volatile', '2026-09-14', 'approved', array['https://touringplans.com', 'https://deeparrival.com'], 'queue_access', 'international_guest', 'core', 'paid_addon', '## איזה סדר גודל נצפה?
 
 בבדיקה שנערכה ב-14.09.2026 נצפה טווח של כ-200 עד כ-390 דולר לאדם, ליום אחד.
 
@@ -1147,7 +1147,7 @@ Rider Switch אינו כרטיס כניסה ואינו מחליף דרישות �
 ## האם הוא מבטיח כניסה מהירה לכל מתקן?
 
 לא. הוא חל על מתקנים משתתפים בלבד, וגם בתור Express יכולה להיות המתנה.'),
-('universal-express-in-practice-uor', 'Universal Express בפועל — יוניברסל אורלנדו', 'tip', 'T3', 'he', 'uor', 'static', '2026-09-01', 'approved', array['https://www.reddit.com/r/UniversalOrlando/comments/1sol625/', 'https://touringplans.com/universal-orlando/universal-express'], 'queue_access', 'international_guest', 'core', 'paid_addon', '## למי Express עשוי להשתלם?
+('universal-express-in-practice-uor', 'Universal Express בפועל — יוניברסל אורלנדו', 'tip', 'T4', 'he', 'uor', 'static', '2026-09-01', 'approved', array['https://www.reddit.com/r/UniversalOrlando/comments/1sol625/', 'https://touringplans.com/universal-orlando/universal-express'], 'queue_access', 'international_guest', 'core', 'paid_addon', '## למי Express עשוי להשתלם?
 
 הוא מועיל במיוחד ביום אחד עמוס, לקבוצה עם ילדים שמתקשים בתורים או למי שרוצה להספיק שני פארקים. מבקרים מדווחים על חיסכון משמעותי במתקנים פופולריים, אך התוצאה תלויה ביום ובמתקנים.
 
@@ -1168,7 +1168,7 @@ Rider Switch אינו כרטיס כניסה ואינו מחליף דרישות �
 משווים את רשימת המתקנים, שעות הפארק, העומס הצפוי וגודל הקבוצה. Express קונה זמן, לא אטרקציות. אם הזמן שנחסך אינו מנוצל לפעילויות שהמשפחה רוצה, הערך יורד.
 
 דיווחי המבקרים אינם אחידים ולכן אין להציג אותו כחובה.'),
-('universal-express-unlimited-in-practice-uor', 'Universal Express Unlimited בפועל — יוניברסל אורלנדו', 'tip', 'T3', 'he', 'uor', 'static', '2026-09-01', 'approved', array['https://www.reddit.com/r/UniversalOrlando/comments/1rgbm3p/', 'https://touringplans.com/blog/universals-best-secret-complementary-hotel-express-pass/'], 'queue_access', 'international_guest', 'core', 'paid_addon', '## מתי Unlimited מוסיף ערך?
+('universal-express-unlimited-in-practice-uor', 'Universal Express Unlimited בפועל — יוניברסל אורלנדו', 'tip', 'T4', 'he', 'uor', 'static', '2026-09-01', 'approved', array['https://www.reddit.com/r/UniversalOrlando/comments/1rgbm3p/', 'https://touringplans.com/blog/universals-best-secret-complementary-hotel-express-pass/'], 'queue_access', 'international_guest', 'core', 'paid_addon', '## מתי Unlimited מוסיף ערך?
 
 הוא מתאים למי שרוצה לחזור שוב ושוב למתקנים אהובים בלי לבחור בין חזרה לבין תור רגיל. הוא משמעותי יותר לקבוצה שמעדיפה רכבות ומתקנים על פני מופעים, אוכל ושיטוט.
 
@@ -1233,7 +1233,7 @@ Universal Express מאפשר להשתמש בתור Express פעם אחת בכל 
 ## כמה פעמים אפשר להשתמש?
 
 ב-Universal Express הרגיל — פעם אחת בכל מתקן משתתף. שימוש חוזר דורש תור רגיל או מוצר Express Unlimited, אם הוא מוצע ומתאים לפארק.'),
-('universal-onsite-hotels-uor', 'מלונות יוניברסל On-Site — הטבות לפי קטגוריה', 'guide', 'T3', 'he', 'uor', 'static', '2026-09-14', 'approved', array['https://www.universalorlandovacations.com/hotels', 'https://allears.net', 'https://touringplans.com', 'https://orlandoinformer.com'], 'hotel_benefit', 'international_guest', 'core', 'included_benefit', '## שש קטגוריות, ולא רשימה אחת של מלונות
+('universal-onsite-hotels-uor', 'מלונות יוניברסל On-Site — הטבות לפי קטגוריה', 'guide', 'T1', 'he', 'uor', 'static', '2026-09-14', 'approved', array['https://www.universalorlandovacations.com/hotels', 'https://allears.net', 'https://touringplans.com', 'https://orlandoinformer.com'], 'hotel_benefit', 'international_guest', 'core', 'included_benefit', '## שש קטגוריות, ולא רשימה אחת של מלונות
 
 מלונות יוניברסל עצמם מתחלקים לשש קטגוריות, וההטבות **שונות בין קטגוריה לקטגוריה**. מלון שותף אינו אחד מהם — הוא תוכנית נפרדת עם הטבות אחרות לגמרי.
 
@@ -1566,36 +1566,36 @@ Character Dining הוא ארוחה במסעדה שבה מופיעות דמויו
 מפגש עם דמות אינו כלול אוטומטית בכל מסעדה או בכל אירוע. רק חוויה שמסומנת רשמית כ-Character Experience או Character Dining צריכה להיות מוצגת ככזו, וההרכב עשוי להשתנות ללא התחייבות לדמות מסוימת.', 'T1', 'he', 'approved'),
 ('characters-in-practice-uor', 0, '## האם הדמויות עומדות רק במקום קבוע?
 
-לא. ביוניברסל קיימים שני דפוסים: דמויות עם הופעות מתוזמנות במקום מוגדר, ודמויות שמופיעות מעת לעת ולעיתים מסתובבות באזור שלהן. ב-Epic Universe, למשל, יש דמויות עם נקודת מפגש קבועה לצד דמויות או performers ניידים בעולמות מסוימים.', 'T3', 'he', 'approved'),
+לא. ביוניברסל קיימים שני דפוסים: דמויות עם הופעות מתוזמנות במקום מוגדר, ודמויות שמופיעות מעת לעת ולעיתים מסתובבות באזור שלהן. ב-Epic Universe, למשל, יש דמויות עם נקודת מפגש קבועה לצד דמויות או performers ניידים בעולמות מסוימים.', 'T4', 'he', 'approved'),
 ('characters-in-practice-uor', 1, '## האם צריך לעמוד בתור?
 
-במפגש קבוע עשוי להיווצר תור, במיוחד לדמות פופולרית או בתקופה עמוסה. בדיווחי מבקרים, תורים רבים קצרים יחסית לתורי מתקנים, אך אין לכך הבטחה. דמות שמופיעה באופן תקופתי עשויה למשוך קבוצה במהירות גם אם אינה מופיעה בלוח מסודר.', 'T3', 'he', 'approved'),
+במפגש קבוע עשוי להיווצר תור, במיוחד לדמות פופולרית או בתקופה עמוסה. בדיווחי מבקרים, תורים רבים קצרים יחסית לתורי מתקנים, אך אין לכך הבטחה. דמות שמופיעה באופן תקופתי עשויה למשוך קבוצה במהירות גם אם אינה מופיעה בלוח מסודר.', 'T4', 'he', 'approved'),
 ('characters-in-practice-uor', 2, '## איך יודעים איפה ומתי לחפש?
 
-התחלה טובה היא רשימת הדמויות באפליקציית Universal Orlando. היא מציגה מפגשים מתוזמנים, אבל אינה בהכרח כוללת כל הופעה תקופתית. בתוך אזור נושאי ניתן לשאול Team Member אם צפויה הופעת דמות נוספת. לוחות משתנים לפי עונה ואירועים.', 'T3', 'he', 'approved'),
+התחלה טובה היא רשימת הדמויות באפליקציית Universal Orlando. היא מציגה מפגשים מתוזמנים, אבל אינה בהכרח כוללת כל הופעה תקופתית. בתוך אזור נושאי ניתן לשאול Team Member אם צפויה הופעת דמות נוספת. לוחות משתנים לפי עונה ואירועים.', 'T4', 'he', 'approved'),
 ('characters-in-practice-uor', 3, '## האם מפגש אקראי מחליף תכנון?
 
-לא כאשר חשוב לפגוש דמות מסוימת. דמויות ניידות אינן מופיעות בהכרח בכל יום ובאותו זמן. מפגש קבוע נותן נקודת יעד ברורה יותר; הופעה משוטטת היא אפשרות נוספת ולא הבטחה.', 'T3', 'he', 'approved'),
+לא כאשר חשוב לפגוש דמות מסוימת. דמויות ניידות אינן מופיעות בהכרח בכל יום ובאותו זמן. מפגש קבוע נותן נקודת יעד ברורה יותר; הופעה משוטטת היא אפשרות נוספת ולא הבטחה.', 'T4', 'he', 'approved'),
 ('characters-in-practice-uor', 4, '## ומה לגבי Character Dining?
 
 ביוניברסל קיימות חוויות אוכל עם דמויות, אך חלקן מתקיימות רק בתקופות או בערבים נבחרים. יש לבדוק את ההיצע הפעיל ואת הצורך בהזמנה. אין להסיק מאירוע שהיה זמין בעונה קודמת שהוא עדיין פועל.
 
-המידע במסמך מבוסס על מדריכי מבקרים ואינו התחייבות של יוניברסל.', 'T3', 'he', 'approved'),
+המידע במסמך מבוסס על מדריכי מבקרים ואינו התחייבות של יוניברסל.', 'T4', 'he', 'approved'),
 ('characters-in-practice-wdw', 0, '## האם פוגשים דמויות במקרה ברחוב?
 
-לא נכון לבנות על מפגש אקראי. רוב המפגשים עם הדמויות המבוקשות מתקיימים במיקום ייעודי ובשעות מוגדרות, ולעיתים כרוכים בתור. מבקרים שמגיעים בציפייה שמיקי או נסיכות פשוט יסתובבו לידם עלולים לסיים את היום בלי לפגוש אותם.', 'T3', 'he', 'approved'),
+לא נכון לבנות על מפגש אקראי. רוב המפגשים עם הדמויות המבוקשות מתקיימים במיקום ייעודי ובשעות מוגדרות, ולעיתים כרוכים בתור. מבקרים שמגיעים בציפייה שמיקי או נסיכות פשוט יסתובבו לידם עלולים לסיים את היום בלי לפגוש אותם.', 'T4', 'he', 'approved'),
 ('characters-in-practice-wdw', 1, '## האם דמויות לעולם אינן משוטטות?
 
-גם זה כלל גורף מדי. עשויות להיות הופעות או אינטראקציות ניידות, דמויות או performers באזורים מסוימים ושינויים עונתיים. הן אינן תחליף לתכנון של Character Experience רשמי כאשר חשוב לפגוש דמות מסוימת. מפגש אקראי הוא בונוס, לא מנגנון שאפשר להבטיח.', 'T3', 'he', 'approved'),
+גם זה כלל גורף מדי. עשויות להיות הופעות או אינטראקציות ניידות, דמויות או performers באזורים מסוימים ושינויים עונתיים. הן אינן תחליף לתכנון של Character Experience רשמי כאשר חשוב לפגוש דמות מסוימת. מפגש אקראי הוא בונוס, לא מנגנון שאפשר להבטיח.', 'T4', 'he', 'approved'),
 ('characters-in-practice-wdw', 2, '## איך המפגש נראה בפועל?
 
-במפגש ייעודי נכנסים לתור, מגיעים לדמות לזמן קצר, מצטלמים ולעיתים מקבלים חתימה. התור עשוי להיעצר בזמן הפסקות של הדמות, גם אם המפגש ממשיך לאחר מכן. במיקומים מבוקשים ההמתנה יכולה להיות משמעותית, ולכן יש לבדוק אותה באפליקציה ולא להניח שמפגש קצר פירושו תור קצר.', 'T3', 'he', 'approved'),
+במפגש ייעודי נכנסים לתור, מגיעים לדמות לזמן קצר, מצטלמים ולעיתים מקבלים חתימה. התור עשוי להיעצר בזמן הפסקות של הדמות, גם אם המפגש ממשיך לאחר מכן. במיקומים מבוקשים ההמתנה יכולה להיות משמעותית, ולכן יש לבדוק אותה באפליקציה ולא להניח שמפגש קצר פירושו תור קצר.', 'T4', 'he', 'approved'),
 ('characters-in-practice-wdw', 3, '## ומה לגבי מסעדות עם דמויות?
 
-Character Dining מאפשר לפגוש דמויות במהלך ארוחה בלי לעמוד בתור נפרד לכל אחת, אך דורש הזמנת מסעדה ואינו מבטיח בהכרח הרכב קבוע מעבר למה שמפורסם לאותה חוויה. הוא מתאים למי שרוצה לשלב ארוחה ומפגשים, אך הוא גוזל זמן של מסעדת ישיבה.', 'T3', 'he', 'approved'),
+Character Dining מאפשר לפגוש דמויות במהלך ארוחה בלי לעמוד בתור נפרד לכל אחת, אך דורש הזמנת מסעדה ואינו מבטיח בהכרח הרכב קבוע מעבר למה שמפורסם לאותה חוויה. הוא מתאים למי שרוצה לשלב ארוחה ומפגשים, אך הוא גוזל זמן של מסעדת ישיבה.', 'T4', 'he', 'approved'),
 ('characters-in-practice-wdw', 4, '## ציפייה נכונה
 
-אם דמות מסוימת חשובה, מחפשים אותה באפליקציה, בודקים מיקום ושעות ומכניסים את המפגש לתכנון היום. לא משאירים אותו למזל.', 'T3', 'he', 'approved'),
+אם דמות מסוימת חשובה, מחפשים אותה באפליקציה, בודקים מיקום ושעות ומכניסים את המפגש לתכנון היום. לא משאירים אותו למזל.', 'T4', 'he', 'approved'),
 ('child-swap-uor', 0, '## למי השירות מיועד?
 
 Child Swap מיועד למשפחה שבה ילד קטן מדי או אינו מעוניין לעלות על מתקן ששאר חברי הקבוצה רוצים לחוות. השירות מאפשר למבוגרים להתחלף בלי שהמבוגר השני יצטרך לעבור מחדש את כל התור הרגיל.', 'T1', 'he', 'approved'),
@@ -1710,21 +1710,21 @@ Extended Evening Theme Park Hours מאפשרת לאורחים זכאים להי�
 יש לבדוק את תנאי ההצעה הפעילה ואת מסמכי הזכאות באתר הרשמי לפני תשלום.', 'T1', 'he', 'approved'),
 ('lightning-lane-multi-pass-in-practice-wdw', 0, '## למי הוא עשוי להשתלם?
 
-Multi Pass מועיל למשפחה עם יום פארק מוגבל, ילדים שמתקשים בתורים ארוכים או רשימת מתקנים מבוקשים. הוא מספק כמה זמנים ידועים מראש ויכול להפחית אי־ודאות בתחילת היום.', 'T3', 'he', 'approved'),
+Multi Pass מועיל למשפחה עם יום פארק מוגבל, ילדים שמתקשים בתורים ארוכים או רשימת מתקנים מבוקשים. הוא מספק כמה זמנים ידועים מראש ויכול להפחית אי־ודאות בתחילת היום.', 'T4', 'he', 'approved'),
 ('lightning-lane-multi-pass-in-practice-wdw', 1, '## מתי הערך נמוך יותר?
 
-ביום רגוע, בהגעה מוקדמת מאוד או כאשר רוב הפעילויות הרצויות אינן משתתפות, החיסכון עשוי להיות קטן. משפחה שבוחרת רק מעט מתקנים יכולה לגלות ששילמה עבור מערכת שלא ניצלה.', 'T3', 'he', 'approved'),
+ביום רגוע, בהגעה מוקדמת מאוד או כאשר רוב הפעילויות הרצויות אינן משתתפות, החיסכון עשוי להיות קטן. משפחה שבוחרת רק מעט מתקנים יכולה לגלות ששילמה עבור מערכת שלא ניצלה.', 'T4', 'he', 'approved'),
 ('lightning-lane-multi-pass-in-practice-wdw', 2, '## מה דורש ניהול?
 
-צריך לבחור חוויות מראש, לעקוב אחרי חלונות החזרה ולחפש בחירה נוספת לאחר המימוש הראשון. בחירות מפוזרות עלולות לגרום להליכה מיותרת. המוצר אינו מחליף מסלול יום.', 'T3', 'he', 'approved'),
+צריך לבחור חוויות מראש, לעקוב אחרי חלונות החזרה ולחפש בחירה נוספת לאחר המימוש הראשון. בחירות מפוזרות עלולות לגרום להליכה מיותרת. המוצר אינו מחליף מסלול יום.', 'T4', 'he', 'approved'),
 ('lightning-lane-multi-pass-in-practice-wdw', 3, '## האם הוא מבטל המתנה?
 
-לא. מבקרים מדווחים שגם Lightning Lane יכול לכלול המתנה, במיוחד בעומס או לאחר תקלות. הערך הוא קיצור ביחס לתור הרגיל, לא כניסה מיידית.', 'T3', 'he', 'approved'),
+לא. מבקרים מדווחים שגם Lightning Lane יכול לכלול המתנה, במיוחד בעומס או לאחר תקלות. הערך הוא קיצור ביחס לתור הרגיל, לא כניסה מיידית.', 'T4', 'he', 'approved'),
 ('lightning-lane-multi-pass-in-practice-wdw', 4, '## איך מחליטים?
 
 בודקים כמה מהמתקנים החשובים נמצאים ב-Multi Pass, מה זמני התור הצפויים וכמה שווה למשפחה שעה שנחסכת. יש להביא בחשבון את כל חברי הקבוצה ולא רק מחיר לאדם אחד.
 
-הדיווחים על כדאיות אינם אחידים: עבור חלק מהמשפחות הוא משנה את היום, ואחרות מסתדרות היטב בלעדיו.', 'T3', 'he', 'approved'),
+הדיווחים על כדאיות אינם אחידים: עבור חלק מהמשפחות הוא משנה את היום, ואחרות מסתדרות היטב בלעדיו.', 'T4', 'he', 'approved'),
 ('lightning-lane-multi-pass-wdw', 0, '## מה Multi Pass נותן?
 
 Multi Pass מאפשר לבחור מראש עד שלוש חוויות וזמני הגעה בפארק אחד ולהשתמש בכניסת Lightning Lane שלהן. לאחר שמממשים את הבחירה הראשונה ביום הביקור, ניתן לבדוק באפליקציה זמינות לבחירה נוספת, אחת בכל פעם. לכן “שלוש” היא מכסת הבחירה המוקדמת, לא בהכרח המספר המרבי לכל היום.', 'T1', 'he', 'approved'),
@@ -1742,21 +1742,21 @@ Multi Pass מאפשר לבחור מראש עד שלוש חוויות וזמני 
 ניתן לרכוש Multi Pass ו-Single Pass לאותו יום. כל מוצר נשאר נפרד ופועל לפי הזמינות והתנאים שלו.', 'T1', 'he', 'approved'),
 ('lightning-lane-premier-pass-in-practice-wdw', 0, '## מה הערך המעשי?
 
-Premier Pass מפחית את הצורך לנהל חלונות חזרה בטלפון. מבקרים מתארים חופש לעצור לאוכל, לילדים או למנוחה ולבחור את סדר המתקנים בלי לרדוף אחרי הזמנות.', 'T3', 'he', 'approved'),
+Premier Pass מפחית את הצורך לנהל חלונות חזרה בטלפון. מבקרים מתארים חופש לעצור לאוכל, לילדים או למנוחה ולבחור את סדר המתקנים בלי לרדוף אחרי הזמנות.', 'T4', 'he', 'approved'),
 ('lightning-lane-premier-pass-in-practice-wdw', 1, '## למי הוא עשוי להתאים?
 
-ליום פארק יחיד וחשוב, למשפחה שמעריכה גמישות יותר מחיסכון כספי, או לקבוצה שרוצה להספיק הרבה בלי לנהל את Multi Pass. הוא עשוי להתאים גם למי שזמן החופשה שלו מוגבל מאוד.', 'T3', 'he', 'approved'),
+ליום פארק יחיד וחשוב, למשפחה שמעריכה גמישות יותר מחיסכון כספי, או לקבוצה שרוצה להספיק הרבה בלי לנהל את Multi Pass. הוא עשוי להתאים גם למי שזמן החופשה שלו מוגבל מאוד.', 'T4', 'he', 'approved'),
 ('lightning-lane-premier-pass-in-practice-wdw', 2, '## מתי הוא פחות מתאים?
 
-אם לא מתכוונים לעלות על רוב מתקני Lightning Lane, משלמים על כיסוי שלא ינוצל. ילדים שאינם עומדים בדרישות גובה, רגישות למתקנים או פיצול העדפות במשפחה יכולים להקטין את הערך.', 'T3', 'he', 'approved'),
+אם לא מתכוונים לעלות על רוב מתקני Lightning Lane, משלמים על כיסוי שלא ינוצל. ילדים שאינם עומדים בדרישות גובה, רגישות למתקנים או פיצול העדפות במשפחה יכולים להקטין את הערך.', 'T4', 'he', 'approved'),
 ('lightning-lane-premier-pass-in-practice-wdw', 3, '## האם הוא מבטיח יום מושלם?
 
-לא. עדיין יש הליכה, המתנה, עומס והשבתות. הוא אינו כולל חזרות על אותו מתקן ואינו מאפשר שימוש בפארק נוסף. מחיר גבוה אינו יוצר קדימות על פני תקלה.', 'T3', 'he', 'approved'),
+לא. עדיין יש הליכה, המתנה, עומס והשבתות. הוא אינו כולל חזרות על אותו מתקן ואינו מאפשר שימוש בפארק נוסף. מחיר גבוה אינו יוצר קדימות על פני תקלה.', 'T4', 'he', 'approved'),
 ('lightning-lane-premier-pass-in-practice-wdw', 4, '## איך מחליטים?
 
 בונים רשימת מתקנים שאכן יעלו עליהם ומשווים אותה ל-Multi Pass בתוספת Single Pass. ההחלטה המרכזית היא כמה שווה למשפחה להפחית ניהול ולוחות זמנים.
 
-זהו מוצר נוחות, לא פתרון חובה לכל מבקר.', 'T3', 'he', 'approved'),
+זהו מוצר נוחות, לא פתרון חובה לכל מבקר.', 'T4', 'he', 'approved'),
 ('lightning-lane-premier-pass-wdw', 0, '## מה Premier Pass נותן?
 
 Premier Pass מאפשר כניסה חד־פעמית לכל חוויית Lightning Lane זמינה בפארק אחד ביום שנבחר. הוא כולל את חוויות Multi Pass ואת מתקני Single Pass הזמינים באותו פארק, ללא צורך לבחור מראש חלונות הגעה לכל מתקן.', 'T1', 'he', 'approved'),
@@ -1774,21 +1774,21 @@ Premier Pass מאפשר כניסה חד־פעמית לכל חוויית Lightnin
 אורחי מלון Disney Resort (וכן Swan/Dolphin/Swan Reserve ו-Shades of Green) יכולים לרכוש עד 7 ימים לפני תחילת השהות, באופן חד-פעמי המכסה את כל השהות (עד 14 יום). אורחים שאינם מתארחים במלון דיסני יכולים לרכוש עד 3 ימים מראש, בנפרד לכל יום. בשני המקרים החלון נפתח ב-7:00 בבוקר שעון-מזרח, באפליקציית My Disney Experience. המחיר משתנה לפי פארק ותאריך, וזמינות מוגבלת.', 'T1', 'he', 'approved'),
 ('lightning-lane-single-pass-in-practice-wdw', 0, '## למי Single Pass מועיל?
 
-הוא מתאים כאשר מתקן אחד הוא עדיפות גבוהה והמשפחה אינה רוצה להקדיש לו תור ארוך. במקום לרכוש חבילת מתקנים, משלמים על חלון חזרה לאטרקציה מסוימת.', 'T3', 'he', 'approved'),
+הוא מתאים כאשר מתקן אחד הוא עדיפות גבוהה והמשפחה אינה רוצה להקדיש לו תור ארוך. במקום לרכוש חבילת מתקנים, משלמים על חלון חזרה לאטרקציה מסוימת.', 'T4', 'he', 'approved'),
 ('lightning-lane-single-pass-in-practice-wdw', 1, '## מתי הוא פחות נחוץ?
 
-אם אפשר להגיע למתקן בתחילת היום, לקראת הסגירה או בזמן שבו התור סביר, התוספת עשויה לחסוך מעט. גם מי שאינו בטוח שכל בני המשפחה יעלו צריך לבדוק לפני רכישה.', 'T3', 'he', 'approved'),
+אם אפשר להגיע למתקן בתחילת היום, לקראת הסגירה או בזמן שבו התור סביר, התוספת עשויה לחסוך מעט. גם מי שאינו בטוח שכל בני המשפחה יעלו צריך לבדוק לפני רכישה.', 'T4', 'he', 'approved'),
 ('lightning-lane-single-pass-in-practice-wdw', 2, '## מה הטעות הנפוצה?
 
-להניח שהמוצר כולל כניסה לפארק או Park Hopper. אם המתקן נמצא בפארק השני של היום, צריך לוודא שהכרטיס מאפשר להגיע אליו ושחלון ההגעה מתאים לזמן המעבר.', 'T3', 'he', 'approved'),
+להניח שהמוצר כולל כניסה לפארק או Park Hopper. אם המתקן נמצא בפארק השני של היום, צריך לוודא שהכרטיס מאפשר להגיע אליו ושחלון ההגעה מתאים לזמן המעבר.', 'T4', 'he', 'approved'),
 ('lightning-lane-single-pass-in-practice-wdw', 3, '## איך מעריכים כדאיות?
 
-משווים את זמן התור הצפוי, חשיבות המתקן ומחיר הקבוצה. Single Pass יכול להיות שימושי יותר ביום קצר או בביקור חד־פעמי, ופחות משמעותי ביום עם גמישות רבה.', 'T3', 'he', 'approved'),
+משווים את זמן התור הצפוי, חשיבות המתקן ומחיר הקבוצה. Single Pass יכול להיות שימושי יותר ביום קצר או בביקור חד־פעמי, ופחות משמעותי ביום עם גמישות רבה.', 'T4', 'he', 'approved'),
 ('lightning-lane-single-pass-in-practice-wdw', 4, '## מה קורה בתקלה?
 
 השבתת מתקן עלולה לשנות את התכנון. יש לפעול לפי ההודעה באפליקציה ולא לבנות על החזר אוטומטי. רכישה אינה מבטיחה שהמתקן יפעל.
 
-זהו כלי ממוקד: הערך נובע מהחשיבות של מתקן אחד, ולא מעצם היותו מוצר Lightning Lane.', 'T3', 'he', 'approved'),
+זהו כלי ממוקד: הערך נובע מהחשיבות של מתקן אחד, ולא מעצם היותו מוצר Lightning Lane.', 'T4', 'he', 'approved'),
 ('lightning-lane-single-pass-wdw', 0, '## מה Single Pass נותן?
 
 Single Pass הוא רכישה נפרדת לכניסת Lightning Lane אחת למתקן מבוקש שמופיע ברשימת Single Pass. בוחרים מתקן וחלון הגעה זמינים. הוא אינו חבילת מתקנים ואינו Multi Pass.', 'T1', 'he', 'approved'),
@@ -1842,7 +1842,7 @@ Express, אירועים מיוחדים, מלון ו-VIP אינם כלולים א
 
 הפארק הרגוע והאימרסיבי ביותר מבין ארבעת שערי דיסני וורלד, וגם הגדול בשטח. מעט מתקני אקסטרים אמיתיים: Expedition Everest (רכבת הרים בינונית) ו-Kali River Rapids (ראפטינג רטוב) הם החזקים ביותר. Avatar Flight of Passage עוצמתי חושית, אך אינו מתקן של כוחות פיזיים.
 
-רוב הפארק בנוי סביב הליכה, תצפית בבעלי חיים והצגות — קצב נמוך יותר, שמתאים לכל הגילאים.', 'T3', 'he', 'approved'),
+רוב הפארק בנוי סביב הליכה, תצפית בבעלי חיים והצגות — קצב נמוך יותר, שמתאים לכל הגילאים.', 'T1', 'he', 'approved'),
 ('park-character-animal-kingdom-wdw', 1, '## האזורים, ולמי כל אחד מדבר
 
 - **Discovery Island** — כל המשפחה. מרכז הפארק, סביב עץ החיים.
@@ -1850,17 +1850,17 @@ Express, אירועים מיוחדים, מלון ו-VIP אינם כלולים א
 - **Asia** — כל המשפחה, עם נטייה מעט גבוהה יותר לעוצמה (Expedition Everest, Kali River Rapids).
 - **Pandora – The World of Avatar** — כל המשפחה ומעריצי Avatar. האזור הוויזואלי והאימרסיבי ביותר בפארק.
 - **Rafiki''s Planet Watch** — כל המשפחה. קצב רגוע מאוד, דגש חינוכי ושימורי.
-- **Oasis** — כל המשפחה. שביל כניסה עם בעלי חיים, קצב איטי.', 'T3', 'he', 'approved'),
+- **Oasis** — כל המשפחה. שביל כניסה עם בעלי חיים, קצב איטי.', 'T1', 'he', 'approved'),
 ('park-character-animal-kingdom-wdw', 2, '## מה מייחד אותו
 
 הפארק היחיד בדיסני וורלד הבנוי סביב בעלי חיים חיים אמיתיים ומסר של שימור טבע, ולא רק סביב פנטזיה ודמויות — שילוב של פארק שעשועים וגן חיות.
 
-מול EPCOT (תרבויות עולם) ומול Hollywood Studios (קולנוע), Animal Kingdom מציע חיבור לטבע אמיתי: פחות בידור מהיר, ויותר חוויה חינוכית ואטמוספרית ליום איטי.', 'T3', 'he', 'approved'),
+מול EPCOT (תרבויות עולם) ומול Hollywood Studios (קולנוע), Animal Kingdom מציע חיבור לטבע אמיתי: פחות בידור מהיר, ויותר חוויה חינוכית ואטמוספרית ליום איטי.', 'T1', 'he', 'approved'),
 ('park-character-animal-kingdom-wdw', 3, '## קשרים לפארקים אחרים
 
 **אין ל-Animal Kingdom קו תחבורה ייעודי לאף פארק אחר** — והוא היחיד מבין ארבעת השערים שאינו על קו המונוריל ואינו על ה-Skyliner. הגישה אליו היא באוטובוסי דיסני הרגילים בלבד.
 
-זה שונה מהותית מ-Magic Kingdom (מונוריל) ומ-Hollywood Studios ו-EPCOT (Skyliner), ולכן נאמר במפורש ולא נשאר ריק.', 'T3', 'he', 'approved'),
+זה שונה מהותית מ-Magic Kingdom (מונוריל) ומ-Hollywood Studios ו-EPCOT (Skyliner), ולכן נאמר במפורש ולא נשאר ריק.', 'T1', 'he', 'approved'),
 ('park-character-epcot-wdw', 0, '## קצב ועוצמה כללית
 
 EPCOT הוא הפארק הרגוע ביותר מבין ארבעת פארקי הנושא של וולט דיסני וורלד — לא בכמות מה שיש בו, אלא בקצב שהוא מזמין. יש בו **שתי רכבות הרים בלבד**: Guardians of the Galaxy: Cosmic Rewind, האטרקציה האינטנסיבית בפארק, שאין בה היפוכים; ו-Test Track, שהיא סימולציית נהיגה מהירה ולא רכבת הרים קלאסית.
@@ -1869,7 +1869,7 @@ EPCOT הוא הפארק הרגוע ביותר מבין ארבעת פארקי ה�
 
 הפארק מתפקד היטב כיום רגוע בתוך חופשה אינטנסיבית יותר. משפחות עם ילדים קטנים מאוד, זוגות, ומי שמחפש חוויה תרבותית וקולינרית — ימצאו את הקצב נוח. **נוער שמחפש בעיקר ריגוש עלול למצוא אותו שקט מדי**, אלא אם משלבים את שתי הרכבות ואת מופע הערב Luminous: The Symphony of Us.
 
-⚠️ **ורגוע אינו קטן.** EPCOT הוא מהפארקים הגדולים בשטח, והקפת אגם ה-World Showcase לבדה דורשת הליכה משמעותית. העומס הפיזי ביום שלם ניכר — הוא פשוט מגיע מהליכה ומהמתנה למסעדות, ולא מרכבות.', 'T3', 'he', 'approved'),
+⚠️ **ורגוע אינו קטן.** EPCOT הוא מהפארקים הגדולים בשטח, והקפת אגם ה-World Showcase לבדה דורשת הליכה משמעותית. העומס הפיזי ביום שלם ניכר — הוא פשוט מגיע מהליכה ומהמתנה למסעדות, ולא מרכבות.', 'T1', 'he', 'approved'),
 ('park-character-epcot-wdw', 1, '## האזורים, ולמי כל אחד מדבר
 
 הפארק מתחלק לשני חלקים שונים לגמרי באופיים.
@@ -1886,12 +1886,12 @@ EPCOT הוא הפארק הרגוע ביותר מבין ארבעת פארקי ה�
 
 🔴 **ומה שחשוב לתכנון: שבע מתוך 11 אינן מציעות מתקן רכיבה כלל.** גרמניה, איטליה, ארצות הברית, יפן, מרוקו, בריטניה וקנדה הן אוכל, אווירה, מוזיקה ותפאורה. רק ארבע — מקסיקו, נורווגיה, סין וצרפת — כוללות מתקן רכיבה או סרט.
 
-מתוכן, שתיים נוטות לתורים ארוכים: **נורווגיה** בגלל Frozen Ever After, ו**צרפת** בגלל Remy''s Ratatouille Adventure.', 'T3', 'he', 'approved'),
+מתוכן, שתיים נוטות לתורים ארוכים: **נורווגיה** בגלל Frozen Ever After, ו**צרפת** בגלל Remy''s Ratatouille Adventure.', 'T1', 'he', 'approved'),
 ('park-character-epcot-wdw', 2, '## מה מייחד אותו
 
 World Showcase הוא מה שמבדיל את EPCOT מכל פארק אחר: טבעת של 11 מדינות אמיתיות, כל אחת עם אדריכלות אותנטית, מוזיקה חיה ותפריט שונה לגמרי — מה שהופך יום בפארק לסיור עולם ולא ליום מתקנים. זו הסיבה שהוא מתאים במיוחד לזוגות ולמבוגרים שמחפשים יום רגוע, ולמשפחות שרוצות לגוון את הקצב באמצע חופשה אינטנסיבית.
 
-מול Magic Kingdom (האגדתי־משפחתי) ומול Hollywood Studios (הקולנועי), EPCOT הוא התרבותי־קולינרי — ובו העולם עצמו הוא האטרקציה.', 'T3', 'he', 'approved'),
+מול Magic Kingdom (האגדתי־משפחתי) ומול Hollywood Studios (הקולנועי), EPCOT הוא התרבותי־קולינרי — ובו העולם עצמו הוא האטרקציה.', 'T1', 'he', 'approved'),
 ('park-character-epcot-wdw', 3, '## הפסטיבלים
 
 EPCOT מארח את מרבית הפסטיבלים העונתיים של וולט דיסני וורלד, ושואב מהם חלק ניכר מזהותו לאורך השנה. ארבעה מרכזיים, וסדרם חוזר על עצמו משנה לשנה:
@@ -1901,7 +1901,7 @@ EPCOT מארח את מרבית הפסטיבלים העונתיים של וולט
 - **Food & Wine Festival** · סוף יולי או אוגוסט עד נובמבר, המוכר ביותר, עם דוכני אוכל לאורך היקף הפארק
 - **Festival of the Holidays** · נובמבר–דצמבר, עם תוספות חגיגיות בכל פביליוני World Showcase
 
-**התאריכים המדויקים של כל פסטיבל מתפרסמים רשמית חודשים ספורים מראש בלבד**, ולכן מי שמתכנן טיול רחוק יכול להסתמך על החודשים ולא על תאריך.', 'T3', 'he', 'approved'),
+**התאריכים המדויקים של כל פסטיבל מתפרסמים רשמית חודשים ספורים מראש בלבד**, ולכן מי שמתכנן טיול רחוק יכול להסתמך על החודשים ולא על תאריך.', 'T1', 'he', 'approved'),
 ('park-character-epcot-wdw', 4, '## קשרים לפארקים אחרים
 
 **Disney Skyliner** — רכבל אוויר המחבר את EPCOT, בתחנה שליד ה-International Gateway, עם Disney''s Hollywood Studios ועם ארבעה מלונות דיסני: Riviera, Caribbean Beach, Art of Animation ו-Pop Century. מעבר נוח בין שני הפארקים בלי רכב ובלי אוטובוס, עם תצפית מהאוויר בדרך.
@@ -1910,34 +1910,34 @@ EPCOT מארח את מרבית הפסטיבלים העונתיים של וולט
 
 🔴 **ואין בין EPCOT לפארק אחר קישור סיפורי כמו Hogwarts Express ביוניברסל.** ה-Skyliner הוא תחבורה, לא חוויה משותפת בין שני פארקים. מי שמכיר את הרכבת של הארי פוטר ומצפה למקבילה — לא ימצא אותה.
 
-מעבר ל-Skyliner, אין קו ישיר בין EPCOT לבין Magic Kingdom או Animal Kingdom. מעבר אליהם דורש אוטובוס או מונורייל עם החלפה.', 'T3', 'he', 'approved'),
+מעבר ל-Skyliner, אין קו ישיר בין EPCOT לבין Magic Kingdom או Animal Kingdom. מעבר אליהם דורש אוטובוס או מונורייל עם החלפה.', 'T1', 'he', 'approved'),
 ('park-character-epic-uor', 0, '## קצב ועוצמה כללית
 
 פארק חדש לגמרי, שנפתח במאי 2025 — הראשון שיוניברסל בונה מאפס מזה כרבע מאה. הקצב שונה מהותית מ-Islands of Adventure: פחות רכבות בסך הכול, אבל כל עולם בנוי כבועה סגורה חזותית ואקוסטית, עם מערכת פורטלים בין העולמות.
 
 מבחינת עוצמה זהו שילוב קוטבי: Stardust Racers היא רכבת לאנץ'' כפולה אינטנסיבית מאוד, לצד אזורים רגועים לגמרי (Isle of Berk, Celestial Park). הוא אינו קיצוני יותר או פחות מ-Islands of Adventure באופן גורף — הוא דורש תכנון מסלול מודע יותר למשפחה מעורבת גילאים.
 
-חוויות אינטראקטיביות (Power-Up Bands, איסוף מפתחות) מוסיפות שכבת משחק.', 'T3', 'he', 'approved'),
+חוויות אינטראקטיביות (Power-Up Bands, איסוף מפתחות) מוסיפות שכבת משחק.', 'T1', 'he', 'approved'),
 ('park-character-epic-uor', 1, '## האזורים, ולמי כל אחד מדבר
 
 - **Celestial Park** — הרכזת המרכזית, נושא קוסמי. Stardust Racers למבוגרים, לנוער ולחובבי מהירות; קרוסלת Constellation לכל הגילאים.
 - **Super Nintendo World** — מריו ודונקי קונג. משפחות וחובבי גיימינג.
 - **The Wizarding World – Ministry of Magic** — Battle at the Ministry היא דארק־רייד אינטנסיבית יחסית. מעריצים, מבוגרים ונוער יותר מילדים קטנים.
 - **How to Train Your Dragon – Isle of Berk** — האזור הגדול בפארק, עם מתחם משחק. Hiccup''s Wing Gliders ו-Dragon Racer''s Rally עדינים עד בינוניים. משפחות וילדים צעירים.
-- **Dark Universe** — מפלצות יוניברסל הקלאסיות. נוער ומבוגרים, לא לילדים צעירים.', 'T3', 'he', 'approved'),
+- **Dark Universe** — מפלצות יוניברסל הקלאסיות. נוער ומבוגרים, לא לילדים צעירים.', 'T1', 'he', 'approved'),
 ('park-character-epic-uor', 2, '## מה מייחד אותו
 
-הבידול הוא אדריכלי־חווייתי ולא תוכני: חמישה עולמות סגורים סביב רכזת מרכזית, מבודדים חזותית ואקוסטית זה מזה — לעומת אזורים פתוחים ב-Islands of Adventure וב-Universal Studios Florida. הדיינינג ברמה גבוהה יותר (The Atlantic, The Blue Dragon). האפיון הכללי: טבילה נרטיבית ביחד עם טכנולוגיה.', 'T3', 'he', 'approved'),
+הבידול הוא אדריכלי־חווייתי ולא תוכני: חמישה עולמות סגורים סביב רכזת מרכזית, מבודדים חזותית ואקוסטית זה מזה — לעומת אזורים פתוחים ב-Islands of Adventure וב-Universal Studios Florida. הדיינינג ברמה גבוהה יותר (The Atlantic, The Blue Dragon). האפיון הכללי: טבילה נרטיבית ביחד עם טכנולוגיה.', 'T1', 'he', 'approved'),
 ('park-character-epic-uor', 3, '## קשרים לפארקים אחרים
 
 אין קישור הובלה פיזי בין הרכזות — כשלוש עשרה דקות נסיעה, עם הסעות חינם מ-CityWalk ומהמלונות, וחניון נפרד. אין הרחבה של Hogwarts Express לכיוון Epic Universe.
 
-שלוש חוויות הארי פוטר — Ministry of Magic כאן, Diagon Alley ו-Hogsmeade בפארקים האחרים — אינן מקושרות סיפורית זו לזו.', 'T3', 'he', 'approved'),
+שלוש חוויות הארי פוטר — Ministry of Magic כאן, Diagon Alley ו-Hogsmeade בפארקים האחרים — אינן מקושרות סיפורית זו לזו.', 'T1', 'he', 'approved'),
 ('park-character-hollywood-studios-wdw', 0, '## קצב ועוצמה כללית
 
 פארק מעורב עוצמה, עם קיטוב ברור: מתקן נפילה אינטנסיבי (Tower of Terror) ודארק־רייד טכנולוגי אינטנסיבי (Star Wars: Rise of the Resistance), לצד Toy Story Land המשפחתי והקליל.
 
-פחות רגוע מ-Magic Kingdom, ואינו פארק רכבות הרים כמו Islands of Adventure — הוא בנוי סביב חוויות אימרסיביות, ובראשן Galaxy''s Edge, יותר מאשר סביב ריכוז רכבות.', 'T3', 'he', 'approved'),
+פחות רגוע מ-Magic Kingdom, ואינו פארק רכבות הרים כמו Islands of Adventure — הוא בנוי סביב חוויות אימרסיביות, ובראשן Galaxy''s Edge, יותר מאשר סביב ריכוז רכבות.', 'T1', 'he', 'approved'),
 ('park-character-hollywood-studios-wdw', 1, '## האזורים, ולמי כל אחד מדבר
 
 - **Hollywood Boulevard** — כל המשפחה. נוסטלגיית הוליווד, כניסה וצילומים.
@@ -1945,22 +1945,22 @@ EPCOT מארח את מרבית הפסטיבלים העונתיים של וולט
 - **Toy Story Land** — בעיקר ילדים קטנים ומשפחות עם פעוטות.
 - **Star Wars: Galaxy''s Edge** — מתבגרים, מבוגרים ומעריצי Star Wars.
 - **Sunset Boulevard** — מתבגרים ומבוגרים שמחפשים עוצמה (Tower of Terror, Rock ''n'' Roller Coaster), ולצידם מופעים לכל המשפחה (Fantasmic!, Beauty and the Beast).
-- **Animation Courtyard** — כל המשפחה, קצב רגוע.', 'T3', 'he', 'approved'),
+- **Animation Courtyard** — כל המשפחה, קצב רגוע.', 'T1', 'he', 'approved'),
 ('park-character-hollywood-studios-wdw', 2, '## מה מייחד אותו
 
 הקונספט הוא "מאחורי הקלעים של הוליווד" — נוסטלגיה לתור הזהב של הקולנוע, בשילוב עולמות עכשוויים וחזקים (Star Wars, Toy Story, Pixar).
 
-Galaxy''s Edge נחשב לאזור האימרסיבי ביותר פיזית בכל דיסני וורלד: רמת פירוט תפאורתי שמזכירה את World Showcase ב-EPCOT, אבל דרך פנטזיית מדע בדיוני ולא דרך תרבויות אמיתיות.', 'T3', 'he', 'approved'),
+Galaxy''s Edge נחשב לאזור האימרסיבי ביותר פיזית בכל דיסני וורלד: רמת פירוט תפאורתי שמזכירה את World Showcase ב-EPCOT, אבל דרך פנטזיית מדע בדיוני ולא דרך תרבויות אמיתיות.', 'T1', 'he', 'approved'),
 ('park-character-hollywood-studios-wdw', 3, '## קשרים לפארקים אחרים
 
 ה-Disney Skyliner, רכבל גונדולות, מחבר ישירות ל-EPCOT, עם תחנות ביניים במלונות Caribbean Beach, Riviera, Pop Century ו-Art of Animation. זו המקבילה של דיסני ל-Hogwarts Express ביוניברסל.
 
 ⚠️ הקו נסגר בסופות רעמים וברוחות חזקות, שנפוצות בקיץ הפלורידי — כלומר קשר אמין, אך לא מובטח בכל שעה.
 
-אין קישור ייעודי ל-Magic Kingdom או ל-Animal Kingdom.', 'T3', 'he', 'approved'),
+אין קישור ייעודי ל-Magic Kingdom או ל-Animal Kingdom.', 'T1', 'he', 'approved'),
 ('park-character-ioa-uor', 0, '## קצב ועוצמה כללית
 
-הפארק האינטנסיבי מבין שני פארקי יוניברסל הקלאסיים — ריכוז גבוה של רכבות הרים (VelociCoaster, Hulk, Hagrid''s) לצד איים רגועים (Seuss Landing, Hogsmeade). ליבה אדרנלינית חזקה, עטופה באיים מגוונים בעוצמה. אינו פארק שמתאים לכל המשפחה בקלות כמו Universal Studios Florida.', 'T3', 'he', 'approved'),
+הפארק האינטנסיבי מבין שני פארקי יוניברסל הקלאסיים — ריכוז גבוה של רכבות הרים (VelociCoaster, Hulk, Hagrid''s) לצד איים רגועים (Seuss Landing, Hogsmeade). ליבה אדרנלינית חזקה, עטופה באיים מגוונים בעוצמה. אינו פארק שמתאים לכל המשפחה בקלות כמו Universal Studios Florida.', 'T1', 'he', 'approved'),
 ('park-character-ioa-uor', 1, '## האזורים, ולמי כל אחד מדבר
 
 - **Marvel Super Hero Island** — נוער ומבוגרים, רכבות הרים.
@@ -1969,20 +1969,20 @@ Galaxy''s Edge נחשב לאזור האימרסיבי ביותר פיזית בכ
 - **Jurassic Park** — חובבי דינוזאורים מכל הגילאים, וגם VelociCoaster לחובבי אקסטרים. אזור עם שני פרצופים.
 - **Hogsmeade (The Wizarding World of Harry Potter)** — מעריצי הארי פוטר, כל הגילאים, פחות רועש.
 - **The Lost Continent** — משפחות שרוצות הפוגה או ארוחה טובה.
-- **Seuss Landing** — פעוטות וילדים קטנים.', 'T3', 'he', 'approved'),
+- **Seuss Landing** — פעוטות וילדים קטנים.', 'T1', 'he', 'approved'),
 ('park-character-ioa-uor', 2, '## מה מייחד אותו
 
 הפארק האינטנסיבי־ביותר של יוניברסל אורלנדו — עולמות תמטיים סוחפים (הארי פוטר, ג''ורסיק פארק, מארוול) עם דגש ברור על רכבות־הרים ומתקני־אקסטרים.
 
-מול Universal Studios Florida: "פארק רכבות ההרים" (כעשר אטרקציות אינטנסיביות) מול "חוויית קולנוע וסיפור". מול Epic Universe: פארק בשל ומוכח, עם רכבות אייקוניות, מול פארק חדש ומאוזן יותר.', 'T3', 'he', 'approved'),
+מול Universal Studios Florida: "פארק רכבות ההרים" (כעשר אטרקציות אינטנסיביות) מול "חוויית קולנוע וסיפור". מול Epic Universe: פארק בשל ומוכח, עם רכבות אייקוניות, מול פארק חדש ומאוזן יותר.', 'T1', 'he', 'approved'),
 ('park-character-ioa-uor', 3, '## קשרים לפארקים אחרים
 
-Hogwarts Express מחבר את הוגסמיד לתחנת King''s Cross ב-Universal Studios Florida, ודורש כרטיס Park-to-Park. מעריצי הארי פוטר רוצים בדרך כלל את שני הפארקים יחד. אין קישור בין־פארקי נוסף.', 'T3', 'he', 'approved'),
+Hogwarts Express מחבר את הוגסמיד לתחנת King''s Cross ב-Universal Studios Florida, ודורש כרטיס Park-to-Park. מעריצי הארי פוטר רוצים בדרך כלל את שני הפארקים יחד. אין קישור בין־פארקי נוסף.', 'T1', 'he', 'approved'),
 ('park-character-magic-kingdom-wdw', 0, '## קצב ועוצמה כללית
 
 הפארק המשפחתי הקלאסי מבין ארבעת שערי דיסני וורלד — ואינו פארק אקסטרים. רוב המתקנים קלילים עד בינוניים: Space Mountain, Big Thunder Mountain, Seven Dwarfs Mine Train ו-Tron Lightcycle Run הן רכבות משפחתיות־נועזות, ולא רכבות תלולות כמו ביוניברסל.
 
-הפארק בנוי סביב סיפור, נוסטלגיה ודמויות קלאסיות — יותר מאשר סביב עוצמת מתקן.', 'T3', 'he', 'approved'),
+הפארק בנוי סביב סיפור, נוסטלגיה ודמויות קלאסיות — יותר מאשר סביב עוצמת מתקן.', 'T1', 'he', 'approved'),
 ('park-character-magic-kingdom-wdw', 1, '## האזורים, ולמי כל אחד מדבר
 
 - **Main Street U.S.A.** — כל המשפחה. נוסטלגיה אמריקאית קלאסית, הכניסה והפרידה מהפארק.
@@ -1990,22 +1990,22 @@ Hogwarts Express מחבר את הוגסמיד לתחנת King''s Cross ב-Univer
 - **Frontierland** — כל המשפחה, עם נטייה קלה למתבגרים (Big Thunder Mountain).
 - **Liberty Square** — כל המשפחה. נוסטלגיה אמריקאית היסטורית, קצב רגוע.
 - **Fantasyland** — בעיקר ילדים קטנים ומשפחות עם פעוטות.
-- **Tomorrowland** — כל המשפחה, עם נטייה למתבגרים ולעוצמה מעט גבוהה יותר (Space Mountain, Tron).', 'T3', 'he', 'approved'),
+- **Tomorrowland** — כל המשפחה, עם נטייה למתבגרים ולעוצמה מעט גבוהה יותר (Space Mountain, Tron).', 'T1', 'he', 'approved'),
 ('park-character-magic-kingdom-wdw', 2, '## מה מייחד אותו
 
 זהו הליבה ההיסטורית של המותג — הפארק הנאמן ביותר לרעיון היסוד של וולט דיסני. טירת סינדרלה כאייקון מרכזי, מבנה קלאסי של רכזת וזרועות, זיקוקים כמעט כל ערב, ומיעוט משמעותי של מתקני אקסטרים לעומת שאר הפארקים.
 
-מול EPCOT (חדשנות ותרבות) ומול Hollywood Studios (קולנוע), Magic Kingdom הוא האגדתי־משפחתי הטהור ביותר.', 'T3', 'he', 'approved'),
+מול EPCOT (חדשנות ותרבות) ומול Hollywood Studios (קולנוע), Magic Kingdom הוא האגדתי־משפחתי הטהור ביותר.', 'T1', 'he', 'approved'),
 ('park-character-magic-kingdom-wdw', 3, '## קשרים לפארקים אחרים
 
 המונוריל מחבר את Magic Kingdom ל-EPCOT ולמלונות Contemporary, Polynesian ו-Grand Floridian, דרך שני קווים נפרדים (Express ו-Resort) עם החלפה ב-TTC — ולא בנסיעה ישירה. זהו קשר תחבורה בלבד, ולא קשר עלילתי כמו Hogwarts Express ביוניברסל.
 
-אין קישור ייעודי ל-Hollywood Studios או ל-Animal Kingdom — אליהם מגיעים באוטובוסי דיסני הרגילים.', 'T3', 'he', 'approved'),
+אין קישור ייעודי ל-Hollywood Studios או ל-Animal Kingdom — אליהם מגיעים באוטובוסי דיסני הרגילים.', 'T1', 'he', 'approved'),
 ('park-character-usf-uor', 0, '## קצב ועוצמה כללית
 
 כמעט ההפך המדויק מ-Islands of Adventure — פארק של חוויית קולנוע, ולא פארק רכבות הרים. כשלוש רכבות הרים בלבד, מול כעשר ב-Islands of Adventure, ואף אחת מהן אינה ברמת אקסטרים דומה. מתאים יותר למשפחות עם ילדים קטנים ולמי שמחפש סיפור.
 
-Hollywood Rip Ride Rockit נסגרה סופית. מחליפתה העתידית, Fast & Furious "Hollywood Drift", טרם נפתחה.', 'T3', 'he', 'approved'),
+Hollywood Rip Ride Rockit נסגרה סופית. מחליפתה העתידית, Fast & Furious "Hollywood Drift", טרם נפתחה.', 'T1', 'he', 'approved'),
 ('park-character-usf-uor', 1, '## האזורים, ולמי כל אחד מדבר
 
 - **Production Central** — באתחול, פחות רלוונטי כרגע.
@@ -2016,32 +2016,32 @@ Hollywood Rip Ride Rockit נסגרה סופית. מחליפתה העתידית, 
 - **World Expo** — משפחות (MIB, E.T.).
 - **Springfield** — משפחות.
 - **DreamWorks Land** — ילדים צעירים מאוד וגיל גן.
-- **Hollywood** — קהל כללי, מופעי רחוב.', 'T3', 'he', 'approved'),
+- **Hollywood** — קהל כללי, מופעי רחוב.', 'T1', 'he', 'approved'),
 ('park-character-usf-uor', 2, '## מה מייחד אותו
 
 הפארק המקורי של יוניברסל, בנוי על מורשת־אולפן קולנועית אמיתית — חוויות מבוססות־סיפור וקולנוע לצד רכבות, לא פארק־רכבות־הרים קלאסי.
 
-מול Islands of Adventure: "חוויית קולנוע וסיפור" מול "פארק רכבות ההרים". מול Epic Universe: הפארק הוותיק, שמשלב קלאסיקות (Mummy, MIB) עם תוספות עדכניות. Diagon Alley הוא נקודת משיכה עצמאית בפני עצמה.', 'T3', 'he', 'approved'),
+מול Islands of Adventure: "חוויית קולנוע וסיפור" מול "פארק רכבות ההרים". מול Epic Universe: הפארק הוותיק, שמשלב קלאסיקות (Mummy, MIB) עם תוספות עדכניות. Diagon Alley הוא נקודת משיכה עצמאית בפני עצמה.', 'T1', 'he', 'approved'),
 ('park-character-usf-uor', 3, '## קשרים לפארקים אחרים
 
-Hogwarts Express מחבר את תחנת King''s Cross להוגסמיד ב-Islands of Adventure, ודורש כרטיס Park-to-Park.', 'T3', 'he', 'approved'),
+Hogwarts Express מחבר את תחנת King''s Cross להוגסמיד ב-Islands of Adventure, ודורש כרטיס Park-to-Park.', 'T1', 'he', 'approved'),
 ('park-hopper-in-practice-wdw', 0, '## למי Park Hopper מועיל?
 
-הוא מועיל במיוחד למי שרוצה לחזור בערב לפארק אחר, לשלב יום קצר עם מופע לילה, או להשאיר גמישות כשפארק מסוים עמוס. הוא יכול להתאים גם למי שלן באזור עם תחבורה נוחה לכמה פארקים.', 'T3', 'he', 'approved'),
+הוא מועיל במיוחד למי שרוצה לחזור בערב לפארק אחר, לשלב יום קצר עם מופע לילה, או להשאיר גמישות כשפארק מסוים עמוס. הוא יכול להתאים גם למי שלן באזור עם תחבורה נוחה לכמה פארקים.', 'T4', 'he', 'approved'),
 ('park-hopper-in-practice-wdw', 1, '## מתי הוא פחות שימושי?
 
-בביקור ראשון עם ילדים קטנים, מעבר פארק גוזל זמן ואנרגיה: יוצאים, מגיעים לתחבורה, נוסעים, עוברים בידוק ונכנסים מחדש. משפחה שמתכננת מעט מתקנים ביום עשויה לקבל יותר ערך משהייה רציפה בפארק אחד.', 'T3', 'he', 'approved'),
+בביקור ראשון עם ילדים קטנים, מעבר פארק גוזל זמן ואנרגיה: יוצאים, מגיעים לתחבורה, נוסעים, עוברים בידוק ונכנסים מחדש. משפחה שמתכננת מעט מתקנים ביום עשויה לקבל יותר ערך משהייה רציפה בפארק אחד.', 'T4', 'he', 'approved'),
 ('park-hopper-in-practice-wdw', 2, '## מה הטעות הנפוצה?
 
-לקנות Hopper “ליתר ביטחון” בלי לתכנן אפילו מעבר אחד. בכרטיס רב־יומי השדרוג עשוי לחול על כל ימי הכרטיס, ולכן שימוש יחיד יכול להיות לא יעיל ביחס לתוספת.', 'T3', 'he', 'approved'),
+לקנות Hopper “ליתר ביטחון” בלי לתכנן אפילו מעבר אחד. בכרטיס רב־יומי השדרוג עשוי לחול על כל ימי הכרטיס, ולכן שימוש יחיד יכול להיות לא יעיל ביחס לתוספת.', 'T4', 'he', 'approved'),
 ('park-hopper-in-practice-wdw', 3, '## איך מחליטים?
 
-מסמנים מראש באילו ימים באמת רוצים שני פארקים ומה הסיבה: מופע ערב, ארוחה, חזרה למתקן או ניצול שעות פתיחה. אחר כך משווים את זמן המעבר ואת העלות מול הוספת יום פארק או שינוי סדר הימים.', 'T3', 'he', 'approved'),
+מסמנים מראש באילו ימים באמת רוצים שני פארקים ומה הסיבה: מופע ערב, ארוחה, חזרה למתקן או ניצול שעות פתיחה. אחר כך משווים את זמן המעבר ואת העלות מול הוספת יום פארק או שינוי סדר הימים.', 'T4', 'he', 'approved'),
 ('park-hopper-in-practice-wdw', 4, '## מה Park Hopper אינו פותר?
 
 הוא לא מקצר תורים, לא מבטיח כניסה למתקן ולא מפצה על תכנון צפוף מדי. גמישות מועילה רק אם נשאר זמן להשתמש בה.
 
-זהו טיפ תכנוני, לא התחייבות של דיסני.', 'T3', 'he', 'approved'),
+זהו טיפ תכנוני, לא התחייבות של דיסני.', 'T4', 'he', 'approved'),
 ('park-hopper-plus-wdw', 0, '## מה המוצר נותן?
 
 Park Hopper Plus משלב מעבר בין פארקי השעשועים באותו יום עם מספר ביקורים נפרדים בפארק מים או בפעילויות נבחרות של וולט דיסני וורלד. מספר ביקורי ה-Plus נגזר ממספר הימים בכרטיס.', 'T1', 'he', 'approved'),
@@ -2092,21 +2092,21 @@ Passholders יכולים בדרך כלל להיכנס אחרי השעה שמפר
 היא אינה כרטיס כניסה, אינה Lightning Lane ואינה מבטיחה כניסה אם הפארק הגיע למגבלת קיבולת. תמיד נדרש אמצעי כניסה תקף.', 'T1', 'he', 'approved'),
 ('park-to-park-in-practice-uor', 0, '## למי Park-to-Park משמעותי?
 
-הוא כמעט הכרחי למי שרוצה את חוויית Hogwarts Express, משום שהרכבת עצמה מחברת בין שני פארקים ודורשת כרטיס מתאים. הוא מועיל גם למי שרוצה להתייחס ל-Universal Studios ו-Islands of Adventure כיום משולב.', 'T3', 'he', 'approved'),
+הוא כמעט הכרחי למי שרוצה את חוויית Hogwarts Express, משום שהרכבת עצמה מחברת בין שני פארקים ודורשת כרטיס מתאים. הוא מועיל גם למי שרוצה להתייחס ל-Universal Studios ו-Islands of Adventure כיום משולב.', 'T4', 'he', 'approved'),
 ('park-to-park-in-practice-uor', 1, '## מתי Base מספיק?
 
-אם מקדישים יום מלא לכל פארק ואינם מעוניינים ב-Hogwarts Express, Base Ticket עשוי להספיק. כך מצמצמים מעבר ומקבלים יום פשוט יותר.', 'T3', 'he', 'approved'),
+אם מקדישים יום מלא לכל פארק ואינם מעוניינים ב-Hogwarts Express, Base Ticket עשוי להספיק. כך מצמצמים מעבר ומקבלים יום פשוט יותר.', 'T4', 'he', 'approved'),
 ('park-to-park-in-practice-uor', 2, '## מה הטעות הנפוצה?
 
-לראות “Park-to-Park” ולהניח שכל ארבעת הפארקים כלולים. יש לבדוק את רשימת הפארקים המדויקת. מוצר לשני פארקים אינו כולל בהכרח Epic Universe או Volcano Bay.', 'T3', 'he', 'approved'),
+לראות “Park-to-Park” ולהניח שכל ארבעת הפארקים כלולים. יש לבדוק את רשימת הפארקים המדויקת. מוצר לשני פארקים אינו כולל בהכרח Epic Universe או Volcano Bay.', 'T4', 'he', 'approved'),
 ('park-to-park-in-practice-uor', 3, '## כמה זמן המעבר גוזל?
 
-הפארקים הוותיקים סמוכים, אך Hogwarts Express הוא גם מתקן עם תור ולא רק תחבורה. הליכה דרך CityWalk היא חלופה, וגם היא דורשת יציאה וכניסה מחדש. זמן המעבר משתנה.', 'T3', 'he', 'approved'),
+הפארקים הוותיקים סמוכים, אך Hogwarts Express הוא גם מתקן עם תור ולא רק תחבורה. הליכה דרך CityWalk היא חלופה, וגם היא דורשת יציאה וכניסה מחדש. זמן המעבר משתנה.', 'T4', 'he', 'approved'),
 ('park-to-park-in-practice-uor', 4, '## איך מחליטים?
 
 אם Hogwarts Express או גמישות בין שני עולמות הארי פוטר הם יעד מרכזי, Park-to-Park הוא חלק מהחוויה. אם המטרה היא ביקור רגוע בפארק אחד, השדרוג עלול להוסיף מורכבות בלי ערך ממשי.
 
-זהו טיפ תכנוני, לא כלל של יוניברסל.', 'T3', 'he', 'approved'),
+זהו טיפ תכנוני, לא כלל של יוניברסל.', 'T4', 'he', 'approved'),
 ('park-to-park-uor', 0, '## מה Park-to-Park נותן?
 
 Park-to-Park מאפשר לבקר ביותר מפארק יוניברסל אחד באותו יום, בהתאם לפארקים הכלולים בכרטיס שנרכש. הוא שונה מ-Base Ticket, שמוגבל לפארק אחד ביום.', 'T1', 'he', 'approved'),
@@ -2125,11 +2125,11 @@ Park-to-Park אינו כולל Universal Express, Early Park Admission, אירו
 ('parking-and-arrival-uor', 0, '## שני מונחים שחוזרים כאן, ואין להם מקבילה מוכרת בעברית
 
 - **קמפוס** — מתחם שלם של פארקים, חניונים ומלונות. ליוניברסל אורלנדו יש שניים, והמעבר ביניהם הוא נסיעה ולא הליכה.
-- **טרם** (Tram) — רכבת כבישים קטנה שמסיעה מהחניון לכניסה, כמו בדיסני. **ביוניברסל אין כזו**, וזה ההבדל שמפתיע ישראלים שכבר היו בדיסני.', 'T3', 'he', 'approved'),
+- **טרם** (Tram) — רכבת כבישים קטנה שמסיעה מהחניון לכניסה, כמו בדיסני. **ביוניברסל אין כזו**, וזה ההבדל שמפתיע ישראלים שכבר היו בדיסני.', 'T1', 'he', 'approved'),
 ('parking-and-arrival-uor', 1, '## 🔴 שני קמפוסים, לא ארבעה חניונים — וזה שונה מהותית מדיסני
 
 - **הקמפוס הראשי** משרת את Universal Studios Florida, את Islands of Adventure, את Volcano Bay ואת CityWalk — כולם מאותם חניונים רב־קומתיים.
-- **הקמפוס הדרומי** הוא חניון שטח נפרד, ל-Epic Universe בלבד.', 'T3', 'he', 'approved'),
+- **הקמפוס הדרומי** הוא חניון שטח נפרד, ל-Epic Universe בלבד.', 'T1', 'he', 'approved'),
 ('parking-and-arrival-uor', 2, '## ההגעה מהחניון — הליכה, לא טרם
 
 בקמפוס הראשי אין טרם. ההגעה היא בהליכה ובמדרגות נעות, דרך CityWalk:
@@ -2142,12 +2142,12 @@ Park-to-Park אינו כולל Universal Express, Early Park Admission, אירו
 
 שני הפארקים חולקים את אותה שרשרת בדיוק, ואין ביניהם הבדל מבני.
 
-⚠️ **בדיקת הביטחון נעשית ברכזת המרכזית ולא בשער הפארק** — שונה מדיסני, ושווה לדעת מראש.', 'T3', 'he', 'approved'),
+⚠️ **בדיקת הביטחון נעשית ברכזת המרכזית ולא בשער הפארק** — שונה מדיסני, ושווה לדעת מראש.', 'T1', 'he', 'approved'),
 ('parking-and-arrival-uor', 3, '## Epic Universe
 
 חניון שטח, ולא רב־קומתי, עם אזורים בשמות נושאיים. **אין טרם ואין מדרגות נעות — ההליכה ישירה.**
 
-חלופה: אפשר לחנות בקמפוס הראשי ולנסוע בהסעת אוטובוס חינם ל-Epic Universe.', 'T3', 'he', 'approved'),
+חלופה: אפשר לחנות בקמפוס הראשי ולנסוע בהסעת אוטובוס חינם ל-Epic Universe.', 'T1', 'he', 'approved'),
 ('parking-and-arrival-uor', 4, '## מחירי החניה
 
 - **Self-Parking** — כ-32 דולר בהזמנה מראש, כ-35 בקופה. זהה בשני הקמפוסים.
@@ -2156,10 +2156,10 @@ Park-to-Park אינו כולל Universal Express, Early Park Admission, אירו
 - **Valet**, ב-CityWalk בלבד — כ-38 עד 81 דולר.
 - **חינם אחרי 18:00**, למעט לילות אירועים.
 
-בעלי Annual Pass: Premier — חינם ב-Valet וב-Prime. Preferred — Self-Parking חינם, וחצי מחיר ב-Valet.', 'T3', 'he', 'approved'),
+בעלי Annual Pass: Premier — חינם ב-Valet וב-Prime. Preferred — Self-Parking חינם, וחצי מחיר ב-Valet.', 'T1', 'he', 'approved'),
 ('parking-and-arrival-uor', 5, '## CityWalk
 
-אינו חניון נפרד. מגיעים אליו דרך חניוני הקמפוס הראשי, באותה שרשרת בדיוק.', 'T3', 'he', 'approved'),
+אינו חניון נפרד. מגיעים אליו דרך חניוני הקמפוס הראשי, באותה שרשרת בדיוק.', 'T1', 'he', 'approved'),
 ('parking-and-arrival-wdw', 0, '## תשלום החניה
 
 תשלום אחד ליום, **תקף בכל ארבעת הפארקים** — מעבר בין פארקים אינו דורש תשלום נוסף.
@@ -2170,7 +2170,7 @@ Park-to-Park אינו כולל Universal Express, Early Park Admission, אירו
 
 אורחי מלון דיסני רשום: **Standard ללא תשלום**, ושדרוג ל-Preferred בתוספת של כ-15 עד 25 דולר ליום. הסדר דומה חל על בעלי Annual Pass מסוימים.
 
-טרם חינם מסיע מהחניון לכניסה.', 'T3', 'he', 'approved'),
+טרם חינם מסיע מהחניון לכניסה.', 'T1', 'he', 'approved'),
 ('parking-and-arrival-wdw', 1, '## 🔴 Magic Kingdom — הפארק היחיד עם שרשרת דו־שלבית
 
 זהו ההבדל המעשי החשוב ביותר בהגעה, ושווה לדעת עליו מראש:
@@ -2180,32 +2180,32 @@ Park-to-Park אינו כולל Universal Express, Early Park Admission, אירו
 
 **זמן כולל בפועל: כחצי שעה ברוגע, ועד כשלושת רבעי שעה בשעת הפתיחה.**
 
-⚠️ משפחה שמתכננת להגיע לפתיחה צריכה לקחת את זה בחשבון. שלושת הפארקים האחרים אינם דורשים את זה.', 'T3', 'he', 'approved'),
+⚠️ משפחה שמתכננת להגיע לפתיחה צריכה לקחת את זה בחשבון. שלושת הפארקים האחרים אינם דורשים את זה.', 'T1', 'he', 'approved'),
 ('parking-and-arrival-wdw', 2, '## שלושת האחרים — חניון אחד וטרם ישיר
 
 - **EPCOT** — המהיר מבין הארבעה. כתשע דקות בפתיחה, עשר עד עשרים בשעות אחרות.
 - **Disney''s Animal Kingdom** — כעשר דקות בפתיחה, עשר עד עשרים בדרך כלל. נפתח מוקדם (7:30), מה שמפחית עומס בכניסה.
-- **Disney''s Hollywood Studios** — כרבע שעה בפתיחה, עשרים עד שלושים בעומס. הזמן כולל את תור סריקת הכרטיסים בכניסה, ולא רק את ההגעה.', 'T3', 'he', 'approved'),
+- **Disney''s Hollywood Studios** — כרבע שעה בפתיחה, עשרים עד שלושים בעומס. הזמן כולל את תור סריקת הכרטיסים בכניסה, ולא רק את ההגעה.', 'T1', 'he', 'approved'),
 ('parking-and-arrival-wdw', 3, '## Disney Springs — חניה חינם
 
 חניה ללא תשלום וללא הגבלת זמן. שלושה חניונים עיקריים:
 
 - **Orange** — מרכזי, שבע עד עשר דקות הליכה.
 - **Lime** — הקרוב ביותר ל-The Landing, חמש עד שבע דקות.
-- **Grapefruit** — הרחוק, עשר עד חמש עשרה דקות.', 'T3', 'he', 'approved'),
+- **Grapefruit** — הרחוק, עשר עד חמש עשרה דקות.', 'T1', 'he', 'approved'),
 ('partner-hotels-uor', 0, '## מה זו התוכנית
 
-תוכנית רשמית של יוניברסל אורלנדו למלונות **שאינם בבעלותה ואינם מופעלים על ידה**. היא נפרדת ממלונות יוניברסל עצמם, וההטבות בה שונות.', 'T3', 'he', 'approved'),
+תוכנית רשמית של יוניברסל אורלנדו למלונות **שאינם בבעלותה ואינם מופעלים על ידה**. היא נפרדת ממלונות יוניברסל עצמם, וההטבות בה שונות.', 'T1', 'he', 'approved'),
 ('partner-hotels-uor', 1, '## מה כלול
 
 - הנחות על מרצ''נדייז במיקומים נבחרים בפארקים.
 - הנחות על אוכל ומשקאות לא אלכוהוליים בפארקים וב-CityWalk.
-- הסעה מתוזמנת לאתר וממנו.', 'T3', 'he', 'approved'),
+- הסעה מתוזמנת לאתר וממנו.', 'T1', 'he', 'approved'),
 ('partner-hotels-uor', 2, '## Early Park Admission — לא כלול
 
 **Early Park Admission אינה הטבה של תוכנית המלונות השותפים.** היא מגיעה עם מלונות יוניברסל שבבעלות מלאה, ולא עם מלון שותף.
 
-⚠️ ייתכן חריג: רכישת **חבילת נופש** של יוניברסל דרך מלון שותף — להבדיל מהזמנת חדר בלבד — עשויה לכלול Early Park Admission כחלק מהחבילה. זהו ממצא ממקור בודד ואינו מאומת מול יוניברסל.', 'T3', 'he', 'approved'),
+⚠️ ייתכן חריג: רכישת **חבילת נופש** של יוניברסל דרך מלון שותף — להבדיל מהזמנת חדר בלבד — עשויה לכלול Early Park Admission כחלק מהחבילה. זהו ממצא ממקור בודד ואינו מאומת מול יוניברסל.', 'T1', 'he', 'approved'),
 ('partner-hotels-uor', 3, '## אילו מלונות
 
 הרשימה מתחלקת לשלוש שכבות. מלון ברשימה הזו הוא מלון שותף, ולא מלון יוניברסל.
@@ -2216,7 +2216,7 @@ Park-to-Park אינו כולל Universal Express, Early Park Admission, אירו
 
 **Value:** Clarion Inn & Suites Orlando · Comfort Inn & Suites · Comfort Suites Orlando · Fairfield Inn & Suites near Universal Orlando · Hampton Inn Orlando Near Universal Blvd/International Drive · Holiday Inn Express Hotel & Suites · Rosen Inn International · Rosen Inn · The Rosen Inn at Pointe Orlando
 
-⚠️ הרשימה נאספה ממקור משני, והעמוד הרשמי לא נקרא ישירות. מלון שאינו מופיע כאן אינו בהכרח מחוץ לתוכנית — כדאי לוודא מול יוניברסל.', 'T3', 'he', 'approved'),
+⚠️ הרשימה נאספה ממקור משני, והעמוד הרשמי לא נקרא ישירות. מלון שאינו מופיע כאן אינו בהכרח מחוץ לתוכנית — כדאי לוודא מול יוניברסל.', 'T1', 'he', 'approved'),
 ('photopass-wdw', 0, '## מהו Disney PhotoPass?
 
 צלמי Disney PhotoPass מצלמים אורחים במיקומים ברחבי הריזורט. שירות הצילום עצמו מאפשר לקשר תמונות לחשבון, אך הורדה של תמונות ללא סימן מים דורשת רכישה מתאימה. בחלק מהמתקנים נוצרים גם תמונות או סרטונים אוטומטיים.', 'T1', 'he', 'approved'),
@@ -2249,32 +2249,32 @@ My Universal Photos הוא שירות הצילום של Universal Orlando. הא�
 יש לבדוק אילו פארקים ומיקומים מכוסים, מהו חלון השימוש, מי בקבוצה יכול לקשר ולהוריד תמונות, ומהו מועד התפוגה. פרטים אלה עשויים להשתנות ולכן אינם נשמרים כאן כערכים קבועים.', 'T1', 'he', 'approved'),
 ('rain-in-practice-uor', 0, '## מה קורה בפועל כשמתחיל גשם?
 
-גשם אינו אומר שכל הפארק נסגר. מתקנים מקורים עשויים להמשיך לפעול, בעוד שמתקנים חיצוניים ומופעי רחוב עלולים להתעכב או להיסגר. ברקים ורוחות עשויים להרחיב את מספר הסגירות. גם מתקן מקורה יכול להיות מושבת מסיבה תפעולית שאינה קשורה ישירות לגשם, ולכן אין להסיק מהמבנה בלבד שהוא יפעל.', 'T3', 'he', 'approved'),
+גשם אינו אומר שכל הפארק נסגר. מתקנים מקורים עשויים להמשיך לפעול, בעוד שמתקנים חיצוניים ומופעי רחוב עלולים להתעכב או להיסגר. ברקים ורוחות עשויים להרחיב את מספר הסגירות. גם מתקן מקורה יכול להיות מושבת מסיבה תפעולית שאינה קשורה ישירות לגשם, ולכן אין להסיק מהמבנה בלבד שהוא יפעל.', 'T4', 'he', 'approved'),
 ('rain-in-practice-uor', 1, '## האם מקבלים החזר אם מופע או תהלוכה בוטלו?
 
-דיווחי מבקרים מראים שאין פיצוי אוטומטי על ביטול תהלוכה או חוויה יחידה. יש מבקרים שקיבלו החזר או טיפול חריג כאשר חלק גדול מהפארק הושפע, ולעומתם מבקרים אחרים לא קיבלו דבר ביום גשום. ההחלטה עשויה להיות פרטנית ואינה זכות שאפשר להציג כמובטחת.', 'T3', 'he', 'approved'),
+דיווחי מבקרים מראים שאין פיצוי אוטומטי על ביטול תהלוכה או חוויה יחידה. יש מבקרים שקיבלו החזר או טיפול חריג כאשר חלק גדול מהפארק הושפע, ולעומתם מבקרים אחרים לא קיבלו דבר ביום גשום. ההחלטה עשויה להיות פרטנית ואינה זכות שאפשר להציג כמובטחת.', 'T4', 'he', 'approved'),
 ('rain-in-practice-uor', 2, '## מה כדאי לדעת על Express Pass בגשם?
 
-Express Pass אינו מבטיח שמתקן יהיה פעיל. אם מתקן סגור, לא ניתן להשתמש בו רק משום שנרכש Express. קיימים דיווחים נקודתיים על החזר בגין Express ביום שבו מתקנים רבים הושבתו, אך קיימים גם דיווחים הפוכים. יש לפנות ל-Guest Services בזמן הביקור ולא להסתמך על טיפול בדיעבד.', 'T3', 'he', 'approved'),
+Express Pass אינו מבטיח שמתקן יהיה פעיל. אם מתקן סגור, לא ניתן להשתמש בו רק משום שנרכש Express. קיימים דיווחים נקודתיים על החזר בגין Express ביום שבו מתקנים רבים הושבתו, אך קיימים גם דיווחים הפוכים. יש לפנות ל-Guest Services בזמן הביקור ולא להסתמך על טיפול בדיעבד.', 'T4', 'he', 'approved'),
 ('rain-in-practice-uor', 3, '## איך נערכים?
 
 יש לעקוב באפליקציה אחר זמינות המתקנים והמופעים ולשמור חלופות מקורות. כאשר מופע נדחה, יש לקבוע מראש כמה זמן מוכנים להמתין. אם מזג האוויר פוגע בחלק מהותי מהמוצר שנרכש, יש לתעד את הסגירות ולפנות לשירות האורחים באותו יום.
 
-המידע במסמך מבוסס על ניסיון מבקרים ואינו התחייבות של יוניברסל.', 'T3', 'he', 'approved'),
+המידע במסמך מבוסס על ניסיון מבקרים ואינו התחייבות של יוניברסל.', 'T4', 'he', 'approved'),
 ('rain-in-practice-wdw', 0, '## מה קורה בפועל כשמתחיל גשם?
 
-גשם קל אינו סוגר אוטומטית את הפארק. מתקנים מקורים רבים ממשיכים לפעול, ואילו מתקנים חיצוניים, תהלוכות ומופעי חוץ עלולים להתעכב או להתבטל. ברקים ורוחות משפיעים בדרך כלל יותר מגשם בלבד. ההחלטה מתקבלת בזמן אמת, ולכן חוויה שהופיעה בלוח בבוקר עשויה להידחות בהמשך היום.', 'T3', 'he', 'approved'),
+גשם קל אינו סוגר אוטומטית את הפארק. מתקנים מקורים רבים ממשיכים לפעול, ואילו מתקנים חיצוניים, תהלוכות ומופעי חוץ עלולים להתעכב או להתבטל. ברקים ורוחות משפיעים בדרך כלל יותר מגשם בלבד. ההחלטה מתקבלת בזמן אמת, ולכן חוויה שהופיעה בלוח בבוקר עשויה להידחות בהמשך היום.', 'T4', 'he', 'approved'),
 ('rain-in-practice-wdw', 1, '## האם מקבלים החזר אם התהלוכה או הזיקוקים בוטלו?
 
-מניסיון מבקרים, ביטול של תהלוכה, זיקוקים או מופע יחיד אינו יוצר החזר אוטומטי. אורחים מדווחים שנשארו באירוע שפעל בגשם ולא קיבלו החזר אף שהבידור המרכזי בוטל. במקרים חריגים של מזג אוויר קיצוני יש גם דיווחים על זיכוי, כרטיס חלופי או טיפול פרטני מצד Guest Relations, אך זו אינה הטבה שאפשר להבטיח מראש.', 'T3', 'he', 'approved'),
+מניסיון מבקרים, ביטול של תהלוכה, זיקוקים או מופע יחיד אינו יוצר החזר אוטומטי. אורחים מדווחים שנשארו באירוע שפעל בגשם ולא קיבלו החזר אף שהבידור המרכזי בוטל. במקרים חריגים של מזג אוויר קיצוני יש גם דיווחים על זיכוי, כרטיס חלופי או טיפול פרטני מצד Guest Relations, אך זו אינה הטבה שאפשר להבטיח מראש.', 'T4', 'he', 'approved'),
 ('rain-in-practice-wdw', 2, '## מה הסיכון בהמתנה למופע שנדחה?
 
-הקושי אינו רק הביטול: מופע עשוי להידחות שוב ושוב לפני שיוחלט לבטלו. מבקרים מתארים המתנה ארוכה במקום שנבחר לצפייה, שבסופה לא התקיים המופע. בזמן הזה ניתן היה להספיק פעילויות אחרות.', 'T3', 'he', 'approved'),
+הקושי אינו רק הביטול: מופע עשוי להידחות שוב ושוב לפני שיוחלט לבטלו. מבקרים מתארים המתנה ארוכה במקום שנבחר לצפייה, שבסופה לא התקיים המופע. בזמן הזה ניתן היה להספיק פעילויות אחרות.', 'T4', 'he', 'approved'),
 ('rain-in-practice-wdw', 3, '## איך נערכים?
 
 כאשר מופע חוץ הוא יעד מרכזי, יש לבדוק את תחזית הברקים והגשם ואת סטטוס המופע באפליקציה לאורך היום. אם מתחילה דחייה, יש להחליט כמה זמן מוכנים להמתין ולא להניח שהמופע בהכרח יתקיים. באירוע בתשלום נפרד, אפשר לפנות ל-Guest Relations בזמן אמת, אך אין לבנות את התקציב על החזר.
 
-המידע במסמך מבוסס על דיווחי מבקרים ואינו התחייבות של דיסני.', 'T3', 'he', 'approved'),
+המידע במסמך מבוסס על דיווחי מבקרים ואינו התחייבות של דיסני.', 'T4', 'he', 'approved'),
 ('rain-policy-uor', 0, '## מה עלול להשתנות בגלל מזג האוויר?
 
 מזג אוויר באורלנדו עשוי להשפיע על מתקנים, מופעים וחוויות, ובייחוד כאשר תנאי הבטיחות אינם מאפשרים הפעלה. באתר הרשמי של יוניברסל לא נמצאה רשימה קבועה שמבטיחה אילו מתקנים יישארו פתוחים בכל סוג של גשם. יש לבדוק באפליקציית Universal Orlando, בשילוט ובאמצעות Team Member בזמן הביקור. מצב ההפעלה יכול להשתנות במהלך היום.', 'T1', 'he', 'approved'),
@@ -2382,13 +2382,13 @@ Rider Switch אינו כרטיס כניסה ואינו מחליף דרישות �
 
 בבדיקה שנערכה ב-14.09.2026 נצפה טווח של כ-200 עד כ-390 דולר לאדם, ליום אחד.
 
-**זהו טווח שנצפה באותו תאריך, ולא מחיר נוכחי מובטח.** המחיר בפועל נקבע לפי התאריך ולפי הביקוש, והפער בין הקצה הנמוך לגבוה הוא כמעט פי שניים — כלומר בחירת התאריך משנה את העלות יותר מכל שיקול אחר.', 'T3', 'he', 'approved'),
+**זהו טווח שנצפה באותו תאריך, ולא מחיר נוכחי מובטח.** המחיר בפועל נקבע לפי התאריך ולפי הביקוש, והפער בין הקצה הנמוך לגבוה הוא כמעט פי שניים — כלומר בחירת התאריך משנה את העלות יותר מכל שיקול אחר.', 'T4', 'he', 'approved'),
 ('universal-express-epic-in-practice-uor', 1, '## איך כדאי להתייחס למספר הזה?
 
-ככלי להערכת סדר גודל בלבד, לפני שמחליטים אם המוצר בכלל רלוונטי לתקציב. **את המחיר בפועל יש לבדוק ביום הרכישה.**', 'T3', 'he', 'approved'),
+ככלי להערכת סדר גודל בלבד, לפני שמחליטים אם המוצר בכלל רלוונטי לתקציב. **את המחיר בפועל יש לבדוק ביום הרכישה.**', 'T4', 'he', 'approved'),
 ('universal-express-epic-in-practice-uor', 2, '## למה זה משנה למשפחה?
 
-לארבעה אנשים ליום אחד מדובר בהפרש של מאות דולרים בין קצה לקצה. זהו סכום בסדר גודל של לילה במלון או של יום פארק נוסף, ולכן הוא שיקול תקציבי ולא פרט טכני.', 'T3', 'he', 'approved'),
+לארבעה אנשים ליום אחד מדובר בהפרש של מאות דולרים בין קצה לקצה. זהו סכום בסדר גודל של לילה במלון או של יום פארק נוסף, ולכן הוא שיקול תקציבי ולא פרט טכני.', 'T4', 'he', 'approved'),
 ('universal-express-epic-uor', 0, '## מה Express ב-Epic Universe נותן?
 
 גישה לתור Express במתקנים משתתפים ב-Epic Universe. הוא נרכש בנפרד, ואינו חלק מכרטיס הכניסה.', 'T1', 'he', 'approved'),
@@ -2406,38 +2406,38 @@ Rider Switch אינו כרטיס כניסה ואינו מחליף דרישות �
 לא. הוא חל על מתקנים משתתפים בלבד, וגם בתור Express יכולה להיות המתנה.', 'T1', 'he', 'approved'),
 ('universal-express-in-practice-uor', 0, '## למי Express עשוי להשתלם?
 
-הוא מועיל במיוחד ביום אחד עמוס, לקבוצה עם ילדים שמתקשים בתורים או למי שרוצה להספיק שני פארקים. מבקרים מדווחים על חיסכון משמעותי במתקנים פופולריים, אך התוצאה תלויה ביום ובמתקנים.', 'T3', 'he', 'approved'),
+הוא מועיל במיוחד ביום אחד עמוס, לקבוצה עם ילדים שמתקשים בתורים או למי שרוצה להספיק שני פארקים. מבקרים מדווחים על חיסכון משמעותי במתקנים פופולריים, אך התוצאה תלויה ביום ובמתקנים.', 'T4', 'he', 'approved'),
 ('universal-express-in-practice-uor', 1, '## מתי הוא פחות נחוץ?
 
-בימים רגועים, בהגעה מוקדמת או כאשר רוב המתקנים הרצויים אינם משתתפים, אפשר להספיק הרבה בלי Express. משפחה עם ילדים שאינם עולים על רכבות ההרים המבוקשות צריכה לבדוק כמה מהכיסוי רלוונטי לה.', 'T3', 'he', 'approved'),
+בימים רגועים, בהגעה מוקדמת או כאשר רוב המתקנים הרצויים אינם משתתפים, אפשר להספיק הרבה בלי Express. משפחה עם ילדים שאינם עולים על רכבות ההרים המבוקשות צריכה לבדוק כמה מהכיסוי רלוונטי לה.', 'T4', 'he', 'approved'),
 ('universal-express-in-practice-uor', 2, '## מה חשוב לבדוק במלונות?
 
-מלונות נבחרים כוללים Express Unlimited לפארקים מסוימים. לקבוצה גדולה, לילה במלון כזה עשוי להיות חלופה לרכישת passes נפרדים. ההטבה אינה בהכרח כוללת Epic Universe, ולכן יש לאמת את הכיסוי.', 'T3', 'he', 'approved'),
+מלונות נבחרים כוללים Express Unlimited לפארקים מסוימים. לקבוצה גדולה, לילה במלון כזה עשוי להיות חלופה לרכישת passes נפרדים. ההטבה אינה בהכרח כוללת Epic Universe, ולכן יש לאמת את הכיסוי.', 'T4', 'he', 'approved'),
 ('universal-express-in-practice-uor', 3, '## האם Express מבטל תורים?
 
-לא. יש עדיין המתנה, ולעיתים היא משמעותית. מתקנים סגורים אינם נעשים זמינים בזכות Express, וחלק מהמתקנים אינם משתתפים.', 'T3', 'he', 'approved'),
+לא. יש עדיין המתנה, ולעיתים היא משמעותית. מתקנים סגורים אינם נעשים זמינים בזכות Express, וחלק מהמתקנים אינם משתתפים.', 'T4', 'he', 'approved'),
 ('universal-express-in-practice-uor', 4, '## איך מחליטים?
 
 משווים את רשימת המתקנים, שעות הפארק, העומס הצפוי וגודל הקבוצה. Express קונה זמן, לא אטרקציות. אם הזמן שנחסך אינו מנוצל לפעילויות שהמשפחה רוצה, הערך יורד.
 
-דיווחי המבקרים אינם אחידים ולכן אין להציג אותו כחובה.', 'T3', 'he', 'approved'),
+דיווחי המבקרים אינם אחידים ולכן אין להציג אותו כחובה.', 'T4', 'he', 'approved'),
 ('universal-express-unlimited-in-practice-uor', 0, '## מתי Unlimited מוסיף ערך?
 
-הוא מתאים למי שרוצה לחזור שוב ושוב למתקנים אהובים בלי לבחור בין חזרה לבין תור רגיל. הוא משמעותי יותר לקבוצה שמעדיפה רכבות ומתקנים על פני מופעים, אוכל ושיטוט.', 'T3', 'he', 'approved'),
+הוא מתאים למי שרוצה לחזור שוב ושוב למתקנים אהובים בלי לבחור בין חזרה לבין תור רגיל. הוא משמעותי יותר לקבוצה שמעדיפה רכבות ומתקנים על פני מופעים, אוכל ושיטוט.', 'T4', 'he', 'approved'),
 ('universal-express-unlimited-in-practice-uor', 1, '## מתי Express רגיל מספיק?
 
-בביקור ראשון, שימוש אחד בכל מתקן משתתף עשוי להספיק. אם המטרה היא לטעום מכל אטרקציה פעם אחת, Unlimited יכול להיות תשלום על חזרות שלא יתממשו.', 'T3', 'he', 'approved'),
+בביקור ראשון, שימוש אחד בכל מתקן משתתף עשוי להספיק. אם המטרה היא לטעום מכל אטרקציה פעם אחת, Unlimited יכול להיות תשלום על חזרות שלא יתממשו.', 'T4', 'he', 'approved'),
 ('universal-express-unlimited-in-practice-uor', 2, '## מה תפקיד המלון?
 
-אורחים רבים משווים את עלות הרכישה העצמאית ללינה במלון שמעניק Unlimited לפארקים המכוסים. לקבוצה גדולה, ההטבה יכולה לשנות את החישוב. עם זאת, אין להזמין מלון רק לפי שם ההטבה בלי לבדוק תאריכים, אורחים ופארקים.', 'T3', 'he', 'approved'),
+אורחים רבים משווים את עלות הרכישה העצמאית ללינה במלון שמעניק Unlimited לפארקים המכוסים. לקבוצה גדולה, ההטבה יכולה לשנות את החישוב. עם זאת, אין להזמין מלון רק לפי שם ההטבה בלי לבדוק תאריכים, אורחים ופארקים.', 'T4', 'he', 'approved'),
 ('universal-express-unlimited-in-practice-uor', 3, '## האם הוא מתאים ל-Epic Universe?
 
-אין להניח שהטבת המלון חלה על Epic. זהו אחד המקומות שבהם משתמשים עלולים לקנות מוצר לא נכון. יש לבדוק מוצר Epic נפרד.', 'T3', 'he', 'approved'),
+אין להניח שהטבת המלון חלה על Epic. זהו אחד המקומות שבהם משתמשים עלולים לקנות מוצר לא נכון. יש לבדוק מוצר Epic נפרד.', 'T4', 'he', 'approved'),
 ('universal-express-unlimited-in-practice-uor', 4, '## איך מחליטים?
 
 סופרים כמה מתקנים באמת רוצים לחזור עליהם ומי בקבוצה יעלה. אם רק אדם אחד רוצה חזרות, אין הכרח שכל הקבוצה תקבל אותו מוצר.
 
-Unlimited מעניק חזרות בתורים משתתפים; הוא אינו מעניק זמן נוסף ביום או פתרון להשבתות.', 'T3', 'he', 'approved'),
+Unlimited מעניק חזרות בתורים משתתפים; הוא אינו מעניק זמן נוסף ביום או פתרון להשבתות.', 'T4', 'he', 'approved'),
 ('universal-express-unlimited-uor', 0, '## מה Unlimited נותן?
 
 Express Unlimited מאפשר להשתמש בתור Express מספר פעמים במתקנים משתתפים, במקום פעם אחת בלבד בכל מתקן. הוא תקף רק לפארק, לתאריך ולמוצר שמופיעים ברכישה.', 'T1', 'he', 'approved'),
@@ -2478,19 +2478,19 @@ Universal Express מאפשר להשתמש בתור Express פעם אחת בכל 
 
 מלונות יוניברסל עצמם מתחלקים לשש קטגוריות, וההטבות **שונות בין קטגוריה לקטגוריה**. מלון שותף אינו אחד מהם — הוא תוכנית נפרדת עם הטבות אחרות לגמרי.
 
-המסמך הזה עוסק בכניסה המוקדמת ובתחבורה. Express Unlimited הוא מוצר נפרד עם מדיניות משלו.', 'T3', 'he', 'approved'),
+המסמך הזה עוסק בכניסה המוקדמת ובתחבורה. Express Unlimited הוא מוצר נפרד עם מדיניות משלו.', 'T1', 'he', 'approved'),
 ('universal-onsite-hotels-uor', 1, '## Early Park Admission — כלול בכל מלונות יוניברסל
 
 **EPA כלול בכל שש הקטגוריות, בלי יוצא מן הכלל.** זו ההטבה המשותפת לכל מלונות יוניברסל, ובה הם נבדלים ממלונות שותפים.
 
-בשלושת מלונות Epic Universe — Helios Grand, Stella Nova ו-Terra Luna — ה-EPA כולל גם את Epic Universe עצמו.', 'T3', 'he', 'approved'),
+בשלושת מלונות Epic Universe — Helios Grand, Stella Nova ו-Terra Luna — ה-EPA כולל גם את Epic Universe עצמו.', 'T1', 'he', 'approved'),
 ('universal-onsite-hotels-uor', 2, '## התחבורה — שלוש צורות
 
 **סירות ואוטובוסים:** Portofino Bay, Hard Rock, Royal Pacific ו-Sapphire Falls. התחבורה הזו מגיעה לפארקים המקוריים, **ואינה מגיעה ל-Epic Universe**.
 
 **אוטובוס בלבד:** Cabana Bay, Aventura, Endless Summer ו-Terra Luna.
 
-**הליכה:** ל-Helios Grand כניסה ייעודית ישירות לתוך Epic Universe. מ-Stella Nova ההליכה ל-Epic Universe אורכת כרבע שעה.', 'T3', 'he', 'approved'),
+**הליכה:** ל-Helios Grand כניסה ייעודית ישירות לתוך Epic Universe. מ-Stella Nova ההליכה ל-Epic Universe אורכת כרבע שעה.', 'T1', 'he', 'approved'),
 ('universal-onsite-hotels-uor', 3, '## הקטגוריות במלואן
 
 | קטגוריה | מלונות |
@@ -2500,7 +2500,7 @@ Universal Express מאפשר להשתמש בתור Express פעם אחת בכל 
 | Prime Value | Cabana Bay · Aventura · Endless Summer (Surfside ו-Dockside) |
 | Epic Universe — Premier | Helios Grand |
 | Epic Universe — Preferred | Stella Nova |
-| Epic Universe — Value | Terra Luna |', 'T3', 'he', 'approved'),
+| Epic Universe — Value | Terra Luna |', 'T1', 'he', 'approved'),
 ('vacation-package-uor', 0, '## מהי חבילת נופש?
 
 חבילה משלבת לינה, כרטיסי פארק ולעיתים הטבות נוספות. ההרכב משתנה לפי מלון ומבצע. אין להניח ש-Express, Park-to-Park או Epic Universe כלולים ללא ציון מפורש.', 'T1', 'he', 'approved'),
