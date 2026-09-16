@@ -174,6 +174,12 @@ select
            || case when (select count(*) from problems where problem is not null) > 5
                    then ' · ועוד ' || ((select count(*) from problems where problem is not null) - 5) || ' מסמכים'
                    else '' end, '—') as "פרט"
+-- ⚠️ שורת הכרעה לקריאת מכונה. הכותרות נועדו לאדם, וסימן שמשמעותו
+-- אזעקה אינו יכול לשבת בתוך שם של שורה.
+union all
+select 'verdict',
+       case when exists (select 1 from problems where problem is not null)
+            then 'PROBLEM' else 'OK' end
 union all
 select 'מסמכים ברפו', (select count(*) from expected)::text
 union all

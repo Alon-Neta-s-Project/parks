@@ -248,6 +248,17 @@ select
        then '🔴 לא נמצאה במסד — לבדוק ביד'
        else '✅ כל המיגרציות נמצאו' end                as "מה",
   coalesce((select string_agg(filename, ', ' order by filename) from missing), '—') as "פרט"
+-- ── שורת הכרעה, לקריאת מכונה ────────────────────────────────────────
+-- 🔴 **קיים כי הבדיקה ב-CI חיפשה את הסימן 🔴 בטקסט — והוא מופיע
+-- בתוך הכותרת עצמה, גם כשאין ממצא.** אזעקה שנדלקת מהשם שלה.
+--
+-- ⚠️ הכותרות נועדו לאדם, והשורה הזו למכונה. `verdict|OK` ותו לא.
+union all
+select 'verdict',
+       case when exists (select 1 from missing)
+              or exists (select 1 from probe p join schema_migration m using (filename)
+                          where m.evidence = 'observed' and m.checksum <> p.checksum)
+            then 'PROBLEM' else 'OK' end
 union all
 select 'ראיה: ' || evidence, n::text from summary
 
