@@ -34,4 +34,4 @@ select id as "פארק",
        case when intro_he is null then '— טרם נכתב —'
             else left(intro_he, 60) || '…' end as "הפתיח",
        coalesce(length(intro_he)::text, '—') as "תווים"
-  from park where kind = 'theme' order by id;
+  from park where park_kind = 'theme' order by id;
