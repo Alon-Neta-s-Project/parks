@@ -63,8 +63,20 @@ jobs:
           CI_VERIFY_URL: ${{ secrets.CI_VERIFY_URL }}
         run: |
           python3 scripts/migration-log.py --write >/dev/null
-          result=$(psql "$CI_VERIFY_URL" -At -f data/deploy/full-check.txt)
+
+          # 🔴 **ON_ERROR_STOP, ואני מוסיף אותו אחרי שהיעדרו עלה ביוקר.**
+          # בלעדיו psql ממשיך אחרי שגיאה, הטרנזקציה נקטעת, השאילתה
+          # האחרונה לא מחזירה דבר — והבדיקה מכריזה הצלחה.
+          result=$(psql "$CI_VERIFY_URL" -At -v ON_ERROR_STOP=1 \
+                     -f data/deploy/migrations-check.txt)
           echo "$result"
+
+          # 🔴 **היעדר סימן אדום אינו הצלחה.** זו בדיוק התבנית שהמוצר
+          # הזה בנוי נגדה — שתיקה שנקראת כאישור. נדרש אישור חיובי.
+          if ! echo "$result" | grep -q "✅ כל המיגרציות נמצאו"; then
+            echo "✗ האימות לא החזיר אישור חיובי."
+            exit 1
+          fi
           if echo "$result" | grep -q "🔴"; then
             echo "✗ מיגרציה חסרה או סטייה בין הרפו למסד."
             exit 1

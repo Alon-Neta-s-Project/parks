@@ -311,7 +311,7 @@ def deploy_name(name: str) -> str:
     return name.replace("_", "-").removesuffix(".sql") + ".txt"
 
 
-def build_verify() -> str:
+def build_verify(with_turn_log: bool = True) -> str:
     rows = []
     for f in sorted(MIG.glob("*.sql")):
         if f.name not in PROBES:
@@ -327,7 +327,12 @@ def build_verify() -> str:
         + "\n  union all\n".join(rows)
         + ";\n"
     )
-    return VERIFY_HEAD + HELPERS + "\n" + probe + SELFTEST + VERIFY_TAIL
+    tail = VERIFY_TAIL
+    if not with_turn_log:
+        # חותכים את בלוק turn_log מהתוצאה, ומשאירים מיגרציות וסטייה.
+        tail = tail[:tail.index("-- \u2500\u2500 \u05d5\u05ea\u05e0\u05d0\u05d9 \u05d2\u05d9\u05d0")] + "order by 1;\n\nCOMMIT;\n"
+        return VERIFY_HEAD + HELPERS + "\n" + probe + tail
+    return VERIFY_HEAD + HELPERS + "\n" + probe + SELFTEST + tail
 
 
 def main() -> int:
@@ -386,6 +391,20 @@ def main() -> int:
 
     verify = DEPLOY / "full-check.txt"
     want_verify = build_verify()
+
+    # 🔴 **גרסה שרצה בהרשאות של ci_verify.** `full-check` קורא את
+    # `turn_log` ישירות — והטבלה סגורה לחלוטין, בכוונה ובאישור גיא.
+    # כלומר הקובץ המלא אינו יכול לרוץ מ-CI, וזה נכון שהוא לא יכול.
+    #
+    # ⚠️ ולכן שתי גרסאות: המלאה ל-SQL Editor, והזו — מיגרציות וסטייה
+    # בלבד — ל-CI. **הבדיקה ההתנהגותית של turn_log נשארת ידנית**,
+    # ואני מציין את זה במפורש כדי שלא ייראה שהיא רצה ולא רצה.
+    mig = DEPLOY / "migrations-check.txt"
+    want_mig = build_verify(with_turn_log=False)
+    if not mig.exists() or mig.read_text(encoding="utf-8") != want_mig:
+        bad.append("migrations-check.txt — אינו מעודכן")
+        if not check:
+            mig.write_text(want_mig, encoding="utf-8")
     if not verify.exists() or verify.read_text(encoding="utf-8") != want_verify:
         bad.append("full-check.txt — אינו מעודכן")
         if not check:

@@ -83,9 +83,18 @@ done
 # ── הווידוא — תנאי גיא ──────────────────────────────────────────────
 echo "▸ ווידוא שהתוכן נשלף"
 python3 scripts/build-knowledge-seed.py --live-check >/dev/null
-result=$(psql "$CI_CONTENT_URL" -At -f data/deploy/content-live-check.txt)
+result=$(psql "$CI_CONTENT_URL" -At -v ON_ERROR_STOP=1 \
+           -f data/deploy/content-live-check.txt)
 echo "$result"
 
+# 🔴 **אישור חיובי, ולא היעדר סימן אדום.** אותה תקלה בדיוק קרתה בשלב
+# האימות: הטרנזקציה נקטעה, לא חזר כלום, ולא היה 🔴 — והבדיקה הכריזה
+# הצלחה. שתיקה אינה אישור.
+if ! echo "$result" | grep -q "✅ כל המסמכים במסד"; then
+  echo
+  echo "✗ הווידוא לא החזיר אישור חיובי. ייתכן שהשאילתה כלל לא רצה."
+  exit 1
+fi
 if echo "$result" | grep -q "🔴"; then
   echo
   echo "✗ תוכן שאינו נשלף. הכתיבה לא הושלמה, ולכן זה נכשל בקול."
