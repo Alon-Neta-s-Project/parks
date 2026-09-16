@@ -15,7 +15,23 @@ cd "$(dirname "$0")/.."
 : "${INGEST_SECRET:?חסר הסוד של embed}"
 : "${SUPABASE_PROJECT_REF:?חסר מזהה הפרויקט}"
 
+# ⚠️ **בהרצה ידנית אין "לפני".** `github.event.before` ריק ב-dispatch,
+# ובדחיפה ראשונה לענף הוא אפסים. בשני המקרים `git diff` נכשל או מחזיר
+# הכול — ולכן נופלים אחורה להשוואה מול release.
+#
+# 🔴 **ולא לטעינה מלאה.** "לא ידעתי מה השתנה, אז אטען הכול" הוא בדיוק
+# איך 309 קטעים מאבדים וקטור בלי שאיש ביקש.
 BEFORE="${1:-}"
+if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+  git fetch origin release --depth=1 >/dev/null 2>&1 || true
+  BEFORE=$(git rev-parse origin/release 2>/dev/null || echo "")
+  echo "▸ אין נקודת השוואה מהדחיפה — משווה מול release"
+fi
+if [ -z "$BEFORE" ]; then
+  echo "✗ אין מול מה להשוות. עוצר במקום לנחש."
+  exit 1
+fi
+
 changed=$(git diff --name-only "$BEFORE" HEAD -- knowledge/ | sed 's|knowledge/||; s|\.md$||')
 
 if [ -z "$changed" ]; then
