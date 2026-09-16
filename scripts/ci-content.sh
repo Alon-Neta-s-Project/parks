@@ -14,6 +14,10 @@ cd "$(dirname "$0")/.."
 : "${CI_CONTENT_URL:?חסרה מחרוזת החיבור של ci_content}"
 : "${INGEST_SECRET:?חסר הסוד של embed}"
 : "${SUPABASE_PROJECT_REF:?חסר מזהה הפרויקט}"
+# ⚠️ **הפונקציה מאחורי שער ה-JWT של סופהבייס.** מהדשבורד הכותרת
+# נוספת אוטומטית, ומבחוץ צריך לשלוח אותה. המפתח הזה ציבורי בכוונה —
+# הוא נשלח לכל דפדפן שנכנס לאתר — וההגנה היא ה-RLS ו-x-ingest-secret.
+: "${SUPABASE_ANON_KEY:?חסר המפתח הציבורי של סופהבייס}"
 
 # ⚠️ **בהרצה ידנית אין "לפני".** `github.event.before` ריק ב-dispatch,
 # ובדחיפה ראשונה לענף הוא אפסים. בשני המקרים `git diff` נכשל או מחזיר
@@ -60,8 +64,18 @@ echo "▸ embed"
 for i in $(seq 1 20); do
   out=$(curl -sS -X POST \
     "https://${SUPABASE_PROJECT_REF}.supabase.co/functions/v1/clever-processor" \
+    -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
     -H "x-ingest-secret: ${INGEST_SECRET}")
   echo "   $out"
+
+  # 🔴 **שגיאה חוזרת אינה "עוד סבב".** הגרסה הקודמת הדפיסה את אותה
+  # שגיאת הרשאה עשרים פעם לפני שנפלה — כלומר הרעש הסתיר את הסיבה.
+  # תשובה בלי "remaining" אינה התקדמות, והיא עוצרת מיד.
+  if ! echo "$out" | grep -q '"remaining"'; then
+    echo "✗ embed החזיר שגיאה ולא התקדמות. עוצר."
+    exit 1
+  fi
+
   echo "$out" | grep -q '"remaining":0' && break
   [ "$i" = "20" ] && { echo "✗ embed לא הסתיים אחרי 20 סבבים"; exit 1; }
 done

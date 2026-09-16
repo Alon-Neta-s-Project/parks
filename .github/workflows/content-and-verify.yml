@@ -51,6 +51,7 @@ jobs:
         env:
           CI_CONTENT_URL: ${{ secrets.CI_CONTENT_URL }}
           INGEST_SECRET: ${{ secrets.INGEST_SECRET }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
         run: bash scripts/ci-content.sh "${{ github.event.before }}"
 
