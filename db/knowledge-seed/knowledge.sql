@@ -889,7 +889,7 @@ Park-to-Park אינו כולל Universal Express, Early Park Admission, אירו
 - **Orange** — מרכזי, שבע עד עשר דקות הליכה.
 - **Lime** — הקרוב ביותר ל-The Landing, חמש עד שבע דקות.
 - **Grapefruit** — הרחוק, עשר עד חמש עשרה דקות.'),
-('partner-hotels-uor', 'Universal Partner Hotels — מלונות שותפים', 'guide', 'T1', 'he', 'uor', 'static', '2026-09-10', 'approved', array['https://www.universalorlandovacations.com/Hotels/Partner.aspx'], 'hotel_benefit', 'international_guest', 'appendix', 'N/A', '## מה זו התוכנית
+('partner-hotels-uor', 'Universal Partner Hotels — מלונות שותפים', 'guide', 'T1', 'he', 'uor', 'volatile', '2026-09-10', 'approved', array['https://www.universalorlandovacations.com/Hotels/Partner.aspx'], 'hotel_benefit', 'international_guest', 'appendix', 'N/A', '## מה זו התוכנית
 
 תוכנית רשמית של יוניברסל אורלנדו למלונות **שאינם בבעלותה ואינם מופעלים על ידה**. היא נפרדת ממלונות יוניברסל עצמם, וההטבות בה שונות.
 
@@ -1233,7 +1233,7 @@ Universal Express מאפשר להשתמש בתור Express פעם אחת בכל 
 ## כמה פעמים אפשר להשתמש?
 
 ב-Universal Express הרגיל — פעם אחת בכל מתקן משתתף. שימוש חוזר דורש תור רגיל או מוצר Express Unlimited, אם הוא מוצע ומתאים לפארק.'),
-('universal-onsite-hotels-uor', 'מלונות יוניברסל On-Site — הטבות לפי קטגוריה', 'guide', 'T1', 'he', 'uor', 'static', '2026-09-14', 'approved', array['https://www.universalorlandovacations.com/hotels', 'https://allears.net', 'https://touringplans.com', 'https://orlandoinformer.com'], 'hotel_benefit', 'international_guest', 'core', 'included_benefit', '## שש קטגוריות, ולא רשימה אחת של מלונות
+('universal-onsite-hotels-uor', 'מלונות יוניברסל On-Site — הטבות לפי קטגוריה', 'guide', 'T1', 'he', 'uor', 'volatile', '2026-09-14', 'approved', array['https://www.universalorlandovacations.com/hotels', 'https://allears.net', 'https://touringplans.com', 'https://orlandoinformer.com'], 'hotel_benefit', 'international_guest', 'core', 'included_benefit', '## שש קטגוריות, ולא רשימה אחת של מלונות
 
 מלונות יוניברסל עצמם מתחלקים לשש קטגוריות, וההטבות **שונות בין קטגוריה לקטגוריה**. מלון שותף אינו אחד מהם — הוא תוכנית נפרדת עם הטבות אחרות לגמרי.
 
