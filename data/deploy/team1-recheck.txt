@@ -1,0 +1,101 @@
+-- team1-recheck — אימות חוזר אחרי ההרצה של 21.09
+-- ────────────────────────────────────────────────────────────────────
+-- 📍 להריץ ב: Supabase ← SQL Editor
+-- שם השאילתה: team1-recheck (כלי חוזר — לא צריך מספר)
+--
+-- ⛔ **הקובץ הזה אינו משנה דבר.** הוא קורא בלבד. אפשר להריץ אותו שוב
+-- ושוב.
+--
+-- 🔴 **למה הוא קיים:** שתי שורות באימות של `team1-role` נכשלו —
+-- "אין לו כתיבה ל-submitted_by" (יצא 3) ו"אין לו כתיבה לווקטור"
+-- (יצא 2). **הגרנטים תקינים; הבדיקה הייתה שגויה.**
+--
+-- `information_schema.column_privileges` פורשת גם גרנט ברמת טבלה
+-- לשורה לכל עמודה. `grant select on knowledge_doc` מייצר שם SELECT
+-- על שלוש עמודות האישור — שלוש שורות. ועוד שתיים על הווקטור
+-- מ-`knowledge_chunk`. הבדיקה לא סיננה `privilege_type`, ולכן ספרה
+-- **קריאה** כשניסתה להוכיח שאין **כתיבה**.
+--
+-- שוחזר במסד מקומי (PostgreSQL 16) לפני התיקון: אותם 3 ואותם 2,
+-- וכולם SELECT.
+--
+-- ⚠️ ובגלל זה השורה האחרונה כאן מפרטת בדיוק אילו הרשאות יש — כדי
+-- שהתשובה תהיה נראית ולא רק נספרת.
+
+-- ════════════════════════════════════════════════════════════════════
+-- 1 · 045 — עמודת country. תשובה חד-משמעית, בלי NULL אפשרי.
+-- ════════════════════════════════════════════════════════════════════
+select
+  'עמודת country' as "מה נבדק",
+  coalesce((select 'קיימת' from information_schema.columns
+             where table_schema = 'public' and table_name = 'knowledge_doc'
+               and column_name = 'country'), 'חסרה') as "יצא",
+  'קיימת' as "צפוי"
+union all
+select
+  'nullable',
+  coalesce((select is_nullable::text from information_schema.columns
+             where table_schema = 'public' and table_name = 'knowledge_doc'
+               and column_name = 'country'), 'העמודה חסרה'),
+  'YES'
+union all
+select
+  'ברירת מחדל',
+  coalesce((select column_default from information_schema.columns
+             where table_schema = 'public' and table_name = 'knowledge_doc'
+               and column_name = 'country'), 'אין'),
+  'אין'
+union all
+select
+  'האילוץ knowledge_doc_country_iso',
+  (select count(*)::text from pg_constraint
+    where conname = 'knowledge_doc_country_iso'),
+  '1'
+
+-- ════════════════════════════════════════════════════════════════════
+-- 2 · team1_content — שתי השורות שנכשלו, מתוקנות
+-- ════════════════════════════════════════════════════════════════════
+union all
+select
+  'כתיבה ל-submitted_by / reviewed_by / reviewed_at',
+  (select count(*)::text from information_schema.column_privileges
+    where grantee = 'team1_content'
+      and privilege_type in ('INSERT','UPDATE')
+      and column_name in ('submitted_by','reviewed_by','reviewed_at')),
+  '0'
+union all
+select
+  'כתיבה ל-embedding / embedding_model',
+  (select count(*)::text from information_schema.column_privileges
+    where grantee = 'team1_content'
+      and privilege_type in ('INSERT','UPDATE')
+      and column_name in ('embedding','embedding_model')),
+  '0'
+
+-- ════════════════════════════════════════════════════════════════════
+-- 3 · ומה שאי אפשר להתווכח עליו: מה בדיוק יש לתפקיד על העמודות האלה
+-- ════════════════════════════════════════════════════════════════════
+union all
+select
+  'ההרשאות בפועל על חמש העמודות',
+  coalesce((select string_agg(distinct privilege_type, ' + ' order by privilege_type)
+              from information_schema.column_privileges
+             where grantee = 'team1_content'
+               and column_name in ('submitted_by','reviewed_by','reviewed_at',
+                                   'embedding','embedding_model')), 'אין כלל'),
+  'SELECT'
+union all
+select
+  'המדיניות המגבילה על שתי הטבלאות',
+  (select count(*)::text from pg_policies
+    where policyname in ('knowledge_doc_team1_cap','knowledge_chunk_team1_cap')
+      and permissive = 'RESTRICTIVE'),
+  '2'
+union all
+select
+  'ושורה מאושרת אינה נראית לתפקיד',
+  case when (select count(*) from pg_policies
+              where policyname = 'knowledge_doc_team1_cap'
+                and qual like '%review_status%') = 1
+       then 'כן' else 'לא' end,
+  'כן';

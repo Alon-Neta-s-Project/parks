@@ -174,14 +174,26 @@ select 'אינו נוגע ב-park',
        (select count(*)::text from information_schema.role_table_grants
          where grantee = 'team1_content' and table_name = 'park'), '0'
 union all
+-- 🔴 **`privilege_type` — והיעדרו הוא מה שהפיל את שתי השורות האלה
+-- בהרצה של 21.09.** `information_schema.column_privileges` פורשת גם
+-- גרנט ברמת טבלה לשורה לכל עמודה. `grant select on knowledge_doc`
+-- מייצר שם SELECT על `submitted_by`, `reviewed_by` ו-`reviewed_at` —
+-- שלוש שורות, וזה בדיוק מה שיצא. שתיים נוספות מ-`knowledge_chunk`
+-- על הווקטור.
+--
+-- ⚠️ כלומר הבדיקה שנועדה להוכיח **שאין כתיבה** ספרה **קריאה**.
+-- הגרנטים היו תקינים כל הזמן. אותה משפחה כמו 011: בדיקה שמסתכלת על
+-- הדבר הלא נכון ונכשלת בביטחון מלא. שוחזר במסד מקומי לפני התיקון.
 select 'אין לו כתיבה ל-submitted_by',
        (select count(*)::text from information_schema.column_privileges
          where grantee = 'team1_content'
+           and privilege_type in ('INSERT','UPDATE')
            and column_name in ('submitted_by','reviewed_by','reviewed_at')), '0'
 union all
 select 'אין לו כתיבה לווקטור',
        (select count(*)::text from information_schema.column_privileges
          where grantee = 'team1_content'
+           and privilege_type in ('INSERT','UPDATE')
            and column_name in ('embedding','embedding_model')), '0'
 union all
 select 'המדיניות המגבילה קיימת על שתי הטבלאות',
