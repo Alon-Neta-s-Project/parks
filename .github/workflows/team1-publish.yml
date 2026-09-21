@@ -1,0 +1,54 @@
+# כתיבת צוות 1 למסד — הסיסמה כאן, לא בסוכן
+#
+# 🔴 אותו דפוס כמו team1-collect, ומאותה סיבה: המסדר מפיק שורות,
+# השלב הזה כותב אותן. אין לו Bash ואין לו פרטי חיבור.
+#
+# ⛔ **ואין כאן הרצה של סוכן.** ה-workflow קורא קובץ שהמסדר כתב.
+
+name: כתיבת צוות 1
+
+on:
+  workflow_dispatch:
+    inputs:
+      rows_file:
+        description: "קובץ ה-JSON שהמסדר הפיק"
+        required: true
+        default: "data/team1-inbox/rows.json"
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # ⚠️ **שער ה-QA לפני הכתיבה, לא אחריה.** אותו סדר כמו
+      # content-and-verify.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: התקנה
+        run: npm ci
+      - name: שער QA
+        run: npm run qa
+
+      # 🔴 **הסוד על השלב, לא על ה-job.**
+      - name: כתיבה למסד בתפקיד team1_content
+        env:
+          TEAM1_CONTENT_URL: ${{ secrets.TEAM1_CONTENT_URL }}
+        run: bash scripts/team1-write.sh "${{ inputs.rows_file }}"
+
+      # ⚠️ משלב זה ואילך אין TEAM1_CONTENT_URL בסביבה.
+      #
+      # 🔴 **ואימות השליפה עדיין לא כאן — בכוונה.** המוודא אמור לבדוק
+      # דרך `match_knowledge`, ו-`team1_content` אינו מורשה להריץ
+      # אותה (היא `security definer` ו-`revoke all from public`).
+      # הגרנט הזה טרם נכתב ולא עבר את גיא. עד אז: כתיבה בלבד,
+      # והאימות ידני.
+      - name: מה נכתב
+        run: echo "הכתיבה הסתיימה. אימות השליפה ממתין לגרנט על match_knowledge."

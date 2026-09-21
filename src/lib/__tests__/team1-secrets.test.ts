@@ -19,6 +19,10 @@ const WORKFLOW = join(ROOT, ".github", "workflows", "team1-collect.yml");
 const AGENTS = join(ROOT, ".claude", "agents");
 
 const workflow = readFileSync(WORKFLOW, "utf8");
+const publishWorkflow = readFileSync(
+  join(ROOT, ".github", "workflows", "team1-publish.yml"),
+  "utf8",
+);
 
 /** ניתוח מספיק לשאלה אחת: באילו שלבים מופיע הסוד. */
 function stepsWithSecret(yaml: string, secret: string): string[] {
@@ -67,6 +71,44 @@ describe("workflow האיסוף — הסוד אינו זולג משלב אחד",
     for (const forbidden of ["TEAM1_CONTENT_URL", "CI_CONTENT_URL", "SUPABASE_ACCESS_TOKEN"]) {
       expect(workflow).not.toContain(forbidden);
     }
+  });
+});
+
+describe("workflow הכתיבה — אותו דפוס, אותה אכיפה", () => {
+  /**
+   * ⚠️ **הדפוס נאכף פעמיים ולא נכתב פעמיים.** הכלל אחד — credential
+   * בשלב CI נפרד ולא בסוכן — ולכן שני ה-workflows נבדקים באותן
+   * דרישות. workflow שלישי שייכתב בלי בדיקה כזו יעבור בשקט; זה
+   * מה שהבדיקה הזו לא פותרת, והוא רשום ב-#26.
+   */
+  it("TEAM1_CONTENT_URL בשלב אחד בלבד", () => {
+    expect(stepsWithSecret(publishWorkflow, "TEAM1_CONTENT_URL")).toEqual([
+      "כתיבה למסד בתפקיד team1_content",
+    ]);
+  });
+
+  it("אין env ברמת job", () => {
+    expect(publishWorkflow).not.toMatch(/^ {4}env:/m);
+  });
+
+  it("קריאה לקוד בלבד", () => {
+    const block = /^permissions:\n((?: {2}\S.*\n)+)/m.exec(publishWorkflow);
+    if (block === null) throw new Error("אין בלוק permissions");
+    expect((block[1] ?? "").trim().split("\n").map((l) => l.trim())).toEqual([
+      "contents: read",
+    ]);
+  });
+
+  /**
+   * 🔴 **שער ה-QA לפני הכתיבה ולא אחריה.** כתיבה שרצה לפני הבדיקות
+   * אינה ניתנת לביטול — היא כבר במסד.
+   */
+  it("שער ה-QA קודם לכתיבה", () => {
+    const qa = publishWorkflow.indexOf("npm run qa");
+    const write = publishWorkflow.indexOf("team1-write.sh");
+    expect(qa).toBeGreaterThan(-1);
+    expect(write).toBeGreaterThan(-1);
+    expect(qa).toBeLessThan(write);
   });
 });
 
