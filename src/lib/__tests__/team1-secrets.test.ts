@@ -43,8 +43,24 @@ describe("workflow האיסוף — הסוד אינו זולג משלב אחד",
     expect(workflow).not.toMatch(/^ {4}env:/m);
   });
 
-  it("ברירת המחדל היא אפס הרשאות ל-GITHUB_TOKEN", () => {
-    expect(workflow).toMatch(/^permissions:\s*\{\}\s*$/m);
+  /**
+   * 🔴 **`permissions: {}` היה כאן, והוא היה שובר את ה-workflow.**
+   *
+   * גיא שאל (21.09) אם הקובץ אי פעם רץ. לא — ו-`{}` מאפס גם `contents`,
+   * ש-`actions/checkout@v4` דורש על ריפו פרטי. כלומר הוא היה נופל בשלב
+   * הראשון, ואיש לא היה יודע, כי אף אחד לא הריץ.
+   *
+   * הבדיקה מכאן ואילך דורשת את שני הכיוונים: `contents: read` קיים,
+   * ושום הרשאת כתיבה לא הצטרפה אליו.
+   */
+  it("קריאה לקוד בלבד — ולא הרשאה אחת מעבר לזה", () => {
+    const block = /^permissions:\n((?: {2}\S.*\n)+)/m.exec(workflow);
+    if (block === null) throw new Error("אין בלוק permissions ב-workflow");
+    const granted = (block[1] ?? "")
+      .trim()
+      .split("\n")
+      .map((line) => line.trim());
+    expect(granted).toEqual(["contents: read"]);
   });
 
   it("אין סוד של המסד בקובץ הזה", () => {

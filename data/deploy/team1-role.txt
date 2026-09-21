@@ -103,18 +103,39 @@ create policy knowledge_chunk_team1 on knowledge_chunk
 -- הכלל נכתב כאן פעם אחת. המתירה למעלה אינה חוזרת עליו.
 create policy knowledge_doc_team1_cap on knowledge_doc
   as restrictive for all to team1_content
-  using      (authority_tier = 'T4' and source_kind = 'community')
+  using      (authority_tier = 'T4' and source_kind = 'community'
+              and review_status in ('draft','pending_review'))
   with check (authority_tier = 'T4' and source_kind = 'community'
               and review_status in ('draft','pending_review'));
 
 create policy knowledge_chunk_team1_cap on knowledge_chunk
   as restrictive for all to team1_content
-  using      (authority_tier = 'T4')
+  using      (authority_tier = 'T4'
+              and review_status in ('draft','pending_review'))
   with check (authority_tier = 'T4'
               and review_status in ('draft','pending_review'));
 
--- מה ששלוש השורות האלה עושות, במילים:
---   `using`      — התפקיד אינו רואה ואינו נוגע בשורות T1–T3 **בכלל**.
+-- 🔴 **`review_status` נמצא בשתי הפסקאות, ולא רק ב-`with check`.**
+-- מצא על ידי גיא, 21.09, ותוקן לפני הרצה.
+--
+-- ה-`id` אידמפוטנטי לפי הפוסט: פוסט שנערך מייצר את אותו `id`, ולכן
+-- איסוף חוזר **מעדכן שורה קיימת**. אם בינתיים אדם אישר אותה, והמסדר
+-- כותב `review_status = 'draft'` כרגיל — עם `using` שאינו מסנן, העדכון
+-- **מצליח**, והמסמך נופל מ-`approved` בחזרה ל-`draft`.
+--
+-- ⚠️ **ואז הוא נעלם מהתשובות של טים.** `match_knowledge` (028) מסננת
+-- `review_status = 'approved'` בשתי הטבלאות. כלומר תוכן שהיה חי מפסיק
+-- להישלף — בלי שגיאה, בלי שורה שנמחקה, ובלי שאיש ידע. זו בדיוק
+-- המחלקה שהמוצר בנוי נגדה.
+--
+-- עם `review_status` ב-`using`, שורה מאושרת פשוט אינה נראית לתפקיד.
+-- ⚠️ **ולכן ה-UPDATE יחזיר 0 שורות, ולא ישגה** — והמסדר חייב לקרוא את
+-- מספר השורות שהושפעו ולהסלים, ולא להניח הצלחה. אפס שורות כאן פירושו
+-- "אדם כבר אישר את זה", וזה מצב שדורש הכרעה ולא כתיבה מחדש.
+
+-- מה שארבע הפסקאות האלה עושות, במילים:
+--   `using`      — התפקיד אינו רואה ואינו נוגע בשורות T1–T3, **ולא
+--                  בשורות שכבר אושרו**.
 --   `with check` — מה שהוא כותב הוא T4 קהילתי, ו**לעולם לא**
 --                  `'approved'` — לא ב-insert ולא ב-update.
 --
