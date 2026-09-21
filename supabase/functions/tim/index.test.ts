@@ -7,6 +7,7 @@ import {
   handle, thinkingConfig, formatChunks, formatExperiences, scrubAnswer,
   extractHeight, extractRideName, looksLikeGeminiKey, bucketKey,
 } from "./index.ts";
+import type { KnowledgeChunk } from "./index.ts";
 
 const KEY = "AIza" + "x".repeat(35);
 const ask = (body: unknown, method = "POST") =>
@@ -1104,4 +1105,70 @@ Deno.test("שאלה שאינה על מתקן מחזירה אפס שורות וא
     s.calls.find((c) => c.url.includes("generateContent"))!.init!.body as any,
   ).contents.at(-1).parts[0].text;
   assertEquals(prompt.includes("[מתקן:"), false, "אסור ששורת מתקן תיכנס להקשר");
+});
+
+// ── שכבות ההקשר ───────────────────────────────────────────────────────
+// 🔴 **הכלל "T1/T2 לעולם לא נסתרים על ידי T3-T5" לא היה ניתן לקיום.**
+// הוא היה כתוב בהוראות, והמידע להפעיל אותו עליו לא הגיע למודל: כל
+// הקטעים נכנסו כערימה אחת, וקטע מרדיט נראה זהה למגבלה רשמית.
+//
+// ⚠️ **ושתי הדרישות אינן סותרות, וזה מה שאיפשר את התיקון:** מה שאסור
+// לדלוף הוא **שם הדרגה** (`T1`), ומה שחייב להגיע הוא **הסדר**. התוויות
+// הן מילים בעברית, ולכן הבדיקה על דליפת הדרגה ממשיכה לעבור.
+
+const chunk = (tier: string | null, content: string): KnowledgeChunk => ({
+  content,
+  volatility: "static",
+  last_verified: null,
+  authority_tier: tier,
+});
+
+Deno.test("ההקשר מגיע בשכבות, והרשמי ראשון", () => {
+  const out = formatChunks([
+    chunk("T4", "שמעתי שפותחים מוקדם"),
+    chunk("T1", "הפארק נפתח ב-9:00"),
+    chunk("T3", "הטיפ שלנו"),
+  ]);
+
+  assertEquals(out.includes("[עובדות רשמיות]"), true, "אין שכבה רשמית");
+  assertEquals(out.includes("[מניסיון מבקרים — לא מאומת]"), true, "אין שכבה קהילתית");
+
+  const official = out.indexOf("[עובדות רשמיות]");
+  const ours = out.indexOf("[מהתוכן שלנו]");
+  const community = out.indexOf("[מניסיון מבקרים — לא מאומת]");
+  assertEquals(official < ours && ours < community, true, "הסדר אינו לפי סמכות");
+
+  // ⚠️ והתוכן נשאר בשכבה שלו, לא רק הכותרת.
+  assertEquals(out.indexOf("הפארק נפתח") < out.indexOf("שמעתי שפותחים"), true);
+});
+
+Deno.test("שם הדרגה אינו נכנס להקשר גם אחרי השכבות", () => {
+  const out = formatChunks([chunk("T1", "רשמי"), chunk("T5", "קהילתי")]);
+  for (const code of ["T1", "T2", "T3", "T4", "T5"]) {
+    assertEquals(out.includes(code), false, `${code} דלף להקשר`);
+  }
+});
+
+Deno.test("שכבה ריקה אינה מופיעה ככותרת בלי תוכן", () => {
+  const out = formatChunks([chunk("T1", "רשמי בלבד")]);
+  assertEquals(out.includes("[מניסיון מבקרים — לא מאומת]"), false);
+  assertEquals(out.includes("[מהתוכן שלנו]"), false);
+});
+
+// 🔴 המספור הוא מה שמאפשר כבילת ציטוט (סעיף 3 שלב 6). אם הוא מתאפס
+// בכל שכבה, "קטע 1" מצביע על שלושה דברים שונים.
+Deno.test("המספור רץ על פני השכבות ואינו מתאפס", () => {
+  const out = formatChunks([chunk("T1", "א"), chunk("T4", "ב"), chunk("T3", "ג")]);
+  assertEquals(out.includes("[קטע 1 ·"), true);
+  assertEquals(out.includes("[קטע 2 ·"), true);
+  assertEquals(out.includes("[קטע 3 ·"), true);
+});
+
+// ⚠️ הסכמה אומרת not null, אבל ברירת מחדל שקטה היא בדיוק מה שנשבר כאן
+// שוב ושוב. קטע בלי דרגה יורד, ולא עולה ולא נעלם.
+Deno.test("קטע בלי דרגה אינו נעלם ואינו מוצג כמאומת", () => {
+  const out = formatChunks([chunk("T1", "רשמי"), chunk(null, "בלי דרגה")]);
+  assertEquals(out.includes("בלי דרגה"), true, "הקטע נעלם");
+  assertEquals(out.indexOf("רשמי") < out.indexOf("בלי דרגה"), true, "לא מאומת הוצג לפני רשמי");
+  assertEquals(out.includes("לא מסווג"), true);
 });

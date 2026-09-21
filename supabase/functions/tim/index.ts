@@ -840,21 +840,65 @@ export function scrubAnswer(text: string): { clean: string; hits: string[] } {
   return { clean, hits };
 }
 
+/**
+ * שלוש השכבות שבהן ההקשר מורכב — סעיף 3 שלב 5 במסמך השליפה.
+ *
+ * 🔴 **בלי זה קטע מרדיט ומגבלה רשמית מגיעים למודל כשני קטעים שקולים,
+ * ואין לו שום דרך לדעת במי לבטוח.** זה בדיוק מה שסעיף 1 מזהיר מפניו,
+ * והכלל "T1/T2 לעולם לא נסתרים על ידי T3-T5" לא היה ניתן לקיום: הוא
+ * היה כתוב בהוראות, ולא היה מידע להפעיל אותו עליו.
+ *
+ * ⚠️ **והתוויות הן מילים, לא קודים.** `T1` אינו יוצא להקשר — גם לא
+ * דרך התוויות האלה. המודל מקבל היררכיה בשפה, והדרגה עצמה נשארת פנימית
+ * ונבדקת בפלט. שתי הדרישות אינן סותרות: מה שאסור לדלוף הוא **שם
+ * הדרגה**, ומה שחייב להגיע הוא **הסדר**.
+ */
+const LAYERS: { label: string; tiers: string[] }[] = [
+  { label: "עובדות רשמיות", tiers: ["T1", "T2"] },
+  { label: "מהתוכן שלנו", tiers: ["T3"] },
+  { label: "מניסיון מבקרים — לא מאומת", tiers: ["T4", "T5"] },
+];
+
 export function formatChunks(chunks: KnowledgeChunk[]): string {
   const mark: Record<string, string> = {
     volatile: "משתנה",
     seasonal: "עונתי",
     static: "יציב",
   };
-  return chunks
-    .map((c, i) => {
-      // ⚠️ volatility חסר אינו "יציב". קטע בלי סימון נאמר בזהירות ולא
-      // בביטחון — ברירת המחדל היא לכיוון הבטוח, לא לכיוון הנוח.
-      const tag = c.volatility ? mark[c.volatility] ?? "משתנה" : "משתנה";
-      const when = c.last_verified ? ` · נבדק ${c.last_verified}` : "";
-      return `[קטע ${i + 1} · ${tag}${when}]\n${c.content}`;
-    })
-    .join("\n\n");
+
+  const one = (c: KnowledgeChunk, i: number): string => {
+    // ⚠️ volatility חסר אינו "יציב". קטע בלי סימון נאמר בזהירות ולא
+    // בביטחון — ברירת המחדל היא לכיוון הבטוח, לא לכיוון הנוח.
+    const tag = c.volatility ? mark[c.volatility] ?? "משתנה" : "משתנה";
+    const when = c.last_verified ? ` · נבדק ${c.last_verified}` : "";
+    return `[קטע ${i + 1} · ${tag}${when}]\n${c.content}`;
+  };
+
+  // ⚠️ **המספור רץ על פני כל הקטעים ולא מתאפס בכל שכבה.** "קטע 3"
+  // חייב להיות פריט אחד ויחיד, אחרת כבילת ציטוט לא ניתנת למימוש.
+  let n = 0;
+  const blocks: string[] = [];
+
+  for (const layer of LAYERS) {
+    const inLayer = chunks.filter(
+      (c) => c.authority_tier !== null && layer.tiers.includes(c.authority_tier),
+    );
+    if (inLayer.length === 0) continue;
+    blocks.push(`[${layer.label}]\n` + inLayer.map((c) => one(c, n++)).join("\n\n"));
+  }
+
+  // 🔴 **קטע בלי דרגה יורד לשכבה הנמוכה ביותר, ולא נעלם ולא עולה.**
+  // `authority_tier` הוא `not null` בסכמה, אז זה לא אמור לקרות — ואם
+  // בכל זאת קרה, השתיקה הייתה מציגה אותו כאילו הוא מאומת. ברירת המחדל
+  // היא לכיוון הבטוח, כמו ב-volatility שורה מעל.
+  const unknown = chunks.filter((c) => !LAYERS.some(
+    (l) => c.authority_tier !== null && l.tiers.includes(c.authority_tier),
+  ));
+  if (unknown.length > 0) {
+    blocks.push("[מקור לא מסווג — לא מאומת]\n" + unknown.map((c) => one(c, n++)).join("\n\n"));
+  }
+
+  return blocks.join("\n\n");
 }
 
 /**
