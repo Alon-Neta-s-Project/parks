@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "mcp__github__add_issue_comment|mcp__github__issue_write|mcp__github__add_comment_to_pending_review|mcp__github__add_reply_to_pull_request_comment",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/scripts/hook-scan-issue.py\""
+          }
+        ]
+      }
+    ]
+  }
+}
