@@ -221,7 +221,11 @@ insert into probe (filename, checksum, found)
          (pg_temp.has_fn('park_candidates'))
   union all
   select '044_turn_log.sql'::text, 'sha256:2c1748938e0ab76ed2e507cffbc26254'::text,
-         (to_regclass('public.turn_log') is not null);
+         (to_regclass('public.turn_log') is not null)
+  union all
+  select '045_country.sql'::text, 'sha256:6fe2287748ddec538af1f891d52a0f3b'::text,
+         (pg_temp.has_col('knowledge_doc','country')
+         and pg_temp.con('knowledge_doc','knowledge_doc_country_iso') like '%A-Z%');
 
 -- ── בדיקת יומן התשובות ──────────────────────────────────────────────
 -- 🔴 שלוש קריאות: נענתה · לא נענתה · ארוכה מאוד. הן נמחקות מיד אחרי

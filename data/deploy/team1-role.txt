@@ -1,0 +1,169 @@
+-- team1-role — תפקיד הכתיבה של צוות 1 (21.09.2026)
+-- ────────────────────────────────────────────────────────────────────
+-- 📍 להריץ ב: Supabase ← SQL Editor
+-- שם השאילתה: team1-role — הרשאת כתיבה לצוות 1 (21.09)
+-- ⚠️ פעם אחת בלבד. ⚠️ ואחרי מיגרציה 045 — היא יוצרת את country.
+--
+-- ⛔ **לפני ההרצה: להחליף את הסיסמה.** לייצר סיסמה חזקה, שונה משתי
+-- הקיימות, ולא לשלוח אותה בצ'אט לאף אחד. היא מודבקת ישירות
+-- ל-GitHub Secrets.
+--
+-- ── למה תפקיד שלישי ולא הרחבה של ci_content ──────────────────────
+-- 🔴 **הטיעון שגיא קיבל עבור `ci_content` לא חל כאן.** הוא היה: "שתי
+-- הטבלאות נגזרות מהרפו במלואן, כתיבה שגויה מתוקנת בהרצה חוזרת —
+-- הרפו הוא הגיבוי." התוכן של צוות 1 אינו נגזר מהרפו. הוא מגיע
+-- מפייסבוק, דרך סוכן שקורא טקסט חיצוני לא מהימן, ואין ממה לשחזר.
+--
+-- `ci_content` מחזיק `using(true) with check(true)` — כלומר הוא יכול
+-- לכתוב מסמך T1, למחוק מסמכים, ולעדכן את פתיח הפארק. הזרקה מוצלחת
+-- בסוכן שמחזיק אותו כותבת T1. זה אותו נימוק שבגללו `ci_verify`
+-- ו-`ci_content` פוצלו מלכתחילה.
+--
+-- ⚠️ **ושניהם אינם יכולים לגעת בסכמה.** אין `create`, אין `alter`,
+-- אין `drop`. 045 היא מיגרציה ידנית נפרדת, ולא עוברת דרך התפקיד הזה.
+
+BEGIN;
+
+set local search_path = public, extensions;
+
+create role team1_content login password 'YOUR-TEAM1-PASSWORD-HERE';
+
+grant connect on database postgres to team1_content;
+grant usage on schema public     to team1_content;
+grant usage on schema extensions to team1_content;
+
+-- ════════════════════════════════════════════════════════════════════
+-- 1 · גרנטים ברמת עמודה — מה שלא ניתן, לא ניתן לכתוב
+-- ════════════════════════════════════════════════════════════════════
+
+-- ⚠️ **אין `delete`, בשום טבלה.** מסמך קהילתי שגוי נפסל בשינוי
+-- `review_status` ל-`rejected` ולא בהיעלמות. שורה שנמחקה אינה מותירה
+-- עקבות של מה שהיה בה.
+grant select on knowledge_doc, knowledge_chunk to team1_content;
+
+-- 🔴 **`reviewed_by`, `reviewed_at` ו-`submitted_by` אינם ברשימה,
+-- בשום פעולה.** לא ב-insert ולא ב-update. זו התשובה לשאלת גיא על
+-- `submitted_by`: העמודה נשארת `NULL`, לא בגלל מוסכמה אלא כי
+-- ל-`team1_content` אין הרשאה לכתוב אליה כלל. ניסיון ימות בהרשאה.
+--
+-- לצוות 1 אין משתמש. `NULL` אומר "לא הוגש על ידי משתמש", וזה נכון.
+-- ערך placeholder קבוע היה אומר "הוגש על ידי X" — שקר שקט, ובדיוק
+-- ההצהרה־שאיש־לא־בדק שאנחנו סופרים. (`submitted_by` הוא `uuid` בלי
+-- מפתח זר — 003 — ולכן אין כאן שאלת FK כלל.)
+grant insert (
+  id, title, doc_type, authority_tier, locale,
+  scope_resort, scope_park, scope_experience,
+  source_urls, source_kind, country,
+  volatility, last_verified, last_seen, corroboration_count,
+  product_family, audience, v1_priority, purchase_type,
+  body, review_status
+) on knowledge_doc to team1_content;
+-- `created_at`/`updated_at` אינם ברשימה: ברירת המחדל של המסד קובעת
+-- אותן. כותב שיכול לקבוע `created_at` יכול לתארך שורה אחורה.
+
+-- `review_status` כן ברשימת ה-update: דלי ב' שהתחזק לדלי א' עובר
+-- מ-`draft` ל-`pending_review`. התקרה על הערך נאכפת למטה, לא כאן.
+grant update (
+  title, source_urls, country,
+  volatility, last_verified, last_seen, corroboration_count,
+  product_family, audience, v1_priority, purchase_type,
+  body, review_status, updated_at
+) on knowledge_doc to team1_content;
+
+grant insert (
+  doc_id, chunk_index, content,
+  authority_tier, locale, scope_park, scope_experience, review_status
+) on knowledge_chunk to team1_content;
+
+-- ⚠️ **`embedding` ו-`embedding_model` אינם ברשימה.** הווקטור נוצר
+-- בצינור ה-embed הקיים. הטריגר מ-033 מאפס אותו כש-`content` משתנה,
+-- כך שעדכון גורר embedding מחדש מעצמו.
+grant update (
+  content, review_status
+) on knowledge_chunk to team1_content;
+
+-- ════════════════════════════════════════════════════════════════════
+-- 2 · RLS — שתי מדיניות, ובכוונה
+-- ════════════════════════════════════════════════════════════════════
+
+-- המתירה אומרת **שיש גישה**. היא אינה מנסה לתאר את הכלל.
+create policy knowledge_doc_team1 on knowledge_doc
+  for all to team1_content using (true) with check (true);
+create policy knowledge_chunk_team1 on knowledge_chunk
+  for all to team1_content using (true) with check (true);
+
+-- 🔴 **והמגבילה אומרת מהי הגישה — וזו היחידה שמכילה את הכלל.**
+--
+-- ⚠️ `restrictive` ולא `permissive`, ובכוונה. מדיניות מתירה נוספת
+-- שמישהו יכתוב בעתיד **בלי `to`** חלה על כל התפקידים, ומדיניות מתירה
+-- מצטרפת ב-OR — כלומר היא הייתה מרחיבה את `team1_content` בלי שאיש
+-- ישים לב. `restrictive` מצטרפת ב-AND. אי אפשר לעקוף אותה בהוספה,
+-- רק במחיקה מפורשת.
+--
+-- הכלל נכתב כאן פעם אחת. המתירה למעלה אינה חוזרת עליו.
+create policy knowledge_doc_team1_cap on knowledge_doc
+  as restrictive for all to team1_content
+  using      (authority_tier = 'T4' and source_kind = 'community')
+  with check (authority_tier = 'T4' and source_kind = 'community'
+              and review_status in ('draft','pending_review'));
+
+create policy knowledge_chunk_team1_cap on knowledge_chunk
+  as restrictive for all to team1_content
+  using      (authority_tier = 'T4')
+  with check (authority_tier = 'T4'
+              and review_status in ('draft','pending_review'));
+
+-- מה ששלוש השורות האלה עושות, במילים:
+--   `using`      — התפקיד אינו רואה ואינו נוגע בשורות T1–T3 **בכלל**.
+--   `with check` — מה שהוא כותב הוא T4 קהילתי, ו**לעולם לא**
+--                  `'approved'` — לא ב-insert ולא ב-update.
+--
+-- 🔴 **זו התשובה לשאלתו של גיא על `approved`, והיא שכבתית:**
+--   1. `with check` במדיניות המגבילה — פוסל את הערך עצמו.
+--   2. גרנט ברמת עמודה — `reviewed_by`/`reviewed_at` אינם ניתנים
+--      לכתיבה, כך ש"מאושר" לא יכול להיראות מאושר גם אם היה עובר.
+-- שתיהן עצמאיות. נפילת אחת אינה פותחת את השנייה.
+
+COMMIT;
+
+-- ── אימות ───────────────────────────────────────────────────────────
+-- 🔴 עמודת "עובר" חייבת להיות ✅ בכל שורה.
+select 'התפקיד קיים' as "הבדיקה",
+       (select count(*)::text from pg_roles where rolname = 'team1_content') as "יצא",
+       '1' as "צפוי"
+union all
+select 'ואינו superuser',
+       (select count(*)::text from pg_roles where rolname = 'team1_content'
+          and (rolsuper or rolcreatedb or rolcreaterole)), '0'
+union all
+select 'אין לו delete בשום טבלה',
+       (select count(*)::text from information_schema.role_table_grants
+         where grantee = 'team1_content' and privilege_type = 'DELETE'), '0'
+union all
+select 'אינו נוגע ביומן המיגרציות',
+       (select count(*)::text from information_schema.role_table_grants
+         where grantee = 'team1_content' and table_name = 'schema_migration'), '0'
+union all
+select 'אינו נוגע בטבלאות משתמשים',
+       (select count(*)::text from information_schema.role_table_grants
+         where grantee in ('team1_content')
+           and table_name in ('profile','trip','trip_member','conversation','message','turn_log')), '0'
+union all
+select 'אינו נוגע ב-park',
+       (select count(*)::text from information_schema.role_table_grants
+         where grantee = 'team1_content' and table_name = 'park'), '0'
+union all
+select 'אין לו כתיבה ל-submitted_by',
+       (select count(*)::text from information_schema.column_privileges
+         where grantee = 'team1_content'
+           and column_name in ('submitted_by','reviewed_by','reviewed_at')), '0'
+union all
+select 'אין לו כתיבה לווקטור',
+       (select count(*)::text from information_schema.column_privileges
+         where grantee = 'team1_content'
+           and column_name in ('embedding','embedding_model')), '0'
+union all
+select 'המדיניות המגבילה קיימת על שתי הטבלאות',
+       (select count(*)::text from pg_policies
+         where policyname in ('knowledge_doc_team1_cap','knowledge_chunk_team1_cap')
+           and permissive = 'RESTRICTIVE'), '2';

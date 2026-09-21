@@ -94,6 +94,7 @@ PROBES: dict[str, str] = {
     "042_description_and_meet_location.sql": "pg_temp.has_col('experience','description_he')",
     "043_park_candidates.sql":         "pg_temp.has_fn('park_candidates')",
     "044_turn_log.sql":                "to_regclass('public.turn_log') is not null",
+    "045_country.sql":                 "pg_temp.has_col('knowledge_doc','country')\n         and pg_temp.con('knowledge_doc','knowledge_doc_country_iso') like '%A-Z%'",
 }
 
 HELPERS = """-- ── עוזרים זמניים (נעלמים בסוף הסשן) ────────────────────────────────
