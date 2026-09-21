@@ -27,7 +27,7 @@ function stepsWithSecret(yaml: string, secret: string): string[] {
   let currentStep = "(לפני השלב הראשון)";
   for (const line of lines) {
     const name = /^\s{6,}- name:\s*(.+)$/.exec(line) ?? /^\s{6,}-\s+uses:\s*(.+)$/.exec(line);
-    if (name) currentStep = name[1].trim();
+    if (name?.[1] !== undefined) currentStep = name[1].trim();
     if (line.includes(secret)) found.push(currentStep);
   }
   return [...new Set(found)];
@@ -64,10 +64,12 @@ describe("סוכני צוות 1 — רשימת כלים מצומצמת", () => {
 
   for (const agent of agents) {
     it(`${agent} — בלי Bash ובלי WebFetch`, () => {
-      const front = readFileSync(join(AGENTS, `${agent}.md`), "utf8").split("---")[1];
+      const front = readFileSync(join(AGENTS, `${agent}.md`), "utf8").split("---")[1] ?? "";
       const tools = /^tools:\s*(.+)$/m.exec(front);
-      expect(tools, `ל-${agent} אין שורת tools — ברירת המחדל היא כל הכלים`).not.toBeNull();
-      const list = tools![1].split(",").map((t) => t.trim());
+      if (tools === null) {
+        throw new Error(`ל-${agent} אין שורת tools — ברירת המחדל היא כל הכלים`);
+      }
+      const list = (tools[1] ?? "").split(",").map((t) => t.trim());
       expect(list).not.toContain("Bash");
       expect(list).not.toContain("WebFetch");
       expect(list.length).toBeGreaterThan(0);
