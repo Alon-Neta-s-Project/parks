@@ -98,7 +98,7 @@
   הידע — היא מקרבת את כל המסמכים זה לזה בשליפה, וכופלת את `volatility`.
   הכלל נכתב פעם אחת בהוראות של טים ומופעל מ-`volatility`. הפירוט,
   ופער הסכמה שהמעבר הזה יוצר, בסעיף 8 של
-  `docs/tim-retrieval-and-memory-architecture.md`.
+  `docs/architecture/tim-retrieval-and-memory-architecture.md`.
 
 - **תוכן שמופיע בשני מסכים נוצר, ולא מודבק פעמיים.** זו לא הנחיה על
   סגנון — זה מה שמונע שני מקורות אמת. שלוש הופעות עד כה: `intro_he` מול

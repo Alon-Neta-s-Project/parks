@@ -85,7 +85,7 @@
 
 ## 7 — Git worktree
 
-✅ מתועד ב-`docs/worktree.md`.
+✅ מתועד ב-`docs/howto/worktree.md`.
 
 ## 8 — PostHog + Sentry
 

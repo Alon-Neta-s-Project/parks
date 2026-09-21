@@ -151,11 +151,28 @@ describe("hook הכתיבה ל-Issue", () => {
       hooks?: { PreToolUse?: { matcher?: string; hooks?: { command?: string }[] }[] };
     };
     const entries = cfg.hooks?.PreToolUse ?? [];
-    const matching = entries.filter((e) => (e.matcher ?? "").includes("issue"));
-    expect(matching.length, "אין PreToolUse על כלי ה-Issues").toBeGreaterThan(0);
-    for (const tool of ["mcp__github__add_issue_comment", "mcp__github__issue_write"]) {
+    /**
+     * 🔴 **המאצ'ר הוא תבנית ולא רשימה — וזה תיקון לשאלת גיא (22.09).**
+     *
+     * הרשימה המקורית מנתה ארבעה כלים שהכרתי משימוש. כלי כתיבה חדש
+     * שיתווסף לשרת ה-MCP לא היה נכנס אליה, ושום דבר לא היה תופס את
+     * זה — **הפער היה נפתח בשקט.**
+     *
+     * `mcp__github__.*` מכסה גם את מה שעוד לא קיים. כלי קריאה אינם
+     * נושאים טקסט חופשי, ולכן הסריקה עליהם אינה עולה דבר.
+     */
+    const matching = entries.filter((e) =>
+      new RegExp(e.matcher ?? "$^").test("mcp__github__add_issue_comment"),
+    );
+    expect(matching.length, "אין PreToolUse שמכסה כתיבה ל-Issues").toBeGreaterThan(0);
+    for (const tool of [
+      "mcp__github__add_issue_comment",
+      "mcp__github__issue_write",
+      "mcp__github__add_comment_to_pending_review",
+      "mcp__github__some_future_write_tool",
+    ]) {
       expect(
-        matching.some((e) => (e.matcher ?? "").includes(tool)),
+        entries.some((e) => new RegExp(e.matcher ?? "$^").test(tool)),
         `${tool} אינו מכוסה`,
       ).toBe(true);
     }

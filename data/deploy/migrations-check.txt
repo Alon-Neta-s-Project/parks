@@ -188,7 +188,7 @@ insert into probe (filename, checksum, found)
                    where key = 'EPCOT|Entertainment|JAMMitors'
                      and name_i18n->>'he' is not null))
   union all
-  select '034_sensitivities_vocabulary.sql'::text, 'sha256:9c822a6a6a2b7fe4f1653882b3340ac5'::text,
+  select '034_sensitivities_vocabulary.sql'::text, 'sha256:e3670a7f30399bf39406d2b6805a6641'::text,
          (pg_temp.con('trip_member','trip_member_sensitivities_vocab') like '%motionSickness%')
   union all
   select '035_sources_are_not_public.sql'::text, 'sha256:8cb16bb8493d794a21962391abbaf216'::text,

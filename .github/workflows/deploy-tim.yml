@@ -61,7 +61,7 @@ jobs:
           version: latest
 
       # ⚠️ ה-slug הוא `quick-worker` ולא `tim`. השם בדשבורד אינו הכתובת,
-      # וזה כבר עלה לנו שעה. ראה docs/edge-functions-slugs.md.
+      # וזה כבר עלה לנו שעה. ראה docs/architecture/edge-functions-slugs.md.
       - name: פריסה
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}

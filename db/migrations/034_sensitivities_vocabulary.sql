@@ -79,10 +79,10 @@ comment on column trip_member.sensitivities is
 -- לגבי **כל** מי שנרשם — כולל מי שרק תכנן יום ולא הזמין דבר. זהות
 -- להזמנה שייכת לטבלה נפרדת, שטים אינו קורא ממנה לעולם.
 --
--- הפירוט ב-docs/commercial-foundations.md. בדיקה ברפו נכשלת אם עמודה
+-- הפירוט ב-docs/product/commercial-foundations.md. בדיקה ברפו נכשלת אם עמודה
 -- כזו נוספת.
 comment on table trip_member is
-  'חבר אחד בקבוצה. אנונימי לצמיתות: בלי שם ובלי תאריך לידה. זהות להזמנה — טבלה נפרדת. ראה docs/commercial-foundations.md.';
+  'חבר אחד בקבוצה. אנונימי לצמיתות: בלי שם ובלי תאריך לידה. זהות להזמנה — טבלה נפרדת. ראה docs/product/commercial-foundations.md.';
 
 COMMIT;
 
@@ -147,6 +147,6 @@ select '✅ 034 הותקנה' as "מצב";
 -- <migration-log>
 -- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
 -- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
-select public.record_migration('034_sensitivities_vocabulary.sql', 'sha256:9c822a6a6a2b7fe4f1653882b3340ac5',
+select public.record_migration('034_sensitivities_vocabulary.sql', 'sha256:e3670a7f30399bf39406d2b6805a6641',
   coalesce(current_setting('app.migration_source', true), 'sql-editor'));
 -- </migration-log>
