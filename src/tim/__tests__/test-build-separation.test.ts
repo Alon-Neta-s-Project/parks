@@ -72,6 +72,30 @@ describe("גרסת הבדיקה אינה נכנסת לחבילה הציבורי�
     expect(/^\s*import\b.*save-note/m.test(app)).toBe(false);
   });
 
+  /**
+   * 🔴 **מיזוג הענף אינו יכול לשנות את מה שנבנה בפרודקשן.**
+   *
+   * הבנייה לבדיקה יושבת ב-`[context."tim-test"]`, שחל רק כששם הענף
+   * הנבנה הוא `tim-test`. אילו היא הייתה יושבת ב-`[build]` — מיזוג
+   * היה מעלה את גרסת הבדיקה לאוויר, והיא נראית כמעט זהה.
+   */
+  it("הקשר הבנייה הציבורי אינו יודע על גרסת הבדיקה", () => {
+    const toml = readFileSync(join(ROOT, "netlify.toml"), "utf8");
+    const publicBlock = toml.slice(
+      toml.indexOf("[build]"),
+      toml.indexOf('[context."tim-test"]'),
+    );
+    expect(publicBlock.includes("tim-test")).toBe(false);
+    expect(publicBlock.includes('publish = "dist-tim"')).toBe(true);
+
+    // ובהקשר הבדיקה — גם ניתוב משלו, אחרת כל כתובת שם מגישה את טים
+    // הציבורי מתוך תיקיית הבדיקה.
+    const testBlock = toml.slice(toml.indexOf('[context."tim-test"]'));
+    expect(testBlock.includes('publish = "dist-tim-test"')).toBe(true);
+    expect(testBlock.includes("/tim-test.html")).toBe(true);
+    expect(testBlock.includes("noindex")).toBe(true);
+  });
+
   it("שתי הבניות נפרדות לחלוטין", () => {
     const pub = readFileSync(join(ROOT, "vite.tim.config.ts"), "utf8");
     const test = readFileSync(join(ROOT, "vite.tim-test.config.ts"), "utf8");
