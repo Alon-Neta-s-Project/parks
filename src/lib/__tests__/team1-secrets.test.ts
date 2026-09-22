@@ -23,10 +23,24 @@ const publishWorkflow = readFileSync(
   join(ROOT, ".github", "workflows", "team1-publish.yml"),
   "utf8",
 );
+const notesWorkflow = readFileSync(
+  join(ROOT, ".github", "workflows", "tester-notes.yml"),
+  "utf8",
+);
 
-/** ניתוח מספיק לשאלה אחת: באילו שלבים מופיע הסוד. */
+/**
+ * ניתוח מספיק לשאלה אחת: באילו שלבים מופיע הסוד.
+ *
+ * 🔴 **ההערות מוסרות — והיעדר הסינון הפיל את הבדיקה פעם רביעית בסשן
+ * אחד.** הפסקה שמסבירה *למה* אין כאן סוד חדש מזכירה את שם הסוד,
+ * והבדיקה ספרה אותה כשלב.
+ *
+ * אותה צורה בדיוק כמו המפתחות המזויפים בסורק הסודות, הדוגמאות בבודק
+ * הנתיבים, וההערה בהקשרי Netlify. **גלאי שקורא את הפרוזה שסביב הדבר
+ * במקום את הדבר.** כאן זה במקום אחד, ולכן חל על כל ה-workflows.
+ */
 function stepsWithSecret(yaml: string, secret: string): string[] {
-  const lines = yaml.split("\n");
+  const lines = yaml.split("\n").filter((l) => !l.trimStart().startsWith("#"));
   const found: string[] = [];
   let currentStep = "(לפני השלב הראשון)";
   for (const line of lines) {
@@ -109,6 +123,34 @@ describe("workflow הכתיבה — אותו דפוס, אותה אכיפה", () 
     expect(qa).toBeGreaterThan(-1);
     expect(write).toBeGreaterThan(-1);
     expect(qa).toBeLessThan(write);
+  });
+});
+
+describe("workflow הערות הבודק — אותו דפוס", () => {
+  it("CI_VERIFY_URL בשלב אחד בלבד", () => {
+    expect(stepsWithSecret(notesWorkflow, "CI_VERIFY_URL")).toEqual(["שליפת ההערות"]);
+  });
+
+  it("אין env ברמת job", () => {
+    expect(notesWorkflow).not.toMatch(/^ {4}env:/m);
+  });
+
+  it("קריאה לקוד בלבד", () => {
+    const block = /^permissions:\n((?: {2}\S.*\n)+)/m.exec(notesWorkflow);
+    if (block === null) throw new Error("אין בלוק permissions");
+    expect((block[1] ?? "").trim().split("\n").map((l) => l.trim())).toEqual([
+      "contents: read",
+    ]);
+  });
+
+  /**
+   * ⚠️ **ההערות אינן נכנסות לריפו.** הן טקסט חופשי של בודקת, חומר
+   * עבודה ולא תוכן — ו-commit היה נותן להן היסטוריית גרסאות שאיש לא
+   * צריך, בריפו שנקרא בידי כל מי שיש לו גישה.
+   */
+  it("ארטיפקט ולא commit", () => {
+    expect(notesWorkflow.includes("upload-artifact")).toBe(true);
+    expect(notesWorkflow).not.toMatch(/git (add|commit|push)/);
   });
 });
 

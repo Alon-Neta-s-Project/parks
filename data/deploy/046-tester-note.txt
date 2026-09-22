@@ -120,6 +120,24 @@ $$;
 
 revoke all on function public.tester_notes(int) from public, anon, authenticated;
 
+-- 🔴 **ולמי כן — `ci_verify`, וזו הכרעה שצריכה את גיא.**
+--
+-- נטע קבעה (14.09) שהיא אינה מריצה בדיקות ידניות, והצעתי לה קובץ
+-- להרצה. זו הייתה חזרה לאחור. הקריאה צריכה לקרות בלי שהיא תיגע בכלום,
+-- ולכן היא עוברת ל-CI — אותו דפוס כמו כל שאר הסודות כאן.
+--
+-- ⚠️ **ו-`ci_verify` ולא תפקיד רביעי חדש**, כי הוא כבר קיים ויש לו
+-- סוד ב-GitHub. תפקיד נוסף פירושו סיסמה נוספת שנטע מדביקה.
+--
+-- ⚠️ **ומה שזה כן מותח:** גיא פיצל את `ci_verify` מ-`ci_content`
+-- בכוונה, והערות בודק אינן אף אחד משניהם. הטיעון בעד: הטבלה מחזיקה
+-- מילים של נטע על תשובות של טים — אין בה נתוני משתמשים, ואין בה מה
+-- לדלוף. הטיעון נגד: זו הרחבה שלישית לתפקיד שהוגדר למשימה אחת.
+--
+-- **זו שאלה לגיא ולא החלטה שלי.** אם הוא מעדיף תפקיד נפרד — השורה
+-- הזו יורדת ונכתב קובץ תפקיד משלו.
+grant execute on function public.tester_notes(int) to ci_verify;
+
 COMMIT;
 
 -- ── אימות ───────────────────────────────────────────────────────────
@@ -147,6 +165,6 @@ select '⛔ המפתח הוחלף',
 -- <migration-log>
 -- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
 -- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
-select public.record_migration('046_tester_note.sql', 'sha256:aa093644d736b48e5257fa37ca20d184',
+select public.record_migration('046_tester_note.sql', 'sha256:2987c9f9e159b5d032f0eeb909c3c931',
   coalesce(current_setting('app.migration_source', true), 'sql-editor'));
 -- </migration-log>

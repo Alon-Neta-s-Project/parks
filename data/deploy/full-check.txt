@@ -227,7 +227,7 @@ insert into probe (filename, checksum, found)
          (pg_temp.has_col('knowledge_doc','country')
          and pg_temp.con('knowledge_doc','knowledge_doc_country_iso') like '%A-Z%')
   union all
-  select '046_tester_note.sql'::text, 'sha256:aa093644d736b48e5257fa37ca20d184'::text,
+  select '046_tester_note.sql'::text, 'sha256:2987c9f9e159b5d032f0eeb909c3c931'::text,
          (pg_temp.has_fn('save_tester_note')
          and pg_temp.fn_src('save_tester_note') like '%tester_key%');
 
