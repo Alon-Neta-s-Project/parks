@@ -18,7 +18,14 @@ const ROOT = join(__dirname, "..", "..", "..");
 const PUBLIC_DIR = join(ROOT, "dist-tim", "assets");
 
 /** סימנים שקיימים רק בגרסת הבדיקה. */
-const TEST_ONLY = ["feedback__flag", "tim-test-notes-v1", "מה לא בסדר בתשובה"];
+const TEST_ONLY = [
+  "feedback__flag",
+  "tim-test-notes-v1",
+  "מה לא בסדר בתשובה",
+  // ⚠️ נוספו כשההערות עברו למסד — נתיב כתיבה שאסור שיגיע לציבורית.
+  "save_tester_note",
+  "tim-test-key-v1",
+];
 
 function bundleText(dir: string): string | null {
   if (!existsSync(dir)) return null;
@@ -58,6 +65,11 @@ describe("גרסת הבדיקה אינה נכנסת לחבילה הציבורי�
     const publicMain = readFileSync(join(ROOT, "src", "tim", "main.tsx"), "utf8");
     expect(publicMain.includes("FeedbackNote")).toBe(false);
     expect(publicMain.includes("test-feedback.css")).toBe(false);
+    expect(publicMain.includes("save-note")).toBe(false);
+
+    // ⚠️ וגם מסך הצ'אט המשותף אינו יודע על נתיב הכתיבה.
+    const app = readFileSync(join(ROOT, "src", "tim", "TimOnlyApp.tsx"), "utf8");
+    expect(/^\s*import\b.*save-note/m.test(app)).toBe(false);
   });
 
   it("שתי הבניות נפרדות לחלוטין", () => {

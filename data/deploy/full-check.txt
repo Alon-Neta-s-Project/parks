@@ -225,7 +225,11 @@ insert into probe (filename, checksum, found)
   union all
   select '045_country.sql'::text, 'sha256:6fe2287748ddec538af1f891d52a0f3b'::text,
          (pg_temp.has_col('knowledge_doc','country')
-         and pg_temp.con('knowledge_doc','knowledge_doc_country_iso') like '%A-Z%');
+         and pg_temp.con('knowledge_doc','knowledge_doc_country_iso') like '%A-Z%')
+  union all
+  select '046_tester_note.sql'::text, 'sha256:aa093644d736b48e5257fa37ca20d184'::text,
+         (pg_temp.has_fn('save_tester_note')
+         and pg_temp.fn_src('save_tester_note') like '%tester_key%');
 
 -- ── בדיקת יומן התשובות ──────────────────────────────────────────────
 -- 🔴 שלוש קריאות: נענתה · לא נענתה · ארוכה מאוד. הן נמחקות מיד אחרי

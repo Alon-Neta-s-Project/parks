@@ -67,3 +67,14 @@
   font-size: 0.75rem;
   opacity: 0.8;
 }
+
+.testbar__key {
+  margin-inline-start: 0.6rem;
+  padding-block: 0.1rem;
+  padding-inline: 0.4rem;
+  font-size: 0.75rem;
+  border-radius: 0.25rem;
+  border: 1px solid #fff;
+  background: transparent;
+  color: #fff;
+}
