@@ -16,7 +16,22 @@ import { describe, expect, it } from "vitest";
  */
 
 const ROOT = join(__dirname, "..", "..", "..");
-const BANNED = ["dangerouslySetInnerHTML", "innerHTML", "outerHTML", "document.write"];
+/**
+ * ⚠️ **מורכבות בזמן ריצה — והבדיקה סימנה את עצמה בלי זה.**
+ *
+ * היא עברה כשנכתבה, כי הקובץ עוד לא היה במעקב git והסריקה קוראת רק
+ * את מה שבמעקב. ברגע שנכנס — הוא הפך לקובץ ב-`src` שמכיל את
+ * המחרוזות האסורות.
+ *
+ * זו בדיוק אותה צורה כמו המפתחות המזויפים בסורק הסודות, וכבר פתרתי
+ * אותה שם. **דוגמה שנראית אמיתית היא אמיתית מבחינת הכלי שסורק אותה.**
+ */
+const BANNED = [
+  "dangerously" + "SetInnerHTML",
+  "inner" + "HTML",
+  "outer" + "HTML",
+  "document" + ".write",
+];
 
 function tracked(): string[] {
   return execFileSync("git", ["ls-files", "-z"], { cwd: ROOT, encoding: "utf8" })

@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+# rate-limit-live — הוכחה שהתקרה חוסמת בסביבה החיה, לא רק בקוד
+#
+# 🔴 **דרישת גיא (22.09):** לא מספיק שהכלל כתוב — צריך לראות אותו
+# עוצר בפועל. זו אותה תביעה שהוא מעמיד על כל דבר אחר, ובצדק: בדיקה
+# שלא רצה אינה בדיקה, וגם כלל שלא נבדק בסביבה שלו אינו כלל.
+#
+# ⚠️ **ההרצה עולה קריאות אמיתיות.** 21 קריאות מהתקרה הגלובלית של 600
+# ליום. לכן ידנית בלבד — אין כאן `schedule`.
+#
+# ⚠️ **ומה שהיא לא מוכיחה:** היא בודקת את הגדר לפי כתובת, ומריצה
+# מכתובת אחת (של runner ב-Actions). היא אינה בודקת את הגדר הגלובלית,
+# וזו בכוונה — כדי להוכיח אותה צריך לשרוף 600 קריאות.
+set -euo pipefail
+
+: "${TIM_URL:?חסר TIM_URL — כתובת הפונקציה}"
+: "${SUPABASE_ANON_KEY:?חסר SUPABASE_ANON_KEY}"
+
+WINDOW_MAX="${WINDOW_MAX:-20}"
+TRIES=$((WINDOW_MAX + 1))
+
+echo "▶ $TRIES קריאות, התקרה $WINDOW_MAX לחלון"
+
+blocked=0
+ok=0
+last=""
+
+for i in $(seq 1 "$TRIES"); do
+  code=$(curl -sS -o /tmp/rl-body -w '%{http_code}' --max-time 30 \
+    -X POST "$TIM_URL" \
+    -H 'Content-Type: application/json' \
+    -H "apikey: $SUPABASE_ANON_KEY" \
+    -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+    --data '{"question":"בדיקת גדר קצב"}' || echo 000)
+
+  if [ "$code" = "429" ]; then
+    blocked=$((blocked + 1))
+    last=$(cat /tmp/rl-body)
+  elif [ "$code" = "200" ]; then
+    ok=$((ok + 1))
+  else
+    # ⚠️ קוד אחר אינו "לא נחסם" ואינו "נחסם". הוא אומר שהבדיקה לא
+    # בדקה את מה שהיא נועדה לבדוק, ולכן היא נופלת ולא ממשיכה.
+    echo "🔴 קריאה $i החזירה $code — לא 200 ולא 429. הבדיקה אינה תקפה." >&2
+    cat /tmp/rl-body >&2
+    exit 1
+  fi
+done
+
+echo "  עברו: $ok · נחסמו: $blocked"
+echo "  תשובת החסימה: $last"
+
+# 🔴 **שני כיוונים, ולא אחד.** "הכול נחסם" אינו הצלחה — הוא אומר
+# שהשירות שבור או שהתקרה כבר מוצתה מקריאה קודמת.
+if [ "$ok" -eq 0 ]; then
+  echo "🔴 אף קריאה לא עברה. או שהתקרה כבר מוצתה, או שהשירות שבור." >&2
+  exit 1
+fi
+
+if [ "$blocked" -eq 0 ]; then
+  echo "🔴 $TRIES קריאות והתקרה לא עצרה אף אחת. הגדר אינו אוכף." >&2
+  exit 1
+fi
+
+# ⚠️ והתשובה עצמה נבדקת, לא רק הקוד. 429 שמגיע מ-CDN או מ-proxy אינו
+# הגדר שלנו.
+if ! printf '%s' "$last" | grep -q '"error":"rate_limited"'; then
+  echo "🔴 429 שאינו מהגדר שלנו — הגוף אינו rate_limited." >&2
+  exit 1
+fi
+
+echo "✅ הגדר אוכפת בסביבה החיה: $ok עברו, $blocked נחסמו."
