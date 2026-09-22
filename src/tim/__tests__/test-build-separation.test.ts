@@ -1,0 +1,71 @@
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import { describe, expect, it } from "vitest";
+
+/**
+ * 🔴 **הדרישה של נטע: גרסת הבדיקה לא תתערבב עם הקיים.**
+ *
+ * ⚠️ **וזה כמעט נכשל בשקט.** בגרסה הראשונה `TimOnlyApp` ייבא את
+ * `FeedbackNote` ישירות ובדק את ה-prop לפני הרינדור — והקוד נכנס
+ * לחבילה הציבורית בכל זאת. ייבוא סטטי נכלל גם כשהענף לא נבחר,
+ * ו-tree-shaking אינו יכול להסיר רכיב שמופיע ב-JSX.
+ *
+ * הקריאה בקוד נראתה נכונה לגמרי. **רק ספירה בחבילה שנבנתה הראתה את
+ * זה**, וזו בדיוק הסיבה שהבדיקה הזו סופרת ולא רק קוראת.
+ */
+
+const ROOT = join(__dirname, "..", "..", "..");
+const PUBLIC_DIR = join(ROOT, "dist-tim", "assets");
+
+/** סימנים שקיימים רק בגרסת הבדיקה. */
+const TEST_ONLY = ["feedback__flag", "tim-test-notes-v1", "מה לא בסדר בתשובה"];
+
+function bundleText(dir: string): string | null {
+  if (!existsSync(dir)) return null;
+  return readdirSync(dir)
+    .filter((f) => f.endsWith(".js") || f.endsWith(".css"))
+    .map((f) => readFileSync(join(dir, f), "utf8"))
+    .join("\n");
+}
+
+describe("גרסת הבדיקה אינה נכנסת לחבילה הציבורית", () => {
+  const text = bundleText(PUBLIC_DIR);
+
+  it.skipIf(text === null)("אין בה סימן מקוד הפידבק", () => {
+    for (const marker of TEST_ONLY) {
+      expect(text?.includes(marker), `"${marker}" נמצא בחבילה הציבורית`).toBe(false);
+    }
+  });
+
+  /**
+   * ⚠️ **הבדיקה למעלה מדלגת כשאין חבילה בנויה** — וזה נכון, כי היא
+   * בודקת תוצר בנייה. אבל דילוג שקט הוא בדיוק "בדיקה שלא רצה", ולכן
+   * אלה שמתחתיה רצות תמיד וקוראות את המקור.
+   */
+  it("TimOnlyApp אינו מייבא את רכיב הפידבק", () => {
+    const src = readFileSync(join(ROOT, "src", "tim", "TimOnlyApp.tsx"), "utf8");
+    // ⚠️ **ייבוא או שימוש ב-JSX — לא אזכור.** הגרסה הראשונה של הבדיקה
+    // חיפשה את השם בכל מקום, ונפלה על ההערה שמסבירה למה הוא לא שם.
+    // בדיקה שאוסרת לתעד את הבאג היא בדיקה שתוסר.
+    expect(/^\s*import\b.*FeedbackNote/m.test(src), "ייבוא סטטי מחזיר את הדליפה").toBe(false);
+    expect(/<FeedbackNote\b/.test(src), "שימוש ב-JSX מחזיר את הדליפה").toBe(false);
+  });
+
+  it("רק נקודת הכניסה של הבדיקה מייבאת אותו", () => {
+    const testMain = readFileSync(join(ROOT, "src", "tim", "test-main.tsx"), "utf8");
+    expect(testMain.includes("FeedbackNote")).toBe(true);
+
+    const publicMain = readFileSync(join(ROOT, "src", "tim", "main.tsx"), "utf8");
+    expect(publicMain.includes("FeedbackNote")).toBe(false);
+    expect(publicMain.includes("test-feedback.css")).toBe(false);
+  });
+
+  it("שתי הבניות נפרדות לחלוטין", () => {
+    const pub = readFileSync(join(ROOT, "vite.tim.config.ts"), "utf8");
+    const test = readFileSync(join(ROOT, "vite.tim-test.config.ts"), "utf8");
+    expect(pub.includes("dist-tim-test")).toBe(false);
+    expect(test.includes("dist-tim-test")).toBe(true);
+    expect(pub.includes("tim-test.html")).toBe(false);
+    expect(test.includes("tim-test.html")).toBe(true);
+  });
+});

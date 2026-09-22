@@ -1,0 +1,69 @@
+/* גרסת הבדיקה בלבד. לא נטען בבנייה הציבורית.
+   ⚠️ CSS לוגי בלבד — אין left/right, נאכף ב-logical-css.test.ts. */
+
+.testbar {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 10;
+  padding-block: 0.4rem;
+  padding-inline: 0.8rem;
+  background: #7a1f1f;
+  color: #fff;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.feedback__flag {
+  margin-block-start: 0.3rem;
+  margin-inline-start: 2.6rem;
+  padding-block: 0.15rem;
+  padding-inline: 0.5rem;
+  font-size: 0.75rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+  opacity: 0.65;
+}
+
+.feedback__flag:hover { opacity: 1; }
+
+.feedback {
+  margin-block-start: 0.4rem;
+  margin-inline-start: 2.6rem;
+}
+
+.feedback__text {
+  inline-size: 100%;
+  max-inline-size: 32rem;
+  padding: 0.4rem;
+  font: inherit;
+  font-size: 0.85rem;
+}
+
+.feedback__actions {
+  display: flex;
+  gap: 0.4rem;
+  margin-block-start: 0.3rem;
+}
+
+.feedback__export {
+  margin-block: 1.2rem;
+  padding: 0.8rem;
+  border: 1px dashed currentColor;
+  border-radius: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.85rem;
+}
+
+.feedback__preview {
+  inline-size: 100%;
+  max-block-size: 12rem;
+  overflow: auto;
+  white-space: pre-wrap;
+  font-size: 0.75rem;
+  opacity: 0.8;
+}

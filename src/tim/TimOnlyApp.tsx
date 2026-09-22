@@ -35,7 +35,39 @@ interface Turn {
   reply: TimReply | "clarify" | null;
 }
 
-export default function TimOnlyApp() {
+/**
+ * ⚠️ **`feedback` הוא איך גרסת הבדיקה נבדלת — ולא עותק של הקובץ הזה.**
+ *
+ * נטע ביקשה "ממש העתקה של טים למקום אחר". שתי העתקות של מסך הצ'אט היו
+ * מתפצלות תוך שבוע, ואז גרסת הבדיקה הייתה בודקת משהו אחר ממה שרץ
+ * בפועל — בדיוק הכשל שהפרויקט הזה נבנה נגדו.
+ *
+ * מה שנפרד בפועל: `tim-test.html`, בנייה נפרדת, כתובת נפרדת. מה שמשותף:
+ * מסך הצ'אט עצמו. כשטים משתנה, גרסת הבדיקה משתנה איתו.
+ */
+export interface TimOnlyAppProps {
+  /**
+   * כשאינו מוגדר — אין פידבק, ואין כפתור. זו הבנייה הציבורית.
+   *
+   * 🔴 **והרכיב מגיע כפונקציה, לא כייבוא — וזה לא סגנון.**
+   *
+   * בגרסה הראשונה `TimOnlyApp` ייבא את `FeedbackNote` ישירות ובדק את
+   * ה-prop לפני הרינדור. הקוד **נכנס לחבילה הציבורית בכל זאת**: ייבוא
+   * סטטי נכלל גם כשהענף לא נבחר, ו-tree-shaking אינו יכול להסיר רכיב
+   * שמופיע ב-JSX. נמצא בבדיקת החבילה שנבנתה, לא בקריאה.
+   *
+   * עכשיו הקובץ הזה אינו יודע ש-`FeedbackNote` קיים. רק
+   * `test-main.tsx` מייבא אותו, ולכן הוא אינו יכול להגיע לבנייה
+   * הציבורית — מהמבנה, לא מחוכמת ה-bundler.
+   */
+  feedback?: {
+    renderNote: (turnId: string) => React.ReactNode;
+    /** מוצג בסוף השיחה — ייצוא כל ההערות. */
+    footer: React.ReactNode;
+  };
+}
+
+export default function TimOnlyApp({ feedback }: TimOnlyAppProps = {}) {
   const { t } = useTranslation();
   const [turns, setTurns] = useState<Turn[]>([]);
   const [draft, setDraft] = useState("");
@@ -215,9 +247,13 @@ export default function TimOnlyApp() {
                   </span>
                 )}
               </div>
+              {/* ⚠️ רק כשיש reply. אין טעם להעיר על תשובה שעוד בדרך. */}
+              {feedback && turn.reply !== null ? feedback.renderNote(turn.id) : null}
             </div>
           </div>
         ))}
+
+        {feedback ? feedback.footer : null}
 
         <div ref={endRef} />
 
