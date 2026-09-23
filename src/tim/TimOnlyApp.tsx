@@ -179,19 +179,6 @@ export default function TimOnlyApp({ feedback }: TimOnlyAppProps = {}) {
                 <div className="bubble__note">{t("timOnly.scope")}</div>
               </div>
             </div>
-
-            <div className="options">
-              {(t("timOnly.examples", { returnObjects: true }) as string[]).map((example) => (
-                <button
-                  key={example}
-                  type="button"
-                  className="option"
-                  onClick={() => void send(example)}
-                >
-                  {example}
-                </button>
-              ))}
-            </div>
           </section>
         )}
 
