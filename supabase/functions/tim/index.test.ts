@@ -218,6 +218,69 @@ Deno.test("CORS מצטמצם לדומיין ברגע ש-ALLOWED_ORIGIN מוגד�
   assertEquals(theirs.headers.get("Access-Control-Allow-Origin"), null);
 });
 
+/**
+ * 🔴 **גיא, 23.09 — לפני שהקישור יוצא לטסטרים.**
+ *
+ * כותרת `Origin` שדפדפן שולח לעולם אינה כוללת סלאש בסוף. ערך עם סלאש
+ * היה חוסם כל בקשה אמיתית, והתסמין — CORS — נראה כמו תקלת רשת ולא כמו
+ * הגדרה שגויה. זו בדיוק צורת הכשל שחוזרת כאן: ערך שנראה נכון לחלוטין.
+ */
+Deno.test("סלאש בסוף אינו חוסם, ומקור זר עדיין נחסם", async () => {
+  const withOrigin = (o: string) =>
+    new Request("http://x/tim", { method: "OPTIONS", headers: { origin: o } });
+  const env = { ALLOWED_ORIGIN: "https://parkday.example/" };
+
+  const ours = await handle(withOrigin("https://parkday.example"), env);
+  assertEquals(ours.headers.get("Access-Control-Allow-Origin"), "https://parkday.example");
+
+  const theirs = await handle(withOrigin("https://evil.example"), env);
+  assertEquals(theirs.headers.get("Access-Control-Allow-Origin"), null);
+});
+
+/**
+ * ⚠️ **גרסת הבדיקה היא מקור אחר.** `tim-test--<אתר>.netlify.app` אינו
+ * האתר הציבורי, וערך יחיד פירושו שאחד מהשניים חסום תמיד.
+ */
+Deno.test("שני מקורות מופרדים בפסיק — ושניהם עוברים", async () => {
+  const withOrigin = (o: string) =>
+    new Request("http://x/tim", { method: "OPTIONS", headers: { origin: o } });
+  const env = {
+    ALLOWED_ORIGIN: "https://parkday.example/ , https://tim-test--parkday.example",
+  };
+
+  for (const o of ["https://parkday.example", "https://tim-test--parkday.example"]) {
+    const r = await handle(withOrigin(o), env);
+    assertEquals(r.headers.get("Access-Control-Allow-Origin"), o);
+  }
+
+  // 🔴 **ואין prefix ואין תת־דומיין.** ההרחבה מרחיבה את מה שמותר, ולכן
+  // זו הבדיקה שמונעת ממנה להרחיב יותר ממה שנאמר.
+  for (const o of ["https://parkday.example.evil.com", "https://tim-test--parkday.example.x"]) {
+    const r = await handle(withOrigin(o), env);
+    assertEquals(r.headers.get("Access-Control-Allow-Origin"), null);
+  }
+});
+
+/**
+ * 🔴 **ערך שמתנרמל לריק נפתח, ולא נסגר** — `*` לכולם, ונראה מוגדר.
+ * `diagnose` מחזיר את המספר כדי שההבדל ייראה מהסביבה החיה.
+ */
+Deno.test("האבחון סופר מקורות מנורמלים, לא תווים", async () => {
+  const ask = async (env: Record<string, string | undefined>) => {
+    const r = await handle(
+      new Request("http://x/tim", { method: "POST", body: JSON.stringify({ diagnose: true }) }),
+      env,
+    );
+    return (await r.json()).allowed_origins;
+  };
+
+  // ⚠️ המפתח נדרש כי בדיקת קיומו רצה לפני האבחון.
+  assertEquals(await ask({ GEMINI_API_KEY: KEY }), 0);
+  assertEquals(await ask({ GEMINI_API_KEY: KEY, ALLOWED_ORIGIN: "/" }), 0);
+  assertEquals(await ask({ GEMINI_API_KEY: KEY, ALLOWED_ORIGIN: "https://a/" }), 1);
+  assertEquals(await ask({ GEMINI_API_KEY: KEY, ALLOWED_ORIGIN: "https://a, https://b" }), 2);
+});
+
 Deno.test("הדלי הוא גיבוב — כתובת ה-IP עצמה אינה נשמרת", async () => {
   const a = await bucketKey("203.0.113.9", "salt");
   const b = await bucketKey("203.0.113.9", "salt");
