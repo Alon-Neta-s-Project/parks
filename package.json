@@ -9,9 +9,10 @@
   ],
   "scripts": {
     "dev": "vite --config apps/web/vite.config.ts",
+    "dev:server": "npm -w apps/server run dev",
     "build": "tsc -b && vite build --config apps/web/vite.config.ts && tsx scripts/prerender.ts",
     "preview": "vite preview --config apps/web/vite.config.ts",
-    "test": "vitest run --config apps/web/vite.config.ts && npm run test:edge",
+    "test": "vitest run --config apps/web/vite.config.ts && vitest run --config apps/server/vitest.config.ts && npm run test:edge",
     "test:edge": "deno test --allow-env supabase/functions/tim/index.test.ts",
     "import": "tsx scripts/import-content.ts",
     "artifact": "npm run build && python3 scripts/build-artifact.py",

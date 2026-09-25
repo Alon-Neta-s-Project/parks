@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { ROOT } from "../../../../../scripts/paths";
 
@@ -99,6 +99,17 @@ const resolveIn = (file: string, target: string): string => {
   return hit ? hit[1] + target.slice(hit[0].length) : target;
 };
 
+/**
+ * ⚠️ **ב-`package.json` של סביבת עבודה, נתיב יחסי לחבילה ולא לשורש.**
+ * ה-package.json של השרת מריץ את קובץ הכניסה בנתיב יחסי לחבילה, והבדיקה
+ * קראה אותו כנתיב בשורש הרפו — אותה מלכודת שכבר נרשמה כאן: גלאי שקורא
+ * טקסט בלי ההקשר שלו (ובגרסה הראשונה של ההערה הזו, היא תפסה את הדוגמה
+ * שבה). רק שם, ולא בכל קובץ: במסמך, נתיב נקרא מהשורש.
+ */
+const exists = (file: string, target: string): boolean =>
+  existsSync(join(ROOT, target)) ||
+  (file.endsWith("package.json") && existsSync(join(ROOT, dirname(file), target)));
+
 describe("מפת ההזזות אינה מתיישנת", () => {
   for (const [from] of MOVED) {
     it(`${from} — כבר אינו קיים, ולכן עדיין במפה`, () => {
@@ -145,7 +156,7 @@ describe("כל נתיב שמופיע בטקסט — קיים בפועל", () => 
         if (target.startsWith("supabase/functions/quick-worker")) continue;
         if (target.includes("*")) continue;
         if (KNOWN_STALE.includes(target)) continue;
-        if (!existsSync(join(ROOT, resolveIn(file, target)))) {
+        if (!exists(file, resolveIn(file, target))) {
           broken.push(`  ${file} → ${target}`);
         }
       }

@@ -21,7 +21,7 @@ scripts/         repo tooling
 | 0 | Decisions: hosting, security review, the gap in the Tim file (see open items) | Open |
 | 1 | npm workspaces and moving folders into the layout above, with no behavior change | ✅ Done 25.09 (workspaces and `packages/shared` deferred to 3) |
 | 2 | Migrations with dbmate, run from CI with an approval gate | Not started |
-| 3 | Port Tim, `embed` and `aliases` to the Node server, running alongside the Edge Function | Not started |
+| 3 | Port Tim, `embed` and `aliases` to the Node server, running alongside the Edge Function | 3a ✅ workspaces · 3b ✅ server + Tim · deployment waits on O1 |
 | 4 | Point the frontend at the server, retire the Edge Functions, revoke the anon grants | Not started |
 | 5 | Shared logic in `packages/shared`, a browse API, close direct table reads | Not started |
 
@@ -110,6 +110,24 @@ data/deploy/       Neta's deploy files, until Stage 2
 docs/              + archive/, claude-code/
 ```
 Starting point → end: vitest 287 → 299 (+12 guards and self-checks, none removed) · deno 75 → 75 · generated files: only the path text in their headers, plus the bundle that was stale.
+
+### 3a ✅ npm workspaces (25.09.2026)
+- `package.json` at the root: `workspaces: [apps/web, apps/server]`. The frontend's dependencies moved to `apps/web/package.json`, and the server's (`hono`, `@hono/node-server`) are in `apps/server/package.json`. The dev tools stay at the root.
+- **`package-lock`: no existing package changed version.** Only the workspaces and the two new packages were added. `npm ci` passes. `netlify.toml` didn't change, because the build runs from the root.
+- `packages/shared` is still deferred, to Stage 5, when code moves into it. An empty package adds nothing.
+
+### 3b ✅ The server, and Tim in it (25.09.2026)
+- **`apps/server/src/app.ts`:** a Hono app with `GET /health` and `/tim`. `index.ts` runs it on Node (`PORT`, default 8787). `npm run dev:server` runs it in development.
+- 🔴 **The server runs the same Tim file as the Edge Function** (`supabase/functions/tim/index.ts`), through an import, not a copy. Until the cut-over there's no second Tim that could drift from the live one, and the stamped file isn't touched. **Checked on a running server:** `diagnose` returns `deploy_stamp` `bfd501af7bd8` and `fit_stamp` `73db7652fca2`, identical to the repo.
+- 🔴 **Client IP:** Tim builds the rate-limit bucket from the first entry of `x-forwarded-for`. On Supabase their edge sets it, but on our server anyone can send it, and a different value per request would mean a new bucket per request, i.e. no limit. So the server **overwrites** the header with an IP it trusts: from the header the host sets (`CLIENT_IP_HEADER`, e.g. `fly-client-ip`) or from the socket. The tests check that the bucket reaching the database is built from the real IP. **Seen failing:** with the protection disabled, both spoofing tests fail.
+- **Tests:** 7 new server tests (`apps/server/src/__tests__/app.test.ts`) in `npm test`, so also in the QA gate. `/health`, routing with the env, OPTIONS, the body passing through, and the three IP checks.
+- `doc-paths`: in a workspace's `package.json`, a path can also resolve relative to the package (`tsx src/index.ts`). Only there. And the test caught its own explanatory comment, which quoted the example, on the first try.
+- **Tests:** `npm run qa` passes · web 299 · **server 7** · deno 75 · `build` 253 pages.
+
+**Not done yet in Stage 3:**
+- `embed` and `aliases` in the server. Their `Deno.serve` isn't guarded like Tim's, so importing them in Node would crash. They need the same guard first, a small change to files that are deployed manually from the dashboard.
+- Deployment (Dockerfile + workflow) waits on O1, hosting.
+- Comparing answers against the golden set on a live server needs keys (Gemini, database), so it happens on deployment.
 
 ---
 
