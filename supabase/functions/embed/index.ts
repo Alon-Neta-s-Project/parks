@@ -232,9 +232,22 @@ export async function handle(
   });
 }
 
-Deno.serve(async (req) => {
+/**
+ * ⚠️ **השרת עולה רק כשזה קובץ הכניסה** — אותה עטיפה כמו ב-`tim/index.ts`.
+ * עד 25.09 `Deno.serve` רץ בטעינת המודול, ולכן `deno test` נפל לפני
+ * בדיקה אחת, ו-`index.test.ts` כאן לא רץ מעולם. ב-Supabase התנאי מתקיים
+ * והשרת עולה בדיוק כמו קודם.
+ */
+declare const Deno:
+  | {
+      serve: (handler: (req: Request) => Promise<Response>) => void;
+      env: { toObject(): Record<string, string | undefined> };
+    }
+  | undefined;
+
+if (typeof Deno !== "undefined" && import.meta.main) Deno.serve(async (req) => {
   try {
-    return await handle(req, Deno.env.toObject());
+    return await handle(req, Deno!.env.toObject());
   } catch (e) {
     return json({ error: "unhandled", detail: String((e as Error)?.message ?? e) }, 500);
   }

@@ -91,3 +91,24 @@ describe("the rate-limit bucket comes from an IP the caller cannot choose", () =
     expect(clientIp(req, {}, undefined)).toBe("unknown");
   });
 });
+
+/** embed and aliases keep their own gate: x-ingest-secret, checked inside the function. */
+describe("the ingest routes", () => {
+  for (const path of ["/internal/embed", "/internal/aliases"]) {
+    it(`${path} refuses without the secret, and is not configured without one`, async () => {
+      const secured = createApp({ env: { ...baseEnv, INGEST_SECRET: "s3cret" } });
+      expect((await secured.request(path, { method: "POST" })).status).toBe(403);
+      expect((await secured.request(path, { method: "POST", headers: { "x-ingest-secret": "wrong" } })).status).toBe(403);
+
+      const bare = createApp({ env: baseEnv });
+      const res = await bare.request(path, { method: "POST", headers: { "x-ingest-secret": "anything" } });
+      expect(res.status).toBe(500);
+      expect((await res.json()).error).toBe("not_configured");
+    });
+
+    it(`${path} is POST only`, async () => {
+      const res = await createApp({ env: baseEnv }).request(path);
+      expect(res.status).toBe(404);
+    });
+  }
+});

@@ -21,7 +21,7 @@ scripts/         repo tooling
 | 0 | Decisions: hosting, security review, the gap in the Tim file (see open items) | Open |
 | 1 | npm workspaces and moving folders into the layout above, with no behavior change | ✅ Done 25.09 (workspaces and `packages/shared` deferred to 3) |
 | 2 | Migrations with dbmate, run from CI with an approval gate | Not started |
-| 3 | Port Tim, `embed` and `aliases` to the Node server, running alongside the Edge Function | 3a ✅ workspaces · 3b ✅ server + Tim · deployment waits on O1 |
+| 3 | Port Tim, `embed` and `aliases` to the Node server, running alongside the Edge Function | 3a ✅ workspaces · 3b ✅ server + Tim · 3c ✅ embed + aliases · deployment waits on O1 |
 | 4 | Point the frontend at the server, retire the Edge Functions, revoke the anon grants | Not started |
 | 5 | Shared logic in `packages/shared`, a browse API, close direct table reads | Not started |
 
@@ -121,11 +121,18 @@ Starting point → end: vitest 287 → 299 (+12 guards and self-checks, none rem
 - 🔴 **The server runs the same Tim file as the Edge Function** (`supabase/functions/tim/index.ts`), through an import, not a copy. Until the cut-over there's no second Tim that could drift from the live one, and the stamped file isn't touched. **Checked on a running server:** `diagnose` returns `deploy_stamp` `bfd501af7bd8` and `fit_stamp` `73db7652fca2`, identical to the repo.
 - 🔴 **Client IP:** Tim builds the rate-limit bucket from the first entry of `x-forwarded-for`. On Supabase their edge sets it, but on our server anyone can send it, and a different value per request would mean a new bucket per request, i.e. no limit. So the server **overwrites** the header with an IP it trusts: from the header the host sets (`CLIENT_IP_HEADER`, e.g. `fly-client-ip`) or from the socket. The tests check that the bucket reaching the database is built from the real IP. **Seen failing:** with the protection disabled, both spoofing tests fail.
 - **Tests:** 7 new server tests (`apps/server/src/__tests__/app.test.ts`) in `npm test`, so also in the QA gate. `/health`, routing with the env, OPTIONS, the body passing through, and the three IP checks.
-- `doc-paths`: in a workspace's `package.json`, a path can also resolve relative to the package (`tsx src/index.ts`). Only there. And the test caught its own explanatory comment, which quoted the example, on the first try.
+- `doc-paths`: in a workspace's `package.json`, a path can also resolve relative to the package (the server's entry file). Only there. And the test caught its own explanatory comment, which quoted the example, on the first try.
 - **Tests:** `npm run qa` passes · web 299 · **server 7** · deno 75 · `build` 253 pages.
 
+### 3c ✅ `embed` and `aliases` (25.09.2026)
+- 🔴 **Their tests had never run.** `Deno.serve` ran at module load, so `deno test` crashed before a single test ran. **0 of 29.** It's the same bug Tim had and that CLAUDE.md records ("a test that didn't run isn't a test"). **Seen failing:** "FAILED | 0 passed | 1 failed (uncaught error)" before the fix.
+- The fix: the same guard as Tim's (`typeof Deno !== "undefined" && import.meta.main`). On Supabase the server comes up exactly as before. After it: **embed 14, aliases 15, all passing.** `test:edge` now runs all three, so they're in `npm test` and the QA gate.
+- ⚠️ This is a change to two files that are **deployed manually from the dashboard**. It changes nothing in their behavior on Supabase, but whoever redeploys them there will be pasting a new version.
+- The server: `POST /internal/embed` and `POST /internal/aliases`. The secret (`x-ingest-secret`) is checked inside the function itself, exactly as on Supabase, and the route adds and removes nothing. 4 new server tests: 403 without the secret or with a wrong one, `not_configured` without an env value, POST only.
+- CLAUDE.md: the test counts updated (they said 221/66, already stale before) plus `npm run dev:server`.
+- **Tests:** `npm run qa` passes · web 299 · server **11** · deno **104** (75 + the 29 that had never run).
+
 **Not done yet in Stage 3:**
-- `embed` and `aliases` in the server. Their `Deno.serve` isn't guarded like Tim's, so importing them in Node would crash. They need the same guard first, a small change to files that are deployed manually from the dashboard.
 - Deployment (Dockerfile + workflow) waits on O1, hosting.
 - Comparing answers against the golden set on a live server needs keys (Gemini, database), so it happens on deployment.
 

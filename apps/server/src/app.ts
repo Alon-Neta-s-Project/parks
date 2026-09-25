@@ -4,6 +4,8 @@ import { Hono, type Context } from "hono";
 // from the one that is live, and the file is stamped (DEPLOY_STAMP), so it is not
 // edited to move it either. In stage 4 it moves into apps/server for real.
 import { handle as tim } from "../../../supabase/functions/tim/index";
+import { handle as embed } from "../../../supabase/functions/embed/index";
+import { handle as aliases } from "../../../supabase/functions/aliases/index";
 
 export type Env = Record<string, string | undefined>;
 
@@ -57,6 +59,19 @@ export function createApp({ env, remoteAddress }: AppOptions): Hono {
       return c.json({ error: "unhandled", detail: err instanceof Error ? err.message : String(err) }, 500);
     }
   });
+
+  // Called by CI (ci-content.sh) and by hand, never by the browser. Each checks
+  // x-ingest-secret itself, exactly as on Supabase — the route adds nothing and
+  // removes nothing.
+  for (const [path, fn] of [["/internal/embed", embed], ["/internal/aliases", aliases]] as const) {
+    app.post(path, async (c) => {
+      try {
+        return await fn(c.req.raw, env);
+      } catch (err) {
+        return c.json({ error: "unhandled", detail: err instanceof Error ? err.message : String(err) }, 500);
+      }
+    });
+  }
 
   return app;
 }
