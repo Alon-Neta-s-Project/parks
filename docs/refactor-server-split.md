@@ -258,3 +258,18 @@ The system catalog of production compared object by object with the local databa
 ⚠️ **The migration log (`schema_migration`) can't be read:** `reviewer_readonly` has SELECT, but row-level security (forced) hides every row. Needs a read policy for it.
 
 **What this means for the baseline:** the baseline has to encode **production**, not the migrations. That means the stricter permissions, the roles, and the team 1 policies. And it needs a test: a database built from the baseline has to be identical to production in the same catalog comparison.
+
+### O9 — The data pipeline is separate from the server · raised by Alon 25.09 · waiting on: a decision
+**Alon's observation:** collecting, processing and embedding data is an independent process, not part of the server. Today it's scattered: part in `scripts/`, the content in `apps/server/content/`, and `embed`/`aliases` as HTTP routes in the server.
+
+**The flow map (checked against the code):**
+1. **Attractions:** master Excel (outside the repo) → `build-product-export.py` → `product_export.csv` + patches → `import-content.ts` (zod) → `experiences.json` (also bundled in the browser) → `build-content-seed.py` → ✋ pasted by hand → `experience`/`land` → `aliases` (Gemini suggests) → `alias_candidate` → ✋ Paula's review → `aliases_i18n`.
+2. **Official knowledge:** `knowledge/*.md` → `check-knowledge.py` → `build-knowledge-seed.py` → 🤖 CI on push to release (`ci-content.sh`, only what changed) → `knowledge_doc`/`chunk` → a trigger resets the embedding when content changes → `embed` picks up whatever has none (**the database is the queue**) → retrieval check. In parallel: park-character guides → `build-park-intro.py` → `park.intro_he`.
+3. **Community (team 1):** Apify/Facebook → `team1-fetch.sh` → `team1-inbox/` → scraper → gatekeeper → organizer (agents) → `team1-write.sh` (`team1_content`: T4, draft) → `embed` → verifier.
+4. **Out, at runtime:** Tim → `find_experiences` + `park_candidates` + `match_knowledge` → Gemini → answer → `turn_log`.
+
+**What stands out:** there are 3 paths into the database, each with a different role (manual paste, `ci_content`, `team1_content`). Flow 1 is the most manual. `embed` is shared by flows 2–3 and already works on the "whatever's missing" principle.
+
+**Proposal:** `apps/pipeline/`, **split by flow**: `attractions/`, `knowledge/`, `community/`, plus shared `enrich/` (embed, aliases as CLI jobs, not routes), `verify/`, and `content/` (the sources). Each flow runs source → build (in the repo, deterministic) → load (database role) → enrich (Gemini) → verify. `db/` shared at the root. The server keeps only Tim. `scripts/` keeps only repo tooling.
+
+**Waiting on Alon:** split by flow or by stage, and where `db/` goes. Before this: Stage 2 (a dbmate baseline matching production, O6/O8).
