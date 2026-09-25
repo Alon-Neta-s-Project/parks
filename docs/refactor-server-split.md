@@ -19,7 +19,7 @@ scripts/         repo tooling
 | # | Stage | Status |
 |---|---|---|
 | 0 | Decisions: hosting, security review, the gap in the Tim file (see open items) | Open |
-| 1 | npm workspaces and moving folders into the layout above, with no behavior change | 1a ✅ · 1b-1 ✅ content · 1b-2 ✅ db · 1b-3 ✅ web · 1b-4 (root cleanup) not started |
+| 1 | npm workspaces and moving folders into the layout above, with no behavior change | ✅ Done 25.09 (workspaces and `packages/shared` deferred to 3) |
 | 2 | Migrations with dbmate, run from CI with an approval gate | Not started |
 | 3 | Port Tim, `embed` and `aliases` to the Node server, running alongside the Edge Function | Not started |
 | 4 | Point the frontend at the server, retire the Edge Functions, revoke the anon grants | Not started |
@@ -93,6 +93,23 @@ These are the numbers every step in Stage 1 is compared against.
 ⚠️ **Deviation from the approved plan: npm workspaces and `packages/shared` are deferred to Stage 3.** Right now `apps/web` would be the only package and `packages/shared` would be empty. They'd bring a new `package-lock`, a change to how Netlify installs dependencies, and another thing that can't be checked locally, for no benefit yet. They become necessary once `apps/server` has dependencies of its own. The resulting tree is identical. `package.json` stays at the root, and so does `reports/` (the import report that `AdminPage` shows).
 
 ⚠️ **Netlify wasn't checked against a real build.** What was checked: the `publish` values match where Vite writes, and the builds run. Before pushing this to `release`, a branch deploy on `tim-test` confirms that Netlify serves from the new path.
+
+### 1b-4 ✅ Tidying the root (25.09.2026)
+- The ten numbered files at the root (`1-skip-line.txt` … `9-content-part2.txt`) → `docs/archive/deploy-2026-09-early/`, with a README that says **do not run**.
+- 🔴 **`6-tim-function.txt` is an old copy of the Tim function** (362 lines, from 02.09; today it's about 1,500). Pasting it into Supabase would roll Tim back weeks, without the rate limit, retrieval or the CORS fix. That's why it isn't just moved but marked explicitly in the archive.
+- `claude/` → `docs/claude-code/` (the golden set, infra status, handoffs). Nothing referenced them.
+- **Tests:** `npm run qa` passes · vitest **299 passed, 0 skipped** (the skipped test runs now that `build:tim-test` produced its output) · deno 75 · `build` 253 pages.
+
+### Stage 1 — summary
+```
+apps/web/          src/, public/, html, vite configs
+apps/server/       content/ (knowledge, source, mapping) · db/ (migrations, seeds, bundle)
+scripts/           tooling + paths.json (the only place that says where things live)
+supabase/          the Edge Functions, until Stage 3–4
+data/deploy/       Neta's deploy files, until Stage 2
+docs/              + archive/, claude-code/
+```
+Starting point → end: vitest 287 → 299 (+12 guards and self-checks, none removed) · deno 75 → 75 · generated files: only the path text in their headers, plus the bundle that was stale.
 
 ---
 
