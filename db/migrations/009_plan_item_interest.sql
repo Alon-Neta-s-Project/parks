@@ -29,3 +29,10 @@ comment on column plan_item.anchor_time is
 create index plan_item_interest_idx on plan_item (trip_id, interest);
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('009_plan_item_interest.sql', 'sha256:5f6beab9801549e1a1b6edce10191fc4',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

@@ -39,3 +39,10 @@ comment on column experience.category is
   'צורת החוויה. scenic_ride = נוסעים בכלי רכב והנוף הוא העניין — לא תחבורה בפארק.';
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('013_scenic_ride.sql', 'sha256:537b8b77b11e65ad212fad1550c6d577',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

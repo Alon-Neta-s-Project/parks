@@ -1,0 +1,55 @@
+# איסוף הערות הבודק — נטע אינה מריצה דבר
+#
+# 🔴 **נטע קבעה (14.09) שהיא אינה מריצה בדיקות ידניות.** הצעתי לה
+# קובץ SQL להרצה אחרי כל סבב, וזו הייתה חזרה לאחור. ההערות מגיעות
+# אליי בלי שהיא תיגע בכלום.
+#
+# ⛔ **ואין כאן סוד חדש.** CI_VERIFY_URL כבר קיים ב-Secrets מאז
+# 14.09. מה שנדרש זה גרנט אחד על tester_notes(), במיגרציה 046.
+
+name: הערות בודק
+
+on:
+  workflow_dispatch:
+  schedule:
+    # ⚠️ פעם ביום. קצב גבוה יותר היה מייצר ריצות ריקות, וריצה ריקה
+    # שחוזרת היא בדיוק מה שמפסיקים להסתכל עליו.
+    - cron: "0 5 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: שליפת ההערות
+        env:
+          CI_VERIFY_URL: ${{ secrets.CI_VERIFY_URL }}
+        run: |
+          # ⚠️ ON_ERROR_STOP, והלקח שכבר עלה ביוקר: בלעדיו psql ממשיך
+          # אחרי שגיאה, השאילתה לא מחזירה דבר, והריצה מכריזה הצלחה.
+          psql "$CI_VERIFY_URL" -v ON_ERROR_STOP=1 \
+            --pset=border=2 --pset=linestyle=unicode \
+            -c "select created_at at time zone 'Asia/Jerusalem' as \"מתי\",
+                       session_ref as \"סבב\", turn_ref as \"תור\",
+                       note as \"ההערה\",
+                       left(question, 120) as \"השאלה\",
+                       left(answer, 200)   as \"מה טים ענה\"
+                  from public.tester_notes(200) order by created_at" \
+            > tester-notes.txt
+
+          lines=$(grep -c '' tester-notes.txt || true)
+          echo "▶ $lines שורות"
+          cat tester-notes.txt
+
+      # ⚠️ **ארטיפקט ולא commit.** ההערות הן טקסט חופשי של בודקת על
+      # תשובות של טים — הן חומר עבודה, לא תוכן שצריך היסטוריית גרסאות.
+      - name: העלאה
+        uses: actions/upload-artifact@v4
+        with:
+          name: tester-notes-${{ github.run_id }}
+          path: tester-notes.txt
+          retention-days: 30

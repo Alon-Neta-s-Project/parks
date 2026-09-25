@@ -20,8 +20,24 @@ python3 scripts/check-secrets.py
 step "הוראות טים מסונכרנות עם he.json"
 python3 scripts/build-tim-prompt.py --check
 
+step "יומן המיגרציות — כל מיגרציה חתומה, וקובץ הפריסה זהה לה"
+python3 scripts/migration-log.py --check
+
 step "קובצי הזרע מעודכנים מול המקור"
 python3 scripts/build-knowledge-seed.py --check
+
+# ⚠️ ובדיקת "האם התוכן באמת נשלף" נבנית כאן, ורצה על המסד החי
+# אחרי embed. תנאי מחייב של גיא — כתיבה שהצליחה אינה מספיקה.
+python3 scripts/build-knowledge-seed.py --live-check
+
+step "פתיח הפארק נגזר ממדריך האופי"
+python3 scripts/build-park-intro.py --check
+
+# ⚠️ **לא בשער.** הבדיקה הזו דורשת Postgres מקומי, ולכן היא אינה
+# חלק מ-npm run qa — היא מורצת ידנית אחרי הוספת מיגרציה:
+#     bash scripts/verify-probes.sh
+# 🔴 ולציין את זה כאן, כי בדיקה שלא רצה אינה בדיקה — ובדיקה שחושבים
+# שהיא בשער והיא לא, גרועה משתיהן.
 
 step "טיפוסים"
 npx tsc -b --noEmit

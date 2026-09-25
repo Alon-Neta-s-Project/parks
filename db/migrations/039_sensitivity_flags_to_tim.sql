@@ -249,3 +249,10 @@ end $$;
 COMMIT;
 
 select '✅ 039 הותקנה' as "מצב";
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('039_sensitivity_flags_to_tim.sql', 'sha256:7470162c5a7eca7d8c06977fd1191f8a',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

@@ -40,3 +40,10 @@ select count(*) as "פארקים",
   from park;
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('041_park_intro.sql', 'sha256:87781504e654dea6cefc46f6c17dfb14',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

@@ -6,12 +6,17 @@ authority_tier: T3
 scope_resort: uor
 volatility: volatile
 source_url: https://www.universalorlando.com/web/en/us/plan-your-visit/directions-parking
-last_verified: 2026-09-09
+last_verified: 2026-09-14
 product_family: park_logistics
 audience: international_guest
 v1_priority: core
 purchase_type: N/A
 ---
+
+## שני מונחים שחוזרים כאן, ואין להם מקבילה מוכרת בעברית
+
+- **קמפוס** — מתחם שלם של פארקים, חניונים ומלונות. ליוניברסל אורלנדו יש שניים, והמעבר ביניהם הוא נסיעה ולא הליכה.
+- **טרם** (Tram) — רכבת כבישים קטנה שמסיעה מהחניון לכניסה, כמו בדיסני. **ביוניברסל אין כזו**, וזה ההבדל שמפתיע ישראלים שכבר היו בדיסני.
 
 ## 🔴 שני קמפוסים, לא ארבעה חניונים — וזה שונה מהותית מדיסני
 

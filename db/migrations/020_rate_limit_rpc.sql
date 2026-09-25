@@ -76,3 +76,10 @@ comment on function public.check_rate_limit(text, int, int) is
   'גג קריאות לדלי בחלון זמן. אטומית. security definer כדי שנקודת הקצה לא תזדקק ל-service_role — 403 מ-PostgREST הראה שהתפקיד אינו נפתר לשם.';
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('020_rate_limit_rpc.sql', 'sha256:2b5f1dc15ec0cd8a51ead08816057caa',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

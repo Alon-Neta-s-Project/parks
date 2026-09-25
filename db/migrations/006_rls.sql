@@ -79,3 +79,10 @@ create policy message_self on message for all
   with check (exists (select 1 from conversation c where c.id = message.conversation_id and c.user_id = auth.uid()));
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('006_rls.sql', 'sha256:e2181e2c7d0f8293e7372df689e708f0',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

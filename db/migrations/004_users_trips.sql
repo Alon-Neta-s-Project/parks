@@ -99,3 +99,10 @@ create index plan_item_trip_idx on plan_item (trip_id, trip_day_id);
 create index plan_item_exp_idx  on plan_item (experience_id);
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('004_users_trips.sql', 'sha256:b5ef6a32ad6597498ce3e7a7335fcf6b',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

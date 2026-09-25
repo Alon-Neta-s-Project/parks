@@ -1,0 +1,139 @@
+-- content-live-check — האם התוכן שכתבנו באמת נשלף
+-- ────────────────────────────────────────────────────────────────────
+-- 📍 להריץ ב: Supabase ← SQL Editor
+-- שם השאילתה: content-live-check (כלי חוזר — לא צריך מספר)
+-- ⚠️ להריץ **אחרי** embed.
+--
+-- 🔴 **תנאי מחייב של גיא (14.09), ולא בדיקה שנחמד שתהיה.**
+--
+-- כתיבת תוכן יושבת בטרנזקציה אחת ומתגלגלת אחורה בכישלון. אבל
+-- ה-embed רץ **אחריה**, מחוץ לטרנזקציה — ובין השניים הקטעים קיימים
+-- בלי וקטור. **קטע בלי וקטור אינו נשלף, וטים עונה כאילו המסמך אינו
+-- קיים.**
+--
+-- ⚠️ כלומר כתיבה שהצליחה במלואה יכולה להשאיר את התוכן **בלתי נראה**,
+-- ושום דבר לא יצעק. זו בדיוק המחלקה של כשלים שהמוצר בנוי נגדה:
+-- "אין נפילה שקטה" ו"שתיקה על ערך נקראת כהעדר".
+--
+-- 🔴 **הכתיבה אינה נחשבת שהצליחה עד שהשורה האחרונה כאן מחזירה ✅.**
+
+with expected (doc_id, chunks) as (
+  values
+    ('annual-pass-uor', 5),
+    ('annual-pass-wdw', 5),
+    ('base-ticket-uor', 5),
+    ('base-ticket-wdw', 5),
+    ('character-meetings-uor', 4),
+    ('character-meetings-wdw', 4),
+    ('characters-in-practice-uor', 5),
+    ('characters-in-practice-wdw', 5),
+    ('child-swap-uor', 5),
+    ('early-entry-wdw', 5),
+    ('early-park-admission-uor', 6),
+    ('epic-universe-admission-uor', 5),
+    ('extended-evening-wdw', 5),
+    ('florida-resident-ticket-uor', 5),
+    ('florida-resident-ticket-wdw', 5),
+    ('lightning-lane-multi-pass-in-practice-wdw', 5),
+    ('lightning-lane-multi-pass-wdw', 5),
+    ('lightning-lane-premier-pass-in-practice-wdw', 5),
+    ('lightning-lane-premier-pass-wdw', 5),
+    ('lightning-lane-single-pass-in-practice-wdw', 5),
+    ('lightning-lane-single-pass-wdw', 5),
+    ('military-ticket-uor', 5),
+    ('military-ticket-wdw', 5),
+    ('park-character-animal-kingdom-wdw', 4),
+    ('park-character-epcot-wdw', 5),
+    ('park-character-epic-uor', 4),
+    ('park-character-hollywood-studios-wdw', 4),
+    ('park-character-ioa-uor', 4),
+    ('park-character-magic-kingdom-wdw', 4),
+    ('park-character-usf-uor', 4),
+    ('park-hopper-in-practice-wdw', 5),
+    ('park-hopper-plus-wdw', 5),
+    ('park-hopper-wdw', 5),
+    ('park-reservation-wdw', 6),
+    ('park-to-park-in-practice-uor', 5),
+    ('park-to-park-uor', 5),
+    ('parking-and-arrival-uor', 6),
+    ('parking-and-arrival-wdw', 4),
+    ('partner-hotels-uor', 4),
+    ('photopass-wdw', 5),
+    ('photos-uor', 5),
+    ('rain-in-practice-uor', 4),
+    ('rain-in-practice-wdw', 4),
+    ('rain-policy-uor', 4),
+    ('rain-policy-wdw', 4),
+    ('rider-switch-wdw', 5),
+    ('special-event-ticket-uor', 5),
+    ('special-event-ticket-wdw', 5),
+    ('strollers-uor', 4),
+    ('strollers-wdw', 4),
+    ('universal-express-epic-in-practice-uor', 3),
+    ('universal-express-epic-uor', 5),
+    ('universal-express-in-practice-uor', 5),
+    ('universal-express-unlimited-in-practice-uor', 5),
+    ('universal-express-unlimited-uor', 5),
+    ('universal-express-uor', 5),
+    ('universal-onsite-hotels-uor', 4),
+    ('vacation-package-uor', 5),
+    ('vacation-package-wdw', 5),
+    ('vip-experience-uor', 5),
+    ('vip-tour-wdw', 5),
+    ('virtual-queue-wdw', 5),
+    ('volcano-bay-admission-uor', 5),
+    ('volcano-bay-express-uor', 5),
+    ('water-park-sports-wdw', 5),
+    ('water-park-ticket-wdw', 5)
+),
+actual as (
+  select d.id as doc_id,
+         count(c.id)                                    as chunks,
+         count(c.id) filter (where c.embedding is null) as no_vector
+    from knowledge_doc d
+    left join knowledge_chunk c on c.doc_id = d.id
+   group by d.id
+),
+problems as (
+  select e.doc_id,
+         case
+           when a.doc_id is null            then 'המסמך אינו במסד'
+           when a.no_vector > 0             then 'קטעים בלי וקטור: ' || a.no_vector
+           when a.chunks <> e.chunks        then 'מספר קטעים שונה מהרפו: ' || a.chunks || ' מול ' || e.chunks
+         end as problem
+    from expected e
+    left join actual a on a.doc_id = e.doc_id
+)
+select
+  case when exists (select 1 from problems where problem is not null)
+       then '🔴 תוכן שאינו נשלף — הכתיבה לא הושלמה'
+       else '✅ כל המסמכים במסד, עם וקטור, ובמספר הקטעים הנכון' end as "מה",
+  -- ⚠️ חמישה ראשונים בלבד. רשימה של 65 מסמכים בתא אחד אינה קריאה,
+  -- ובדיקה שלא קוראים אותה אינה בדיקה.
+  coalesce((select string_agg(doc_id || ' — ' || problem, ' · ' order by doc_id)
+              from (select * from problems where problem is not null
+                     order by doc_id limit 5) t)
+           || case when (select count(*) from problems where problem is not null) > 5
+                   then ' · ועוד ' || ((select count(*) from problems where problem is not null) - 5) || ' מסמכים'
+                   else '' end, '—') as "פרט"
+-- ⚠️ שורת הכרעה לקריאת מכונה. הכותרות נועדו לאדם, וסימן שמשמעותו
+-- אזעקה אינו יכול לשבת בתוך שם של שורה.
+union all
+select 'verdict',
+       case when exists (select 1 from problems where problem is not null)
+            then 'PROBLEM' else 'OK' end
+union all
+select 'מסמכים ברפו', (select count(*) from expected)::text
+union all
+select 'מסמכים במסד', (select count(*) from knowledge_doc)::text
+union all
+select 'קטעים בלי וקטור (צפוי 0)',
+       (select count(*) from knowledge_chunk where embedding is null)::text
+-- ⚠️ **מצב רביעי שלא חיפשתי בהתחלה.** וקטור שנוצר במודל ישן אינו
+-- NULL, ולכן כל הבדיקות למעלה עוברות עליו — אבל הוא מושווה לשאילתה
+-- שנוצרה במודל אחר, והשליפה פשוט מחזירה את הדברים הלא נכונים.
+-- 🔴 בשקט. בלי שגיאה. מיגרציה 024 קיימת בדיוק בגלל מעבר כזה.
+union all
+select 'מודלים שונים בשימוש (צפוי: אחד)',
+       coalesce((select string_agg(distinct embedding_model, ' · ')
+                   from knowledge_chunk where embedding_model is not null), '— אין וקטורים —');

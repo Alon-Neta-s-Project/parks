@@ -1,0 +1,87 @@
+# תוכן ואימות — אוטומטית, בדחיפה ל-release
+#
+# 🔴 **קיים כי נטע הריצה 15 קבצים ידנית ביום אחד**, ואמרה שהיא מפסיקה.
+# גיא אישר שתי הרשאות מוגבלות (14.09) — קריאה לאימות, וכתיבת תוכן.
+#
+# ⛔ **מיגרציות סכמה אינן כאן, בכוונה.** גיא סגר את זה עד שדרוג
+# תוכנית: אין PITR ב-Free, וכתיבה למבנה היא הדבר היחיד שאי אפשר
+# לשחזר ממנו. שני התפקידים כאן אינם יכולים לגעת בסכמה — לא בגלל
+# הקובץ הזה, אלא בגלל הרשאות שהמסד אוכף.
+
+name: תוכן ואימות
+
+on:
+  push:
+    branches: [release]
+    paths:
+      - "knowledge/**"
+      - "db/migrations/**"
+      - "scripts/build-knowledge-seed.py"
+      - "scripts/build-park-intro.py"
+      - "scripts/migration-log.py"
+      - ".github/workflows/content-and-verify.yml"
+  workflow_dispatch:
+
+jobs:
+  content-and-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # ⚠️ צריך את ההיסטוריה כדי לדעת אילו מסמכים השתנו.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # 🔴 דנו נדרש ל-npm test. ההרצה הראשונה של פריסת טים נפלה בלעדיו.
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: התקנה
+        run: npm ci
+
+      # 🔴 **השער לפני הכתיבה, ולא אחריה.**
+      - name: שער QA
+        run: npm run qa
+
+      - name: תוכן — מה שהשתנה בלבד, ואז embed ואז ווידוא
+        env:
+          CI_CONTENT_URL: ${{ secrets.CI_CONTENT_URL }}
+          INGEST_SECRET: ${{ secrets.INGEST_SECRET }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: bash scripts/ci-content.sh "${{ github.event.before }}"
+
+      # ⚠️ **האימות אחרי הכתיבה, ובתפקיד אחר.** ci_verify אינו יכול
+      # לגעת במסמכי ידע, ולכן כשל בנתיב התוכן אינו יכול להסתיר את עצמו
+      # דרך האימות.
+      - name: אימות המיגרציות
+        env:
+          CI_VERIFY_URL: ${{ secrets.CI_VERIFY_URL }}
+        run: |
+          python3 scripts/migration-log.py --write >/dev/null
+
+          # 🔴 **ON_ERROR_STOP, ואני מוסיף אותו אחרי שהיעדרו עלה ביוקר.**
+          # בלעדיו psql ממשיך אחרי שגיאה, הטרנזקציה נקטעת, השאילתה
+          # האחרונה לא מחזירה דבר — והבדיקה מכריזה הצלחה.
+          result=$(psql "$CI_VERIFY_URL" -At -v ON_ERROR_STOP=1 \
+                     -f data/deploy/migrations-check.txt)
+          echo "$result"
+
+          # 🔴 **אישור חיובי, משורה שנועדה למכונה.**
+          #
+          # שתי תקלות קדמו לשורה הזו, והן הפוכות זו לזו: קודם "היעדר
+          # סימן אדום" נחשב הצלחה, והבדיקה הכריזה ירוק כשהיא כלל לא
+          # רצה. אחר כך חיפוש הסימן האדום בטקסט נדלק מהכותרת עצמה,
+          # והכריז כשל כשהכול תקין.
+          #
+          # ⚠️ **המסקנה: כותרת נועדה לאדם, והכרעה נועדה למכונה.**
+          if ! echo "$result" | grep -qx "verdict|OK"; then
+            echo "✗ האימות לא החזיר verdict|OK — מיגרציה חסרה, סטייה,"
+            echo "  או שהשאילתה כלל לא רצה."
+            exit 1
+          fi
+          echo "✅ כל המיגרציות מאומתות."

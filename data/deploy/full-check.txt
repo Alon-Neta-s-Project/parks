@@ -1,0 +1,337 @@
+-- full-check — בדיקה אחת: המיגרציות, ותנאי גיא על יומן התשובות
+-- ────────────────────────────────────────────────────────────────────
+-- 📍 להריץ ב: Supabase ← SQL Editor
+-- שם השאילתה: full-check (כלי חוזר — לא צריך מספר)
+-- ⚠️ להריץ **אחרי** 000.
+--
+-- 🔴 **הוא אינו סומך על אף רשימה — הוא שואל את המסד.** לכל מיגרציה
+-- יש טביעת אצבע שנשארת אחריה: עמודה שנוספה, אילוץ שהוחלף, הערה על
+-- עמודה, פוליסי שהוסר, או מחרוזת בגוף פונקציה. הקובץ בודק את כולן.
+--
+-- ⚠️ **ולכן שאילתה שמורה אינה מספיקה.** 044 יושבת ברשימת השאילתות,
+-- קיבלה שם, הודבקה — ונפלה. רשימה מראה מה נכתב; המסד מראה מה קרה.
+--
+-- ✅ **מה שעובר נרשם כ-`verified`.** לא `observed`: לא ראינו אותה רצה,
+-- ראינו שהתוצאה שלה כאן. מה שנכשל **אינו נרשם בכלל**, ומופיע בטבלה
+-- שבסוף — ואלה המיגרציות שצריך לבדוק ביד.
+--
+-- ⚠️ **רישום אמיתי גובר.** מיגרציה שנרשמה בזמן ההרצה (`observed`)
+-- אינה מוחלפת כאן. ראיה ישירה גוברת על בדיקה עקיפה.
+-- אפשר להריץ שוב מתי שרוצים.
+
+BEGIN;
+
+set local search_path = public, extensions;
+
+-- ── עוזרים זמניים (נעלמים בסוף הסשן) ────────────────────────────────
+create or replace function pg_temp.has_col(t text, c text) returns boolean
+  language sql stable as $fn$
+  select exists (select 1 from pg_attribute
+                  where attrelid = to_regclass('public.' || t)
+                    and attname = c and attnum > 0 and not attisdropped);
+$fn$;
+
+create or replace function pg_temp.col_required(t text, c text) returns boolean
+  language sql stable as $fn$
+  select coalesce((select attnotnull from pg_attribute
+                    where attrelid = to_regclass('public.' || t) and attname = c), false);
+$fn$;
+
+create or replace function pg_temp.col_type(t text, c text) returns text
+  language sql stable as $fn$
+  select format_type(atttypid, atttypmod) from pg_attribute
+   where attrelid = to_regclass('public.' || t) and attname = c;
+$fn$;
+
+create or replace function pg_temp.col_note(t text, c text) returns text
+  language sql stable as $fn$
+  select col_description(to_regclass('public.' || t), attnum) from pg_attribute
+   where attrelid = to_regclass('public.' || t) and attname = c;
+$fn$;
+
+create or replace function pg_temp.tbl_note(t text) returns text
+  language sql stable as $fn$
+  select obj_description(to_regclass('public.' || t), 'pg_class');
+$fn$;
+
+create or replace function pg_temp.con(t text, c text) returns text
+  language sql stable as $fn$
+  select pg_get_constraintdef(oid) from pg_constraint
+   where conrelid = to_regclass('public.' || t) and conname = c;
+$fn$;
+
+create or replace function pg_temp.has_fn(n text) returns boolean
+  language sql stable as $fn$
+  select exists (select 1 from pg_proc p join pg_namespace s on s.oid = p.pronamespace
+                  where s.nspname = 'public' and p.proname = n);
+$fn$;
+
+create or replace function pg_temp.fn_src(n text) returns text
+  language sql stable as $fn$
+  select string_agg(pg_get_functiondef(p.oid), ' ')
+    from pg_proc p join pg_namespace s on s.oid = p.pronamespace
+   where s.nspname = 'public' and p.proname = n;
+$fn$;
+
+create or replace function pg_temp.has_policy(t text, p text) returns boolean
+  language sql stable as $fn$
+  select exists (select 1 from pg_policies
+                  where schemaname = 'public' and tablename = t and policyname = p);
+$fn$;
+
+-- ⚠️ שורה לכל מיגרציה. עמודה שלישית = האם התוצאה שלה נמצאת במסד.
+create temp table probe (filename text, checksum text, found boolean) on commit drop;
+insert into probe (filename, checksum, found)
+  select '001_extensions_and_taxonomy.sql'::text, 'sha256:febd46240e77a8da36dea66f41ed0e65'::text,
+         (exists (select 1 from pg_extension where extname = 'vector'))
+  union all
+  select '002_content.sql'::text, 'sha256:007b31bbf386302575564d417f0f7a5f'::text,
+         (to_regclass('public.experience') is not null)
+  union all
+  select '003_knowledge.sql'::text, 'sha256:113dc2b23be1e8c5803b4d76200d22bd'::text,
+         (to_regclass('public.knowledge_doc') is not null)
+  union all
+  select '004_users_trips.sql'::text, 'sha256:b5ef6a32ad6597498ce3e7a7335fcf6b'::text,
+         (to_regclass('public.profile_fact') is not null)
+  union all
+  select '005_conversations.sql'::text, 'sha256:449870fb67f196bbf5b03d1e6a57f82a'::text,
+         (to_regclass('public.conversation') is not null)
+  union all
+  select '006_rls.sql'::text, 'sha256:e2181e2c7d0f8293e7372df689e708f0'::text,
+         (pg_temp.has_fn('is_admin'))
+  union all
+  select '007_content_fields.sql'::text, 'sha256:ba04dc1d8636c84d0e41db0bf0159584'::text,
+         (pg_temp.has_col('experience','motion_sickness_warning'))
+  union all
+  select '008_profile_axes.sql'::text, 'sha256:a9ad8de88a58e9334065170cb6938e7f'::text,
+         (to_regclass('public.profile_effective') is not null)
+  union all
+  select '009_plan_item_interest.sql'::text, 'sha256:5f6beab9801549e1a1b6edce10191fc4'::text,
+         (pg_temp.has_col('plan_item','interest'))
+  union all
+  select '010_trip_members.sql'::text, 'sha256:96fa5d133486ccd82b91215c7587c92d'::text,
+         (to_regclass('public.trip_member') is not null)
+  union all
+  select '011_conformance_fixes.sql'::text, 'sha256:b1281393d538698f09aaba3699ba166c'::text,
+         (pg_temp.has_col('park','park_kind')
+         and not pg_temp.col_required('experience','intensity'))
+  union all
+  select '012_height_none.sql'::text, 'sha256:32705b093ef3b15f4b1dab642ef86294'::text,
+         (pg_temp.con('experience','experience_height_requirement_cm_check') like '%= 0%')
+  union all
+  select '013_scenic_ride.sql'::text, 'sha256:537b8b77b11e65ad212fad1550c6d577'::text,
+         (pg_temp.con('experience','experience_category_check') like '%scenic_ride%')
+  union all
+  select '014_gets_wet_na.sql'::text, 'sha256:e1c81fbefd428f39dd19e287bb2c470d'::text,
+         (pg_temp.con('experience','experience_gets_wet_check') like '%na%')
+  union all
+  select '015_trip_park_days.sql'::text, 'sha256:e27135b6a662d3c0ee7e71797ece82dd'::text,
+         (pg_temp.has_col('trip','park_days'))
+  union all
+  select '016_skip_line_neutral.sql'::text, 'sha256:9a5c76a1bd5fd8c4ec7f34c188111e6e'::text,
+         (pg_temp.con('experience','experience_skip_line_system_check') like '%express%'
+         and not pg_temp.col_required('experience','skip_line_system'))
+  union all
+  select '017_drop_skip_line_extra_cost.sql'::text, 'sha256:6f77d1fab9c67752db3c52674f336155'::text,
+         (not pg_temp.has_col('experience','skip_line_extra_cost'))
+  union all
+  select '018_rate_limit.sql'::text, 'sha256:0e6a6814952cf9f9e553c9e2549d0f32'::text,
+         (to_regclass('public.api_call') is not null)
+  union all
+  select '019_content_fields_from_export.sql'::text, 'sha256:b01b39e913d0b678813c0dbd2418e0f2'::text,
+         (pg_temp.has_col('experience','subtype'))
+  union all
+  select '020_rate_limit_rpc.sql'::text, 'sha256:2b5f1dc15ec0cd8a51ead08816057caa'::text,
+         (pg_temp.has_fn('check_rate_limit'))
+  union all
+  select '021_global_daily_cap.sql'::text, 'sha256:6a77b32f3cac6170e5d8d4654f71cadd'::text,
+         (pg_temp.has_fn('rate_limit_daily_cap'))
+  union all
+  select '022_measured_cost.sql'::text, 'sha256:a182cff4178674577faa5db87b224389'::text,
+         (pg_temp.has_fn('estimated_cost_per_message'))
+  union all
+  select '023_speed_and_inversions.sql'::text, 'sha256:3d6d140682399ec1c1c3c66456989978'::text,
+         (pg_temp.has_col('experience','max_speed_kmh'))
+  union all
+  select '024_embedding_1536.sql'::text, 'sha256:53083620830633412a6d721d4db03129'::text,
+         (pg_temp.col_type('knowledge_chunk','embedding') like '%1536%')
+  union all
+  select '025_knowledge_taxonomy.sql'::text, 'sha256:75d3755b81d9e8b2156a825e3112d4a9'::text,
+         (pg_temp.has_col('knowledge_doc','product_family'))
+  union all
+  select '026_rate_limit_caps_not_arguments.sql'::text, 'sha256:5e397ca0fc13b9b3bd803a803591173d'::text,
+         (pg_temp.has_fn('rate_limit_max_per_window'))
+  union all
+  select '027_ingest_rpc.sql'::text, 'sha256:1f500c8be4515a4e4ef1433899cf6eda'::text,
+         (pg_temp.has_fn('ingest_set_key'))
+  union all
+  select '028_match_knowledge.sql'::text, 'sha256:e004bee033d83d0b459a2eb476a51e43'::text,
+         (pg_temp.has_fn('match_knowledge'))
+  union all
+  select '029_find_experiences.sql'::text, 'sha256:df969b0e6b22357e56b7069a9df283fa'::text,
+         (pg_temp.has_fn('find_experiences'))
+  union all
+  select '030_find_experiences_by_words.sql'::text, 'sha256:219641a14cbe15dde0367b4f2da4b08b'::text,
+         (pg_temp.fn_src('find_experiences') like '%park_name%')
+  union all
+  select '031_alias_candidates.sql'::text, 'sha256:392fce61473b0ac71cd42b651dac73fe'::text,
+         (to_regclass('public.alias_candidate') is not null)
+  union all
+  select '032_alias_reject_useless.sql'::text, 'sha256:6bb4c7604d8cb4ee25b1bd7d932eae8a'::text,
+         (pg_temp.fn_src('alias_add') like '%lower%')
+  union all
+  select '033_embedding_follows_content.sql'::text, 'sha256:9409c400147bf52bbecaf4e55965bb1f'::text,
+         (exists (select 1 from pg_trigger where tgname = 'knowledge_chunk_content_changed'))
+  union all
+  select '034_eight_hebrew_names.sql'::text, 'sha256:9c3815daa05b88913c37951a9641db64'::text,
+         (exists (select 1 from experience
+                   where key = 'EPCOT|Entertainment|JAMMitors'
+                     and name_i18n->>'he' is not null))
+  union all
+  select '034_sensitivities_vocabulary.sql'::text, 'sha256:e3670a7f30399bf39406d2b6805a6641'::text,
+         (pg_temp.con('trip_member','trip_member_sensitivities_vocab') like '%motionSickness%')
+  union all
+  select '035_sources_are_not_public.sql'::text, 'sha256:8cb16bb8493d794a21962391abbaf216'::text,
+         (pg_temp.tbl_note('experience_source') like '%035%'
+         and not pg_temp.has_policy('experience_source','experience_source_read'))
+  union all
+  select '036_knowledge_is_not_public.sql'::text, 'sha256:e1960194177c70bf62a45326d6eec657'::text,
+         (pg_temp.tbl_note('knowledge_doc') like '%036%'
+         and not pg_temp.has_policy('knowledge_chunk','knowledge_chunk_read'))
+  union all
+  select '037_bucket_daily_cap.sql'::text, 'sha256:8b7b0c2f1477aa9a2e27eb3a4e6b0064'::text,
+         (pg_temp.has_fn('rate_limit_bucket_daily_cap'))
+  union all
+  select '038_max_height.sql'::text, 'sha256:a3d4d18cb6811b99c45cc25ea10c548d'::text,
+         (pg_temp.has_col('experience','max_height_requirement_cm'))
+  union all
+  select '039_sensitivity_flags_to_tim.sql'::text, 'sha256:7470162c5a7eca7d8c06977fd1191f8a'::text,
+         (pg_temp.fn_src('find_experiences') like '%sens_heights%')
+  union all
+  select '040_sensitivity_four_states.sql'::text, 'sha256:83465f62943fcdb016eb8c31ba594e92'::text,
+         (pg_temp.col_note('experience','sens_heights') like '%ארבעה%')
+  union all
+  select '041_park_intro.sql'::text, 'sha256:87781504e654dea6cefc46f6c17dfb14'::text,
+         (pg_temp.has_col('park','intro_he'))
+  union all
+  select '042_description_and_meet_location.sql'::text, 'sha256:dad982920aa4c925272c9b373d6c2856'::text,
+         (pg_temp.has_col('experience','description_he'))
+  union all
+  select '043_park_candidates.sql'::text, 'sha256:8667d1de9033ebdc5f4956abeb587367'::text,
+         (pg_temp.has_fn('park_candidates'))
+  union all
+  select '044_turn_log.sql'::text, 'sha256:2c1748938e0ab76ed2e507cffbc26254'::text,
+         (to_regclass('public.turn_log') is not null)
+  union all
+  select '045_country.sql'::text, 'sha256:6fe2287748ddec538af1f891d52a0f3b'::text,
+         (pg_temp.has_col('knowledge_doc','country')
+         and pg_temp.con('knowledge_doc','knowledge_doc_country_iso') like '%A-Z%')
+  union all
+  select '046_tester_note.sql'::text, 'sha256:2987c9f9e159b5d032f0eeb909c3c931'::text,
+         (pg_temp.has_fn('save_tester_note')
+         and pg_temp.fn_src('save_tester_note') like '%tester_key%');
+
+-- ── בדיקת יומן התשובות ──────────────────────────────────────────────
+-- 🔴 שלוש קריאות: נענתה · לא נענתה · ארוכה מאוד. הן נמחקות מיד אחרי
+-- שהתוצאה נלכדת, ולכן אינן משאירות זכר ביומן האמיתי.
+select public.log_turn('שאלת בדיקה שנענתה',    true,  null,      'selftest',      10, 20);
+select public.log_turn('שאלת בדיקה שלא נענתה', false, 'no_data', 'selftest',      10, 5);
+select public.log_turn(repeat('א', 900),        false, 'no_data', 'selftest-long', null, null);
+
+create temp table selftest on commit drop as
+  select * from turn_log where model like 'selftest%';
+delete from turn_log where model like 'selftest%';
+
+-- ── הרישום ──────────────────────────────────────────────────────────
+insert into schema_migration (filename, checksum, applied_by, evidence)
+select filename, checksum, 'verify', 'verified' from probe where found
+on conflict (filename) do update
+  set checksum   = excluded.checksum,
+      applied_at = now(),
+      applied_by = excluded.applied_by,
+      evidence   = excluded.evidence
+  where schema_migration.evidence = 'assumed';
+
+-- ── התוצאה ──────────────────────────────────────────────────────────
+-- 🔴 **שאילתה אחת, ובכוונה.** ה-SQL Editor של סופהבייס מציג רק את
+-- תוצאת השאילתה האחרונה. קובץ עם שלוש טבלאות מראה אחת, והשתיים
+-- החשובות נעלמות — וזה בדיוק מה שקרה כאן: רשימת החסרות הייתה ראשונה,
+-- ולכן איש לא ראה אותה.
+--
+-- ⚠️ **וזו אותה תבנית שהקובץ הזה קיים בשבילה:** משהו לא הוצג, ולכן
+-- נקרא כאילו אינו קיים.
+with missing as (select filename from probe where not found),
+     summary as (select evidence, count(*) as n from schema_migration group by evidence)
+select
+  case when exists (select 1 from missing)
+       then '🔴 לא נמצאה במסד — לבדוק ביד'
+       else '✅ כל המיגרציות נמצאו' end                as "מה",
+  coalesce((select string_agg(filename, ', ' order by filename) from missing), '—') as "פרט"
+-- ── שורת הכרעה, לקריאת מכונה ────────────────────────────────────────
+-- 🔴 **קיים כי הבדיקה ב-CI חיפשה את הסימן 🔴 בטקסט — והוא מופיע
+-- בתוך הכותרת עצמה, גם כשאין ממצא.** אזעקה שנדלקת מהשם שלה.
+--
+-- ⚠️ הכותרות נועדו לאדם, והשורה הזו למכונה. `verdict|OK` ותו לא.
+union all
+select 'verdict',
+       case when exists (select 1 from missing)
+              or exists (select 1 from probe p join schema_migration m using (filename)
+                          where m.evidence = 'observed' and m.checksum <> p.checksum)
+            then 'PROBLEM' else 'OK' end
+union all
+select 'ראיה: ' || evidence, n::text from summary
+
+-- ── סטייה: קובץ ברפו שהשתנה אחרי שכבר רץ ────────────────────────────
+-- 🔴 **שאלת גיא, ותשובה שלא הייתה לי קודם.** חתימת הקובץ נשמרת במסד
+-- בזמן ההרצה. אם הקובץ ברפו נערך מאז, השתיים נפרדות — וזו בדיוק
+-- עריכה בדיעבד של מיגרציה שכבר רצה.
+--
+-- ⚠️ **רק על שורות `observed`.** שורת `verified` קיבלה את החתימה שלה
+-- מהרפו ולא מההרצה, ולכן השוואה עליה אינה אומרת דבר. להשוות אותה היה
+-- לייצר ודאות מלאכותית.
+union all
+select '🔴 סטייה: הקובץ ברפו שונה ממה שרץ',
+       coalesce((select string_agg(p.filename, ', ' order by p.filename)
+                   from probe p join schema_migration m using (filename)
+                  where m.evidence = 'observed' and m.checksum <> p.checksum), '—')
+
+-- ── ושורות verified — שאלת גיא, 14.09 ───────────────────────────────
+-- 🔴 **הן לא היו מוגנות בכלל, וזה היה פער ולא הכרעה.**
+--
+-- ⚠️ **התאמה על שורת `verified` אינה אומרת דבר** — החתימה שלה הגיעה
+-- מהרפו ולא מההרצה, ולכן היא מתאימה לעצמה. זו הסיבה שהיא אינה נספרת
+-- בשורה למעלה.
+--
+-- ✅ **אבל אי-התאמה כן אומרת משהו אמיתי:** הקובץ ברפו נערך **אחרי**
+-- שאימתנו שההשפעה שלו נמצאת במסד. כלומר האימות התיישן, ויש לחזור
+-- עליו. זו טענה חלשה יותר מ"שונה ממה שרץ", ולכן היא בשורה נפרדת
+-- ובמילים אחרות — ולא מוזגת פנימה כדי להיראות חזקה יותר.
+--
+-- 🔴 **ומה שגם זה אינו עושה:** להוכיח שהמסד תואם לקובץ. רק הבדיקה
+-- עצמה (`PROBES`) עושה את זה, והיא נכתבת ביד לכל מיגרציה.
+union all
+select '⚠️ הקובץ נערך אחרי האימות — לאמת שוב',
+       coalesce((select string_agg(p.filename, ', ' order by p.filename)
+                   from probe p join schema_migration m using (filename)
+                  where m.evidence = 'verified' and m.checksum <> p.checksum), '—')
+
+-- ── ותנאי גיא על יומן התשובות, באותה טבלה ───────────────────────────
+-- ⚠️ שלוש קריאות בדיקה נכתבו למעלה ונמחקו לפני ההצגה.
+union all select 'turn_log — דליפה: תשובה שנענתה ששמרה טקסט (צפוי 0)',
+  (select count(*)::text from selftest where answered and question is not null)
+union all select 'turn_log — שאלות שנשמרו מתוך 3 קריאות (צפוי 2)',
+  (select count(*)::text from selftest where question is not null)
+union all select 'turn_log — אורך אחרי חיתוך של 900 תווים (צפוי 500)',
+  (select coalesce(max(length(question)),0)::text from selftest where model = 'selftest-long')
+union all select 'turn_log — RLS פעיל · נאכף · policies (צפוי t/t/0)',
+  (select relrowsecurity::text || ' / ' || relforcerowsecurity::text || ' / ' ||
+          (select count(*) from pg_policies
+            where schemaname='public' and tablename='turn_log')::text
+     from pg_class where relname = 'turn_log')
+union all select 'turn_log — עמודות שיכולות להחזיק מזהה (צפוי 0)',
+  (select count(*)::text from pg_attribute
+    where attrelid = 'turn_log'::regclass and attnum > 0 and not attisdropped
+      and attname in ('user_id','conversation_id','ip','session_id'))
+order by 1;
+
+COMMIT;

@@ -35,3 +35,10 @@ comment on column experience.status_note is
   'המשפט של הייצוא על הסטטוס. נושא תאריכים — "Opens Sep 14, 2026" — ובלעדיו coming_soon הוא סטטוס בלי מתי.';
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('019_content_fields_from_export.sql', 'sha256:b01b39e913d0b678813c0dbd2418e0f2',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

@@ -51,3 +51,10 @@ select count(*) as "שורות",
   from experience;
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('042_description_and_meet_location.sql', 'sha256:dad982920aa4c925272c9b373d6c2856',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

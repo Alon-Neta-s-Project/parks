@@ -318,3 +318,10 @@ select name,
   from experience
  where max_height_requirement_cm is not null
  order by name;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('038_max_height.sql', 'sha256:a3d4d18cb6811b99c45cc25ea10c548d',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

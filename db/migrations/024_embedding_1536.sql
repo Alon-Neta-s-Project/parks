@@ -43,3 +43,10 @@ comment on column knowledge_chunk.embedding is
   '1536 ממדים, gemini-embedding-001. ⚠️ נבחר ולא ברירת מחדל: המודל מייצא גם 3072, ומעל 2000 אין אינדקס ANN ב-pgvector.';
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('024_embedding_1536.sql', 'sha256:53083620830633412a6d721d4db03129',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

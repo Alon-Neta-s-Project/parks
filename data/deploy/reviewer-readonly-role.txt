@@ -1,0 +1,117 @@
+-- reviewer-readonly-role — קריאה בלבד לבוחן חיצוני (25.09.2026)
+-- ────────────────────────────────────────────────────────────────────
+-- 📍 להריץ ב: Supabase ← SQL Editor
+-- שם השאילתה: reviewer-readonly — קריאה בלבד לבוחן חיצוני (25.09)
+-- ⚠️ פעם אחת בלבד.
+--
+-- ⛔ **לפני ההרצה: להחליף את הסיסמה.** לייצר סיסמה חזקה, שונה מכל
+-- הקיימות, ולא לשלוח אותה בצ'אט לאף אחד. נטע מעבירה אותה לאלון
+-- ישירות, בערוץ שאינו הצ'אט הזה.
+--
+-- ── למה תפקיד במסד ולא חברות בארגון ──────────────────────────────
+--
+-- בתוכנית Free של סופהבייס יש שלושה תפקידים, והצר שבהם — Developer —
+-- כולל **מחיקה** של נתונים, משתמשים, קבצים ופונקציות, וגם ראייה של
+-- כל המפתחות. כלומר אין שם "קריאה בלבד", והבחירה היא בין הכול לכלום.
+--
+-- כאן ההרשאה נבנית בדיוק: SELECT על טבלאות התוכן, ותו לא.
+--
+-- ⚠️ המחיר, ושייאמר מראש: אלון לא יראה את ממשק סופהבייס. הוא מקבל
+-- מחרוזת חיבור ועובד מול המסד בכלי שהוא בוחר.
+--
+-- ── מה הוא רואה, ומה לא ──────────────────────────────────────────
+--
+-- 🔴 **רשימה מפורשת, ולא `grant select on all tables`.**
+--
+-- `all tables` מעניק גם את מה שלא נבדק, ו-`alter default privileges`
+-- גרוע ממנו: הוא מעניק אוטומטית כל טבלה **עתידית**. כלומר מיגרציה
+-- שתיצור טבלת משתמשים חדשה בעוד חודש הייתה נפתחת לו בלי שאיש יחליט.
+-- זו בדיוק התבנית שהפרויקט הזה נשבר עליה שוב ושוב: הכללה שקטה
+-- שנראית כמו החלטה.
+--
+-- נכלל — תוכן, ואין בו אדם:
+--   park · land · resort · destination · experience ·
+--   experience_editorial · experience_media · knowledge_doc ·
+--   knowledge_chunk · alias_candidate · schema_migration
+--
+-- לא נכלל — כל מה שנוגע באדם או בסוד:
+--   profile · profile_fact · trip · trip_day · trip_member ·
+--   plan_item   ← גילאים וגבהים של ילדים
+--   conversation · message · turn_log · tester_note
+--                 ← מה משתמשות שאלו, ומה הבודקות כתבו
+--   ingest_key   ← סוד
+--   api_call     ← עלויות ודפוסי שימוש
+--
+-- ⚠️ **ו-`experience_source` אינה ברשימה, בכוונה.** היא נושאת את
+-- הקישורים למקורות, והכלל "אין מקורות בממשק" נכתב כדי שהמאסטר לא
+-- ידלוף. בוחן טכני אינו צריך אותה כדי להעריך את המבנה.
+--
+-- ⚠️ **ו-RLS עדיין חל.** התפקיד אינו `bypassrls`, ולכן טבלה עם
+-- מדיניות מגבילה נשארת סגורה בפניו גם אם מישהו יוסיף לו גרנט בטעות.
+
+BEGIN;
+
+set local search_path = public, extensions;
+
+-- ⚠️ `nologin` היה הופך את זה ללא שמיש; `login` בלי `createdb`,
+-- בלי `createrole`, בלי `superuser` ובלי `bypassrls`.
+create role reviewer_readonly login password 'YOUR-REVIEWER-PASSWORD-HERE';
+
+-- ⚠️ החיבור עצמו. בלי זה הוא אינו יכול אפילו להתחבר.
+grant connect on database postgres to reviewer_readonly;
+grant usage   on schema public  to reviewer_readonly;
+
+-- 🔴 **ורק public.** אין `usage` על auth, storage, vault או extensions —
+-- שם יושבים המשתמשים, הקבצים והסודות.
+
+grant select on
+  park, land, resort, destination,
+  experience, experience_editorial, experience_media,
+  knowledge_doc, knowledge_chunk,
+  alias_candidate, schema_migration
+to reviewer_readonly;
+
+COMMIT;
+
+-- ── אימות ────────────────────────────────────────────────────────
+--
+-- ⚠️ **הכיוון שנכשל בפעם הקודמת.** בהרצה של 21.09 בדיקה שנועדה
+-- להוכיח "אין כתיבה" ספרה **קריאה**, כי
+-- `information_schema.column_privileges` פורשת גרנט ברמת טבלה לשורה
+-- לכל עמודה. לכן כאן מסננים במפורש לפי סוג ההרשאה.
+--
+-- 📍 סופהבייס מציג רק את תוצאת השאילתה האחרונה. להריץ את הבלוק הזה
+--    בנפרד, אחרי ה-COMMIT.
+
+select 'התפקיד קיים' as "מה נבדק",
+       (select count(*)::text from pg_roles where rolname = 'reviewer_readonly') as "בפועל",
+       '1' as "מצופה"
+union all
+select 'אינו עוקף RLS',
+       (select count(*)::text from pg_roles
+         where rolname = 'reviewer_readonly' and rolbypassrls), '0'
+union all
+select 'אינו יוצר תפקידים ואינו superuser',
+       (select count(*)::text from pg_roles
+         where rolname = 'reviewer_readonly' and (rolcreaterole or rolsuper or rolcreatedb)), '0'
+union all
+select 'יש לו קריאה על 11 טבלאות התוכן',
+       (select count(distinct table_name)::text from information_schema.table_privileges
+         where grantee = 'reviewer_readonly' and privilege_type = 'SELECT'), '11'
+union all
+-- 🔴 **זו השורה שמכריעה.** אפס כתיבה, על אף טבלה, בשום עמודה.
+select 'אפס הרשאות כתיבה, בכל מקום',
+       (select count(*)::text from information_schema.column_privileges
+         where grantee = 'reviewer_readonly'
+           and privilege_type in ('INSERT','UPDATE','DELETE')), '0'
+union all
+-- ⚠️ ושתיקה על טבלאות האדם אינה מספיקה — היא נבדקת במפורש.
+select 'אפס גישה לטבלאות שנוגעות באדם',
+       (select count(*)::text from information_schema.table_privileges
+         where grantee = 'reviewer_readonly'
+           and table_name in ('profile','profile_fact','trip','trip_day',
+                              'trip_member','plan_item','conversation',
+                              'message','turn_log','tester_note',
+                              'ingest_key','api_call','experience_source')), '0';
+
+-- ── END-reviewer-readonly ─────────────────────────────────────────

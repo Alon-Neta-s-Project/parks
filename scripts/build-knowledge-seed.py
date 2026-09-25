@@ -85,6 +85,119 @@ def chunks(body):
     return out
 
 
+DOC_DEPLOY = """-- {want} — עדכון מסמך ידע בודד
+-- ────────────────────────────────────────────────────────────────────
+-- 📍 להריץ ב: Supabase ← SQL Editor
+-- שם השאילתה: {want} (כלי חוזר — לא צריך מספר)
+--
+-- ⚠️ **נוצר מ-knowledge/{want}.md. אין לערוך ביד.**
+--
+-- 🔴 **אחרי ההרצה חובה להריץ embed.** הקטעים נמחקים ונכתבים מחדש בלי
+-- וקטור. קטע בלי וקטור אינו נשלף, וטים עונה כאילו הוא אינו קיים.
+
+BEGIN;
+
+set local search_path = public, extensions;
+
+insert into knowledge_doc
+  ({cols})
+values
+{doc}
+on conflict (id) do update set
+  {doc_set},
+  updated_at = now();
+
+delete from knowledge_chunk where doc_id = '{want}';
+
+insert into knowledge_chunk
+  (doc_id, chunk_index, content, authority_tier, locale, review_status)
+values
+{chunks};
+
+COMMIT;
+
+select count(*) as "קטעים בלי וקטור — להריץ embed"
+  from knowledge_chunk where embedding is null;
+"""
+
+
+LIVE_CHECK = """-- content-live-check — האם התוכן שכתבנו באמת נשלף
+-- ────────────────────────────────────────────────────────────────────
+-- 📍 להריץ ב: Supabase ← SQL Editor
+-- שם השאילתה: content-live-check (כלי חוזר — לא צריך מספר)
+-- ⚠️ להריץ **אחרי** embed.
+--
+-- 🔴 **תנאי מחייב של גיא (14.09), ולא בדיקה שנחמד שתהיה.**
+--
+-- כתיבת תוכן יושבת בטרנזקציה אחת ומתגלגלת אחורה בכישלון. אבל
+-- ה-embed רץ **אחריה**, מחוץ לטרנזקציה — ובין השניים הקטעים קיימים
+-- בלי וקטור. **קטע בלי וקטור אינו נשלף, וטים עונה כאילו המסמך אינו
+-- קיים.**
+--
+-- ⚠️ כלומר כתיבה שהצליחה במלואה יכולה להשאיר את התוכן **בלתי נראה**,
+-- ושום דבר לא יצעק. זו בדיוק המחלקה של כשלים שהמוצר בנוי נגדה:
+-- "אין נפילה שקטה" ו"שתיקה על ערך נקראת כהעדר".
+--
+-- 🔴 **הכתיבה אינה נחשבת שהצליחה עד שהשורה האחרונה כאן מחזירה ✅.**
+
+with expected (doc_id, chunks) as (
+  values
+{rows}
+),
+actual as (
+  select d.id as doc_id,
+         count(c.id)                                    as chunks,
+         count(c.id) filter (where c.embedding is null) as no_vector
+    from knowledge_doc d
+    left join knowledge_chunk c on c.doc_id = d.id
+   group by d.id
+),
+problems as (
+  select e.doc_id,
+         case
+           when a.doc_id is null            then 'המסמך אינו במסד'
+           when a.no_vector > 0             then 'קטעים בלי וקטור: ' || a.no_vector
+           when a.chunks <> e.chunks        then 'מספר קטעים שונה מהרפו: ' || a.chunks || ' מול ' || e.chunks
+         end as problem
+    from expected e
+    left join actual a on a.doc_id = e.doc_id
+)
+select
+  case when exists (select 1 from problems where problem is not null)
+       then '🔴 תוכן שאינו נשלף — הכתיבה לא הושלמה'
+       else '✅ כל המסמכים במסד, עם וקטור, ובמספר הקטעים הנכון' end as "מה",
+  -- ⚠️ חמישה ראשונים בלבד. רשימה של 65 מסמכים בתא אחד אינה קריאה,
+  -- ובדיקה שלא קוראים אותה אינה בדיקה.
+  coalesce((select string_agg(doc_id || ' — ' || problem, ' · ' order by doc_id)
+              from (select * from problems where problem is not null
+                     order by doc_id limit 5) t)
+           || case when (select count(*) from problems where problem is not null) > 5
+                   then ' · ועוד ' || ((select count(*) from problems where problem is not null) - 5) || ' מסמכים'
+                   else '' end, '—') as "פרט"
+-- ⚠️ שורת הכרעה לקריאת מכונה. הכותרות נועדו לאדם, וסימן שמשמעותו
+-- אזעקה אינו יכול לשבת בתוך שם של שורה.
+union all
+select 'verdict',
+       case when exists (select 1 from problems where problem is not null)
+            then 'PROBLEM' else 'OK' end
+union all
+select 'מסמכים ברפו', (select count(*) from expected)::text
+union all
+select 'מסמכים במסד', (select count(*) from knowledge_doc)::text
+union all
+select 'קטעים בלי וקטור (צפוי 0)',
+       (select count(*) from knowledge_chunk where embedding is null)::text
+-- ⚠️ **מצב רביעי שלא חיפשתי בהתחלה.** וקטור שנוצר במודל ישן אינו
+-- NULL, ולכן כל הבדיקות למעלה עוברות עליו — אבל הוא מושווה לשאילתה
+-- שנוצרה במודל אחר, והשליפה פשוט מחזירה את הדברים הלא נכונים.
+-- 🔴 בשקט. בלי שגיאה. מיגרציה 024 קיימת בדיוק בגלל מעבר כזה.
+union all
+select 'מודלים שונים בשימוש (צפוי: אחד)',
+       coalesce((select string_agg(distinct embedding_model, ' · ')
+                   from knowledge_chunk where embedding_model is not null), '— אין וקטורים —');
+"""
+
+
 def main() -> int:
     files = sorted(DIR.glob("*.md"))
     if not files:
@@ -182,6 +295,37 @@ select
   (select count(*) from knowledge_chunk where embedding is null)      as "בלי וקטור (צפוי: כל הקטעים)",
   (select count(*) from knowledge_doc where cardinality(source_urls) > 1) as "מסמכים עם שני מקורות";
 """
+
+    # ── בדיקת "האם זה באמת נשלף" ─────────────────────────────────────
+    # 🔴 תנאי מחייב של גיא: כתיבה שהצליחה אינה מספיקה. התוכן חייב
+    # להיות **נראה** — כלומר עם וקטור, ובמספר הקטעים שהרפו מצפה לו.
+    if "--live-check" in sys.argv:
+        from collections import Counter
+        counts = Counter(v.split("'")[1] for v in chunk_rows)
+        rows = ",\n".join(f"    ('{d}', {n})" for d, n in sorted(counts.items()))
+        out = ROOT / "data" / "deploy" / "content-live-check.txt"
+        out.write_text(LIVE_CHECK.format(rows=rows), encoding="utf-8")
+        print(f"✅ {out.relative_to(ROOT)} · {len(counts)} מסמכים")
+        return 0
+
+    # ── קובץ פריסה למסמך אחד ────────────────────────────────────────
+    # 🔴 **קיים כי קובצי הפריסה נכתבו ביד.** `data/deploy/parking-and-
+    # arrival.txt` היה עותק ידני של מסמך הידע — בדיוק התבנית שהפילה את
+    # הזרע: תיקון נערך במקור, והעותק המשיך לחיות.
+    if "--doc" in sys.argv:
+        want = sys.argv[sys.argv.index("--doc") + 1]
+        docs = [v for v in doc_rows if v.startswith("('" + want + "'")]
+        rows = [v for v in chunk_rows if v.startswith("('" + want + "'")]
+        if not docs:
+            print("\u2717 \u05d0\u05d9\u05df \u05de\u05e1\u05de\u05da \u05d1\u05e9\u05dd " + want)
+            return 1
+        out = ROOT / "data" / "deploy" / (want + ".txt")
+        sep = ",\n"
+        out.write_text(DOC_DEPLOY.format(
+            want=want, cols=", ".join(DOC_COLS), doc=docs[0],
+            doc_set=doc_set, chunks=sep.join(rows)), encoding="utf-8")
+        print("\u2705 " + str(out.relative_to(ROOT)) + " \u00b7 " + str(len(rows)) + " \u05e7\u05d8\u05e2\u05d9\u05dd")
+        return 0
 
     # 🔴 **`--check` קיים כי הקובץ הזה כבר התיישן בשקט.**
     #

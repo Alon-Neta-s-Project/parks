@@ -70,3 +70,10 @@ comment on view profile_effective is
   'הפרופיל האפקטיבי. מוצהר גובר על מוסק. זהו המקור לטעינת הפרופיל בכל תור.';
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('008_profile_axes.sql', 'sha256:a9ad8de88a58e9334065170cb6938e7f',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

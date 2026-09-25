@@ -1,5 +1,5 @@
 -- ==========================================================================
--- Park Day Companion — מאגר הידע: 62 מסמכים · 296 קטעים
+-- Park Day Companion — מאגר הידע: 66 מסמכים · 314 קטעים
 -- ==========================================================================
 --
 -- נוצר על ידי scripts/build-knowledge-seed.py מתוך knowledge/.
@@ -505,6 +505,60 @@ Express, אירועים מיוחדים, מלון ו-VIP אינם כלולים א
 **אין ל-Animal Kingdom קו תחבורה ייעודי לאף פארק אחר** — והוא היחיד מבין ארבעת השערים שאינו על קו המונוריל ואינו על ה-Skyliner. הגישה אליו היא באוטובוסי דיסני הרגילים בלבד.
 
 זה שונה מהותית מ-Magic Kingdom (מונוריל) ומ-Hollywood Studios ו-EPCOT (Skyliner), ולכן נאמר במפורש ולא נשאר ריק.'),
+('park-character-epcot-wdw', 'אופי הפארק — EPCOT', 'guide', 'T3', 'he', 'wdw', 'static', '2026-09-09', 'approved', array['https://disneyworld.disney.go.com/destinations/epcot/'], 'park_logistics', 'international_guest', 'core', 'N/A', '## קצב ועוצמה כללית
+
+EPCOT הוא הפארק הרגוע ביותר מבין ארבעת פארקי הנושא של וולט דיסני וורלד — לא בכמות מה שיש בו, אלא בקצב שהוא מזמין. יש בו **שתי רכבות הרים בלבד**: Guardians of the Galaxy: Cosmic Rewind, האטרקציה האינטנסיבית בפארק, שאין בה היפוכים; ו-Test Track, שהיא סימולציית נהיגה מהירה ולא רכבת הרים קלאסית.
+
+שאר המתקנים המרכזיים — Spaceship Earth, Frozen Ever After, Remy''s Ratatouille Adventure, Soarin'' Around the World, Living with the Land, The Seas with Nemo & Friends ו-Journey of Water — הם דארק־ריידים רגועים, סימולטורים עדינים או חוויות הליכה.
+
+הפארק מתפקד היטב כיום רגוע בתוך חופשה אינטנסיבית יותר. משפחות עם ילדים קטנים מאוד, זוגות, ומי שמחפש חוויה תרבותית וקולינרית — ימצאו את הקצב נוח. **נוער שמחפש בעיקר ריגוש עלול למצוא אותו שקט מדי**, אלא אם משלבים את שתי הרכבות ואת מופע הערב Luminous: The Symphony of Us.
+
+⚠️ **ורגוע אינו קטן.** EPCOT הוא מהפארקים הגדולים בשטח, והקפת אגם ה-World Showcase לבדה דורשת הליכה משמעותית. העומס הפיזי ביום שלם ניכר — הוא פשוט מגיע מהליכה ומהמתנה למסעדות, ולא מרכבות.
+
+## האזורים, ולמי כל אחד מדבר
+
+הפארק מתחלק לשני חלקים שונים לגמרי באופיים.
+
+**החלק הקדמי — שלושה אזורי נושא:**
+
+- **World Celebration** · סביב Spaceship Earth, הכדור הענק שהוא סמל הפארק. נקודת התארגנות טבעית, לכל הגילאים.
+- **World Discovery** · מתקני הריגוש של הפארק — Cosmic Rewind ו-Test Track. מושך נוער ומבוגרים, וגם משפחות עם ילדים בגובה המתאים.
+- **World Nature** · מוקד סביבתי ורגוע — The Seas with Nemo & Friends, Journey of Water, Soarin'' ו-Living with the Land. מתאים במיוחד לילדים קטנים ולהפוגה ממוזגת.
+
+**World Showcase — טבעת של 11 מדינות סביב לגונה:**
+
+מקסיקו · נורווגיה · סין · גרמניה · איטליה · ארצות הברית · יפן · מרוקו · צרפת · בריטניה · קנדה.
+
+🔴 **ומה שחשוב לתכנון: שבע מתוך 11 אינן מציעות מתקן רכיבה כלל.** גרמניה, איטליה, ארצות הברית, יפן, מרוקו, בריטניה וקנדה הן אוכל, אווירה, מוזיקה ותפאורה. רק ארבע — מקסיקו, נורווגיה, סין וצרפת — כוללות מתקן רכיבה או סרט.
+
+מתוכן, שתיים נוטות לתורים ארוכים: **נורווגיה** בגלל Frozen Ever After, ו**צרפת** בגלל Remy''s Ratatouille Adventure.
+
+## מה מייחד אותו
+
+World Showcase הוא מה שמבדיל את EPCOT מכל פארק אחר: טבעת של 11 מדינות אמיתיות, כל אחת עם אדריכלות אותנטית, מוזיקה חיה ותפריט שונה לגמרי — מה שהופך יום בפארק לסיור עולם ולא ליום מתקנים. זו הסיבה שהוא מתאים במיוחד לזוגות ולמבוגרים שמחפשים יום רגוע, ולמשפחות שרוצות לגוון את הקצב באמצע חופשה אינטנסיבית.
+
+מול Magic Kingdom (האגדתי־משפחתי) ומול Hollywood Studios (הקולנועי), EPCOT הוא התרבותי־קולינרי — ובו העולם עצמו הוא האטרקציה.
+
+## הפסטיבלים
+
+EPCOT מארח את מרבית הפסטיבלים העונתיים של וולט דיסני וורלד, ושואב מהם חלק ניכר מזהותו לאורך השנה. ארבעה מרכזיים, וסדרם חוזר על עצמו משנה לשנה:
+
+- **Festival of the Arts** · ינואר–פברואר
+- **Flower & Garden Festival** · מרץ–יוני, הארוך מביניהם
+- **Food & Wine Festival** · סוף יולי או אוגוסט עד נובמבר, המוכר ביותר, עם דוכני אוכל לאורך היקף הפארק
+- **Festival of the Holidays** · נובמבר–דצמבר, עם תוספות חגיגיות בכל פביליוני World Showcase
+
+**התאריכים המדויקים של כל פסטיבל מתפרסמים רשמית חודשים ספורים מראש בלבד**, ולכן מי שמתכנן טיול רחוק יכול להסתמך על החודשים ולא על תאריך.
+
+## קשרים לפארקים אחרים
+
+**Disney Skyliner** — רכבל אוויר המחבר את EPCOT, בתחנה שליד ה-International Gateway, עם Disney''s Hollywood Studios ועם ארבעה מלונות דיסני: Riviera, Caribbean Beach, Art of Animation ו-Pop Century. מעבר נוח בין שני הפארקים בלי רכב ובלי אוטובוס, עם תצפית מהאוויר בדרך.
+
+⚠️ **הרכבל נסגר ביוזמת דיסני בזמן סופה או ברקים בסביבה.** באורלנדו סופות אחר הצהריים בקיץ הן שגרה, ולכן אין להניח שהוא זמין בשעה מסוימת.
+
+🔴 **ואין בין EPCOT לפארק אחר קישור סיפורי כמו Hogwarts Express ביוניברסל.** ה-Skyliner הוא תחבורה, לא חוויה משותפת בין שני פארקים. מי שמכיר את הרכבת של הארי פוטר ומצפה למקבילה — לא ימצא אותה.
+
+מעבר ל-Skyliner, אין קו ישיר בין EPCOT לבין Magic Kingdom או Animal Kingdom. מעבר אליהם דורש אוטובוס או מונורייל עם החלפה.'),
 ('park-character-epic-uor', 'אופי הפארק — Universal Epic Universe', 'guide', 'T3', 'he', 'uor', 'static', '2026-09-08', 'approved', array['https://www.universalorlando.com/web/en/us/theme-parks/epic-universe'], 'park_logistics', 'international_guest', 'core', 'N/A', '## קצב ועוצמה כללית
 
 פארק חדש לגמרי, שנפתח במאי 2025 — הראשון שיוניברסל בונה מאפס מזה כרבע מאה. הקצב שונה מהותית מ-Islands of Adventure: פחות רכבות בסך הכול, אבל כל עולם בנוי כבועה סגורה חזותית ואקוסטית, עם מערכת פורטלים בין העולמות.
@@ -574,6 +628,8 @@ Galaxy''s Edge נחשב לאזור האימרסיבי ביותר פיזית בכ
 
 ## מה מייחד אותו
 
+הפארק האינטנסיבי־ביותר של יוניברסל אורלנדו — עולמות תמטיים סוחפים (הארי פוטר, ג''ורסיק פארק, מארוול) עם דגש ברור על רכבות־הרים ומתקני־אקסטרים.
+
 מול Universal Studios Florida: "פארק רכבות ההרים" (כעשר אטרקציות אינטנסיביות) מול "חוויית קולנוע וסיפור". מול Epic Universe: פארק בשל ומוכח, עם רכבות אייקוניות, מול פארק חדש ומאוזן יותר.
 
 ## קשרים לפארקים אחרים
@@ -624,6 +680,8 @@ Hollywood Rip Ride Rockit נסגרה סופית. מחליפתה העתידית, 
 - **Hollywood** — קהל כללי, מופעי רחוב.
 
 ## מה מייחד אותו
+
+הפארק המקורי של יוניברסל, בנוי על מורשת־אולפן קולנועית אמיתית — חוויות מבוססות־סיפור וקולנוע לצד רכבות, לא פארק־רכבות־הרים קלאסי.
 
 מול Islands of Adventure: "חוויית קולנוע וסיפור" מול "פארק רכבות ההרים". מול Epic Universe: הפארק הוותיק, שמשלב קלאסיקות (Mummy, MIB) עם תוספות עדכניות. Diagon Alley הוא נקודת משיכה עצמאית בפני עצמה.
 
@@ -752,7 +810,12 @@ Park-to-Park אינו כולל Universal Express, Early Park Admission, אירו
 ## מתי קונים?
 
 אפשר לרכוש מוצר Park-to-Park מלכתחילה או לשאול על שדרוג כרטיס זכאי. השדרוג עשוי לחול על מלוא הכרטיס הרב־יומי ולא רק על יום אחד. יש לבדוק את העלות והתוקף לפני ביצוע שינוי.'),
-('parking-and-arrival-uor', 'חניה והגעה לפארק ברכב — יוניברסל אורלנדו', 'guide', 'T3', 'he', 'uor', 'volatile', '2026-09-09', 'approved', array['https://www.universalorlando.com/web/en/us/plan-your-visit/directions-parking'], 'park_logistics', 'international_guest', 'core', 'N/A', '## 🔴 שני קמפוסים, לא ארבעה חניונים — וזה שונה מהותית מדיסני
+('parking-and-arrival-uor', 'חניה והגעה לפארק ברכב — יוניברסל אורלנדו', 'guide', 'T3', 'he', 'uor', 'volatile', '2026-09-14', 'approved', array['https://www.universalorlando.com/web/en/us/plan-your-visit/directions-parking'], 'park_logistics', 'international_guest', 'core', 'N/A', '## שני מונחים שחוזרים כאן, ואין להם מקבילה מוכרת בעברית
+
+- **קמפוס** — מתחם שלם של פארקים, חניונים ומלונות. ליוניברסל אורלנדו יש שניים, והמעבר ביניהם הוא נסיעה ולא הליכה.
+- **טרם** (Tram) — רכבת כבישים קטנה שמסיעה מהחניון לכניסה, כמו בדיסני. **ביוניברסל אין כזו**, וזה ההבדל שמפתיע ישראלים שכבר היו בדיסני.
+
+## 🔴 שני קמפוסים, לא ארבעה חניונים — וזה שונה מהותית מדיסני
 
 - **הקמפוס הראשי** משרת את Universal Studios Florida, את Islands of Adventure, את Volcano Bay ואת CityWalk — כולם מאותם חניונים רב־קומתיים.
 - **הקמפוס הדרומי** הוא חניון שטח נפרד, ל-Epic Universe בלבד.
@@ -1052,6 +1115,38 @@ Rider Switch אינו כרטיס כניסה ואינו מחליף דרישות �
 עגלות אינן מורשות ברוב המתקנים ויש להשתמש באזורי חניית העגלות המסומנים כאשר צוות הפארק מפנה אליהם. צוות דיסני עשוי להזיז עגלות בתוך אזור החניה לצורכי תפעול. אין להשאיר חפצים אישיים בעגלה ללא השגחה.
 
 עגלות אינן מותרות במדרגות נעות. ניתן להשתמש במעליות וברמפות הזמינות במיקומים המיועדים לכך. כאשר עגלה מסומנת לשימוש רפואי, עשויים לחול עליה כללי נגישות אחרים ויש להסדיר זאת מול Guest Relations.'),
+('universal-express-epic-in-practice-uor', 'Universal Express ב-Epic Universe בפועל — סדר גודל של מחיר', 'tip', 'T3', 'he', 'uor', 'volatile', '2026-09-14', 'approved', array['https://touringplans.com', 'https://deeparrival.com'], 'queue_access', 'international_guest', 'core', 'paid_addon', '## איזה סדר גודל נצפה?
+
+בבדיקה שנערכה ב-14.09.2026 נצפה טווח של כ-200 עד כ-390 דולר לאדם, ליום אחד.
+
+**זהו טווח שנצפה באותו תאריך, ולא מחיר נוכחי מובטח.** המחיר בפועל נקבע לפי התאריך ולפי הביקוש, והפער בין הקצה הנמוך לגבוה הוא כמעט פי שניים — כלומר בחירת התאריך משנה את העלות יותר מכל שיקול אחר.
+
+## איך כדאי להתייחס למספר הזה?
+
+ככלי להערכת סדר גודל בלבד, לפני שמחליטים אם המוצר בכלל רלוונטי לתקציב. **את המחיר בפועל יש לבדוק ביום הרכישה.**
+
+## למה זה משנה למשפחה?
+
+לארבעה אנשים ליום אחד מדובר בהפרש של מאות דולרים בין קצה לקצה. זהו סכום בסדר גודל של לילה במלון או של יום פארק נוסף, ולכן הוא שיקול תקציבי ולא פרט טכני.'),
+('universal-express-epic-uor', 'Universal Express ב-Epic Universe — יוניברסל אורלנדו', 'policy', 'T1', 'he', 'uor', 'static', '2026-09-14', 'approved', array['https://www.universalorlando.com/web/en/us/things-to-do/epic-universe', 'https://touringplans.com', 'https://deeparrival.com'], 'queue_access', 'international_guest', 'core', 'paid_addon', '## מה Express ב-Epic Universe נותן?
+
+גישה לתור Express במתקנים משתתפים ב-Epic Universe. הוא נרכש בנפרד, ואינו חלק מכרטיס הכניסה.
+
+## כמה פעמים אפשר להשתמש בו בכל מתקן?
+
+**פעם אחת בכל מתקן משתתף.** זהו מוצר single-use, ולא Unlimited. השם דומה למוצר של הפארקים הישנים, וההתנהגות שונה.
+
+## האם הוא כלול בשהייה במלון?
+
+**לא, ובשום מלון.** הטבת ה-Express של המלונות שייכת לשלושת מלונות Loews המקוריים ולשני הפארקים הישנים, ואינה חלה על Epic Universe.
+
+## כמה הוא עולה?
+
+**המחיר משתנה לפי תאריך ולפי ביקוש.** אין מחיר קבוע, ואין לשמור סכום כמוצר קבוע.
+
+## האם הוא מבטיח כניסה מהירה לכל מתקן?
+
+לא. הוא חל על מתקנים משתתפים בלבד, וגם בתור Express יכולה להיות המתנה.'),
 ('universal-express-in-practice-uor', 'Universal Express בפועל — יוניברסל אורלנדו', 'tip', 'T3', 'he', 'uor', 'static', '2026-09-01', 'approved', array['https://www.reddit.com/r/UniversalOrlando/comments/1sol625/', 'https://touringplans.com/universal-orlando/universal-express'], 'queue_access', 'international_guest', 'core', 'paid_addon', '## למי Express עשוי להשתלם?
 
 הוא מועיל במיוחד ביום אחד עמוס, לקבוצה עם ילדים שמתקשים בתורים או למי שרוצה להספיק שני פארקים. מבקרים מדווחים על חיסכון משמעותי במתקנים פופולריים, אך התוצאה תלויה ביום ובמתקנים.
@@ -1094,7 +1189,7 @@ Rider Switch אינו כרטיס כניסה ואינו מחליף דרישות �
 סופרים כמה מתקנים באמת רוצים לחזור עליהם ומי בקבוצה יעלה. אם רק אדם אחד רוצה חזרות, אין הכרח שכל הקבוצה תקבל אותו מוצר.
 
 Unlimited מעניק חזרות בתורים משתתפים; הוא אינו מעניק זמן נוסף ביום או פתרון להשבתות.'),
-('universal-express-unlimited-uor', 'Universal Express Unlimited — יוניברסל אורלנדו', 'policy', 'T1', 'he', 'uor', 'static', '2026-09-01', 'approved', array['https://store.universalorlando.com/en/us/store/c/uo_ice_default_pb_express'], 'queue_access', 'international_guest', 'core', 'paid_addon', '## מה Unlimited נותן?
+('universal-express-unlimited-uor', 'Universal Express Unlimited — יוניברסל אורלנדו', 'policy', 'T1', 'he', 'uor', 'static', '2026-09-14', 'approved', array['https://store.universalorlando.com/en/us/store/c/uo_ice_default_pb_express', 'https://www.loewshotels.com', 'https://allears.net', 'https://touringplans.com'], 'queue_access', 'international_guest', 'core', 'paid_addon', '## מה Unlimited נותן?
 
 Express Unlimited מאפשר להשתמש בתור Express מספר פעמים במתקנים משתתפים, במקום פעם אחת בלבד בכל מתקן. הוא תקף רק לפארק, לתאריך ולמוצר שמופיעים ברכישה.
 
@@ -1112,7 +1207,13 @@ Express Unlimited מאפשר להשתמש בתור Express מספר פעמים �
 
 ## מי מקבל אותו דרך מלון?
 
-אורחי מלונות נבחרים מקבלים Express Unlimited בהתאם לתנאי המלון, בדרך כלל ליום הצ’ק-אין וליום הצ’ק-אאוט. רשימת המלונות והפארקים המכוסים עשויה להשתנות ויש לבדוק לפני הזמנה.'),
+שלושה מלונות, ולא "מלונות נבחרים": **Portofino Bay · Hard Rock · Royal Pacific**. בשלושתם Express Unlimited כלול בשהייה, **לכל ימי השהייה** — כולל יום הצ’ק-אין, כל הלילות שביניהם, ויום הצ’ק-אאוט.
+
+ההטבה תקפה ב-Universal Studios Florida וב-Islands of Adventure בלבד.
+
+**בכל שאר מלונות יוניברסל — Sapphire Falls, Cabana Bay, Aventura, Endless Summer, Helios Grand, Stella Nova ו-Terra Luna — Express Unlimited אינו כלול בשהייה.**
+
+**וב-Epic Universe אין Express Unlimited כהטבת מלון לאף מלון, כולל Helios Grand.** ההטבה קשורה בחוזה לשלושת מלונות Loews המקוריים ולשני הפארקים הישנים.'),
 ('universal-express-uor', 'Universal Express Pass — יוניברסל אורלנדו', 'policy', 'T1', 'he', 'uor', 'static', '2026-09-01', 'approved', array['https://store.universalorlando.com/en/us/store/c/uo_ice_default_pb_express'], 'queue_access', 'international_guest', 'core', 'paid_addon', '## מה Express נותן?
 
 Universal Express מאפשר להשתמש בתור Express פעם אחת בכל מתקן משתתף הכלול במוצר שנרכש. הוא מקצר את התור הרגיל, אך אינו מבטיח עלייה מיידית או אפס המתנה.
@@ -1132,6 +1233,36 @@ Universal Express מאפשר להשתמש בתור Express פעם אחת בכל 
 ## כמה פעמים אפשר להשתמש?
 
 ב-Universal Express הרגיל — פעם אחת בכל מתקן משתתף. שימוש חוזר דורש תור רגיל או מוצר Express Unlimited, אם הוא מוצע ומתאים לפארק.'),
+('universal-onsite-hotels-uor', 'מלונות יוניברסל On-Site — הטבות לפי קטגוריה', 'guide', 'T3', 'he', 'uor', 'static', '2026-09-14', 'approved', array['https://www.universalorlandovacations.com/hotels', 'https://allears.net', 'https://touringplans.com', 'https://orlandoinformer.com'], 'hotel_benefit', 'international_guest', 'core', 'included_benefit', '## שש קטגוריות, ולא רשימה אחת של מלונות
+
+מלונות יוניברסל עצמם מתחלקים לשש קטגוריות, וההטבות **שונות בין קטגוריה לקטגוריה**. מלון שותף אינו אחד מהם — הוא תוכנית נפרדת עם הטבות אחרות לגמרי.
+
+המסמך הזה עוסק בכניסה המוקדמת ובתחבורה. Express Unlimited הוא מוצר נפרד עם מדיניות משלו.
+
+## Early Park Admission — כלול בכל מלונות יוניברסל
+
+**EPA כלול בכל שש הקטגוריות, בלי יוצא מן הכלל.** זו ההטבה המשותפת לכל מלונות יוניברסל, ובה הם נבדלים ממלונות שותפים.
+
+בשלושת מלונות Epic Universe — Helios Grand, Stella Nova ו-Terra Luna — ה-EPA כולל גם את Epic Universe עצמו.
+
+## התחבורה — שלוש צורות
+
+**סירות ואוטובוסים:** Portofino Bay, Hard Rock, Royal Pacific ו-Sapphire Falls. התחבורה הזו מגיעה לפארקים המקוריים, **ואינה מגיעה ל-Epic Universe**.
+
+**אוטובוס בלבד:** Cabana Bay, Aventura, Endless Summer ו-Terra Luna.
+
+**הליכה:** ל-Helios Grand כניסה ייעודית ישירות לתוך Epic Universe. מ-Stella Nova ההליכה ל-Epic Universe אורכת כרבע שעה.
+
+## הקטגוריות במלואן
+
+| קטגוריה | מלונות |
+|---|---|
+| Legacy Signature | Portofino Bay · Hard Rock · Royal Pacific |
+| Preferred | Sapphire Falls |
+| Prime Value | Cabana Bay · Aventura · Endless Summer (Surfside ו-Dockside) |
+| Epic Universe — Premier | Helios Grand |
+| Epic Universe — Preferred | Stella Nova |
+| Epic Universe — Value | Terra Luna |'),
 ('vacation-package-uor', 'חבילת מלון וכרטיסים — יוניברסל אורלנדו', 'policy', 'T1', 'he', 'uor', 'static', '2026-09-01', 'approved', array['https://www.universalorlando.com/web/en/us/tickets-packages/vacation-basics'], 'admission', 'international_guest', 'appendix', 'ticket', '## מהי חבילת נופש?
 
 חבילה משלבת לינה, כרטיסי פארק ולעיתים הטבות נוספות. ההרכב משתנה לפי מלון ומבצע. אין להניח ש-Express, Park-to-Park או Epic Universe כלולים ללא ציון מפורש.
@@ -1730,6 +1861,56 @@ Express, אירועים מיוחדים, מלון ו-VIP אינם כלולים א
 **אין ל-Animal Kingdom קו תחבורה ייעודי לאף פארק אחר** — והוא היחיד מבין ארבעת השערים שאינו על קו המונוריל ואינו על ה-Skyliner. הגישה אליו היא באוטובוסי דיסני הרגילים בלבד.
 
 זה שונה מהותית מ-Magic Kingdom (מונוריל) ומ-Hollywood Studios ו-EPCOT (Skyliner), ולכן נאמר במפורש ולא נשאר ריק.', 'T3', 'he', 'approved'),
+('park-character-epcot-wdw', 0, '## קצב ועוצמה כללית
+
+EPCOT הוא הפארק הרגוע ביותר מבין ארבעת פארקי הנושא של וולט דיסני וורלד — לא בכמות מה שיש בו, אלא בקצב שהוא מזמין. יש בו **שתי רכבות הרים בלבד**: Guardians of the Galaxy: Cosmic Rewind, האטרקציה האינטנסיבית בפארק, שאין בה היפוכים; ו-Test Track, שהיא סימולציית נהיגה מהירה ולא רכבת הרים קלאסית.
+
+שאר המתקנים המרכזיים — Spaceship Earth, Frozen Ever After, Remy''s Ratatouille Adventure, Soarin'' Around the World, Living with the Land, The Seas with Nemo & Friends ו-Journey of Water — הם דארק־ריידים רגועים, סימולטורים עדינים או חוויות הליכה.
+
+הפארק מתפקד היטב כיום רגוע בתוך חופשה אינטנסיבית יותר. משפחות עם ילדים קטנים מאוד, זוגות, ומי שמחפש חוויה תרבותית וקולינרית — ימצאו את הקצב נוח. **נוער שמחפש בעיקר ריגוש עלול למצוא אותו שקט מדי**, אלא אם משלבים את שתי הרכבות ואת מופע הערב Luminous: The Symphony of Us.
+
+⚠️ **ורגוע אינו קטן.** EPCOT הוא מהפארקים הגדולים בשטח, והקפת אגם ה-World Showcase לבדה דורשת הליכה משמעותית. העומס הפיזי ביום שלם ניכר — הוא פשוט מגיע מהליכה ומהמתנה למסעדות, ולא מרכבות.', 'T3', 'he', 'approved'),
+('park-character-epcot-wdw', 1, '## האזורים, ולמי כל אחד מדבר
+
+הפארק מתחלק לשני חלקים שונים לגמרי באופיים.
+
+**החלק הקדמי — שלושה אזורי נושא:**
+
+- **World Celebration** · סביב Spaceship Earth, הכדור הענק שהוא סמל הפארק. נקודת התארגנות טבעית, לכל הגילאים.
+- **World Discovery** · מתקני הריגוש של הפארק — Cosmic Rewind ו-Test Track. מושך נוער ומבוגרים, וגם משפחות עם ילדים בגובה המתאים.
+- **World Nature** · מוקד סביבתי ורגוע — The Seas with Nemo & Friends, Journey of Water, Soarin'' ו-Living with the Land. מתאים במיוחד לילדים קטנים ולהפוגה ממוזגת.
+
+**World Showcase — טבעת של 11 מדינות סביב לגונה:**
+
+מקסיקו · נורווגיה · סין · גרמניה · איטליה · ארצות הברית · יפן · מרוקו · צרפת · בריטניה · קנדה.
+
+🔴 **ומה שחשוב לתכנון: שבע מתוך 11 אינן מציעות מתקן רכיבה כלל.** גרמניה, איטליה, ארצות הברית, יפן, מרוקו, בריטניה וקנדה הן אוכל, אווירה, מוזיקה ותפאורה. רק ארבע — מקסיקו, נורווגיה, סין וצרפת — כוללות מתקן רכיבה או סרט.
+
+מתוכן, שתיים נוטות לתורים ארוכים: **נורווגיה** בגלל Frozen Ever After, ו**צרפת** בגלל Remy''s Ratatouille Adventure.', 'T3', 'he', 'approved'),
+('park-character-epcot-wdw', 2, '## מה מייחד אותו
+
+World Showcase הוא מה שמבדיל את EPCOT מכל פארק אחר: טבעת של 11 מדינות אמיתיות, כל אחת עם אדריכלות אותנטית, מוזיקה חיה ותפריט שונה לגמרי — מה שהופך יום בפארק לסיור עולם ולא ליום מתקנים. זו הסיבה שהוא מתאים במיוחד לזוגות ולמבוגרים שמחפשים יום רגוע, ולמשפחות שרוצות לגוון את הקצב באמצע חופשה אינטנסיבית.
+
+מול Magic Kingdom (האגדתי־משפחתי) ומול Hollywood Studios (הקולנועי), EPCOT הוא התרבותי־קולינרי — ובו העולם עצמו הוא האטרקציה.', 'T3', 'he', 'approved'),
+('park-character-epcot-wdw', 3, '## הפסטיבלים
+
+EPCOT מארח את מרבית הפסטיבלים העונתיים של וולט דיסני וורלד, ושואב מהם חלק ניכר מזהותו לאורך השנה. ארבעה מרכזיים, וסדרם חוזר על עצמו משנה לשנה:
+
+- **Festival of the Arts** · ינואר–פברואר
+- **Flower & Garden Festival** · מרץ–יוני, הארוך מביניהם
+- **Food & Wine Festival** · סוף יולי או אוגוסט עד נובמבר, המוכר ביותר, עם דוכני אוכל לאורך היקף הפארק
+- **Festival of the Holidays** · נובמבר–דצמבר, עם תוספות חגיגיות בכל פביליוני World Showcase
+
+**התאריכים המדויקים של כל פסטיבל מתפרסמים רשמית חודשים ספורים מראש בלבד**, ולכן מי שמתכנן טיול רחוק יכול להסתמך על החודשים ולא על תאריך.', 'T3', 'he', 'approved'),
+('park-character-epcot-wdw', 4, '## קשרים לפארקים אחרים
+
+**Disney Skyliner** — רכבל אוויר המחבר את EPCOT, בתחנה שליד ה-International Gateway, עם Disney''s Hollywood Studios ועם ארבעה מלונות דיסני: Riviera, Caribbean Beach, Art of Animation ו-Pop Century. מעבר נוח בין שני הפארקים בלי רכב ובלי אוטובוס, עם תצפית מהאוויר בדרך.
+
+⚠️ **הרכבל נסגר ביוזמת דיסני בזמן סופה או ברקים בסביבה.** באורלנדו סופות אחר הצהריים בקיץ הן שגרה, ולכן אין להניח שהוא זמין בשעה מסוימת.
+
+🔴 **ואין בין EPCOT לפארק אחר קישור סיפורי כמו Hogwarts Express ביוניברסל.** ה-Skyliner הוא תחבורה, לא חוויה משותפת בין שני פארקים. מי שמכיר את הרכבת של הארי פוטר ומצפה למקבילה — לא ימצא אותה.
+
+מעבר ל-Skyliner, אין קו ישיר בין EPCOT לבין Magic Kingdom או Animal Kingdom. מעבר אליהם דורש אוטובוס או מונורייל עם החלפה.', 'T3', 'he', 'approved'),
 ('park-character-epic-uor', 0, '## קצב ועוצמה כללית
 
 פארק חדש לגמרי, שנפתח במאי 2025 — הראשון שיוניברסל בונה מאפס מזה כרבע מאה. הקצב שונה מהותית מ-Islands of Adventure: פחות רכבות בסך הכול, אבל כל עולם בנוי כבועה סגורה חזותית ואקוסטית, עם מערכת פורטלים בין העולמות.
@@ -1791,6 +1972,8 @@ Galaxy''s Edge נחשב לאזור האימרסיבי ביותר פיזית בכ
 - **Seuss Landing** — פעוטות וילדים קטנים.', 'T3', 'he', 'approved'),
 ('park-character-ioa-uor', 2, '## מה מייחד אותו
 
+הפארק האינטנסיבי־ביותר של יוניברסל אורלנדו — עולמות תמטיים סוחפים (הארי פוטר, ג''ורסיק פארק, מארוול) עם דגש ברור על רכבות־הרים ומתקני־אקסטרים.
+
 מול Universal Studios Florida: "פארק רכבות ההרים" (כעשר אטרקציות אינטנסיביות) מול "חוויית קולנוע וסיפור". מול Epic Universe: פארק בשל ומוכח, עם רכבות אייקוניות, מול פארק חדש ומאוזן יותר.', 'T3', 'he', 'approved'),
 ('park-character-ioa-uor', 3, '## קשרים לפארקים אחרים
 
@@ -1835,6 +2018,8 @@ Hollywood Rip Ride Rockit נסגרה סופית. מחליפתה העתידית, 
 - **DreamWorks Land** — ילדים צעירים מאוד וגיל גן.
 - **Hollywood** — קהל כללי, מופעי רחוב.', 'T3', 'he', 'approved'),
 ('park-character-usf-uor', 2, '## מה מייחד אותו
+
+הפארק המקורי של יוניברסל, בנוי על מורשת־אולפן קולנועית אמיתית — חוויות מבוססות־סיפור וקולנוע לצד רכבות, לא פארק־רכבות־הרים קלאסי.
 
 מול Islands of Adventure: "חוויית קולנוע וסיפור" מול "פארק רכבות ההרים". מול Epic Universe: הפארק הוותיק, שמשלב קלאסיקות (Mummy, MIB) עם תוספות עדכניות. Diagon Alley הוא נקודת משיכה עצמאית בפני עצמה.', 'T3', 'he', 'approved'),
 ('park-character-usf-uor', 3, '## קשרים לפארקים אחרים
@@ -1937,11 +2122,15 @@ Park-to-Park אינו כולל Universal Express, Early Park Admission, אירו
 ('park-to-park-uor', 4, '## מתי קונים?
 
 אפשר לרכוש מוצר Park-to-Park מלכתחילה או לשאול על שדרוג כרטיס זכאי. השדרוג עשוי לחול על מלוא הכרטיס הרב־יומי ולא רק על יום אחד. יש לבדוק את העלות והתוקף לפני ביצוע שינוי.', 'T1', 'he', 'approved'),
-('parking-and-arrival-uor', 0, '## 🔴 שני קמפוסים, לא ארבעה חניונים — וזה שונה מהותית מדיסני
+('parking-and-arrival-uor', 0, '## שני מונחים שחוזרים כאן, ואין להם מקבילה מוכרת בעברית
+
+- **קמפוס** — מתחם שלם של פארקים, חניונים ומלונות. ליוניברסל אורלנדו יש שניים, והמעבר ביניהם הוא נסיעה ולא הליכה.
+- **טרם** (Tram) — רכבת כבישים קטנה שמסיעה מהחניון לכניסה, כמו בדיסני. **ביוניברסל אין כזו**, וזה ההבדל שמפתיע ישראלים שכבר היו בדיסני.', 'T3', 'he', 'approved'),
+('parking-and-arrival-uor', 1, '## 🔴 שני קמפוסים, לא ארבעה חניונים — וזה שונה מהותית מדיסני
 
 - **הקמפוס הראשי** משרת את Universal Studios Florida, את Islands of Adventure, את Volcano Bay ואת CityWalk — כולם מאותם חניונים רב־קומתיים.
 - **הקמפוס הדרומי** הוא חניון שטח נפרד, ל-Epic Universe בלבד.', 'T3', 'he', 'approved'),
-('parking-and-arrival-uor', 1, '## ההגעה מהחניון — הליכה, לא טרם
+('parking-and-arrival-uor', 2, '## ההגעה מהחניון — הליכה, לא טרם
 
 בקמפוס הראשי אין טרם. ההגעה היא בהליכה ובמדרגות נעות, דרך CityWalk:
 
@@ -1954,12 +2143,12 @@ Park-to-Park אינו כולל Universal Express, Early Park Admission, אירו
 שני הפארקים חולקים את אותה שרשרת בדיוק, ואין ביניהם הבדל מבני.
 
 ⚠️ **בדיקת הביטחון נעשית ברכזת המרכזית ולא בשער הפארק** — שונה מדיסני, ושווה לדעת מראש.', 'T3', 'he', 'approved'),
-('parking-and-arrival-uor', 2, '## Epic Universe
+('parking-and-arrival-uor', 3, '## Epic Universe
 
 חניון שטח, ולא רב־קומתי, עם אזורים בשמות נושאיים. **אין טרם ואין מדרגות נעות — ההליכה ישירה.**
 
 חלופה: אפשר לחנות בקמפוס הראשי ולנסוע בהסעת אוטובוס חינם ל-Epic Universe.', 'T3', 'he', 'approved'),
-('parking-and-arrival-uor', 3, '## מחירי החניה
+('parking-and-arrival-uor', 4, '## מחירי החניה
 
 - **Self-Parking** — כ-32 דולר בהזמנה מראש, כ-35 בקופה. זהה בשני הקמפוסים.
 - **Prime Parking** — כ-50 עד 60 דולר. ב-Epic Universe כולל חניה מקורה תחת פאנלים סולאריים.
@@ -1968,7 +2157,7 @@ Park-to-Park אינו כולל Universal Express, Early Park Admission, אירו
 - **חינם אחרי 18:00**, למעט לילות אירועים.
 
 בעלי Annual Pass: Premier — חינם ב-Valet וב-Prime. Preferred — Self-Parking חינם, וחצי מחיר ב-Valet.', 'T3', 'he', 'approved'),
-('parking-and-arrival-uor', 4, '## CityWalk
+('parking-and-arrival-uor', 5, '## CityWalk
 
 אינו חניון נפרד. מגיעים אליו דרך חניוני הקמפוס הראשי, באותה שרשרת בדיוק.', 'T3', 'he', 'approved'),
 ('parking-and-arrival-wdw', 0, '## תשלום החניה
@@ -2189,6 +2378,32 @@ Rider Switch אינו כרטיס כניסה ואינו מחליף דרישות �
 עגלות אינן מורשות ברוב המתקנים ויש להשתמש באזורי חניית העגלות המסומנים כאשר צוות הפארק מפנה אליהם. צוות דיסני עשוי להזיז עגלות בתוך אזור החניה לצורכי תפעול. אין להשאיר חפצים אישיים בעגלה ללא השגחה.
 
 עגלות אינן מותרות במדרגות נעות. ניתן להשתמש במעליות וברמפות הזמינות במיקומים המיועדים לכך. כאשר עגלה מסומנת לשימוש רפואי, עשויים לחול עליה כללי נגישות אחרים ויש להסדיר זאת מול Guest Relations.', 'T1', 'he', 'approved'),
+('universal-express-epic-in-practice-uor', 0, '## איזה סדר גודל נצפה?
+
+בבדיקה שנערכה ב-14.09.2026 נצפה טווח של כ-200 עד כ-390 דולר לאדם, ליום אחד.
+
+**זהו טווח שנצפה באותו תאריך, ולא מחיר נוכחי מובטח.** המחיר בפועל נקבע לפי התאריך ולפי הביקוש, והפער בין הקצה הנמוך לגבוה הוא כמעט פי שניים — כלומר בחירת התאריך משנה את העלות יותר מכל שיקול אחר.', 'T3', 'he', 'approved'),
+('universal-express-epic-in-practice-uor', 1, '## איך כדאי להתייחס למספר הזה?
+
+ככלי להערכת סדר גודל בלבד, לפני שמחליטים אם המוצר בכלל רלוונטי לתקציב. **את המחיר בפועל יש לבדוק ביום הרכישה.**', 'T3', 'he', 'approved'),
+('universal-express-epic-in-practice-uor', 2, '## למה זה משנה למשפחה?
+
+לארבעה אנשים ליום אחד מדובר בהפרש של מאות דולרים בין קצה לקצה. זהו סכום בסדר גודל של לילה במלון או של יום פארק נוסף, ולכן הוא שיקול תקציבי ולא פרט טכני.', 'T3', 'he', 'approved'),
+('universal-express-epic-uor', 0, '## מה Express ב-Epic Universe נותן?
+
+גישה לתור Express במתקנים משתתפים ב-Epic Universe. הוא נרכש בנפרד, ואינו חלק מכרטיס הכניסה.', 'T1', 'he', 'approved'),
+('universal-express-epic-uor', 1, '## כמה פעמים אפשר להשתמש בו בכל מתקן?
+
+**פעם אחת בכל מתקן משתתף.** זהו מוצר single-use, ולא Unlimited. השם דומה למוצר של הפארקים הישנים, וההתנהגות שונה.', 'T1', 'he', 'approved'),
+('universal-express-epic-uor', 2, '## האם הוא כלול בשהייה במלון?
+
+**לא, ובשום מלון.** הטבת ה-Express של המלונות שייכת לשלושת מלונות Loews המקוריים ולשני הפארקים הישנים, ואינה חלה על Epic Universe.', 'T1', 'he', 'approved'),
+('universal-express-epic-uor', 3, '## כמה הוא עולה?
+
+**המחיר משתנה לפי תאריך ולפי ביקוש.** אין מחיר קבוע, ואין לשמור סכום כמוצר קבוע.', 'T1', 'he', 'approved'),
+('universal-express-epic-uor', 4, '## האם הוא מבטיח כניסה מהירה לכל מתקן?
+
+לא. הוא חל על מתקנים משתתפים בלבד, וגם בתור Express יכולה להיות המתנה.', 'T1', 'he', 'approved'),
 ('universal-express-in-practice-uor', 0, '## למי Express עשוי להשתלם?
 
 הוא מועיל במיוחד ביום אחד עמוס, לקבוצה עם ילדים שמתקשים בתורים או למי שרוצה להספיק שני פארקים. מבקרים מדווחים על חיסכון משמעותי במתקנים פופולריים, אך התוצאה תלויה ביום ובמתקנים.', 'T3', 'he', 'approved'),
@@ -2237,7 +2452,13 @@ Express Unlimited מאפשר להשתמש בתור Express מספר פעמים �
 לא. רק מתקנים משתתפים. Unlimited מתאר את מספר השימושים, לא כיסוי מלא של כל אטרקציה. גם בתור Express יכולה להיות המתנה.', 'T1', 'he', 'approved'),
 ('universal-express-unlimited-uor', 4, '## מי מקבל אותו דרך מלון?
 
-אורחי מלונות נבחרים מקבלים Express Unlimited בהתאם לתנאי המלון, בדרך כלל ליום הצ’ק-אין וליום הצ’ק-אאוט. רשימת המלונות והפארקים המכוסים עשויה להשתנות ויש לבדוק לפני הזמנה.', 'T1', 'he', 'approved'),
+שלושה מלונות, ולא "מלונות נבחרים": **Portofino Bay · Hard Rock · Royal Pacific**. בשלושתם Express Unlimited כלול בשהייה, **לכל ימי השהייה** — כולל יום הצ’ק-אין, כל הלילות שביניהם, ויום הצ’ק-אאוט.
+
+ההטבה תקפה ב-Universal Studios Florida וב-Islands of Adventure בלבד.
+
+**בכל שאר מלונות יוניברסל — Sapphire Falls, Cabana Bay, Aventura, Endless Summer, Helios Grand, Stella Nova ו-Terra Luna — Express Unlimited אינו כלול בשהייה.**
+
+**וב-Epic Universe אין Express Unlimited כהטבת מלון לאף מלון, כולל Helios Grand.** ההטבה קשורה בחוזה לשלושת מלונות Loews המקוריים ולשני הפארקים הישנים.', 'T1', 'he', 'approved'),
 ('universal-express-uor', 0, '## מה Express נותן?
 
 Universal Express מאפשר להשתמש בתור Express פעם אחת בכל מתקן משתתף הכלול במוצר שנרכש. הוא מקצר את התור הרגיל, אך אינו מבטיח עלייה מיידית או אפס המתנה.', 'T1', 'he', 'approved'),
@@ -2253,6 +2474,33 @@ Universal Express מאפשר להשתמש בתור Express פעם אחת בכל 
 ('universal-express-uor', 4, '## כמה פעמים אפשר להשתמש?
 
 ב-Universal Express הרגיל — פעם אחת בכל מתקן משתתף. שימוש חוזר דורש תור רגיל או מוצר Express Unlimited, אם הוא מוצע ומתאים לפארק.', 'T1', 'he', 'approved'),
+('universal-onsite-hotels-uor', 0, '## שש קטגוריות, ולא רשימה אחת של מלונות
+
+מלונות יוניברסל עצמם מתחלקים לשש קטגוריות, וההטבות **שונות בין קטגוריה לקטגוריה**. מלון שותף אינו אחד מהם — הוא תוכנית נפרדת עם הטבות אחרות לגמרי.
+
+המסמך הזה עוסק בכניסה המוקדמת ובתחבורה. Express Unlimited הוא מוצר נפרד עם מדיניות משלו.', 'T3', 'he', 'approved'),
+('universal-onsite-hotels-uor', 1, '## Early Park Admission — כלול בכל מלונות יוניברסל
+
+**EPA כלול בכל שש הקטגוריות, בלי יוצא מן הכלל.** זו ההטבה המשותפת לכל מלונות יוניברסל, ובה הם נבדלים ממלונות שותפים.
+
+בשלושת מלונות Epic Universe — Helios Grand, Stella Nova ו-Terra Luna — ה-EPA כולל גם את Epic Universe עצמו.', 'T3', 'he', 'approved'),
+('universal-onsite-hotels-uor', 2, '## התחבורה — שלוש צורות
+
+**סירות ואוטובוסים:** Portofino Bay, Hard Rock, Royal Pacific ו-Sapphire Falls. התחבורה הזו מגיעה לפארקים המקוריים, **ואינה מגיעה ל-Epic Universe**.
+
+**אוטובוס בלבד:** Cabana Bay, Aventura, Endless Summer ו-Terra Luna.
+
+**הליכה:** ל-Helios Grand כניסה ייעודית ישירות לתוך Epic Universe. מ-Stella Nova ההליכה ל-Epic Universe אורכת כרבע שעה.', 'T3', 'he', 'approved'),
+('universal-onsite-hotels-uor', 3, '## הקטגוריות במלואן
+
+| קטגוריה | מלונות |
+|---|---|
+| Legacy Signature | Portofino Bay · Hard Rock · Royal Pacific |
+| Preferred | Sapphire Falls |
+| Prime Value | Cabana Bay · Aventura · Endless Summer (Surfside ו-Dockside) |
+| Epic Universe — Premier | Helios Grand |
+| Epic Universe — Preferred | Stella Nova |
+| Epic Universe — Value | Terra Luna |', 'T3', 'he', 'approved'),
 ('vacation-package-uor', 0, '## מהי חבילת נופש?
 
 חבילה משלבת לינה, כרטיסי פארק ולעיתים הטבות נוספות. ההרכב משתנה לפי מלון ומבצע. אין להניח ש-Express, Park-to-Park או Epic Universe כלולים ללא ציון מפורש.', 'T1', 'he', 'approved'),

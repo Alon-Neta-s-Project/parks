@@ -56,3 +56,10 @@ comment on domain authority_tier is
   'שכבת סמכות. T1/T2 לעולם אינם נסתרים על ידי T3-T5. ראה tim-retrieval-and-memory-architecture.md';
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('001_extensions_and_taxonomy.sql', 'sha256:febd46240e77a8da36dea66f41ed0e65',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

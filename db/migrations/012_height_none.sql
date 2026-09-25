@@ -25,3 +25,10 @@ comment on column experience.height_requirement_cm is
   '0 = נבדק, אין מגבלת גובה (מוצג כטקסט, לעולם לא כמספר). NULL = לא נבדק. 50-200 = המגבלה בפועל.';
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('012_height_none.sql', 'sha256:32705b093ef3b15f4b1dab642ef86294',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

@@ -92,3 +92,10 @@ select count(*) filter (where intensity is null) as "בלי דירוג (צפוי
   from public.park_candidates(3);
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('043_park_candidates.sql', 'sha256:8667d1de9033ebdc5f4956abeb587367',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

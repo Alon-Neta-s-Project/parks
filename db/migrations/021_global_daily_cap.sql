@@ -118,3 +118,10 @@ comment on view usage_today is
   'כמה שאלות נשאלו ב-24 השעות האחרונות, וכמה נשאר עד הגדר. העלות מוערכת לפי 0.023 ש"ח להודעה.';
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('021_global_daily_cap.sql', 'sha256:6a77b32f3cac6170e5d8d4654f71cadd',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

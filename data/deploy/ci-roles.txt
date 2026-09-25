@@ -1,0 +1,124 @@
+-- ci-roles — שני תפקידים מוגבלים ל-CI (14.09.2026)
+-- ────────────────────────────────────────────────────────────────────
+-- 📍 להריץ ב: Supabase ← SQL Editor
+-- שם השאילתה: ci-roles — הרשאות ל-CI (14.09)
+-- ⚠️ פעם אחת בלבד.
+--
+-- 🔴 **זה הקובץ האחרון שנטע מריצה ידנית.** אחריו ההרצות והכתיבה
+-- עוברות ל-CI, לפי אישור גיא מ-14.09.
+--
+-- ⛔ **לפני ההרצה: להחליף את שתי הסיסמאות.** לייצר שתיים חזקות
+-- ושונות, ולא לשלוח אותן בצ'אט לאף אחד. הן מודבקות ישירות
+-- ל-GitHub Secrets.
+--
+-- ── למה שני תפקידים ולא אחד ──────────────────────────────────────
+-- 🔴 **הפיצול הוא מה שגיא אישר, והוא לא פורמלי.** תפקיד אחד שמחזיק
+-- את שתי מערכות ההרשאות היה מאפשר לתקלה בנתיב התוכן לגעת ביומן
+-- המיגרציות. שניים נפרדים אינם מאפשרים את זה — גם לא בטעות.
+--
+-- ⚠️ **ושניהם אינם יכולים לגעת בסכמה.** אין `create`, אין `alter`,
+-- אין `drop`, ואין גישה לשום טבלת משתמשים. מיגרציות נשארות ידניות,
+-- כפי שגיא הכריע — והאכיפה היא של Postgres, לא של קובץ workflow
+-- שאפשר לערוך.
+
+BEGIN;
+
+set local search_path = public, extensions;
+
+-- ── התפקידים ────────────────────────────────────────────────────────
+create role ci_verify  login password 'YOUR-VERIFY-PASSWORD-HERE';
+create role ci_content login password 'YOUR-CONTENT-PASSWORD-HERE';
+
+grant connect on database postgres to ci_verify, ci_content;
+grant usage on schema public     to ci_verify, ci_content;
+grant usage on schema extensions to ci_verify, ci_content;
+
+-- ════════════════════════════════════════════════════════════════════
+-- 1 · ci_verify — אימות שהמיגרציות רצו
+-- ════════════════════════════════════════════════════════════════════
+
+-- ⚠️ **כולל כתיבה, ואני מציין את זה במפורש.** `full-check` מסמן
+-- מיגרציה כ-`verified` אחרי שאימת אותה; בלי זה הוא אינו זוכר.
+-- הטבלה מכילה שם קובץ, חתימה, זמן ומי הריץ — **ואין בה שורה אחת
+-- של נתוני משתמש.**
+grant select, insert, update on schema_migration to ci_verify;
+
+-- 🔴 **ובלי policy הגרנט חסר משמעות.** `schema_migration` היא
+-- `force row level security` בלי שום policy — כלומר איש אינו עובר,
+-- כולל הבעלים. זו המדיניות היחידה על הטבלה, והיא לתפקיד אחד.
+create policy schema_migration_ci on schema_migration
+  for all to ci_verify using (true) with check (true);
+
+-- הבדיקה של 034 קוראת שורה אחת מ-experience. יש שם policy ציבורי
+-- לקריאה, ולכן די בגרנט.
+grant select on experience to ci_verify;
+
+-- הבדיקה ההתנהגותית של turn_log עוברת דרך הפונקציה, לא דרך הטבלה.
+grant execute on function public.log_turn(text, boolean, text, text, int, int)
+  to ci_verify;
+
+-- ⚠️ **וקריאת היומן דרך שער, לא דרך גרנט.** `turn_log` היא
+-- `force row level security` בלי policy, בכוונה. פתיחתה בגרנט הייתה
+-- מבטלת את מה שנבנה לפי ארבעת התנאים של גיא. `security definer`
+-- מחזיר בדיוק את מה שצריך ולא יותר.
+create or replace function public.unanswered_sample(p_limit int default 50)
+returns table (created_at timestamptz, refusal_reason text, question text, model text)
+language sql
+stable
+security definer
+set search_path = public, extensions
+as $$
+  select created_at, refusal_reason, question, model
+    from turn_log
+   where answered = false
+   order by created_at desc
+   limit least(coalesce(p_limit, 50), 500);
+$$;
+
+revoke all on function public.unanswered_sample(int) from public;
+grant execute on function public.unanswered_sample(int) to ci_verify;
+
+-- ════════════════════════════════════════════════════════════════════
+-- 2 · ci_content — כתיבת מסמכי ידע בלבד
+-- ════════════════════════════════════════════════════════════════════
+
+-- 🔴 **הטיעון שגיא קיבל:** שתי הטבלאות האלה נגזרות מהרפו במלואן.
+-- כתיבה שגויה מתוקנת בהרצה חוזרת של הגנרטור — **הרפו הוא הגיבוי**,
+-- ואין שם נתוני משתמשים כלל.
+grant select, insert, update, delete on knowledge_doc, knowledge_chunk
+  to ci_content;
+
+create policy knowledge_doc_ci on knowledge_doc
+  for all to ci_content using (true) with check (true);
+create policy knowledge_chunk_ci on knowledge_chunk
+  for all to ci_content using (true) with check (true);
+
+-- ⚠️ ועמודה אחת בלבד ב-park: הפתיח, שנגזר ממדריך האופי.
+grant select, update (intro_he) on park to ci_content;
+create policy park_intro_ci on park
+  for update to ci_content using (true) with check (true);
+
+COMMIT;
+
+-- ── אימות ───────────────────────────────────────────────────────────
+-- 🔴 עמודת "עובר" חייבת להיות ✅ בכל שורה.
+select 'שני התפקידים קיימים' as "הבדיקה",
+       (select count(*)::text from pg_roles where rolname in ('ci_verify','ci_content')) as "יצא",
+       '2' as "צפוי"
+union all
+select 'ואינם superuser',
+       (select count(*)::text from pg_roles
+         where rolname in ('ci_verify','ci_content') and (rolsuper or rolcreatedb or rolcreaterole)), '0'
+union all
+select 'ci_verify אינו נוגע במסמכי ידע',
+       (select count(*)::text from information_schema.role_table_grants
+         where grantee = 'ci_verify' and table_name in ('knowledge_doc','knowledge_chunk')), '0'
+union all
+select 'ci_content אינו נוגע ביומן המיגרציות',
+       (select count(*)::text from information_schema.role_table_grants
+         where grantee = 'ci_content' and table_name = 'schema_migration'), '0'
+union all
+select 'אף אחד מהם אינו נוגע בטבלאות משתמשים',
+       (select count(*)::text from information_schema.role_table_grants
+         where grantee in ('ci_verify','ci_content')
+           and table_name in ('profile','trip','trip_member','conversation','message','turn_log')), '0';

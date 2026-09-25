@@ -179,3 +179,10 @@ select public.rate_limit_daily_cap()        as "גג יומי גלובלי",
        public.rate_limit_window_minutes()   as "אורך החלון",
        round(100.0 * public.rate_limit_bucket_daily_cap()
                    / public.rate_limit_daily_cap()) || '%' as "מה דלי אחד יכול לצרוך";
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('037_bucket_daily_cap.sql', 'sha256:8b7b0c2f1477aa9a2e27eb3a4e6b0064',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

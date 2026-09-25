@@ -264,3 +264,10 @@ COMMIT;
 -- ⚠️ אחרי טעינת התוכן: 77 שורות ב-na, וכולן Entertainment.
 select sens_heights as "ערך", count(*) as "שורות"
   from experience group by 1 order by 2 desc;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('040_sensitivity_four_states.sql', 'sha256:83465f62943fcdb016eb8c31ba594e92',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

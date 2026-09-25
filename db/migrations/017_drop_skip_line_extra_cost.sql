@@ -49,3 +49,10 @@ set local search_path = public, extensions;
 alter table experience drop column if exists skip_line_extra_cost;
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('017_drop_skip_line_extra_cost.sql', 'sha256:6f77d1fab9c67752db3c52674f336155',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

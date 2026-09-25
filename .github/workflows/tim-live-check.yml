@@ -1,0 +1,107 @@
+# מה חי בפונקציה של טים — ולא מה שברפו
+#
+# 🔴 **הפער שהכל נשען עליו: הפונקציה נדבקת ידנית.** בדיקה בזמן בנייה
+# מאמתת את הרפו, והדבקה של קובץ ישן נראית בדיוק כמו הדבקה של חדש.
+# כאן נשאלת הסביבה החיה עצמה.
+#
+# ⚠️ **ולמה זה כאן ולא אצלי:** מדיניות הרשת של סביבת הפיתוח חוסמת את
+# supabase.co, ונטע אינה מריצה דבר ידנית (הכרעתה, 14.09). ל-runner יש
+# רשת, ולכן הוא השואל.
+#
+# ⛔ **שום ערך של סוד אינו מודפס.** `diagnose` מחזיר נוכחות ואורך
+# בלבד, ומה שנקרא מתוכו כאן הוא שני שדות שאינם סודות.
+
+name: מה חי בטים
+
+on:
+  workflow_dispatch:
+    inputs:
+      rate_limit:
+        description: "להריץ גם את הוכחת גדר הקצב (שורפת 21 קריאות מ-600 ליום)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: אבחון — קריאה אחת
+        env:
+          TIM_URL: ${{ secrets.TIM_FUNCTION_URL }}
+          ANON: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          # ⚠️ **קוד שאינו 200 נופל, ולא נספר כ"אין מידע".** תשובה
+          # ריקה מפונקציה שבורה נראית כמו תשובה ריקה מפונקציה תקינה.
+          code=$(curl -sS -o out.json -w '%{http_code}' --max-time 30 \
+            -X POST "$TIM_URL" \
+            -H 'Content-Type: application/json' \
+            -H "apikey: $ANON" -H "Authorization: Bearer $ANON" \
+            --data '{"diagnose":true}') || code=000
+
+          if [ "$code" != "200" ]; then
+            echo "🔴 האבחון החזיר $code" >&2
+            cat out.json >&2
+            exit 1
+          fi
+
+          # 🔴 **שדה חסר אינו ערך, והגרסה הראשונה של הבדיקה הזו קראה
+          # אותו כאחד.** `// "—"` הפך `null` למחרוזת שאינה "0" ואינה
+          # "1", והריצה עברה בירוק על פונקציה ישנה. זו התבנית של
+          # הפרויקט, והפעם היא הייתה בגלאי עצמו. לכן `-e`: jq נכשל על
+          # שדה שאינו קיים, ולא ממציא לו ערך.
+          live=$(jq -re '.deploy_stamp' out.json) || {
+            echo "🔴 התשובה אינה מחזירה deploy_stamp — הפונקציה החיה ישנה מהרפו." >&2
+            exit 1
+          }
+          repo=$(grep -o 'DEPLOY_STAMP = "[^"]*"' supabase/functions/tim/index.ts | head -1 | cut -d'"' -f2)
+
+          echo "▶ deploy_stamp שחי:   $live"
+          echo "▶ deploy_stamp שברפו: $repo"
+
+          if [ "$live" != "$repo" ]; then
+            echo "🔴 הפונקציה שחיה אינה זו שברפו. להדביק מחדש בסופהבייס." >&2
+            exit 1
+          fi
+
+          # ⚠️ `fit_stamp` מודפס לידיעה ואינו מכריע: הוא מגבב את טקסט
+          # כללי ההתאמה בלבד, וב-25.09 הוא אמר "זהה" על פונקציה ישנה.
+          echo "▶ fit_stamp (ניסוח בלבד): $(jq -r '.fit_stamp // "—"' out.json)"
+
+          origins=$(jq -re '.allowed_origins' out.json) || {
+            echo "🔴 אין allowed_origins בתשובה — הפונקציה ישנה." >&2
+            exit 1
+          }
+          echo "▶ allowed_origins:    $origins"
+
+          # 🔴 **אפס הוא הממצא, לא היעדר ממצא.** רשימה ריקה פירושה
+          # `*` לכל מקור — פתוח לכול, ונראה מוגדר.
+          if [ "$origins" = "0" ]; then
+            echo "🔴 ALLOWED_ORIGIN מתנרמל לרשימה ריקה — CORS פתוח לכל מקור." >&2
+            exit 1
+          fi
+
+          # ⚠️ ו-1 אינו תקין מרגע שיש גרסת בדיקה: מקור אחד פירושו
+          # שאחד משני האתרים חסום, ואיש לא יידע עד שמישהי תנסה.
+          if [ "$origins" = "1" ]; then
+            echo "🔴 מקור אחד בלבד — האתר הציבורי או גרסת הבדיקה חסום." >&2
+            exit 1
+          fi
+
+  rate-limit:
+    # ⚠️ ידני ובבקשה מפורשת. ההרצה עולה קריאות אמיתיות.
+    if: ${{ inputs.rate_limit }}
+    needs: diagnose
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: הוכחת גדר הקצב — דרישת גיא, 22.09
+        env:
+          TIM_URL: ${{ secrets.TIM_FUNCTION_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: bash scripts/rate-limit-live.sh

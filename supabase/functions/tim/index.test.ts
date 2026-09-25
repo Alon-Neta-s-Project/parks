@@ -7,6 +7,7 @@ import {
   handle, thinkingConfig, formatChunks, formatExperiences, scrubAnswer,
   extractHeight, extractRideName, looksLikeGeminiKey, bucketKey,
 } from "./index.ts";
+import type { KnowledgeChunk } from "./index.ts";
 
 const KEY = "AIza" + "x".repeat(35);
 const ask = (body: unknown, method = "POST") =>
@@ -215,6 +216,69 @@ Deno.test("CORS מצטמצם לדומיין ברגע ש-ALLOWED_ORIGIN מוגד�
 
   const theirs = await handle(withOrigin("https://evil.example"), env);
   assertEquals(theirs.headers.get("Access-Control-Allow-Origin"), null);
+});
+
+/**
+ * 🔴 **גיא, 23.09 — לפני שהקישור יוצא לטסטרים.**
+ *
+ * כותרת `Origin` שדפדפן שולח לעולם אינה כוללת סלאש בסוף. ערך עם סלאש
+ * היה חוסם כל בקשה אמיתית, והתסמין — CORS — נראה כמו תקלת רשת ולא כמו
+ * הגדרה שגויה. זו בדיוק צורת הכשל שחוזרת כאן: ערך שנראה נכון לחלוטין.
+ */
+Deno.test("סלאש בסוף אינו חוסם, ומקור זר עדיין נחסם", async () => {
+  const withOrigin = (o: string) =>
+    new Request("http://x/tim", { method: "OPTIONS", headers: { origin: o } });
+  const env = { ALLOWED_ORIGIN: "https://parkday.example/" };
+
+  const ours = await handle(withOrigin("https://parkday.example"), env);
+  assertEquals(ours.headers.get("Access-Control-Allow-Origin"), "https://parkday.example");
+
+  const theirs = await handle(withOrigin("https://evil.example"), env);
+  assertEquals(theirs.headers.get("Access-Control-Allow-Origin"), null);
+});
+
+/**
+ * ⚠️ **גרסת הבדיקה היא מקור אחר.** `tim-test--<אתר>.netlify.app` אינו
+ * האתר הציבורי, וערך יחיד פירושו שאחד מהשניים חסום תמיד.
+ */
+Deno.test("שני מקורות מופרדים בפסיק — ושניהם עוברים", async () => {
+  const withOrigin = (o: string) =>
+    new Request("http://x/tim", { method: "OPTIONS", headers: { origin: o } });
+  const env = {
+    ALLOWED_ORIGIN: "https://parkday.example/ , https://tim-test--parkday.example",
+  };
+
+  for (const o of ["https://parkday.example", "https://tim-test--parkday.example"]) {
+    const r = await handle(withOrigin(o), env);
+    assertEquals(r.headers.get("Access-Control-Allow-Origin"), o);
+  }
+
+  // 🔴 **ואין prefix ואין תת־דומיין.** ההרחבה מרחיבה את מה שמותר, ולכן
+  // זו הבדיקה שמונעת ממנה להרחיב יותר ממה שנאמר.
+  for (const o of ["https://parkday.example.evil.com", "https://tim-test--parkday.example.x"]) {
+    const r = await handle(withOrigin(o), env);
+    assertEquals(r.headers.get("Access-Control-Allow-Origin"), null);
+  }
+});
+
+/**
+ * 🔴 **ערך שמתנרמל לריק נפתח, ולא נסגר** — `*` לכולם, ונראה מוגדר.
+ * `diagnose` מחזיר את המספר כדי שההבדל ייראה מהסביבה החיה.
+ */
+Deno.test("האבחון סופר מקורות מנורמלים, לא תווים", async () => {
+  const ask = async (env: Record<string, string | undefined>) => {
+    const r = await handle(
+      new Request("http://x/tim", { method: "POST", body: JSON.stringify({ diagnose: true }) }),
+      env,
+    );
+    return (await r.json()).allowed_origins;
+  };
+
+  // ⚠️ המפתח נדרש כי בדיקת קיומו רצה לפני האבחון.
+  assertEquals(await ask({ GEMINI_API_KEY: KEY }), 0);
+  assertEquals(await ask({ GEMINI_API_KEY: KEY, ALLOWED_ORIGIN: "/" }), 0);
+  assertEquals(await ask({ GEMINI_API_KEY: KEY, ALLOWED_ORIGIN: "https://a/" }), 1);
+  assertEquals(await ask({ GEMINI_API_KEY: KEY, ALLOWED_ORIGIN: "https://a, https://b" }), 2);
 });
 
 Deno.test("הדלי הוא גיבוב — כתובת ה-IP עצמה אינה נשמרת", async () => {
@@ -1104,4 +1168,70 @@ Deno.test("שאלה שאינה על מתקן מחזירה אפס שורות וא
     s.calls.find((c) => c.url.includes("generateContent"))!.init!.body as any,
   ).contents.at(-1).parts[0].text;
   assertEquals(prompt.includes("[מתקן:"), false, "אסור ששורת מתקן תיכנס להקשר");
+});
+
+// ── שכבות ההקשר ───────────────────────────────────────────────────────
+// 🔴 **הכלל "T1/T2 לעולם לא נסתרים על ידי T3-T5" לא היה ניתן לקיום.**
+// הוא היה כתוב בהוראות, והמידע להפעיל אותו עליו לא הגיע למודל: כל
+// הקטעים נכנסו כערימה אחת, וקטע מרדיט נראה זהה למגבלה רשמית.
+//
+// ⚠️ **ושתי הדרישות אינן סותרות, וזה מה שאיפשר את התיקון:** מה שאסור
+// לדלוף הוא **שם הדרגה** (`T1`), ומה שחייב להגיע הוא **הסדר**. התוויות
+// הן מילים בעברית, ולכן הבדיקה על דליפת הדרגה ממשיכה לעבור.
+
+const chunk = (tier: string | null, content: string): KnowledgeChunk => ({
+  content,
+  volatility: "static",
+  last_verified: null,
+  authority_tier: tier,
+});
+
+Deno.test("ההקשר מגיע בשכבות, והרשמי ראשון", () => {
+  const out = formatChunks([
+    chunk("T4", "שמעתי שפותחים מוקדם"),
+    chunk("T1", "הפארק נפתח ב-9:00"),
+    chunk("T3", "הטיפ שלנו"),
+  ]);
+
+  assertEquals(out.includes("[עובדות רשמיות]"), true, "אין שכבה רשמית");
+  assertEquals(out.includes("[מניסיון מבקרים — לא מאומת]"), true, "אין שכבה קהילתית");
+
+  const official = out.indexOf("[עובדות רשמיות]");
+  const ours = out.indexOf("[מהתוכן שלנו]");
+  const community = out.indexOf("[מניסיון מבקרים — לא מאומת]");
+  assertEquals(official < ours && ours < community, true, "הסדר אינו לפי סמכות");
+
+  // ⚠️ והתוכן נשאר בשכבה שלו, לא רק הכותרת.
+  assertEquals(out.indexOf("הפארק נפתח") < out.indexOf("שמעתי שפותחים"), true);
+});
+
+Deno.test("שם הדרגה אינו נכנס להקשר גם אחרי השכבות", () => {
+  const out = formatChunks([chunk("T1", "רשמי"), chunk("T5", "קהילתי")]);
+  for (const code of ["T1", "T2", "T3", "T4", "T5"]) {
+    assertEquals(out.includes(code), false, `${code} דלף להקשר`);
+  }
+});
+
+Deno.test("שכבה ריקה אינה מופיעה ככותרת בלי תוכן", () => {
+  const out = formatChunks([chunk("T1", "רשמי בלבד")]);
+  assertEquals(out.includes("[מניסיון מבקרים — לא מאומת]"), false);
+  assertEquals(out.includes("[מהתוכן שלנו]"), false);
+});
+
+// 🔴 המספור הוא מה שמאפשר כבילת ציטוט (סעיף 3 שלב 6). אם הוא מתאפס
+// בכל שכבה, "קטע 1" מצביע על שלושה דברים שונים.
+Deno.test("המספור רץ על פני השכבות ואינו מתאפס", () => {
+  const out = formatChunks([chunk("T1", "א"), chunk("T4", "ב"), chunk("T3", "ג")]);
+  assertEquals(out.includes("[קטע 1 ·"), true);
+  assertEquals(out.includes("[קטע 2 ·"), true);
+  assertEquals(out.includes("[קטע 3 ·"), true);
+});
+
+// ⚠️ הסכמה אומרת not null, אבל ברירת מחדל שקטה היא בדיוק מה שנשבר כאן
+// שוב ושוב. קטע בלי דרגה יורד, ולא עולה ולא נעלם.
+Deno.test("קטע בלי דרגה אינו נעלם ואינו מוצג כמאומת", () => {
+  const out = formatChunks([chunk("T1", "רשמי"), chunk(null, "בלי דרגה")]);
+  assertEquals(out.includes("בלי דרגה"), true, "הקטע נעלם");
+  assertEquals(out.indexOf("רשמי") < out.indexOf("בלי דרגה"), true, "לא מאומת הוצג לפני רשמי");
+  assertEquals(out.includes("לא מסווג"), true);
 });

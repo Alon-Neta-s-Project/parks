@@ -94,3 +94,10 @@ create view verification_queue as
        or (d.volatility = 'static'   and d.last_verified < current_date - interval '365 days'));
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('003_knowledge.sql', 'sha256:113dc2b23be1e8c5803b4d76200d22bd',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

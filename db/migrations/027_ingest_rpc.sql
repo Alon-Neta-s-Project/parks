@@ -173,3 +173,10 @@ comment on function public.ingest_set_embedding(text, uuid, text, text) is
   '⚠️ כתיבת וקטור. דורשת סוד: מי שיכולה לכתוב וקטור שרירותי יכולה לגרום לטים לשלוף את הקטע הלא נכון לכל שאלה — והרעלת אינדקס שליפה אינה נראית כתקלה אלא כתשובה.';
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('027_ingest_rpc.sql', 'sha256:1f500c8be4515a4e4ef1433899cf6eda',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>

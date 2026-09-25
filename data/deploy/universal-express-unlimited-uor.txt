@@ -1,0 +1,90 @@
+-- universal-express-unlimited-uor — עדכון מסמך ידע בודד
+-- ────────────────────────────────────────────────────────────────────
+-- 📍 להריץ ב: Supabase ← SQL Editor
+-- שם השאילתה: universal-express-unlimited-uor (כלי חוזר — לא צריך מספר)
+--
+-- ⚠️ **נוצר מ-knowledge/universal-express-unlimited-uor.md. אין לערוך ביד.**
+--
+-- 🔴 **אחרי ההרצה חובה להריץ embed.** הקטעים נמחקים ונכתבים מחדש בלי
+-- וקטור. קטע בלי וקטור אינו נשלף, וטים עונה כאילו הוא אינו קיים.
+
+BEGIN;
+
+set local search_path = public, extensions;
+
+insert into knowledge_doc
+  (id, title, doc_type, authority_tier, locale, scope_resort, volatility, last_verified, review_status, source_urls, product_family, audience, v1_priority, purchase_type, body)
+values
+('universal-express-unlimited-uor', 'Universal Express Unlimited — יוניברסל אורלנדו', 'policy', 'T1', 'he', 'uor', 'static', '2026-09-14', 'approved', array['https://store.universalorlando.com/en/us/store/c/uo_ice_default_pb_express', 'https://www.loewshotels.com', 'https://allears.net', 'https://touringplans.com'], 'queue_access', 'international_guest', 'core', 'paid_addon', '## מה Unlimited נותן?
+
+Express Unlimited מאפשר להשתמש בתור Express מספר פעמים במתקנים משתתפים, במקום פעם אחת בלבד בכל מתקן. הוא תקף רק לפארק, לתאריך ולמוצר שמופיעים ברכישה.
+
+## האם הוא כולל כרטיס כניסה?
+
+לא כאשר הוא נרכש כתוספת עצמאית. נדרש כרטיס כניסה תקף. למוצר שמכסה שני פארקים באותו יום נדרש Park-to-Park. חבילת מלון עשויה לכלול Express Unlimited כהטבה, אך גם אז נדרש כרטיס לפארק.
+
+## האם הוא כולל את Epic Universe?
+
+אין להניח שכן. הטבות Express Unlimited של מלונות נבחרים עשויות לחול על Universal Studios Florida ו-Islands of Adventure ולא על Epic Universe. Express ל-Epic הוא מוצר נפרד כאשר מוצע.
+
+## האם כל המתקנים כלולים?
+
+לא. רק מתקנים משתתפים. Unlimited מתאר את מספר השימושים, לא כיסוי מלא של כל אטרקציה. גם בתור Express יכולה להיות המתנה.
+
+## מי מקבל אותו דרך מלון?
+
+שלושה מלונות, ולא "מלונות נבחרים": **Portofino Bay · Hard Rock · Royal Pacific**. בשלושתם Express Unlimited כלול בשהייה, **לכל ימי השהייה** — כולל יום הצ’ק-אין, כל הלילות שביניהם, ויום הצ’ק-אאוט.
+
+ההטבה תקפה ב-Universal Studios Florida וב-Islands of Adventure בלבד.
+
+**בכל שאר מלונות יוניברסל — Sapphire Falls, Cabana Bay, Aventura, Endless Summer, Helios Grand, Stella Nova ו-Terra Luna — Express Unlimited אינו כלול בשהייה.**
+
+**וב-Epic Universe אין Express Unlimited כהטבת מלון לאף מלון, כולל Helios Grand.** ההטבה קשורה בחוזה לשלושת מלונות Loews המקוריים ולשני הפארקים הישנים.')
+on conflict (id) do update set
+  title = excluded.title,
+  doc_type = excluded.doc_type,
+  authority_tier = excluded.authority_tier,
+  locale = excluded.locale,
+  scope_resort = excluded.scope_resort,
+  volatility = excluded.volatility,
+  last_verified = excluded.last_verified,
+  review_status = excluded.review_status,
+  source_urls = excluded.source_urls,
+  product_family = excluded.product_family,
+  audience = excluded.audience,
+  v1_priority = excluded.v1_priority,
+  purchase_type = excluded.purchase_type,
+  body = excluded.body,
+  updated_at = now();
+
+delete from knowledge_chunk where doc_id = 'universal-express-unlimited-uor';
+
+insert into knowledge_chunk
+  (doc_id, chunk_index, content, authority_tier, locale, review_status)
+values
+('universal-express-unlimited-uor', 0, '## מה Unlimited נותן?
+
+Express Unlimited מאפשר להשתמש בתור Express מספר פעמים במתקנים משתתפים, במקום פעם אחת בלבד בכל מתקן. הוא תקף רק לפארק, לתאריך ולמוצר שמופיעים ברכישה.', 'T1', 'he', 'approved'),
+('universal-express-unlimited-uor', 1, '## האם הוא כולל כרטיס כניסה?
+
+לא כאשר הוא נרכש כתוספת עצמאית. נדרש כרטיס כניסה תקף. למוצר שמכסה שני פארקים באותו יום נדרש Park-to-Park. חבילת מלון עשויה לכלול Express Unlimited כהטבה, אך גם אז נדרש כרטיס לפארק.', 'T1', 'he', 'approved'),
+('universal-express-unlimited-uor', 2, '## האם הוא כולל את Epic Universe?
+
+אין להניח שכן. הטבות Express Unlimited של מלונות נבחרים עשויות לחול על Universal Studios Florida ו-Islands of Adventure ולא על Epic Universe. Express ל-Epic הוא מוצר נפרד כאשר מוצע.', 'T1', 'he', 'approved'),
+('universal-express-unlimited-uor', 3, '## האם כל המתקנים כלולים?
+
+לא. רק מתקנים משתתפים. Unlimited מתאר את מספר השימושים, לא כיסוי מלא של כל אטרקציה. גם בתור Express יכולה להיות המתנה.', 'T1', 'he', 'approved'),
+('universal-express-unlimited-uor', 4, '## מי מקבל אותו דרך מלון?
+
+שלושה מלונות, ולא "מלונות נבחרים": **Portofino Bay · Hard Rock · Royal Pacific**. בשלושתם Express Unlimited כלול בשהייה, **לכל ימי השהייה** — כולל יום הצ’ק-אין, כל הלילות שביניהם, ויום הצ’ק-אאוט.
+
+ההטבה תקפה ב-Universal Studios Florida וב-Islands of Adventure בלבד.
+
+**בכל שאר מלונות יוניברסל — Sapphire Falls, Cabana Bay, Aventura, Endless Summer, Helios Grand, Stella Nova ו-Terra Luna — Express Unlimited אינו כלול בשהייה.**
+
+**וב-Epic Universe אין Express Unlimited כהטבת מלון לאף מלון, כולל Helios Grand.** ההטבה קשורה בחוזה לשלושת מלונות Loews המקוריים ולשני הפארקים הישנים.', 'T1', 'he', 'approved');
+
+COMMIT;
+
+select count(*) as "קטעים בלי וקטור — להריץ embed"
+  from knowledge_chunk where embedding is null;

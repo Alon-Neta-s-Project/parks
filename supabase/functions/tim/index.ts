@@ -86,6 +86,18 @@ const RETRY_AFTER_MINUTES = 60;
  *
  * ── נוצר אוטומטית · אין לערוך ידנית ─────────────────────────────────
  */
+/**
+ * 🔴 **חותם על כל הקובץ — כי `FIT_STAMP` אינו.**
+ *
+ * `FIT_STAMP` מגבב את טקסט כללי ההתאמה בלבד, ולכן שינוי קוד שאינו
+ * נוגע בניסוח אינו מזיז אותו. ב-25.09 הוא חזר זהה מהסביבה החיה
+ * בזמן ש-`allowed_origins` לא חזר כלל — כלומר הפונקציה הייתה ישנה,
+ * והחותם אמר "זהה".
+ *
+ * ⚠️ **נוצר בידי `scripts/build-deploy-stamp.py`. אין לערוך ידנית.**
+ */
+const DEPLOY_STAMP = "bfd501af7bd8";
+
 // <fit-rules>
 const FIT_STAMP = "73db7652fca2";
 const FIT_RULES = "\n· ⚠️ **שלושת מצבי ההתאמה, ואלה בדיוק אותם שלושה שהמסך מציג:**\n  **\"מתאים לכל החבורה\"** · **\"לא ידוע אם מתאים לכולם\"** (אין לנו מגבלת גובה למתקן הזה) · **חסר גובה של {{count}} מהחבורה**.\n  שלושה דברים שונים, ואף אחד מהם אינו \"לא מתאים\".\n· ⚠️ ומתקן שאינו פתוח לילד עדיין שווה להזכיר כשאפשר **מתאים למבוגרים, עם Child Swap** — המבוגרים מתחלפים והילד אינו נשאר לבד. זו תשובה שימושית, לא פסילה.";
@@ -338,7 +350,16 @@ function diagnose(env: Record<string, string | undefined>) {
     known,
     other_names: others,
     sent_to_model: thinkingConfig(env),
+    // 🔴 **"קיים · 32 תווים" אינו אומר שהוא תופס.** `https://x/` קיים
+    // ובאורך תקין, ומנורמל לרשימה של אחד שאף דפדפן לא יתאים לו; `/`
+    // לבדו מתנרמל ל**ריק**, כלומר `*` — פתוח לכול, ונראה מוגדר.
+    // המספר הזה הוא ההבדל בין השניים, והוא נבדק מהסביבה החיה.
+    allowed_origins: allowedOrigins(env).length,
     fit_stamp: FIT_STAMP,
+    // ⚠️ **זה החותם שעונה על "האם מה שחי הוא מה שברפו".** `fit_stamp`
+    // עונה רק על "האם בלוק הניסוח נבנה מחדש", וב-25.09 הוא אמר "זהה"
+    // על פונקציה ישנה.
+    deploy_stamp: DEPLOY_STAMP,
   };
 }
 
@@ -693,16 +714,36 @@ export function formatExperiences(rows: ExperienceRow[]): string {
         // זו אותה תבנית שנתפסה כאן שוב ושוב, בכיוון ההפוך: ערך שמשמעותו
         // "לא ידוע / משתנה" נקרא כערך חד. הפעם הוא לא הבטיח בטיחות אלא
         // שלל אפשרות, וזה מזיק באותה מידה.
-        // 🔴 **אוצר המילים כאן אינו זה שמגיע.** הייבוא פולט שלושה ערכים
-        // בלבד — open · closed · check — ו-temporarily_closed ו-coming_soon
-        // אינם נוצרים על ידו לעולם. כלומר ניסוח פולה מ-07.09 יושב כאן
-        // ומעולם לא הגיע למסך, ואילו `check` נפל לענף ברירת המחדל והוצג
-        // למשתמשת כ"⚠️ סטטוס: check" — מילה באנגלית בממשק עברי.
+        // 🔴 **תוקן 23.09 — ההערה שהייתה כאן הייתה שגויה, והיא הטעתה
+        // הכרעת מוצר.**
+        //
+        // היא אמרה ש-`temporarily_closed` ו-`coming_soon` אינם נוצרים
+        // לעולם, ושניסוח פולה מ-07.09 מעולם לא הגיע למסך. על בסיס זה
+        // הוצע להסיר אותם מהמפה — מה שהיה מפיל שלוש שורות אמיתיות
+        // לברירת המחדל, כלומר מילה באנגלית בממשק עברי.
+        //
+        // ⚠️ **שני מקורות, לא אחד.** `npm run import` אכן פולט שלושה
+        // ערכים בלבד — open · closed · check. אבל `build-content-seed.py`
+        // מכריע מעל שלוש שורות שהייצוא סימן `check`, כל אחת אחרי אימות
+        // מול אתר המפעיל:
+        //
+        //   Slush Gusher                  → temporarily_closed
+        //   Meet Moana at Character Landing → temporarily_closed (פולה, 06.09)
+        //   The Magic of Disney Animation → coming_soon
+        //
+        // `verify-content.sql` מצפה בדיוק לזה: 236 open · 3 closed ·
+        // 2 temporarily_closed · 1 coming_soon. כלומר הערכים חיים במסד
+        // ומגיעים למסך.
+        //
+        // ⚠️ ומה שזה מלמד: **הערה שמתארת את המציאות מתיישנת כמו קובץ
+        // נגזר, ובלי בדיקה היא משקרת בשקט.** `check` באמת נפל פעם לענף
+        // ברירת המחדל והוצג כ"⚠️ סטטוס: check"; ההערה נכתבה אז, ונשארה
+        // אחרי שהתמונה השתנתה.
         //
         // ⚠️ זו בדיוק האזהרה שכתובה במיגרציה 037: שינוי אוצר מילים מחייב
-        // שינוי בשני הצדדים. שם היא נכתבה כדי למנוע את זה, וכאן זה כבר קרה.
-        // `check` נוסף עכשיו; איחוד מלא של השלושה מול השניים ממתין לפולה,
-        // כי הניסוח שלה הוא הכרעת מוצר ולא באג.
+        // שינוי בשני הצדדים. ארבעת הערכים כאן מכסים את ארבעת הערכים
+        // שקיימים במסד, ו-`status-vocabulary.test.ts` נופלת אם אחד מהם
+        // יוסר או אם הזרע יתחיל לייצר ערך חמישי.
         const say: Record<string, string> = {
           closed: "⚠️ סגור",
           // ניסוח פולה, 08.09. ⚠️ **תג קבוע וקצר, ובלי לפצל לשני ערכים.**
@@ -840,21 +881,65 @@ export function scrubAnswer(text: string): { clean: string; hits: string[] } {
   return { clean, hits };
 }
 
+/**
+ * שלוש השכבות שבהן ההקשר מורכב — סעיף 3 שלב 5 במסמך השליפה.
+ *
+ * 🔴 **בלי זה קטע מרדיט ומגבלה רשמית מגיעים למודל כשני קטעים שקולים,
+ * ואין לו שום דרך לדעת במי לבטוח.** זה בדיוק מה שסעיף 1 מזהיר מפניו,
+ * והכלל "T1/T2 לעולם לא נסתרים על ידי T3-T5" לא היה ניתן לקיום: הוא
+ * היה כתוב בהוראות, ולא היה מידע להפעיל אותו עליו.
+ *
+ * ⚠️ **והתוויות הן מילים, לא קודים.** `T1` אינו יוצא להקשר — גם לא
+ * דרך התוויות האלה. המודל מקבל היררכיה בשפה, והדרגה עצמה נשארת פנימית
+ * ונבדקת בפלט. שתי הדרישות אינן סותרות: מה שאסור לדלוף הוא **שם
+ * הדרגה**, ומה שחייב להגיע הוא **הסדר**.
+ */
+const LAYERS: { label: string; tiers: string[] }[] = [
+  { label: "עובדות רשמיות", tiers: ["T1", "T2"] },
+  { label: "מהתוכן שלנו", tiers: ["T3"] },
+  { label: "מניסיון מבקרים — לא מאומת", tiers: ["T4", "T5"] },
+];
+
 export function formatChunks(chunks: KnowledgeChunk[]): string {
   const mark: Record<string, string> = {
     volatile: "משתנה",
     seasonal: "עונתי",
     static: "יציב",
   };
-  return chunks
-    .map((c, i) => {
-      // ⚠️ volatility חסר אינו "יציב". קטע בלי סימון נאמר בזהירות ולא
-      // בביטחון — ברירת המחדל היא לכיוון הבטוח, לא לכיוון הנוח.
-      const tag = c.volatility ? mark[c.volatility] ?? "משתנה" : "משתנה";
-      const when = c.last_verified ? ` · נבדק ${c.last_verified}` : "";
-      return `[קטע ${i + 1} · ${tag}${when}]\n${c.content}`;
-    })
-    .join("\n\n");
+
+  const one = (c: KnowledgeChunk, i: number): string => {
+    // ⚠️ volatility חסר אינו "יציב". קטע בלי סימון נאמר בזהירות ולא
+    // בביטחון — ברירת המחדל היא לכיוון הבטוח, לא לכיוון הנוח.
+    const tag = c.volatility ? mark[c.volatility] ?? "משתנה" : "משתנה";
+    const when = c.last_verified ? ` · נבדק ${c.last_verified}` : "";
+    return `[קטע ${i + 1} · ${tag}${when}]\n${c.content}`;
+  };
+
+  // ⚠️ **המספור רץ על פני כל הקטעים ולא מתאפס בכל שכבה.** "קטע 3"
+  // חייב להיות פריט אחד ויחיד, אחרת כבילת ציטוט לא ניתנת למימוש.
+  let n = 0;
+  const blocks: string[] = [];
+
+  for (const layer of LAYERS) {
+    const inLayer = chunks.filter(
+      (c) => c.authority_tier !== null && layer.tiers.includes(c.authority_tier),
+    );
+    if (inLayer.length === 0) continue;
+    blocks.push(`[${layer.label}]\n` + inLayer.map((c) => one(c, n++)).join("\n\n"));
+  }
+
+  // 🔴 **קטע בלי דרגה יורד לשכבה הנמוכה ביותר, ולא נעלם ולא עולה.**
+  // `authority_tier` הוא `not null` בסכמה, אז זה לא אמור לקרות — ואם
+  // בכל זאת קרה, השתיקה הייתה מציגה אותו כאילו הוא מאומת. ברירת המחדל
+  // היא לכיוון הבטוח, כמו ב-volatility שורה מעל.
+  const unknown = chunks.filter((c) => !LAYERS.some(
+    (l) => c.authority_tier !== null && l.tiers.includes(c.authority_tier),
+  ));
+  if (unknown.length > 0) {
+    blocks.push("[מקור לא מסווג — לא מאומת]\n" + unknown.map((c) => one(c, n++)).join("\n\n"));
+  }
+
+  return blocks.join("\n\n");
 }
 
 /**
@@ -885,10 +970,37 @@ export function todayLine(now: Date = new Date()): string {
   ].join("\n");
 }
 
+/**
+ * המקורות המותרים, מנורמלים.
+ *
+ * 🔴 **גיא תפס שתי דרכים שבהן השוואה מדויקת נכשלת על ערך שנראה נכון.**
+ *
+ * 1. **סלאש בסוף.** כותרת `Origin` שדפדפן שולח לעולם אינה כוללת אותו.
+ *    `ALLOWED_ORIGIN=https://x/` היה חוסם **כל** בקשה אמיתית — והתסמין
+ *    הוא CORS, כלומר נראה כמו תקלת רשת ולא כמו הגדרה שגויה.
+ * 2. **מקור אחד בלבד.** גרסת הבדיקה יושבת על
+ *    `tim-test--<אתר>.netlify.app` — מקור **שונה** מהאתר הציבורי. ערך
+ *    יחיד פירושו שאחד מהשניים חסום תמיד.
+ *
+ * ⚠️ **וההרחבה הזו מרחיבה את מה שמותר, ולכן היא מצומצמת בכוונה:**
+ * פיצול לפי פסיק והשוואה מדויקת לכל אחד. **אין כאן prefix ואין תת־דומיין
+ * בכוכבית** — `https://x` שמתאים ל-`https://x.evil.com` הוא בדיוק הכשל
+ * שהצמצום הזה קיים כדי למנוע.
+ */
+function allowedOrigins(env: Record<string, string | undefined>): string[] {
+  return (env.ALLOWED_ORIGIN ?? "")
+    .split(",")
+    .map((o) => o.trim().replace(/\/+$/, ""))
+    .filter((o) => o !== "");
+}
+
 function corsFor(req: Request, env: Record<string, string | undefined>) {
-  const allowed = env.ALLOWED_ORIGIN;
+  const allowed = allowedOrigins(env);
   const origin = req.headers.get("origin");
-  const value = !allowed ? "*" : origin === allowed ? origin : "";
+  // ⚠️ רשימה ריקה = הסוד לא הוגדר, וזה עדיין `*`. ערך שהוא סלאש בלבד,
+  // או פסיקים בלבד, מתנרמל לרשימה ריקה — כלומר **נפתח**, ולא נסגר.
+  // לכן `diagnose` אומר כמה מקורות נספרו, ולא רק שהסוד קיים.
+  const value = allowed.length === 0 ? "*" : origin && allowed.includes(origin) ? origin : "";
   const h: Record<string, string> = {
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
     "Access-Control-Allow-Methods": "POST, OPTIONS",

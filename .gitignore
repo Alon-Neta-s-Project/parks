@@ -19,3 +19,4 @@ data/source/*.json
 !data/source/product_export.csv
 !data/source/product_export_manifest.json
 !data/source/subtype_map.json
+dist-tim-test/

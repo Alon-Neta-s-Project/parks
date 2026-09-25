@@ -66,3 +66,10 @@ alter table profile_fact add constraint profile_fact_key_check check (key in (
 ));
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('010_trip_members.sql', 'sha256:96fa5d133486ccd82b91215c7587c92d',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
