@@ -12,6 +12,22 @@
 
 export type SaveState = "saved" | "local-only" | "sending";
 
+/**
+ * 🔴 **"לא נשלחו" בלי סיבה אינו דיווח — הוא שאלה.**
+ *
+ * בסבב הראשון של נטע (25.09) הערה לא נשלחה, והמסך אמר רק שהיא לא
+ * נשלחה. לא היה שום דבר לפעול לפיו: מפתח שגוי, הרשאה חסרה, רשת,
+ * וכתובת שגויה נראים בדיוק אותו דבר. זו אותה תבנית שהפרויקט הזה
+ * נשבר עליה שוב ושוב — מצב שלא מקבל מילה נקרא כהעדר.
+ *
+ * הסיבה האחרונה נשמרת ומוצגת.
+ */
+let lastError = "";
+
+export function lastSaveError(): string {
+  return lastError;
+}
+
 const URL_BASE = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const ANON = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
 
@@ -53,7 +69,11 @@ export async function saveNote(input: {
   answer?: string;
 }): Promise<SaveState> {
   const key = testerKey();
-  if (!URL_BASE || !ANON || !key) return "local-only";
+  // ⚠️ שלושה חוסרים שונים, ושלוש אמירות שונות. "חסר משהו" היה שולח
+  // אותי לחפש במקום הלא נכון.
+  if (!URL_BASE) { lastError = "חסרה כתובת המסד בבנייה (VITE_SUPABASE_URL)"; return "local-only"; }
+  if (!ANON)     { lastError = "חסר מפתח ציבורי בבנייה (VITE_SUPABASE_ANON_KEY)"; return "local-only"; }
+  if (!key)      { lastError = "חסר מפתח בודק (VITE_TESTER_KEY)"; return "local-only"; }
 
   try {
     const res = await fetch(`${URL_BASE}/rest/v1/rpc/save_tester_note`, {
@@ -72,8 +92,17 @@ export async function saveNote(input: {
         p_answer: input.answer ?? null,
       }),
     });
-    return res.ok ? "saved" : "local-only";
-  } catch {
+    if (res.ok) {
+      lastError = "";
+      return "saved";
+    }
+    // ⚠️ גוף התשובה נקרא, ולא רק הקוד. PostgREST מסביר בו מה נדחה —
+    // "מפתח בודק שגוי" מגיע משם, ו-404 שם פירושו שהפונקציה לא קיימת.
+    const body = await res.text().catch(() => "");
+    lastError = `${res.status} · ${body.slice(0, 200) || "בלי גוף תשובה"}`;
+    return "local-only";
+  } catch (e) {
+    lastError = `הבקשה לא יצאה — ${e instanceof Error ? e.message : "שגיאה לא ידועה"}`;
     return "local-only";
   }
 }

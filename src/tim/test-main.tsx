@@ -2,7 +2,7 @@ import { StrictMode, useCallback, useState } from "react";
 import { createRoot } from "react-dom/client";
 import TimOnlyApp from "./TimOnlyApp";
 import { FeedbackNote } from "./FeedbackNote";
-import { KEY_STORAGE, saveNote, testerKey, type SaveState } from "./save-note";
+import { KEY_STORAGE, lastSaveError, saveNote, testerKey, type SaveState } from "./save-note";
 import "../i18n";
 import "../styles/global.css";
 import "./test-feedback.css";
@@ -122,7 +122,12 @@ function TestHarness() {
                       נקראת כ"הכול נשלח". */}
                   {(() => {
                     const stuck = entries.filter(([id]) => sent[id] !== "saved").length;
-                    return stuck === 0 ? " · כולן נשלחו ✓" : ` · ${stuck} לא נשלחו — להעתיק ידנית`;
+                    if (stuck === 0) return " · כולן נשלחו ✓";
+                    // 🔴 **הסיבה, ולא רק המספר.** "לא נשלחו" בלי סיבה
+                    // אינו דיווח אלא שאלה — מפתח שגוי, הרשאה חסרה
+                    // ורשת נראים בדיוק אותו דבר.
+                    const why = lastSaveError();
+                    return ` · ${stuck} לא נשלחו${why ? ` — ${why}` : ""}`;
                   })()}
                 </div>
                 <button
