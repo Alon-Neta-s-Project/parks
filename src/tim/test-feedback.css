@@ -78,3 +78,35 @@
   background: transparent;
   color: #fff;
 }
+
+/* ── מובייל ───────────────────────────────────────────────────────
+ *
+ * ⚠️ **יעד נגיעה של 0.15rem ריפוד אינו יעד נגיעה.** כפתור "הערה"
+ * ברוחב טלפון היה קטן מהאצבע, ונטע בודקת בדיוק שם — במובייל, בחו"ל.
+ *
+ * ⚠️ וההזחה של 2.6rem נלקחה מרוחב האוורטאר בשולחן העבודה. בטלפון
+ * היא גוזלת כ-15% מהרוחב מכל שורת הערה.
+ */
+@media (max-width: 480px) {
+  .feedback__flag {
+    padding-block: 0.5rem;
+    padding-inline: 0.9rem;
+    font-size: 0.85rem;
+    opacity: 0.9;
+  }
+
+  .feedback__flag,
+  .feedback {
+    margin-inline-start: 0;
+  }
+
+  /* הכפתורים בשורה אחת שנשברת, ולא נדחסים לרוחב של אייקון. */
+  .feedback__export button {
+    padding-block: 0.5rem;
+    padding-inline: 0.9rem;
+  }
+
+  .feedback__preview {
+    max-block-size: 8rem;
+  }
+}
