@@ -1,0 +1,17 @@
+# Only what apps/server/Dockerfile copies needs to reach the build context.
+# ⚠️ .env* especially: a secret in the context can end up in a layer.
+**/node_modules
+**/dist
+**/dist-*
+.git
+.env*
+!.env.example
+apps/web/src
+apps/web/public
+apps/server/content
+apps/server/db
+docs
+design
+evals
+reports
+data

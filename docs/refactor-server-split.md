@@ -21,7 +21,7 @@ scripts/         repo tooling
 | 0 | Decisions: hosting, security review, the gap in the Tim file (see open items) | Open |
 | 1 | npm workspaces and moving folders into the layout above, with no behavior change | ✅ Done 25.09 (workspaces and `packages/shared` deferred to 3) |
 | 2 | Migrations with dbmate, run from CI with an approval gate | Not started |
-| 3 | Port Tim, `embed` and `aliases` to the Node server, running alongside the Edge Function | 3a ✅ workspaces · 3b ✅ server + Tim · 3c ✅ embed + aliases · deployment waits on O1 |
+| 3 | Port Tim, `embed` and `aliases` to the Node server, running alongside the Edge Function | 3a ✅ workspaces · 3b ✅ server + Tim · 3c ✅ embed + aliases · 3d ✅ Docker (local) · deployment waits on O1 |
 | 4 | Point the frontend at the server, retire the Edge Functions, revoke the anon grants | Not started |
 | 5 | Shared logic in `packages/shared`, a browse API, close direct table reads | Not started |
 
@@ -131,6 +131,21 @@ Starting point → end: vitest 287 → 299 (+12 guards and self-checks, none rem
 - The server: `POST /internal/embed` and `POST /internal/aliases`. The secret (`x-ingest-secret`) is checked inside the function itself, exactly as on Supabase, and the route adds and removes nothing. 4 new server tests: 403 without the secret or with a wrong one, `not_configured` without an env value, POST only.
 - CLAUDE.md: the test counts updated (they said 221/66, already stale before) plus `npm run dev:server`.
 - **Tests:** `npm run qa` passes · web 299 · server **11** · deno **104** (75 + the 29 that had never run).
+
+### 3d ✅ Docker, built and tested locally (25.09.2026)
+- **`apps/server/Dockerfile`, two stages.** The build stage bundles with esbuild into a single `server.mjs` (195 KB: Hono plus the three functions). The image that runs has **Node plus one file**: no `node_modules` at all, and it runs as `node`, not root. `HEALTHCHECK` on `/health`.
+- **Build from the repo root** (`npm run docker:server`), because the server imports from `supabase/functions`. `.dockerignore` keeps `.env*`, `node_modules`, content and docs out of the context.
+- esbuild is declared explicitly in the server (`^0.28.2`, already installed by `tsx`). The lock: no existing package changed.
+- **Tested on a running container:**
+  | Check | Result |
+  |---|---|
+  | `/health` · Docker status | `{"ok":true}` · `healthy` |
+  | `diagnose` stamps | `bfd501af7bd8` / `73db7652fca2`, identical to the repo |
+  | No question · GET · OPTIONS | `empty_question` · 405 · 200 |
+  | `embed` without a secret | `not_configured` (closed) |
+  | 🔴 **3 requests, 3 spoofed IPs** (fake database on the host that records the bucket) | **one bucket.** The 4th request: `rate_limited` |
+  | User · `node_modules` | `node` · doesn't exist |
+- Image size: **346 MB**, almost all of it the `node:22-slim` base. `node:22-alpine` would cut it to about half. It isn't worth it before choosing a host.
 
 **Not done yet in Stage 3:**
 - Deployment (Dockerfile + workflow) waits on O1, hosting.
