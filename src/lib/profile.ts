@@ -154,6 +154,9 @@ export interface Question {
  * phrasing — never the order, the fields, or the number of questions.
  */
 export const questions: Question[] = [
+  // TODO: inches display + conversion needed — Hebrew/Israeli UX may want cm,
+  // but US-scale (36", 40", 44", 48", 52", 56"+) is what fits the content and
+  // will be requested. Paula, 25.09: mark it now, do not build it yet.
   { id: "group", kind: "members", freeText: true, why: true },
   {
     // ⚠️ Numbered 0, not 2. It rides along with the group question and the

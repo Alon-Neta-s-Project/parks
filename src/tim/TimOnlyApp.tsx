@@ -61,7 +61,15 @@ export interface TimOnlyAppProps {
    * הציבורית — מהמבנה, לא מחוכמת ה-bundler.
    */
   feedback?: {
-    renderNote: (turnId: string) => React.ReactNode;
+    /**
+     * 🔴 **השאלה והתשובה עוברות, ולא רק המזהה.**
+     *
+     * בסבב הראשון (25.09) הגיעו אליי ארבע הערות מסומנות q0…q3 ובלי
+     * שום הקשר — לא מה נשאל ולא מה טים ענה. הערה על תשובה שאיני
+     * רואה היא ניחוש, והפונקציה במסד כבר קיבלה שדות לשניהם. הם
+     * פשוט מעולם לא נשלחו.
+     */
+    renderNote: (turn: { id: string; question: string; answer: string }) => React.ReactNode;
     /** מוצג בסוף השיחה — ייצוא כל ההערות. */
     footer: React.ReactNode;
   };
@@ -235,7 +243,19 @@ export default function TimOnlyApp({ feedback }: TimOnlyAppProps = {}) {
                 )}
               </div>
               {/* ⚠️ רק כשיש reply. אין טעם להעיר על תשובה שעוד בדרך. */}
-              {feedback && turn.reply !== null ? feedback.renderNote(turn.id) : null}
+              {feedback && turn.reply !== null
+                ? feedback.renderNote({
+                    id: turn.id,
+                    question: turn.question,
+                    // ⚠️ שלושת המצבים מקבלים מילה. "" היה נקרא כתשובה ריקה.
+                    answer:
+                      turn.reply === "clarify"
+                        ? "[טים שאל חזרה במקום לענות]"
+                        : turn.reply.status === "ok"
+                          ? turn.reply.answer
+                          : `[שגיאה: ${turn.reply.reason}]`,
+                  })
+                : null}
             </div>
           </div>
         ))}

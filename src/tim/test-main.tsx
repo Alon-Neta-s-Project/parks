@@ -2,7 +2,7 @@ import { StrictMode, useCallback, useState } from "react";
 import { createRoot } from "react-dom/client";
 import TimOnlyApp from "./TimOnlyApp";
 import { FeedbackNote } from "./FeedbackNote";
-import { KEY_STORAGE, saveNote, testerKey, type SaveState } from "./save-note";
+import { KEY_STORAGE, lastSaveError, saveNote, testerKey, type SaveState } from "./save-note";
 import "../i18n";
 import "../styles/global.css";
 import "./test-feedback.css";
@@ -47,14 +47,27 @@ function TestHarness() {
   const [copied, setCopied] = useState(false);
   /** מצב שליחה לכל הערה. חסר = עוד לא נשלחה בסשן הזה. */
   const [sent, setSent] = useState<Record<string, SaveState>>({});
+  /**
+   * ⚠️ ההקשר של כל הערה — נשמר כדי שגם הייצוא הידני לא ימסור הערות
+   * מרחפות. אינו נשמר ב-localStorage: הוא נגזר מהשיחה שעל המסך,
+   * ושיחה שנסגרה אין מה להעיר עליה.
+   */
+  const [ctx, setCtx] = useState<Record<string, { question: string; answer: string }>>({});
   const [key, setKey] = useState(testerKey);
 
-  const onSave = useCallback((turnId: string, note: string) => {
+  const onSave = useCallback((turnId: string, note: string, ctx?: { question: string; answer: string }) => {
     // 🔴 **המסד אחרי הדפדפן, לא במקומו.** אם השליחה נכשלת ההערה כבר
     // שמורה מקומית — והמסך יראה שהיא לא הגיעה.
+    if (ctx) setCtx((c) => ({ ...c, [turnId]: ctx }));
     if (note !== "") {
       setSent((s) => ({ ...s, [turnId]: "sending" }));
-      void saveNote({ turnRef: turnId, sessionRef: SESSION, note }).then((state) =>
+      void saveNote({
+        turnRef: turnId,
+        sessionRef: SESSION,
+        note,
+        question: ctx?.question,
+        answer: ctx?.answer,
+      }).then((state) =>
         setSent((s) => ({ ...s, [turnId]: state })),
       );
     }
@@ -81,7 +94,14 @@ function TestHarness() {
       : [
           `פידבק מסבב בדיקה · ${new Date().toLocaleString("he-IL")}`,
           "",
-          ...entries.map(([id, note]) => `[${id}]\n${note}`),
+          // ⚠️ גם הייצוא הידני נושא הקשר. בלעדיו הוא מוסר הערות
+          // מרחפות — וזה בדיוק מה שקרה ב-25.09.
+          ...entries.map(([id, note]) => {
+            const c = ctx[id];
+            return c
+              ? `[${id}]\nנשאל: ${c.question}\nטים ענה: ${c.answer}\nההערה: ${note}`
+              : `[${id}]\n${note}`;
+          }),
         ].join("\n\n");
 
   return (
@@ -110,8 +130,14 @@ function TestHarness() {
       </div>
       <TimOnlyApp
         feedback={{
-          renderNote: (id) => (
-            <FeedbackNote turnId={id} note={notes[id] ?? ""} onSave={onSave} />
+          renderNote: (turn) => (
+            <FeedbackNote
+              turnId={turn.id}
+              note={notes[turn.id] ?? ""}
+              onSave={(id, note) =>
+                onSave(id, note, { question: turn.question, answer: turn.answer })
+              }
+            />
           ),
           footer:
             entries.length === 0 ? null : (
@@ -122,7 +148,12 @@ function TestHarness() {
                       נקראת כ"הכול נשלח". */}
                   {(() => {
                     const stuck = entries.filter(([id]) => sent[id] !== "saved").length;
-                    return stuck === 0 ? " · כולן נשלחו ✓" : ` · ${stuck} לא נשלחו — להעתיק ידנית`;
+                    if (stuck === 0) return " · כולן נשלחו ✓";
+                    // 🔴 **הסיבה, ולא רק המספר.** "לא נשלחו" בלי סיבה
+                    // אינו דיווח אלא שאלה — מפתח שגוי, הרשאה חסרה
+                    // ורשת נראים בדיוק אותו דבר.
+                    const why = lastSaveError();
+                    return ` · ${stuck} לא נשלחו${why ? ` — ${why}` : ""}`;
                   })()}
                 </div>
                 <button
