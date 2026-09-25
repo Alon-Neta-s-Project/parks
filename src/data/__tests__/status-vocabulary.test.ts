@@ -30,16 +30,21 @@ const noTsComments = (s: string) =>
 function producible(): Set<string> {
   const py = noPyComments(readFileSync(join(ROOT, "scripts", "build-content-seed.py"), "utf8"));
 
+  // ⚠️ **הבלוק החסר עוצר, ואינו ממשיך לקבוצה ריקה.** קבוצה ריקה
+  // הייתה מעבירה את הבדיקה בטענה שאין מה לבדוק.
   const plain = py.match(/^STATUS\s*=\s*\{([^}]*)\}/m);
   const decided = py.match(/^STATUS_DECIDED\s*=\s*\{([\s\S]*?)^\}/m);
-  expect(plain, "STATUS לא נמצא — הבדיקה קוראת קובץ שהשתנה").not.toBe(null);
-  expect(decided, "STATUS_DECIDED לא נמצא — הבדיקה קוראת קובץ שהשתנה").not.toBe(null);
+  if (!plain?.[1] || !decided?.[1]) {
+    throw new Error("STATUS או STATUS_DECIDED לא נמצאו — הבדיקה קוראת קובץ שהשתנה");
+  }
 
   const out = new Set<string>();
-  // ⚠️ הערך, לא המפתח: `{"open": "open"}` ו-`(…, "check"): "temporarily_closed"`
-  // שניהם ממפים **אל** מה שנכתב למסד.
-  for (const m of plain![1].matchAll(/:\s*"([a-z_]+)"/g)) out.add(m[1]);
-  for (const m of decided![1].matchAll(/:\s*"([a-z_]+)"/g)) out.add(m[1]);
+  // ⚠️ הערך, לא המפתח: שניהם ממפים **אל** מה שנכתב למסד.
+  for (const block of [plain[1], decided[1]]) {
+    for (const m of block.matchAll(/:\s*"([a-z_]+)"/g)) {
+      if (m[1]) out.add(m[1]);
+    }
+  }
   return out;
 }
 
@@ -47,8 +52,13 @@ function producible(): Set<string> {
 function rendered(): Set<string> {
   const ts = noTsComments(readFileSync(join(ROOT, "supabase", "functions", "tim", "index.ts"), "utf8"));
   const block = ts.match(/const say: Record<string, string> = \{([\s\S]*?)\n\s*\};/);
-  expect(block, "מפת הניסוחים לא נמצאה — הבדיקה קוראת קובץ שהשתנה").not.toBe(null);
-  return new Set([...block![1].matchAll(/^\s*([a-z_]+)\s*:/gm)].map((m) => m[1]));
+  if (!block?.[1]) {
+    throw new Error("מפת הניסוחים לא נמצאה — הבדיקה קוראת קובץ שהשתנה");
+  }
+  const keys = [...block[1].matchAll(/^\s*([a-z_]+)\s*:/gm)]
+    .map((m) => m[1])
+    .filter((k): k is string => k !== undefined);
+  return new Set(keys);
 }
 
 describe("אוצר המילים של הסטטוס זהה בשני הצדדים", () => {
