@@ -5,11 +5,11 @@ dist/
 !.env.example
 .DS_Store
 __pycache__/
-dist/
 # ⚠️ תוצר בנייה, ולא מקור. נכנס לרפו בטעות בהעלאה הראשונה — נטפליפיי
 # בונה מהמקור ממילא, והעותק שנשמר כאן היה מתיישן בשקט ומציג את עצמו
 # כעדכני. זה בדיוק הכשל שהמוצר בנוי נגדו.
 dist-tim/
+dist-tim-test/
 *.tsbuildinfo
 
 # ── המאסטר לעולם לא ב-repo ────────────────────────────────────────────────
@@ -20,4 +20,13 @@ apps/server/content/source/*.json
 !apps/server/content/source/product_export.csv
 !apps/server/content/source/product_export_manifest.json
 !apps/server/content/source/subtype_map.json
-dist-tim-test/
+
+# ── נתונים שכלים ברפו מייצרים מקומית ─────────────────────────────────────
+# ⚠️ תוכן שנאסף מפייסבוק לפני שעבר את שוער התוכן — scripts/team1-fetch.sh.
+# ב-CI הוא יוצא כ-artifact; מקומית, בלי השורה הזו, הוא היה נכנס לקומיט.
+data/team1-inbox/
+# ⚠️ הערות הבודקות — tester-notes.yml כותב אותו. מי שמריץ את השאילתה
+# מקומית מקבל קובץ עם מה שבודקות כתבו, בשורש הרפו.
+tester-notes.txt
+# הגדרות אישיות של Claude Code. settings.json משותף ונשאר ברפו.
+.claude/settings.local.json
