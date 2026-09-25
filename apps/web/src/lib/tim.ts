@@ -46,6 +46,11 @@ export type TimFailure =
 const TIM_FUNCTION = "quick-worker";
 
 const timUrl = () => {
+  // ⚠️ The independent server (apps/server), when this build is pointed at it — locally
+  // today, in production after the cut-over (docs/refactor-server-split.md, stage 4).
+  // Unset, nothing changes: the question goes to the Edge Function as before.
+  const own = import.meta.env.VITE_TIM_URL as string | undefined;
+  if (own) return own;
   const base = import.meta.env.VITE_SUPABASE_URL as string | undefined;
   return base ? `${base.replace(/\/$/, "")}/functions/v1/${TIM_FUNCTION}` : null;
 };

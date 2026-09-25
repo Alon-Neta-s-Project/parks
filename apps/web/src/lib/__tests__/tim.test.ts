@@ -3,6 +3,10 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 vi.mock("../supabase", () => ({ isConfigured: true }));
 vi.stubEnv("VITE_SUPABASE_URL", "https://p.supabase.co");
 vi.stubEnv("VITE_SUPABASE_ANON_KEY", "anon-key");
+// ⚠️ **ריק במפורש.** Vite טוען את apps/web/.env.local גם לבדיקות, ומי שמריץ
+// את dev:local מחזיק שם VITE_TIM_URL. בלי השורה הזו הבדיקות עברו אצל מי
+// שאין לו את הקובץ ונפלו אצל מי שיש — בדיקה שתלויה במכונה שמריצה אותה.
+vi.stubEnv("VITE_TIM_URL", "");
 
 const { askTim } = await import("../tim");
 
@@ -31,6 +35,22 @@ describe("טים מהדפדפן", () => {
   });
 
   // ⚠️ "נסי בעוד שעה" למי שהמכסה היומית נגמרה הוא שקר שיתגלה בעוד שעה.
+  /**
+   * ⚠️ **השרת העצמאי (apps/server), לצד פונקציית ה-Edge — לא במקומה.**
+   * בלי VITE_TIM_URL שום דבר לא משתנה, וזו הבדיקה שלמעלה. עם הערך,
+   * השאלה הולכת אליו — כך מריצים את הממשק מקומית מול השרת המקומי.
+   */
+  it("VITE_TIM_URL, כשמוגדר, הוא הכתובת — ובלעדיו נשארים בפונקציה", async () => {
+    vi.stubEnv("VITE_TIM_URL", "http://localhost:8787/tim");
+    reply({ answer: "שלום" });
+    await askTim("שאלה");
+    const calls = () => (fetch as unknown as ReturnType<typeof vi.fn>).mock.calls;
+    expect(calls()[0]![0]).toBe("http://localhost:8787/tim");
+    vi.stubEnv("VITE_TIM_URL", "");
+    await askTim("שאלה");
+    expect(calls()[1]![0]).toBe("https://p.supabase.co/functions/v1/quick-worker");
+  });
+
   it("גדר אישי וגדר יומי הם שתי סיבות שונות", async () => {
     reply({ error: "rate_limited", scope: "user" }, 429);
     expect((await askTim("א")).status === "failed" && (await askTim("א"))).toMatchObject({

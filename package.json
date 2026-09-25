@@ -9,6 +9,7 @@
   ],
   "scripts": {
     "dev": "vite --config apps/web/vite.config.ts",
+    "dev:local": "bash scripts/dev-local.sh",
     "dev:server": "npm -w apps/server run dev",
     "build:server": "npm -w apps/server run build",
     "docker:server": "docker build -f apps/server/Dockerfile -t park-server .",

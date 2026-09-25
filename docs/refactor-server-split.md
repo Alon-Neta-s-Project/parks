@@ -208,7 +208,9 @@ Correct (112 cm, the child is 110). `retrieval: ok` · 5 chunks · 1 attraction 
 
 **Golden set:** `scripts/run-golden.ts` (`npm run golden`), the first runner the set has had. In the first run all **28 were "not run"**: Google was overloaded (502), and an unanswered case isn't counted as either a pass or a failure. The table checks did run, and they match the file (the Hebrew description of Everest and "ולוצירפטור" have no match, as recorded). A bug in the runner itself was found and fixed: `find_experiences` returns `height_cm`, not the table's column name. **The full run is still pending, waiting for Google's load to ease.**
 
-**To run locally again:**
+**To run locally again: `npm run dev:local`** (added the same day). It brings up the database, the server (reloads on every save) and the frontend in one command: the full site at `http://localhost:5173`, Tim only at `/tim.html`, the server at `:8787`. Ctrl+C stops the server and the frontend; the database stays up. It checks Docker, the environment files and the Gemini key, and **stops if the database is empty** rather than bringing up a frontend that looks like it works. The frontend reaches the local server through `VITE_TIM_URL` (in `apps/web/.env.local`). Without that variable, the question goes to the Edge Function as before, so production isn't affected.
+
+**The manual steps, for reference:**
 1. `supabase --workdir apps/server/db/supabase-local start -x gotrue,realtime,storage-api,imgproxy,mailpit,postgres-meta,studio,edge-runtime,logflare,vector,supavisor`. The data is kept in a Docker volume between runs.
 2. `npm run build:server && node --env-file=.env.server apps/server/dist/server.mjs`. `.env.server` isn't in the repo: the Gemini key plus local values.
 3. `npm run golden`.
