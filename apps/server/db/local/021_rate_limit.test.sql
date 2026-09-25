@@ -1,5 +1,5 @@
 -- בדיקות הגדר היומי הגלובלי (מיגרציה 021).
--- הרצה:  psql -h /tmp -p $PGPORT -d pdc -f db/local/021_rate_limit.test.sql
+-- הרצה:  psql -h /tmp -p $PGPORT -d pdc -f apps/server/db/local/021_rate_limit.test.sql
 --
 -- ⚠️ הבדיקות אומתו במוטציה: כשמעלים את rate_limit_daily_cap() ל-999999,
 -- ובדיוק שלוש הבדיקות הגלובליות (ד, ה, ז) נופלות. בדיקה שאינה נופלת

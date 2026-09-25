@@ -41,7 +41,7 @@ const TEXT = /\.(md|ts|tsx|py|sql|sh|yml|yaml|json|astro)$/;
  * על הרשימה.
  */
 const PATH_RE =
-  /(?<![\w./-])((?:docs|claude|scripts|db|supabase|src|data)\/[\w./-]+\.(?:tsx|ts|md|py|sh|sql|json|ya?ml))(?![\w])/g;
+  /(?<![\w./-])((?:apps|docs|claude|scripts|db|supabase|src|data)\/[\w./-]+\.(?:tsx|ts|md|py|sh|sql|json|ya?ml))(?![\w])/g;
 
 /**
  * הפניות שבורות שקיימות מלפני הבדיקה הזו, ושלא ניתן לתקן בלי להכריע
@@ -58,6 +58,46 @@ const KNOWN_STALE = [
   "scripts/seed.ts",
   "db/007_embedding_choice.sql",
 ];
+
+/**
+ * קבצים שהטקסט שלהם קפוא, ולכן הפניה שבהם נקראת לפי המיקום שבו הייתה
+ * נכונה כשנכתבה — ומתורגמת דרך `MOVED`.
+ *
+ * ⚠️ **רק כאן, ולא בכל הרפו.** מפה שחלה על כל קובץ הייתה מעבירה בשקט
+ * נתיב ישן במסמך חי — בדיוק מה שהבדיקה קיימת כדי לתפוס. מסמך חי מתוקן;
+ * רק מה שאסור לגעת בו נכנס לכאן:
+ * - הבריף כפי שהתקבל, ותשובת ההתאמה שנכתבה מולו — תיעוד היסטורי.
+ * - `supabase-bundle.sql` — קובץ נגזר שהתיישן לפני ההזזה (O5 במסמך
+ *   הרפקטור). בנייה מחדש מוסיפה כ-2,700 שורות, ולכן היא לא נעשית
+ *   בקומיט שמזיז קבצים.
+ */
+const FROZEN = [
+  "docs/master-brief-v1.md",
+  "docs/spec/conformance-response.md",
+  "apps/server/db/supabase-bundle.sql",
+];
+
+/** פיצול הרפו (docs/refactor-server-split.md): המיקום הישן → החדש. */
+const MOVED: [string, string][] = [["db/", "apps/server/db/"]];
+
+const resolveIn = (file: string, target: string): string => {
+  if (!FROZEN.includes(file)) return target;
+  const hit = MOVED.find(([from]) => target.startsWith(from));
+  return hit ? hit[1] + target.slice(hit[0].length) : target;
+};
+
+describe("מפת ההזזות אינה מתיישנת", () => {
+  for (const [from] of MOVED) {
+    it(`${from} — כבר אינו קיים, ולכן עדיין במפה`, () => {
+      expect(existsSync(join(ROOT, from)), `${from} קיים שוב — להסיר אותו מ-MOVED`).toBe(false);
+    });
+  }
+  for (const file of FROZEN) {
+    it(`${file} — קיים, ולכן עדיין ברשימת הקפואים`, () => {
+      expect(existsSync(join(ROOT, file)), `${file} אינו קיים — להסיר אותו מ-FROZEN`).toBe(true);
+    });
+  }
+});
 
 describe("רשימת ההיתר אינה מתיישנת", () => {
   for (const target of KNOWN_STALE) {
@@ -92,7 +132,7 @@ describe("כל נתיב שמופיע בטקסט — קיים בפועל", () => 
         if (target.startsWith("supabase/functions/quick-worker")) continue;
         if (target.includes("*")) continue;
         if (KNOWN_STALE.includes(target)) continue;
-        if (!existsSync(join(ROOT, target))) {
+        if (!existsSync(join(ROOT, resolveIn(file, target)))) {
           broken.push(`  ${file} → ${target}`);
         }
       }

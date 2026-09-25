@@ -7,7 +7,7 @@
 -- ⚠️ שורות ריקות אינן הוכחה. הבדיקה שותלת נתוני משתמש אמיתיים ואז מוודאת
 --    ש-anon אינו רואה אותם — אחרת "0 שורות" רק אומר שהטבלה ריקה.
 --
---   psql -f db/local/rls-audit.sql
+--   psql -f apps/server/db/local/rls-audit.sql
 
 do $$ begin
   if not exists (select 1 from pg_roles where rolname='anon') then create role anon nologin; end if;

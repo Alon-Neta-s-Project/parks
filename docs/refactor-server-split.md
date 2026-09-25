@@ -19,7 +19,7 @@ scripts/         repo tooling
 | # | Stage | Status |
 |---|---|---|
 | 0 | Decisions: hosting, security review, the gap in the Tim file (see open items) | Open |
-| 1 | npm workspaces and moving folders into the layout above, with no behavior change | 1a ✅ · 1b-1 ✅ (content) · 1b-2 onward not started |
+| 1 | npm workspaces and moving folders into the layout above, with no behavior change | 1a ✅ · 1b-1 ✅ (content) · 1b-2 ✅ (db) · 1b-3 onward not started |
 | 2 | Migrations with dbmate, run from CI with an approval gate | Not started |
 | 3 | Port Tim, `embed` and `aliases` to the Node server, running alongside the Edge Function | Not started |
 | 4 | Point the frontend at the server, retire the Edge Functions, revoke the anon grants | Not started |
@@ -62,13 +62,23 @@ These are the numbers every step in Stage 1 is compared against.
 ### 1b-1 ✅ Moving the content (25.09.2026)
 - `knowledge/` → `apps/server/content/knowledge/` · `data/source/` → `apps/server/content/source/` · `content-mapping.json` → `apps/server/content/`. All with `git mv`, so history is kept.
 - **The `source` field in `content-mapping.json` is now relative to the mapping file** (`source/product_export.csv`), not to the repo root. Otherwise it would be a second copy of paths outside `paths.json`. The gap report still prints the full path.
-- Updated: `paths.json`, `.gitignore` (the master rules), the `content-and-verify.yml` trigger, the importer's messages, `CLAUDE.md`, `README.md`, `db/README.md`.
+- Updated: `paths.json`, `.gitignore` (the master rules), the `content-and-verify.yml` trigger, the importer's messages, `CLAUDE.md`, `README.md`, `apps/server/db/README.md`.
 - **Tests:** `npm run qa` passes · vitest 288 + 1 skipped · deno 75 · `build` 253 pages · the importer reads from the new location (239/242 pages complete, as before). The only change in a generated file is the `source` path in the gap report.
 - `doc-paths` caught one reference that was missed (`$manifest` inside `content-mapping.json`) before the commit.
 
 ⚠️ **Two things to know when this is pushed:**
 1. **`ci-content.sh` loads only the knowledge documents that changed.** In the move commit, git sees all 66 as new, so the first run on `release` would reload them all and re-embed about 309 chunks. That's harmless but costs Gemini calls, and there's a window where content isn't retrievable. Options: push the move when a full reload is acceptable, or run the script once with a `BEFORE` that points after the move.
 2. **Text inside generated files still says `knowledge/`** (e.g. `נוצר מ-knowledge/...` in the seeds and in `data/deploy/*.txt`, and inside migration `041`, which is signed). It's descriptive text, not a path anything reads. The migrations stay as they are (signatures). The seeds get updated whenever a document is next rebuilt.
+
+### 1b-2 ✅ Moving the database (25.09.2026)
+- `db/` → `apps/server/db/` with `git mv`: migrations, `pending/`, seeds, `local/`, `verify.sql`, the READMEs.
+- **Not one migration changed.** They all appear as pure renames, so the signatures hold (`migration-log.py --check`: 48 signed).
+- Updated: 6 keys in `paths.json`, the `content-and-verify.yml` trigger, live references in `CLAUDE.md`, `.env.example`, the db READMEs, comments in scripts and tests. Including Hebrew prefixes like `מ-db/seed`, which the first pass missed.
+- **`doc-paths.test.ts`, two changes:**
+  1. **`apps/` added to the checked roots.** Until now, a reference to `apps/...` wasn't checked at all, so the new structure would have been exposed to exactly the breakage the test exists to catch.
+  2. **`FROZEN` + `MOVED`:** a path in a frozen file (the brief as received, the conformance response, `supabase-bundle.sql`) resolves through the move map. **Only there**, so a live document with an old path still fails. The map checks itself (an old path that exists again, or a frozen file that disappeared, is a failure).
+  3. Seen failing: removing a file from `FROZEN` flags its reference, and a broken `apps/` reference is caught.
+- **Tests:** `npm run qa` passes · vitest **292** + 1 skipped (+4, the map's self-checks) · deno 75 · `build` 253 pages.
 
 ---
 
@@ -103,3 +113,10 @@ The branches have diverged: `tim-test` has 7 commits this branch doesn't have, a
 
 ### O4 — Port the Python scripts to TypeScript · proposal, not decided
 13 tooling scripts in `scripts/` are Python, and the QA gate and 5 tests depend on them. With a Node server that's a second toolchain, and it already caused a false failure (the system Python 3.9 is too old). Proposal: a step after Stage 1, porting one script at a time with the same `--check` output and a test run after each.
+
+### O5 — `supabase-bundle.sql` is stale, and nothing checks it · found 25.09
+`apps/server/db/supabase-bundle.sql` (a single file of every migration plus seed plus verification block, for setting up a database) was last updated on 07.09. Rebuilding it with `build-supabase-bundle.py` adds about 2,700 lines: every migration since, starting with `000`. **Anyone who sets up a database from it today gets a schema that's weeks old, with no warning.** This is exactly the pattern CLAUDE.md warns about: "a derived file goes stale silently". The seeds have `seed-freshness.test.ts`, and the bundle has nothing.
+
+It wasn't rebuilt during the move so as not to slip a large, unrelated change into a commit of renames only. It's marked `FROZEN` in `doc-paths` for now.
+
+**Proposal:** rebuild it in a separate commit and add a freshness check (like `seed-freshness`). Or, if nobody uses it since the switch to dbmate (Stage 2), delete it along with its script. Needs a decision: is anyone still setting up a database from the bundle?

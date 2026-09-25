@@ -10,7 +10,7 @@ Each file keeps its own BEGIN/COMMIT. That is deliberate: one wrapping
 transaction would roll the whole thing back and hide which file failed, and a
 file with no transaction at all could leave a half-applied migration behind.
 
-⚠️ db/local/000_auth_shim.sql is deliberately excluded. On Supabase the auth
+⚠️ apps/server/db/local/000_auth_shim.sql is deliberately excluded. On Supabase the auth
 schema belongs to the platform; the shim would collide with the real one.
 
 Usage: python3 scripts/build-supabase-bundle.py
@@ -28,7 +28,7 @@ verify = P.DB / "verify.sql"
 if not migrations:
     raise SystemExit("no migrations found")
 if not verify.exists():
-    raise SystemExit("db/verify.sql is missing — the file needs its verification block")
+    raise SystemExit("apps/server/db/verify.sql is missing — the file needs its verification block")
 
 # A file whose name does not start with its number would run out of order.
 for f in migrations:
@@ -47,14 +47,14 @@ header = f"""{RULE}
 --   כל המיגרציות והנתונים הקבועים, בקובץ אחד, בסדר הנכון. להדביק ל-
 --   Supabase Studio ← SQL Editor ← New query, וללחוץ Run פעם אחת.
 --   נוצר אוטומטית על ידי scripts/build-supabase-bundle.py. אין לערוך אותו
---   ביד — לערוך את הקבצים ב-db/migrations ולהריץ את הסקריפט מחדש.
+--   ביד — לערוך את הקבצים ב-apps/server/db/migrations ולהריץ את הסקריפט מחדש.
 --
 -- הסדר
 {chr(10).join('--   ' + s for s in steps)}
 --   {len(files) + 1}. בלוק אימות — שאילתה אחת שמדווחת מה נוצר בפועל.
 --
 -- מה שאין כאן, בכוונה
---   db/local/000_auth_shim.sql. הוא מפגם מקומי לסכמת auth. ב-Supabase
+--   apps/server/db/local/000_auth_shim.sql. הוא מפגם מקומי לסכמת auth. ב-Supabase
 --   הסכמה הזו שייכת לפלטפורמה וכבר קיימת, והפיגום היה מתנגש בה.
 --
 -- אם משהו נופל

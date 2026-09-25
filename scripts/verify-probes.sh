@@ -43,7 +43,7 @@ su postgres -c "psql -h /tmp -p $PORT -d probes -q -f $DB_LOCAL/000_auth_shim.sq
 # את הבדיקה לרפויה, וזה בדיוק מה שהכלי הזה נועד לתפוס.
 NEEDS_DATA=""
 seed_rows() {
-  # ⚠️ הפארקים מגיעים מ-db/seed ולא מהמיגרציות. בלעדיהם ה-FK של
+  # ⚠️ הפארקים מגיעים מ-apps/server/db/seed ולא מהמיגרציות. בלעדיהם ה-FK של
   # experience אינו מסופק, והזרע נכשל בשקט — כלומר ארבע הבדיקות
   # היו מדווחות ככישלון שאינו שלהן.
   for sd in "$DB_SEED"/0*.sql; do

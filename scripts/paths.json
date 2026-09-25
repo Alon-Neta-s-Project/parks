@@ -16,12 +16,12 @@
   "SOURCE": "apps/server/content/source",
   "CONTENT_MAPPING": "apps/server/content/content-mapping.json",
   "DEPLOY": "data/deploy",
-  "DB": "db",
-  "MIGRATIONS": "db/migrations",
-  "DB_SEED": "db/seed",
-  "DB_LOCAL": "db/local",
-  "CONTENT_SEED": "db/content-seed",
-  "KNOWLEDGE_SEED": "db/knowledge-seed",
+  "DB": "apps/server/db",
+  "MIGRATIONS": "apps/server/db/migrations",
+  "DB_SEED": "apps/server/db/seed",
+  "DB_LOCAL": "apps/server/db/local",
+  "CONTENT_SEED": "apps/server/db/content-seed",
+  "KNOWLEDGE_SEED": "apps/server/db/knowledge-seed",
   "TIM_FN": "supabase/functions/tim/index.ts",
   "SCRIPTS": "scripts"
 }

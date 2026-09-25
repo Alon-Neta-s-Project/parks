@@ -15,12 +15,12 @@ su postgres -c "/usr/lib/postgresql/16/bin/pg_ctl -D $PGDATA -o '-p $PGPORT -k /
 su postgres -c "psql -h /tmp -p $PGPORT -d postgres -c 'create database pdc;'"
 
 # ⚠️ קודם השכבה המקומית, ואז השרשרת לפי הסדר
-for f in db/local/000_auth_shim db/migrations/0*_* db/seed/0*_*; do
+for f in apps/server/db/local/000_auth_shim apps/server/db/migrations/0*_* apps/server/db/seed/0*_*; do
   su postgres -c "psql -h /tmp -p $PGPORT -d pdc -v ON_ERROR_STOP=1 -q -f $f"
 done
 ```
 
-## למה צריך `db/local/000_auth_shim.sql`
+## למה צריך `apps/server/db/local/000_auth_shim.sql`
 
 מיגרציה 004 מפנה ל-`auth.users`, ו-006 קוראת ל-`auth.uid()`. **סכמת `auth` שייכת
 ל-Supabase ואינה קיימת ב-PostgreSQL נקי**, ולכן השרשרת נעצרת ב-004 בלעדיה.
@@ -30,16 +30,16 @@ done
 ו-29 מדיניות RLS.
 
 > ה-README הזה אמר קודם "21 טבלאות". 21 הוא טבלאות **ועוד** views
-> (18 + 3). הספירה הנכונה היא 18. `db/verify.sql` בודק את שניהם בנפרד.
+> (18 + 3). הספירה הנכונה היא 18. `apps/server/db/verify.sql` בודק את שניהם בנפרד.
 
 ## אימות
 
 ```sh
-psql -h /tmp -p $PGPORT -d pdc -f db/verify.sql      # מה נוצר בפועל
-psql -h /tmp -p $PGPORT -d pdc -f db/local/rls-audit.sql
+psql -h /tmp -p $PGPORT -d pdc -f apps/server/db/verify.sql      # מה נוצר בפועל
+psql -h /tmp -p $PGPORT -d pdc -f apps/server/db/local/rls-audit.sql
 ```
 
 ## הקובץ ל-Supabase
 
-`db/supabase-bundle.sql` — הכול בקובץ אחד, בלי הפיגום המקומי, עם בלוק אימות
+`apps/server/db/supabase-bundle.sql` — הכול בקובץ אחד, בלי הפיגום המקומי, עם בלוק אימות
 בסוף. נוצר על ידי `python3 scripts/build-supabase-bundle.py` ואין לערוך אותו ביד.

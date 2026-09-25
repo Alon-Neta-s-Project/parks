@@ -77,7 +77,7 @@ PARK_ID = {
     "Universal Volcano Bay": "vb",
 }
 
-# Mirrors the CHECK constraints in db/migrations. If a migration changes one of
+# Mirrors the CHECK constraints in apps/server/db/migrations. If a migration changes one of
 # these, this list has to change with it — the conformance run catches a drift.
 STATUS = {"open": "open", "closed": "closed"}   # 'check' is deliberately absent
 
@@ -642,7 +642,7 @@ set local search_path = public, extensions;
 (OUTDIR / "verify-content.sql").write_text(VERIFY, encoding="utf-8")
 
 # ── report ───────────────────────────────────────────────────────────────
-print(f"{len(rows)} rows of {len(experiences)} → {n} parts in db/content-seed/")
+print(f"{len(rows)} rows of {len(experiences)} → {n} parts in apps/server/db/content-seed/")
 for i, chunk in enumerate(parts, 1):
     p = OUTDIR / f"content-{i}-of-{n}.sql"
     print(f"  content-{i}-of-{n}.sql   {len(chunk):3} rows   {p.stat().st_size / 1024:.0f} KB")

@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { P } from "../../../scripts/paths";
 
 /**
- * The upsert in db/content-seed is generated, and the generator derives the
+ * The upsert in apps/server/db/content-seed is generated, and the generator derives the
  * DO UPDATE SET clause from the same column list as the INSERT. These tests
  * check the generated file rather than the generator, so a hand edit is caught
  * too.

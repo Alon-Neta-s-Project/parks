@@ -7,7 +7,7 @@ import { z } from "zod";
  * input. Anything the export does not carry stays null and shows as an explicit
  * gap — never filled in from anywhere else.
  *
- * Migration 007 (db/migrations/) is the SQL form of this; this file is where it
+ * Migration 007 (apps/server/db/migrations/) is the SQL form of this; this file is where it
  * actually takes effect today.
  */
 
