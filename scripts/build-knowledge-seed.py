@@ -338,9 +338,9 @@ select
     if "--check" in sys.argv:
         current = OUT.read_text(encoding="utf-8") if OUT.exists() else None
         if current == sql:
-            print(f"✅ {OUT.relative_to(ROOT)} מעודכן מול knowledge/")
+            print(f"✅ {OUT.relative_to(ROOT)} מעודכן מול {DIR.relative_to(ROOT)}/")
             return 0
-        print(f"🔴 {OUT.relative_to(ROOT)} אינו מעודכן מול knowledge/.")
+        print(f"🔴 {OUT.relative_to(ROOT)} אינו מעודכן מול {DIR.relative_to(ROOT)}/.")
         print("   מישהו ערך .md ולא בנה מחדש. להריץ:")
         print("   python3 scripts/build-knowledge-seed.py")
         return 1

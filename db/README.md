@@ -56,7 +56,7 @@ psql -v ON_ERROR_STOP=1 -f seed/010_reference.sql      # אידמפוטנטי
 התבנית עברה זמנה. **אין צורך באקסל** — הזרימה היא:
 
 1. **טופס האדמין** (מסך 14 במלאי המסכים) כותב ישירות ל-`experience` ולטבלאות הנלוות. זו הדרך הראשית.
-2. **`knowledge/*.md`** עם frontmatter → `scripts/ingest.ts` → `knowledge_doc` + `knowledge_chunk`. אידמפוטנטי לפי `id`.
+2. **`apps/server/content/knowledge/*.md`** עם frontmatter → `scripts/ingest.ts` → `knowledge_doc` + `knowledge_chunk`. אידמפוטנטי לפי `id`.
 3. כל רשומה חדשה נכנסת עם `last_verified = null`, ולכן מופיעה מיד ב-`verification_queue` עד שמישהו מאשר אותה.
 
 `park-day-companion-tim-content-intake-1.md` הוא הקלט הראשון לשני המסלולים האלה. כל שורה שמסומנת שם `[לבדוק]` נכנסת כ-`review_status = 'pending_review'` ואינה מגיעה לאינדקס עד לאישור.

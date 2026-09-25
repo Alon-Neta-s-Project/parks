@@ -13,10 +13,10 @@ dist-tim/
 
 # ── המאסטר לעולם לא ב-repo ────────────────────────────────────────────────
 # הוא נושא Intensity Source Basis, Intensity Source URL ושאר מידע מחקר פנימי.
-# מקור התוכן היחיד הוא data/source/product_export.csv, שנוצר מרשימת היתר.
+# מקור התוכן היחיד הוא apps/server/content/source/product_export.csv, שנוצר מרשימת היתר.
 *.xlsx
-data/source/*.json
-!data/source/product_export.csv
-!data/source/product_export_manifest.json
-!data/source/subtype_map.json
+apps/server/content/source/*.json
+!apps/server/content/source/product_export.csv
+!apps/server/content/source/product_export_manifest.json
+!apps/server/content/source/subtype_map.json
 dist-tim-test/

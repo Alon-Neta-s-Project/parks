@@ -1,6 +1,6 @@
 {
   "ranAt": "2026-09-25",
-  "source": "data/source/product_export.csv",
+  "source": "apps/server/content/source/product_export.csv",
   "mode": "dry-run",
   "rows": {
     "read": 242,

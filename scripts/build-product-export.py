@@ -75,7 +75,7 @@ def main() -> int:
             continue
         out.append({c: "" if rec.get(c) is None else str(rec[c]) for c in want})
 
-    dest = ROOT / mapping["source"]
+    dest = P.CONTENT_MAPPING.parent / mapping["source"]
     with dest.open("w", encoding="utf-8-sig", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=want)
         w.writeheader()

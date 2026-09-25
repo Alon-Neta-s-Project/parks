@@ -104,7 +104,7 @@ def main() -> int:
         if OUT.exists() and OUT.read_text(encoding="utf-8") == sql:
             print(f"✅ {OUT.relative_to(ROOT)} מעודכן מול מדריכי האופי")
         else:
-            print(f"🔴 {OUT.relative_to(ROOT)} אינו מעודכן מול knowledge/.")
+            print(f"🔴 {OUT.relative_to(ROOT)} אינו מעודכן מול {GUIDES.relative_to(ROOT)}/.")
             print("   python3 scripts/build-park-intro.py")
             return 1
     else:

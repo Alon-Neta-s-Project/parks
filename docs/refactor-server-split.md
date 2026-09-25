@@ -19,7 +19,7 @@ scripts/         repo tooling
 | # | Stage | Status |
 |---|---|---|
 | 0 | Decisions: hosting, security review, the gap in the Tim file (see open items) | Open |
-| 1 | npm workspaces and moving folders into the layout above, with no behavior change | 1a ✅ · 1b not started |
+| 1 | npm workspaces and moving folders into the layout above, with no behavior change | 1a ✅ · 1b-1 ✅ (content) · 1b-2 onward not started |
 | 2 | Migrations with dbmate, run from CI with an approval gate | Not started |
 | 3 | Port Tim, `embed` and `aliases` to the Node server, running alongside the Edge Function | Not started |
 | 4 | Point the frontend at the server, retire the Edge Functions, revoke the anon grants | Not started |
@@ -58,6 +58,17 @@ These are the numbers every step in Stage 1 is compared against.
 - **Deliberately not changed:** text written into generated files (e.g. `נוצר מ-knowledge/...` in the seeds), static JSON imports (`prerender.ts`; `tsc` fails loudly on those in a move), and `mapping.source` inside `content-mapping.json`. The last two are handled in 1b.
 - **New guard:** [paths.test.ts](../src/lib/__tests__/paths.test.ts). Every key in `paths.json` must exist. Seen failing with a wrong key before it passed.
 - **Tests:** `npm run qa` passes · vitest **288 passed** + 1 skipped (+1 new, the guard) · deno 75 · `build` 253 pages · `npm run import` (dry run) identical · the scripts run correctly from a different working directory · **no generated file changed**.
+
+### 1b-1 ✅ Moving the content (25.09.2026)
+- `knowledge/` → `apps/server/content/knowledge/` · `data/source/` → `apps/server/content/source/` · `content-mapping.json` → `apps/server/content/`. All with `git mv`, so history is kept.
+- **The `source` field in `content-mapping.json` is now relative to the mapping file** (`source/product_export.csv`), not to the repo root. Otherwise it would be a second copy of paths outside `paths.json`. The gap report still prints the full path.
+- Updated: `paths.json`, `.gitignore` (the master rules), the `content-and-verify.yml` trigger, the importer's messages, `CLAUDE.md`, `README.md`, `db/README.md`.
+- **Tests:** `npm run qa` passes · vitest 288 + 1 skipped · deno 75 · `build` 253 pages · the importer reads from the new location (239/242 pages complete, as before). The only change in a generated file is the `source` path in the gap report.
+- `doc-paths` caught one reference that was missed (`$manifest` inside `content-mapping.json`) before the commit.
+
+⚠️ **Two things to know when this is pushed:**
+1. **`ci-content.sh` loads only the knowledge documents that changed.** In the move commit, git sees all 66 as new, so the first run on `release` would reload them all and re-embed about 309 chunks. That's harmless but costs Gemini calls, and there's a window where content isn't retrievable. Options: push the move when a full reload is acceptable, or run the script once with a `BEFORE` that points after the move.
+2. **Text inside generated files still says `knowledge/`** (e.g. `נוצר מ-knowledge/...` in the seeds and in `data/deploy/*.txt`, and inside migration `041`, which is signed). It's descriptive text, not a path anything reads. The migrations stay as they are (signatures). The seeds get updated whenever a document is next rebuilt.
 
 ---
 

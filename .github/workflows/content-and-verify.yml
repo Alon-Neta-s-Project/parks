@@ -14,7 +14,7 @@ on:
   push:
     branches: [release]
     paths:
-      - "knowledge/**"
+      - "apps/server/content/knowledge/**"
       - "db/migrations/**"
       - "scripts/build-knowledge-seed.py"
       - "scripts/build-park-intro.py"

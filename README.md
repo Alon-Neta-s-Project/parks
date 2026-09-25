@@ -80,7 +80,8 @@ npm run build      # בנייה לפרודקשן
 
 | נתיב | מה זה |
 |---|---|
-| `data/source/` | הקובץ שנטע העבירה, כלשונו, ועותק JSON של כל גיליון |
+| `apps/server/content/source/` | הייצוא מהמאסטר (`product_export.csv`) ומה שמתאר אותו. המאסטר עצמו אינו ברפו |
+| `apps/server/content/knowledge/` | מסמכי הידע שטים עונה מהם |
 | `docs/spec/content-file-analysis.md` | **דוח הכיסוי בשני הכיוונים** (סעיף 6א.3) — מה הבריף דורש שאין בקובץ, ומה בקובץ שאין לו בית בסכמה |
 | `docs/master-brief-v1.md` | הבריף כפי שהתקבל |
 | `src/styles/tokens.css` | **מקור האמת היחיד לצבע וטיפוגרפיה**. הקובץ היחיד עם ערכי צבע |
@@ -92,7 +93,7 @@ npm run build      # בנייה לפרודקשן
 
 ```sh
 python3 -m pip install openpyxl
-python3 scripts/export-source-xlsx.py   # xlsx -> data/source/*.json
+python3 scripts/export-source-xlsx.py   # xlsx -> apps/server/content/source/*.json
 python3 scripts/build-preview.py        # tokens.css + page.html -> index.html
 ```
 

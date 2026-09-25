@@ -17,8 +17,8 @@
  */
 import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
-import { join } from "node:path";
-import { P, ROOT } from "./paths";
+import { dirname, join } from "node:path";
+import { P, REL } from "./paths";
 import {
   experienceSchema, parkSchema, REQUIRED_FIELDS,
   type Experience, type Park, type QuadState,
@@ -192,7 +192,9 @@ const slugify = (park: string, name: string) =>
 
 // ── run ─────────────────────────────────────────────────────────────────────
 const mapping = JSON.parse(readFileSync(P.CONTENT_MAPPING, "utf8"));
-const csv = readFileSync(join(ROOT, mapping.source), "utf8");
+// ⚠️ `mapping.source` is relative to the mapping file, so a move edits paths.json only.
+const sourceRel = join(dirname(REL.CONTENT_MAPPING), mapping.source);
+const csv = readFileSync(join(dirname(P.CONTENT_MAPPING), mapping.source), "utf8");
 const rows = parseCsv(csv);
 const headers = Object.keys(rows[0] ?? {});
 
@@ -255,7 +257,7 @@ for (const row of rows) {
     console.error(`  ${key}`);
     console.error(`  master: ${current}`);
     console.error(`  patch:  ${approved}`);
-    console.error(`  Delete the row from data/source/name_he_patch.csv, or fix the master.`);
+    console.error(`  Delete the row from ${REL.SOURCE}/name_he_patch.csv, or fix the master.`);
     process.exit(1);
   } else {
     row["name_he"] = approved;
@@ -600,7 +602,7 @@ const incomplete = experiences
 
 const report = {
   ranAt: new Date().toISOString().slice(0, 10),
-  source: mapping.source,
+  source: sourceRel,
   mode: WRITE ? "write" : "dry-run",
   rows: { read: rows.length, accepted: experiences.length, rejected: rejected.length },
   columns: {
@@ -620,7 +622,7 @@ mkdirSync(P.REPORTS, { recursive: true });
 writeFileSync(join(P.REPORTS, "import-gap-report.json"), JSON.stringify(report, null, 2) + "\n");
 
 // ── console summary ─────────────────────────────────────────────────────────
-console.log(`\n${WRITE ? "IMPORT" : "DRY RUN"} — ${mapping.source}`);
+console.log(`\n${WRITE ? "IMPORT" : "DRY RUN"} — ${sourceRel}`);
 console.log(`  columns hash  ${columnsHash} ✓ matches manifest`);
 
 // ⚠️ The patch reports itself on every run, including when it has nothing to
@@ -634,7 +636,7 @@ if (patched.length) {
 if (patchRedundant.length) {
   console.log(`\n  ✅ ${patchRedundant.length} שורות בטלאי — המאסטר כבר מכיל אותן.`);
   for (const k of patchRedundant) console.log(`    ${k.split("|").pop()}`);
-  console.log(`  אפשר למחוק אותן מ-data/source/name_he_patch.csv.`);
+  console.log(`  אפשר למחוק אותן מ-${REL.SOURCE}/name_he_patch.csv.`);
 }
 if (sensApplied.length) {
   console.log(`\n  🔴 ${sensApplied.length} תיקוני דגל מ-sens_patch.csv:`);
@@ -654,7 +656,7 @@ if (maxHeights.size) {
 if (sensRedundant.length) {
   console.log(`\n  ✅ ${sensRedundant.length} תיקוני דגל בטלים — המאסטר כבר מתוקן:`);
   for (const k of sensRedundant) console.log(`    ${k}`);
-  console.log(`  אפשר למחוק אותם מ-data/source/sens_patch.csv.`);
+  console.log(`  אפשר למחוק אותם מ-${REL.SOURCE}/sens_patch.csv.`);
 }
 if (patchOrphaned.size) {
   console.log(`\n  ⚠️ ${patchOrphaned.size} שורות בטלאי מצביעות על מפתח שאינו בייצוא:`);

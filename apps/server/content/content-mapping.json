@@ -4,7 +4,7 @@
     "a renamed column is a fix here, never a change in code (brief §6a.2).",
     "'column' is the exact CSV header. 'kind' is how the value is read."
   ],
-  "source": "data/source/product_export.csv",
+  "source": "source/product_export.csv",
   "requiredColumns": [
     "Key",
     "Resort",
@@ -213,7 +213,7 @@
       "from": [
         "Subtype"
       ],
-      "map": "data/source/subtype_map.json",
+      "map": "source/subtype_map.json",
       "$note": "Subtype is a closed 42-value vocabulary; an unlisted value stops the row."
     },
     "category": {
@@ -221,7 +221,7 @@
       "from": [
         "Subtype"
       ],
-      "map": "data/source/subtype_map.json",
+      "map": "source/subtype_map.json",
       "$note": "Subtype is a closed 42-value vocabulary; an unlisted value stops the row."
     }
   },
@@ -258,5 +258,5 @@
       "fill_notes"
     ]
   },
-  "$manifest": "data/source/product_export_manifest.json — the importer refuses to run on a column-set hash mismatch."
+  "$manifest": "source/product_export_manifest.json — the importer refuses to run on a column-set hash mismatch."
 }
