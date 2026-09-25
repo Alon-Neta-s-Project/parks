@@ -216,3 +216,12 @@ While setting up a local database (`supabase start`, config in `apps/server/db/s
 - Don't edit 038–040 (their signatures and history). Instead, a new migration `047`, or a local setup script that explicitly does what's written above.
 - Or, when moving to dbmate: a "baseline", a single schema file taken from production (`pg_dump --schema-only`) that replaces 000–046 for new databases, with the old migrations kept as history. That's the standard approach, and it also solves the 034 duplicate.
 - `ci_verify` / `ci_content`: a migration that creates them if missing (`if not exists`), without passwords, which get set separately.
+
+### O7 — Tim's fallback model no longer exists, and `diagnose` says it does · found 25.09 on the local server
+With a real Gemini key, against the local database (all 314 chunks embedded):
+- **`gemini-3.5-flash` (the production model) returned 503**, "high demand", several times over about 10 minutes. `gemini-3.8-flash` did the same. That's Google-side load, not a setup error.
+- 🔴 **The fallback in Tim's error message is out of date.** On a 503 the message says to set `GEMINI_MODEL` to `gemini-2.5-flash`. For this key it returns **404: "no longer available to new users"**. Anyone following the hint in the middle of an outage would move from one error to another.
+- ⚠️ **`{"diagnose":"models"}` lists `gemini-2.5-flash` as available**, even though it returns 404. So the list answers "which models exist", not "which will work for this key". The comment in the code treats it as the authority on the latter.
+- The embeddings (`gemini-embedding-001`) worked. The free-tier limit is about 100 a minute, handled with a one-minute wait.
+
+**Proposal:** update the hint in the code to a model that actually works (and check it with a real call, not from the list), and consider an automatic fallback to a second model on a 503. That's a product change to Tim, so it waits for the move in Stage 4 (the file is stamped).
