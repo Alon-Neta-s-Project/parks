@@ -3,6 +3,10 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "workspaces": [
+    "apps/web",
+    "apps/server"
+  ],
   "scripts": {
     "dev": "vite --config apps/web/vite.config.ts",
     "build": "tsc -b && vite build --config apps/web/vite.config.ts && tsx scripts/prerender.ts",
@@ -14,15 +18,6 @@
     "build:tim": "python3 scripts/build-tim-prompt.py --check && tsc -b && vite build --config apps/web/vite.tim.config.ts && tsx scripts/verify-tim-build.ts",
     "qa": "bash scripts/qa-gate.sh",
     "build:tim-test": "tsc -b && vite build --config apps/web/vite.tim-test.config.ts"
-  },
-  "dependencies": {
-    "@supabase/supabase-js": "^2.112.4",
-    "i18next": "^23.16.8",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-i18next": "^15.1.3",
-    "react-router-dom": "^7.18.3",
-    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@types/node": "^26.4.0",
