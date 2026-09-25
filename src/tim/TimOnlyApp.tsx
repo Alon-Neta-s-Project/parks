@@ -150,13 +150,26 @@ export default function TimOnlyApp({ feedback }: TimOnlyAppProps = {}) {
     //
     // ⚠️ רק תשובות שהצליחו נכנסות. הודעת שגיאה אינה דבר שטים אמר,
     // ושליחתה חזרה אליו כאילו אמר אותה מלמדת אותו לחזור עליה.
-    const history: TimTurn[] = turns.flatMap((t) => {
+    // 🔴 **הפתיח של המסך הוא דבר שטים אמר — ולא הגיע אליו.**
+    //
+    // נטע, 25.09: "כבר שאלת איך לקרוא לי ועכשיו אתה שואל שוב?"
+    // המסך מציג "איך לקרוא לך?", היא ענתה "נטעל'ה", ולטים הגיעה
+    // מילה בודדת בלי שום הקשר. הוא לא ידע שהשאלה כבר נשאלה, אז
+    // שאל אותה שוב.
+    //
+    // ⚠️ **ההודעה הייתה על המסך ולא בשיחה.** שני מקומות שמחזיקים
+    // את אותה שיחה, ורק אחד מהם נשלח. היא נכנסת עכשיו כתור ראשון
+    // של טים, לפני הכול.
+    const history: TimTurn[] = [
+      { role: "model", text: t("timOnly.greeting") },
+      ...turns.flatMap((t) => {
       const said: TimTurn[] = [{ role: "user", text: t.question }];
       if (t.reply && t.reply !== "clarify" && t.reply.status === "ok") {
         said.push({ role: "model", text: t.reply.answer });
       }
-      return said;
-    });
+        return said;
+      }),
+    ];
 
     const reply = await askTim(forTim, undefined, history);
     setTurns((current) => current.map((turn) => (turn.id === id ? { ...turn, reply } : turn)));
