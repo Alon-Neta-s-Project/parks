@@ -241,3 +241,20 @@ With a real Gemini key, against the local database (all 314 chunks embedded):
 - The embeddings (`gemini-embedding-001`) worked. The free-tier limit is about 100 a minute, handled with a one-minute wait.
 
 **Proposal:** update the hint in the code to a model that actually works (and check it with a real call, not from the list), and consider an automatic fallback to a second model on a 503. That's a product change to Tim, so it waits for the move in Stage 4 (the file is stamped).
+
+### O8 — Production compared with what the migrations build · 25.09, read-only access (`reviewer_readonly`)
+The system catalog of production compared object by object with the local database built by the 48 migrations. Separating out the measurement artifacts (how `vector` is displayed per `search_path`, and the two rate-limit functions I changed locally), this is what's left:
+
+**✅ The schema is identical.** Every table, column, constraint, index and trigger. **That's strong evidence all 48 migrations ran in production**, even though the log couldn't be read (below).
+
+**Differences, all of which the migrations don't encode:**
+1. 🔴 **Table permissions: production is stricter than the migrations.** In production `anon`/`authenticated` have **SELECT only** on the tables. The migrations (plus Supabase's default privileges) give them SELECT+INSERT+UPDATE+DELETE. Row-level security protects in both, but **a database rebuilt from the migrations would be more open than production.** Two exceptions in the other direction: `usage_today` (production SELECT, migrations none) and `unanswered_turns` (production none, migrations everything).
+2. **Function execution:** in production `anon` can't run `ingest_check`, `record_migration` or `unanswered_sample`. In the migrations it can.
+3. **Roles and policies created by hand in production only:** `team1_content` with 4 policies on the knowledge tables (from `data/deploy/team1-role.txt`), `reviewer_readonly` (Kody, today), and `rls_auto_enable` (apparently a Supabase platform function).
+4. Two functions differ only in comments and whitespace (`knowledge_chunk_content_changed`, `save_tester_note`).
+
+🔴 **Security: `tester_key()` holds the real key of the testers' feedback channel in its code.** Function code is readable by **every** user in the database, so `reviewer_readonly`, which has no access to the table, saw it. The key needs rotating, and it should be stored as a hash in a closed table (like `ingest_key`), not in code.
+
+⚠️ **The migration log (`schema_migration`) can't be read:** `reviewer_readonly` has SELECT, but row-level security (forced) hides every row. Needs a read policy for it.
+
+**What this means for the baseline:** the baseline has to encode **production**, not the migrations. That means the stricter permissions, the roles, and the team 1 policies. And it needs a test: a database built from the baseline has to be identical to production in the same catalog comparison.
