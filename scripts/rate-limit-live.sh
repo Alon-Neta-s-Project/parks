@@ -26,12 +26,19 @@ ok=0
 last=""
 
 for i in $(seq 1 "$TRIES"); do
-  code=$(curl -sS -o /tmp/rl-body -w '%{http_code}' --max-time 30 \
+  # ⚠️ **30 שניות לא הספיקו, והכשל הוצג כ"קוד לא צפוי".** תשובה
+  # אמיתית של טים עוברת דרך מודל, וקריאה שנייה נחתכה באמצע. הגדר
+  # לא נבדקה, והריצה נפלה על מה שנראה כמו תקלה אחרת לגמרי.
+  #
+  # 🔴 **ו-`|| echo 000` הוסיף אפסים במקום להחליף.** `-w` כבר כתב
+  # `000` לפלט, וה-`echo` הוסיף שלושה נוספים — הדיווח אמר `000000`,
+  # מספר שאינו קוד HTTP ואינו אומר דבר למי שקורא אותו.
+  code=$(curl -sS -o /tmp/rl-body -w '%{http_code}' --max-time 120 \
     -X POST "$TIM_URL" \
     -H 'Content-Type: application/json' \
     -H "apikey: $SUPABASE_ANON_KEY" \
     -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
-    --data '{"question":"בדיקת גדר קצב"}' || echo 000)
+    --data '{"question":"בדיקת גדר קצב"}') || true
 
   if [ "$code" = "429" ]; then
     blocked=$((blocked + 1))

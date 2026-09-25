@@ -49,15 +49,37 @@ jobs:
             exit 1
           fi
 
-          stamp=$(jq -r '.fit_stamp // "—"' out.json)
-          origins=$(jq -r '.allowed_origins // "—"' out.json)
+          # 🔴 **שדה חסר אינו ערך, והגרסה הראשונה של הבדיקה הזו קראה
+          # אותו כאחד.** `// "—"` הפך `null` למחרוזת שאינה "0" ואינה
+          # "1", והריצה עברה בירוק על פונקציה ישנה. זו התבנית של
+          # הפרויקט, והפעם היא הייתה בגלאי עצמו. לכן `-e`: jq נכשל על
+          # שדה שאינו קיים, ולא ממציא לו ערך.
+          live=$(jq -re '.deploy_stamp' out.json) || {
+            echo "🔴 התשובה אינה מחזירה deploy_stamp — הפונקציה החיה ישנה מהרפו." >&2
+            exit 1
+          }
+          repo=$(grep -o 'DEPLOY_STAMP = "[^"]*"' supabase/functions/tim/index.ts | head -1 | cut -d'"' -f2)
 
-          echo "▶ fit_stamp שחי:     $stamp"
-          echo "▶ fit_stamp שברפו:   $(grep -o 'FIT_STAMP = "[^"]*"' supabase/functions/tim/index.ts | head -1 | cut -d'"' -f2)"
-          echo "▶ allowed_origins:   $origins"
+          echo "▶ deploy_stamp שחי:   $live"
+          echo "▶ deploy_stamp שברפו: $repo"
+
+          if [ "$live" != "$repo" ]; then
+            echo "🔴 הפונקציה שחיה אינה זו שברפו. להדביק מחדש בסופהבייס." >&2
+            exit 1
+          fi
+
+          # ⚠️ `fit_stamp` מודפס לידיעה ואינו מכריע: הוא מגבב את טקסט
+          # כללי ההתאמה בלבד, וב-25.09 הוא אמר "זהה" על פונקציה ישנה.
+          echo "▶ fit_stamp (ניסוח בלבד): $(jq -r '.fit_stamp // "—"' out.json)"
+
+          origins=$(jq -re '.allowed_origins' out.json) || {
+            echo "🔴 אין allowed_origins בתשובה — הפונקציה ישנה." >&2
+            exit 1
+          }
+          echo "▶ allowed_origins:    $origins"
 
           # 🔴 **אפס הוא הממצא, לא היעדר ממצא.** רשימה ריקה פירושה
-          # `*` לכל מקור — פתוח לכול, ונראה מוגדר. הריצה נופלת עליו.
+          # `*` לכל מקור — פתוח לכול, ונראה מוגדר.
           if [ "$origins" = "0" ]; then
             echo "🔴 ALLOWED_ORIGIN מתנרמל לרשימה ריקה — CORS פתוח לכל מקור." >&2
             exit 1
