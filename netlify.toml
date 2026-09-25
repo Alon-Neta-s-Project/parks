@@ -63,19 +63,21 @@
 #
 # ⚠️ ולהפעיל בממשק: Site configuration ← Build & deploy ← Branch
 # deploys ← להוסיף את `tim-test`. בלי זה הענף לא נבנה כלל.
+# 🔴 **Netlify מכבד `command` ו-`publish` לפי הקשר — אבל לא
+# `redirects` ולא `headers`.** הבנייה הראשונה של הענף הוכיחה
+# את זה באוויר: ההקשר נבנה והגיש מ-`dist-tim-test`, וההפניה
+# שחלה בפועל הייתה הגלובלית שלמעלה — לקובץ שאינו קיים שם.
+# כל כתובת החזירה 404.
+#
+# ⚠️ **ולכן אין כאן בלוק ניתוב להקשר.** הוא נקרא כאילו הוא פועל
+# ואינו פועל. במקומו הבנייה מוציאה `index.html` (נמצא לפני
+# שההפניה נשקלת) ו-`tim.html` (היעד של הכלל הגלובלי), ב-
+# `vite.tim-test.config.ts`. `test-build-separation.test.ts` נופלת אם אחד
+# מהם חסר.
+#
+# ⚠️ **וה-noindex יושב ב-`<meta name="robots">` בתוך הדף.** כותרת
+# HTTP לפי הקשר הייתה מתעלמת באותה מידה, ושלושת הדפים
+# הם עותקים של אותו קובץ — ולכן כולם נושאים אותה.
 [context."tim-test"]
   command = "npm run build:tim-test"
   publish = "dist-tim-test"
-
-[[context."tim-test".redirects]]
-  from = "/*"
-  to = "/tim-test.html"
-  status = 200
-  force = false
-
-# ⚠️ **ושהגרסה הזו לא תתפוס מקום בגוגל.** כתובת בדיקה שמופיעה בחיפוש
-# היא בדיוק הדרך שבה מישהו יגיע לגרסה הלא-נכונה בלי לדעת.
-[[context."tim-test".headers]]
-  for = "/*"
-  [context."tim-test".headers.values]
-    X-Robots-Tag = "noindex, nofollow"

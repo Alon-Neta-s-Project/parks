@@ -101,13 +101,54 @@ describe("גרסת הבדיקה אינה נכנסת לחבילה הציבורי�
     expect(publicBlock.includes("tim-test")).toBe(false);
     expect(publicBlock.includes('publish = "dist-tim"')).toBe(true);
 
-    // ובהקשר הבדיקה — גם ניתוב משלו, אחרת כל כתובת שם מגישה את טים
-    // הציבורי מתוך תיקיית הבדיקה.
     const testBlock = toml.slice(toml.indexOf('[context."tim-test"]'));
     expect(testBlock.includes('publish = "dist-tim-test"')).toBe(true);
-    expect(testBlock.includes("/tim-test.html")).toBe(true);
-    expect(testBlock.includes("noindex")).toBe(true);
   });
+
+  /**
+   * 🔴 **Netlify מכבד `command` ו-`publish` לפי הקשר־ענף — אבל לא
+   * `redirects` ולא `headers`.** הבנייה הראשונה של הענף הוכיחה את זה
+   * באוויר: הענף נבנה והוגש מ-`dist-tim-test`, וההפניה שחלה בפועל
+   * הייתה הגלובלית — ל-`/tim.html`, שלא היה שם. 404 על כל כתובת,
+   * כולל השורש.
+   *
+   * ⚠️ **ולכן הבלוק הזה אסור שיחזור.** קונפיגורציה שנקראת כאילו היא
+   * פועלת ואינה פועלת היא בדיוק הכשל שהתברר כאן.
+   */
+  it("אין ניתוב או כותרות לפי הקשר — Netlify מתעלם מהם", () => {
+    const toml = readFileSync(join(ROOT, "netlify.toml"), "utf8")
+      .split("\n")
+      .filter((line) => !line.trimStart().startsWith("#"))
+      .join("\n");
+    expect(toml.includes('[[context."tim-test".redirects]]')).toBe(false);
+    expect(toml.includes('[[context."tim-test".headers]]')).toBe(false);
+  });
+
+  /**
+   * ⚠️ **התחליף לניתוב הוא קבצים שקיימים.** `index.html` נמצא לפני
+   * שההפניה נשקלת בכלל, ו-`tim.html` הוא היעד של הכלל הגלובלי שחל
+   * גם כאן. שניהם עותקים של אותו דף — אין כאן מסך שני שיתפצל.
+   */
+  it("תצורת הבנייה מוציאה את שני דפי הנפילה", () => {
+    const cfg = readFileSync(join(ROOT, "vite.tim-test.config.ts"), "utf8");
+    // ⚠️ ההערות מוסרות — הן מזכירות את שמות הקבצים שוב ושוב, וזו הפעם
+    // הרביעית בסשן הזה שגלאי שכתבתי היה קורא פרוזה כאילו היא הדבר עצמו.
+    const code = cfg.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+    expect(code.includes('"index.html"')).toBe(true);
+    expect(code.includes('"tim.html"')).toBe(true);
+  });
+
+  const DIST_TEST = join(ROOT, "dist-tim-test");
+  it.skipIf(!existsSync(join(DIST_TEST, "tim-test.html")))(
+    "והיא אכן הוציאה אותם, עם noindex",
+    () => {
+      for (const name of ["index.html", "tim.html"]) {
+        const file = join(DIST_TEST, name);
+        expect(existsSync(file), `${name} חסר — השורש יחזיר 404`).toBe(true);
+        expect(readFileSync(file, "utf8").includes("noindex")).toBe(true);
+      }
+    },
+  );
 
   it("שתי הבניות נפרדות לחלוטין", () => {
     const pub = readFileSync(join(ROOT, "vite.tim.config.ts"), "utf8");

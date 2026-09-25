@@ -350,6 +350,11 @@ function diagnose(env: Record<string, string | undefined>) {
     known,
     other_names: others,
     sent_to_model: thinkingConfig(env),
+    // 🔴 **"קיים · 32 תווים" אינו אומר שהוא תופס.** `https://x/` קיים
+    // ובאורך תקין, ומנורמל לרשימה של אחד שאף דפדפן לא יתאים לו; `/`
+    // לבדו מתנרמל ל**ריק**, כלומר `*` — פתוח לכול, ונראה מוגדר.
+    // המספר הזה הוא ההבדל בין השניים, והוא נבדק מהסביבה החיה.
+    allowed_origins: allowedOrigins(env).length,
     fit_stamp: FIT_STAMP,
     // ⚠️ **זה החותם שעונה על "האם מה שחי הוא מה שברפו".** `fit_stamp`
     // עונה רק על "האם בלוק הניסוח נבנה מחדש", וב-25.09 הוא אמר "זהה"
@@ -709,16 +714,36 @@ export function formatExperiences(rows: ExperienceRow[]): string {
         // זו אותה תבנית שנתפסה כאן שוב ושוב, בכיוון ההפוך: ערך שמשמעותו
         // "לא ידוע / משתנה" נקרא כערך חד. הפעם הוא לא הבטיח בטיחות אלא
         // שלל אפשרות, וזה מזיק באותה מידה.
-        // 🔴 **אוצר המילים כאן אינו זה שמגיע.** הייבוא פולט שלושה ערכים
-        // בלבד — open · closed · check — ו-temporarily_closed ו-coming_soon
-        // אינם נוצרים על ידו לעולם. כלומר ניסוח פולה מ-07.09 יושב כאן
-        // ומעולם לא הגיע למסך, ואילו `check` נפל לענף ברירת המחדל והוצג
-        // למשתמשת כ"⚠️ סטטוס: check" — מילה באנגלית בממשק עברי.
+        // 🔴 **תוקן 23.09 — ההערה שהייתה כאן הייתה שגויה, והיא הטעתה
+        // הכרעת מוצר.**
+        //
+        // היא אמרה ש-`temporarily_closed` ו-`coming_soon` אינם נוצרים
+        // לעולם, ושניסוח פולה מ-07.09 מעולם לא הגיע למסך. על בסיס זה
+        // הוצע להסיר אותם מהמפה — מה שהיה מפיל שלוש שורות אמיתיות
+        // לברירת המחדל, כלומר מילה באנגלית בממשק עברי.
+        //
+        // ⚠️ **שני מקורות, לא אחד.** `npm run import` אכן פולט שלושה
+        // ערכים בלבד — open · closed · check. אבל `build-content-seed.py`
+        // מכריע מעל שלוש שורות שהייצוא סימן `check`, כל אחת אחרי אימות
+        // מול אתר המפעיל:
+        //
+        //   Slush Gusher                  → temporarily_closed
+        //   Meet Moana at Character Landing → temporarily_closed (פולה, 06.09)
+        //   The Magic of Disney Animation → coming_soon
+        //
+        // `verify-content.sql` מצפה בדיוק לזה: 236 open · 3 closed ·
+        // 2 temporarily_closed · 1 coming_soon. כלומר הערכים חיים במסד
+        // ומגיעים למסך.
+        //
+        // ⚠️ ומה שזה מלמד: **הערה שמתארת את המציאות מתיישנת כמו קובץ
+        // נגזר, ובלי בדיקה היא משקרת בשקט.** `check` באמת נפל פעם לענף
+        // ברירת המחדל והוצג כ"⚠️ סטטוס: check"; ההערה נכתבה אז, ונשארה
+        // אחרי שהתמונה השתנתה.
         //
         // ⚠️ זו בדיוק האזהרה שכתובה במיגרציה 037: שינוי אוצר מילים מחייב
-        // שינוי בשני הצדדים. שם היא נכתבה כדי למנוע את זה, וכאן זה כבר קרה.
-        // `check` נוסף עכשיו; איחוד מלא של השלושה מול השניים ממתין לפולה,
-        // כי הניסוח שלה הוא הכרעת מוצר ולא באג.
+        // שינוי בשני הצדדים. ארבעת הערכים כאן מכסים את ארבעת הערכים
+        // שקיימים במסד, ו-`status-vocabulary.test.ts` נופלת אם אחד מהם
+        // יוסר או אם הזרע יתחיל לייצר ערך חמישי.
         const say: Record<string, string> = {
           closed: "⚠️ סגור",
           // ניסוח פולה, 08.09. ⚠️ **תג קבוע וקצר, ובלי לפצל לשני ערכים.**
@@ -945,10 +970,37 @@ export function todayLine(now: Date = new Date()): string {
   ].join("\n");
 }
 
+/**
+ * המקורות המותרים, מנורמלים.
+ *
+ * 🔴 **גיא תפס שתי דרכים שבהן השוואה מדויקת נכשלת על ערך שנראה נכון.**
+ *
+ * 1. **סלאש בסוף.** כותרת `Origin` שדפדפן שולח לעולם אינה כוללת אותו.
+ *    `ALLOWED_ORIGIN=https://x/` היה חוסם **כל** בקשה אמיתית — והתסמין
+ *    הוא CORS, כלומר נראה כמו תקלת רשת ולא כמו הגדרה שגויה.
+ * 2. **מקור אחד בלבד.** גרסת הבדיקה יושבת על
+ *    `tim-test--<אתר>.netlify.app` — מקור **שונה** מהאתר הציבורי. ערך
+ *    יחיד פירושו שאחד מהשניים חסום תמיד.
+ *
+ * ⚠️ **וההרחבה הזו מרחיבה את מה שמותר, ולכן היא מצומצמת בכוונה:**
+ * פיצול לפי פסיק והשוואה מדויקת לכל אחד. **אין כאן prefix ואין תת־דומיין
+ * בכוכבית** — `https://x` שמתאים ל-`https://x.evil.com` הוא בדיוק הכשל
+ * שהצמצום הזה קיים כדי למנוע.
+ */
+function allowedOrigins(env: Record<string, string | undefined>): string[] {
+  return (env.ALLOWED_ORIGIN ?? "")
+    .split(",")
+    .map((o) => o.trim().replace(/\/+$/, ""))
+    .filter((o) => o !== "");
+}
+
 function corsFor(req: Request, env: Record<string, string | undefined>) {
-  const allowed = env.ALLOWED_ORIGIN;
+  const allowed = allowedOrigins(env);
   const origin = req.headers.get("origin");
-  const value = !allowed ? "*" : origin === allowed ? origin : "";
+  // ⚠️ רשימה ריקה = הסוד לא הוגדר, וזה עדיין `*`. ערך שהוא סלאש בלבד,
+  // או פסיקים בלבד, מתנרמל לרשימה ריקה — כלומר **נפתח**, ולא נסגר.
+  // לכן `diagnose` אומר כמה מקורות נספרו, ולא רק שהסוד קיים.
+  const value = allowed.length === 0 ? "*" : origin && allowed.includes(origin) ? origin : "";
   const h: Record<string, string> = {
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
