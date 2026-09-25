@@ -35,7 +35,9 @@ type TimReply = {
   answer?: string; error?: string; status?: number; rides?: number; chunks?: number;
   tiers?: string[]; retrieval?: string;
 };
-type Row = { name: string; height_requirement_cm: number | null; fits: boolean | null };
+// ⚠️ The function's names, not the table's: `height_cm`, not `height_requirement_cm`.
+// The first version read the table name, got undefined, and failed a correct row.
+type Row = { name: string; height_cm: number | null; fits: boolean | null };
 
 const arg = (name: string) => {
   const i = process.argv.indexOf(name);
@@ -81,8 +83,8 @@ async function run(c: Case): Promise<Verdict> {
     const hit = rows.find((r) => r.name === e.ride);
     if (!hit) why.push(`ride "${e.ride}" not found (got: ${rows.map((r) => r.name).join(", ") || "none"})`);
     else {
-      if (e.height_cm !== undefined && hit.height_requirement_cm !== e.height_cm)
-        why.push(`height ${hit.height_requirement_cm} ≠ ${e.height_cm}`);
+      if (e.height_cm !== undefined && hit.height_cm !== e.height_cm)
+        why.push(`height ${hit.height_cm} ≠ ${e.height_cm}`);
       if (e.fits !== undefined && hit.fits !== e.fits) why.push(`fits ${hit.fits} ≠ ${e.fits}`);
     }
   }

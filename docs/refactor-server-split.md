@@ -200,6 +200,22 @@ It wasn't rebuilt during the move so as not to slip a large, unrelated change in
 
 </details>
 
+### 3e ✅ The first real answer, locally (25.09.2026)
+**Server → local database → embeddings → Gemini, all on this machine:**
+> היי! לצערי היא לא תוכל לעלות על Space Mountain, מכיוון שגובה המינימום הנדרש למתקן הוא 112 ס"מ. החדשות הטובות הן שאתם יכולים להשתמש בשירות Child Swap בפארק…
+
+Correct (112 cm, the child is 110). `retrieval: ok` · 5 chunks · 1 attraction · tier T1 · nothing filtered · `gemini-3.5-flash`.
+
+**Golden set:** `scripts/run-golden.ts` (`npm run golden`), the first runner the set has had. In the first run all **28 were "not run"**: Google was overloaded (502), and an unanswered case isn't counted as either a pass or a failure. The table checks did run, and they match the file (the Hebrew description of Everest and "ולוצירפטור" have no match, as recorded). A bug in the runner itself was found and fixed: `find_experiences` returns `height_cm`, not the table's column name. **The full run is still pending, waiting for Google's load to ease.**
+
+**To run locally again:**
+1. `supabase --workdir apps/server/db/supabase-local start -x gotrue,realtime,storage-api,imgproxy,mailpit,postgres-meta,studio,edge-runtime,logflare,vector,supavisor`. The data is kept in a Docker volume between runs.
+2. `npm run build:server && node --env-file=.env.server apps/server/dist/server.mjs`. `.env.server` isn't in the repo: the Gemini key plus local values.
+3. `npm run golden`.
+4. To stop: `supabase --workdir apps/server/db/supabase-local stop`.
+
+⚠️ **In the local database only:** the per-user rate limit was raised to 1000 (in production it's 20), so that 28 questions from one IP don't block the test. It's documented in the function's comment inside the database.
+
 ### O6 — The migrations can't build a database from scratch · found 25.09 on a local database
 While setting up a local database (`supabase start`, config in `apps/server/db/supabase-local/`), the setup file stopped **at migration 038**. That's the practical check O5 left open, and it failed.
 
