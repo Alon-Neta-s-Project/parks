@@ -199,3 +199,20 @@ It wasn't rebuilt during the move so as not to slip a large, unrelated change in
 **Proposal:** rebuild it in a separate commit and add a freshness check (like `seed-freshness`). Or, if nobody uses it since the switch to dbmate (Stage 2), delete it along with its script. Needs a decision: is anyone still setting up a database from the bundle?
 
 </details>
+
+### O6 — The migrations can't build a database from scratch · found 25.09 on a local database
+While setting up a local database (`supabase start`, config in `apps/server/db/supabase-local/`), the setup file stopped **at migration 038**. That's the practical check O5 left open, and it failed.
+
+**Three causes, all the same pattern: the migrations assume a database that was built by hand, not by the migrations:**
+1. **038, 039, 040:** their self-check copies an existing attraction (`select * from experience limit 1`) to create a test row. On an empty database there's nothing to copy, the check gets NULL, and the migration rolls back. In production it passed only because the content was already there. The content can't be loaded before 038 either, because it includes the column 038 adds.
+2. **046** grants permissions to the role `ci_verify`, which isn't created by any migration. It was created by hand from `data/deploy/ci-roles.txt`.
+3. **`content-seed`:** `land.sql` has to run before `content-*.sql`, and alphabetical order puts it after them. Nothing in the directory says so.
+
+**How the local database was built anyway** (a local workaround, nothing changed in the repo): migrations 000–037 → seeds → a placeholder attraction → 038–040 ran **their real checks** and passed → the placeholder was deleted → `ci-roles.txt` → 041–046 → `land.sql` → content → knowledge → `park-intro`. Result: 48 migrations, 242 attractions (verification passes), 66 documents / 314 chunks. Tim's queries were checked through the local REST layer: `check_rate_limit` "ok", `find_experiences` (Space Mountain, 110 cm → fits false), `park_candidates` 58, knowledge closed to anon.
+
+**Why it matters:** the same thing will hit dbmate (Stage 2) on any new database, whether a test database, a Supabase branch, or recovery after a disaster. **The migration history is currently not a way to rebuild the database.**
+
+**Proposal (needs a decision, since these are signed migrations that already ran in production):**
+- Don't edit 038–040 (their signatures and history). Instead, a new migration `047`, or a local setup script that explicitly does what's written above.
+- Or, when moving to dbmate: a "baseline", a single schema file taken from production (`pg_dump --schema-only`) that replaces 000–046 for new databases, with the old migrations kept as history. That's the standard approach, and it also solves the 034 duplicate.
+- `ci_verify` / `ci_content`: a migration that creates them if missing (`if not exists`), without passwords, which get set separately.

@@ -1,7 +1,8 @@
 node_modules/
 dist/
-.env
-.env.local
+# ⚠️ כל קובץ סביבה, ולא רק שני שמות. .env.server נכנס לרפו בלי זה.
+.env*
+!.env.example
 .DS_Store
 __pycache__/
 dist/
