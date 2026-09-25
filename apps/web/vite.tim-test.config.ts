@@ -42,9 +42,6 @@ export default defineConfig({
   root: __dirname,
   plugins: [react(), emitFallbackPages()],
   base: "./",
-  // ⚠️ בלי תיקיית public. היא נושאת את עשר תמונות הפארקים ואת תצלום
-  // הכניסה — 3 MB שאין להם צרכן במסך הזה, ושהיו נטענים לחינם.
-  publicDir: false,
   build: {
     outDir: "dist-tim-test",
     emptyOutDir: true,

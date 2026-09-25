@@ -38,6 +38,16 @@ function bundleText(dir: string): string | null {
 describe("גרסת הבדיקה אינה נכנסת לחבילה הציבורית", () => {
   const text = bundleText(PUBLIC_DIR);
 
+  /**
+   * ⚠️ **אף תמונה בחבילה של טים.** עד 25.09 זה נאכף ב-`publicDir: false`;
+   * התמונות עברו ל-src/assets ונכנסות רק ממה שמייבא אותן. ייבוא אחד של
+   * מסך הכניסה או של רכיב שמציג פארק היה מחזיר אותן בשקט.
+   */
+  it.skipIf(!existsSync(PUBLIC_DIR))("אין בה תמונות", () => {
+    const images = readdirSync(PUBLIC_DIR).filter((f) => /\.(webp|jpe?g|png)$/i.test(f));
+    expect(images).toEqual([]);
+  });
+
   it.skipIf(text === null)("אין בה סימן מקוד הפידבק", () => {
     for (const marker of TEST_ONLY) {
       expect(text?.includes(marker), `"${marker}" נמצא בחבילה הציבורית`).toBe(false);

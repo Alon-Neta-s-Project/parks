@@ -3,6 +3,20 @@ import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Orb } from "../components/Orb";
 import { useContent } from "../data/content";
+import heroPhoto from "../assets/home-hero.jpg";
+
+/**
+ * ⚠️ **תמונות הפארקים נאספות מהתיקייה, ולא ממפה כתובה ביד.** Vite בונה
+ * את המפה בזמן בנייה, וכל קובץ מקבל שם עם גיבוב — כך Netlify שומר אותו
+ * לתמיד, ותמונה שהוחלפה מקבלת שם חדש ולא מוגשת ישנה מהמטמון. הקובץ עדיין
+ * נקרא לפי slug, ו-dataset.test.ts בודק שלכל פארק יש אחד.
+ */
+const parkPhotos = import.meta.glob<string>("../assets/parks/*.webp", {
+  eager: true,
+  import: "default",
+  query: "?url",
+});
+const parkPhoto = (slug: string): string | undefined => parkPhotos[`../assets/parks/${slug}.webp`];
 
 /**
  * מסך הכניסה, לפי `apps/web/design/canvas/TimHomeLaylaInspired.dc.html`.
@@ -45,7 +59,7 @@ export function HomePage() {
           שמשתמש בקורא מסך בלי שהוא מוסיף מידע.
         */}
         <div className="greet__bg" aria-hidden="true">
-          <img src="/home-hero.jpg" alt="" className="greet__photo" />
+          <img src={heroPhoto} alt="" className="greet__photo" />
           <div className="greet__veil greet__veil--top" />
           <div className="greet__veil greet__veil--bottom" />
         </div>
@@ -104,7 +118,7 @@ export function HomePage() {
                     alt ריק בכוונה — התמונה דקורטיבית, והשם כתוב לידה. */}
                 <img
                   className="parkcard__img"
-                  src={`/parks/${park.slug}.webp`}
+                  src={parkPhoto(park.slug)}
                   alt=""
                   loading="lazy"
                   width={400}

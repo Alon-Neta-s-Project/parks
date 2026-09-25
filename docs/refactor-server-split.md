@@ -225,6 +225,12 @@ Correct (112 cm, the child is 110). `retrieval: ok` · 5 chunks · 1 attraction 
 - `build-preview.py --check`, and a test in `seed-freshness.test.ts`. **Seen failing** on the old page before the rebuild. It also caught a comment edit in `tokens.css`, which gets copied into the page.
 - **Tests:** `npm run qa` passes · web **301** (+1) · server 11 · deno 104 · `build` 253 pages.
 
+### Images from `public/` → `src/assets/` (25.09.2026)
+- The home photo and the 10 park photos moved to `apps/web/src/assets/`. `HomePage` imports the home photo, and the park photos through `import.meta.glob`, a map Vite builds from the folder, not by hand. The file is still named by `slug`, and `dataset.test.ts` checks every park has one.
+- **Why:** files in `public/` keep their name with no hash, so Netlify couldn't cache them permanently, and a swapped image could be served stale. Now: `epcot-BQpbcvIB.webp`, under `/assets/` with `immutable`.
+- `publicDir: false` in the Tim configs was removed, because there's no `public/` anymore. Instead, **a test: no image in the Tim build** (`test-build-separation`). Before, the config guaranteed it; now it depends on what gets imported. **Seen failing:** a temporary import in `TimOnlyApp` put `home-hero-U4e2b5tN.jpg` into the build, and the test caught it.
+- **Tests:** `npm run qa` passes · web **302** (+1) · server 11 · deno 104 · `build`: 11 images, all hashed, and 0 images in the Tim build.
+
 ### O6 — The migrations can't build a database from scratch · found 25.09 on a local database
 While setting up a local database (`supabase start`, config in `apps/server/db/supabase-local/`), the setup file stopped **at migration 038**. That's the practical check O5 left open, and it failed.
 

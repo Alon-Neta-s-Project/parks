@@ -1,7 +1,7 @@
 {
   "WEB": "apps/web",
   "WEB_SRC": "apps/web/src",
-  "WEB_PUBLIC": "apps/web/public",
+  "WEB_ASSETS": "apps/web/src/assets",
   "TOKENS_CSS": "apps/web/src/styles/tokens.css",
   "HE_JSON": "apps/web/src/i18n/he.json",
   "EXPERIENCES_JSON": "apps/web/src/data/experiences.json",

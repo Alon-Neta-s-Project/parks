@@ -52,7 +52,7 @@ describe("מסך הכניסה", () => {
 describe("תצלום מסך הכניסה", () => {
   it("קיים כקובץ ולא כ-base64 ברכיב", async () => {
     const { statSync } = await import("node:fs");
-    const s = statSync(join(P.WEB_PUBLIC, "home-hero.jpg"));
+    const s = statSync(join(P.WEB_ASSETS, "home-hero.jpg"));
     expect(s.size).toBeGreaterThan(10_000);
   });
 

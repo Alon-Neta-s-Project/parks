@@ -359,7 +359,7 @@ describe("every park carries its own photo", () => {
   // ושורת הפארקים מאבדת תמונה בלי שאיש ידע. הבדיקה הזו היא מה שהופך
   // את זה לכשל שרואים.
   it("has a webp named for every park slug, and no orphans", () => {
-    const dir = join(P.WEB_PUBLIC, "parks");
+    const dir = join(P.WEB_ASSETS, "parks");
     const files = readdirSync(dir).filter((f) => f.endsWith(".webp"));
     const have = new Set(files.map((f) => f.replace(/\.webp$/, "")));
     const want = new Set(parks.map((p) => p.slug));
@@ -373,7 +373,7 @@ describe("every park carries its own photo", () => {
   it("keeps each photo small enough for a rail of ten", () => {
     // עשר תמונות נטענות במסך הכניסה. המקור היה 3 MB; ⚠️ תמונה אחת
     // שתחזור בגודל המקורי מחזירה את הטעינה למקום שממנו באנו.
-    const dir = join(P.WEB_PUBLIC, "parks");
+    const dir = join(P.WEB_ASSETS, "parks");
     for (const file of readdirSync(dir).filter((f) => f.endsWith(".webp"))) {
       expect(statSync(join(dir, file)).size).toBeLessThan(120_000);
     }
