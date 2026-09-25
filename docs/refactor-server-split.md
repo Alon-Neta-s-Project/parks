@@ -218,6 +218,13 @@ Correct (112 cm, the child is 110). `retrieval: ok` · 5 chunks · 1 attraction 
 
 ⚠️ **In the local database only:** the per-user rate limit was raised to 1000 (in production it's 20), so that 28 questions from one IP don't block the test. It's documented in the function's comment inside the database.
 
+### `design/` → `apps/web/design/`, and one palette instead of two (25.09.2026)
+- `design/` (the designer's mockups in `canvas/`, the approval pages in `preview/`) moved into `apps/web/design/`. It's the frontend's design, even though it isn't shipped: Vite bundles only what's imported.
+- 🔴 **There were two `tokens.css` files with different palettes, and both called themselves "the only source of truth".** `design/tokens.css` was the old palette (navy background `#0B1220`, purple accent `#A98FF2`). The site ships the warm one (brown `#1A1512`, orange `#FF8156`). `build-preview.py` built the approval page from the old one, **so the page showed Neta colors the product no longer had.**
+- The copy was deleted. `build-preview.py` builds from the site's `tokens.css` (`TOKENS_CSS` in `paths.json`). Checked first: all 59 tokens the page uses exist in the site's file.
+- `build-preview.py --check`, and a test in `seed-freshness.test.ts`. **Seen failing** on the old page before the rebuild. It also caught a comment edit in `tokens.css`, which gets copied into the page.
+- **Tests:** `npm run qa` passes · web **301** (+1) · server 11 · deno 104 · `build` 253 pages.
+
 ### O6 — The migrations can't build a database from scratch · found 25.09 on a local database
 While setting up a local database (`supabase start`, config in `apps/server/db/supabase-local/`), the setup file stopped **at migration 038**. That's the practical check O5 left open, and it failed.
 

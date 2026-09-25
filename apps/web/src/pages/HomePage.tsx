@@ -5,7 +5,7 @@ import { Orb } from "../components/Orb";
 import { useContent } from "../data/content";
 
 /**
- * מסך הכניסה, לפי `design/canvas/TimHomeLaylaInspired.dc.html`.
+ * מסך הכניסה, לפי `apps/web/design/canvas/TimHomeLaylaInspired.dc.html`.
  *
  * ⚠️ **תצלום הטירה מאושר** (דנה, 07.09 — מאגר חינמי, בלי דרישת קרדיט),
  * ולכן הוא מומש כמו ב-artboard ובלי שורת ייחוס.

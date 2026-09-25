@@ -815,7 +815,7 @@ button {
 }
 
 /* ---- מסך הכניסה ------------------------------------------------------------
-   לפי design/canvas/TimHomeLaylaInspired.dc.html. הערכים מהטוקנים ולא
+   לפי apps/web/design/canvas/TimHomeLaylaInspired.dc.html. הערכים מהטוקנים ולא
    מה-artboard: הוא כותב #2B2420 ישירות, וכאן זה --pw-ink.                 */
 .home { padding-block-start: var(--pw-s5); }
 

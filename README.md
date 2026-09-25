@@ -85,9 +85,9 @@ npm run build      # בנייה לפרודקשן
 | `docs/spec/content-file-analysis.md` | **דוח הכיסוי בשני הכיוונים** (סעיף 6א.3) — מה הבריף דורש שאין בקובץ, ומה בקובץ שאין לו בית בסכמה |
 | `docs/master-brief-v1.md` | הבריף כפי שהתקבל |
 | `apps/web/src/styles/tokens.css` | **מקור האמת היחיד לצבע וטיפוגרפיה**. הקובץ היחיד עם ערכי צבע |
-| `design/tokens.css` | עותק המקור לדף האישור |
-| `design/preview/page.html` | דף האישור של M1 — טוקנים, אייקונים, שלושה מסכים |
-| `design/preview/index.html` | נבנה מהשניים שמעל. **לא לערוך ידנית** |
+| `apps/web/design/canvas/` | מסכי הדמו של המעצבת — מקור לעיצוב, לא קוד |
+| `apps/web/design/preview/page.html` | דף האישור של M1 — טוקנים, אייקונים, שלושה מסכים |
+| `apps/web/design/preview/index.html` | נבנה מ-page.html ומהטוקנים של האתר (`build-preview.py`). **לא לערוך ידנית** |
 | `scripts/export-source-xlsx.py` | ייצוא הגיליונות ל-JSON. לא הייבוא של סעיף 6א |
 | `scripts/build-preview.py` | הזרקת `tokens.css` לתוך דף התצוגה |
 
@@ -117,6 +117,6 @@ python3 scripts/build-preview.py        # tokens.css + page.html -> index.html
 ## כללי עבודה שנשמרים בקוד
 
 - **אין תוכן מומצא.** כל ערך בדף התצוגה נלקח משורה אמיתית בקובץ. שדה בלי מקור מוצג כ"אין נתון".
-- **אין ערכי צבע קשיחים** מחוץ ל-`design/tokens.css`.
+- **אין ערכי צבע קשיחים** מחוץ ל-`apps/web/src/styles/tokens.css`.
 - **RTL לוגי בלבד** — `inline-start`/`inline-end`/`block-*`. אין `left`/`right`/`margin-left`.
 - **שם אנגלי בתוך משפט עברי** מבודד תמיד (`<bdi>` או `unicode-bidi: isolate`).

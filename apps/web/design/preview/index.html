@@ -6,82 +6,104 @@
    Park Day Companion — Design Tokens
    ----------------------------------------------------------------------------
    מקור אמת יחיד לשפה העיצובית. סעיף 4.2 בבריף: קומפוננטה צורכת רק tokens,
-   לעולם לא ערך צבע קשיח.
+   לעולם לא ערך צבע קשיח. זו הסיבה שהחלפת שפה שלמה היא החלפת הקובץ הזה.
 
-   הכיוון (מהבריף העיצובי של נטע):
-     60% Apple / premium travel-tech · 20% Google Maps / ניווט
-     10% קסם · 10% אנרגיה קולנועית
-   הממשק שקט. הצילום, המצב הנבחר והאקצנט מביאים את הצבע.
+   ⚠️ הערכים כאן נלקחו מהקנבס של דנה — הדף layla-inspired, היחיד שאושר
+   לבנייה (נטע, 03.09). לא מהערכה של איך זה נראה: חמשת ה-artboards יושבים
+   ב-apps/web/design/canvas/, והצבעים נמדדו מה-HTML שלהם.
+
+   הכיוון: קרם חם וצילומי. הממשק שקט, הצילום והאקצנט מביאים את הצבע.
+   קודם עמד כאן ניטרלי עם הטיה כחולה — כיוון שקדם לקנבס ולא תאם אותו.
 
    RTL: אין כאן ערכי left/right. רק logical properties (סעיף 8).
    ========================================================================== */
 
 :root {
   /* ---- ground -------------------------------------------------------------
-     נייטרלים עם הטיה כחולה קלה — לא אפור טהור. */
-  --pw-canvas:          #F2F5FA;
-  --pw-surface:         #FFFFFF;
-  --pw-surface-2:       #F7F9FD;
-  --pw-sunken:          #E9EEF7;
-  --pw-hairline:        #E1E8F3;
-  --pw-hairline-strong: #CBD6E8;
-  --pw-scrim:           rgba(8, 16, 30, .62);
+     קרם, לא לבן. #FBF6EF הוא הרקע של כל מסך בקנבס. */
+  --pw-canvas:          #FBF6EF;
+  --pw-surface:         #FFFDF9;
+  --pw-surface-2:       #F1E9DC;
+  --pw-sunken:          #ECE3D8;
+  --pw-hairline:        #EDE4D6;
+  --pw-hairline-strong: #DCCFBB;
+  --pw-scrim:           rgba(43, 36, 32, .62);
 
-  /* ---- ink --------------------------------------------------------------- */
-  --pw-ink:             #0C1524;
-  --pw-ink-2:           #495871;
-  --pw-ink-3:           #606E85;
-  --pw-ink-on-dark:     #FFFFFF;
-  --pw-ink-on-dark-2:   rgba(255, 255, 255, .74);
+  /* ---- ink ----------------------------------------------------------------
+     חום-שחור ולא אפור. #2B2420 הוא צבע הטקסט בקנבס ו-#B0A493 ה-placeholder;
+     שני קצות הסולם נמדדו, והאמצע נגזר ביניהם. */
+  --pw-ink:             #2B2420;
+  --pw-ink-2:           #4A4038;
+  --pw-ink-3:           #6B6058;
+  --pw-ink-4:           #8A8074;
+  --pw-ink-muted:       #B0A493;
+  --pw-ink-on-dark:     #FBF6EF;
+  --pw-ink-on-dark-2:   rgba(251, 246, 239, .74);
 
-  /* ---- wayfinding blue — ניווט, מפה, מצב נבחר, פעולה ראשית, אמון ------- */
-  --pw-way-50:          #EDF3FE;
-  --pw-way-100:         #DAE6FD;
-  --pw-way-200:         #B4CAFA;
-  --pw-way-400:         #4A7CE8;
-  --pw-way-500:         #2360E0;
-  --pw-way-600:         #1A4CBC;
-  --pw-way-700:         #143A92;
-  /* Foreground for anything sitting on a filled accent. Flips with the accent:
-     the dark palette lightens the fills, so white text on them would drop to
-     roughly 2.5:1. */
+  /* ---- wayfinding — ניווט, מפה, מצב נבחר, פעולה ראשית, אמון -----------
+     התכלת של הקנבס. היא הצבע הקר היחיד בפלטה, ולכן היא נושאת לבדה את כל
+     מה שצריך להיקרא כ"מערכת" ולא כ"טים". */
+  --pw-way-50:          #E8F4FB;
+  --pw-way-100:         #CFE8F6;
+  --pw-way-200:         #A5D4EE;
+  --pw-way-400:         #2E9FD6;
+  --pw-way-500:         #1C7AA8;
+  --pw-way-600:         #17627F;
+  --pw-way-700:         #114B62;
   --pw-on-way:          #FFFFFF;
 
-  /* ---- magic violet — טים, AI, תובנה אישית, פרימיום -------------------- */
-  --pw-magic-50:        #F2EEFE;
-  --pw-magic-100:       #E5DEFC;
-  --pw-magic-300:       #A98FF2;
-  --pw-magic-500:       #6B45E4;
-  --pw-magic-600:       #5733C4;
-  --pw-magic-line:      linear-gradient(90deg, var(--pw-way-500) 0%, var(--pw-magic-500) 100%);
-  --pw-magic-orb:       radial-gradient(circle at 32% 28%, #9C7BFF 0%, #6B45E4 46%, #2360E0 100%);
+  /* ---- magic — טים, AI, תובנה אישית ------------------------------------
+     ⚠️ כתום ולא סגול. בקנבס טים הוא הדמות החמה במרכז המסך, עם זוהר
+     #FFD98A סביבה. סגול היה נשאר צבע של ממשק; הכתום הוא הדמות. */
+  --pw-magic-50:        #FDEEE8;
+  --pw-magic-100:       #FBDCCF;
+  --pw-magic-300:       #E8894A;
+  --pw-magic-500:       #F0653A;
+  --pw-magic-600:       #C94A24;
+  --pw-magic-glow:      #FFD98A;
+  --pw-magic-line:      linear-gradient(90deg, var(--pw-way-400) 0%, var(--pw-magic-500) 100%);
+  --pw-magic-orb:       radial-gradient(circle at 32% 28%, #FFD98A 0%, #F0653A 52%, #C94A24 100%);
   --pw-on-magic:        #FFFFFF;
 
-  /* ---- signal — במשורה בלבד -------------------------------------------- */
-  --pw-urgent-50:       #FDEFE9;
-  --pw-urgent-500:      #E2592C;
-  --pw-urgent-600:      #B94320;
-  --pw-clear-50:        #E7F5EF;
-  --pw-clear-500:       #0E8A5F;
-  --pw-clear-600:       #0A6746;
+  /* ---- signal — במשורה בלבד --------------------------------------------
+     ⚠️ נבדל מהאקצנט בכוונה. כשהמותג עצמו כתום, אזהרה בכתום נקראת כמותג
+     ולא כאזהרה — ולכן האדום כאן עמוק וחום יותר. */
+  /* ⚠️ הערכים מדנה, לא ניחוש שלי. ניחשתי #A9432B כדי להרחיק את האזהרה
+     מהאקצנט הכתום; היא מסרה את הערכים בפועל, והם שולטים. */
+  --pw-urgent-50:       #FDF1EC;
+  --pw-urgent-line:     #F0CFC0;
+  --pw-urgent-500:      #B5622F;
+  --pw-urgent-600:      #8A4520;
 
-  /* ---- missing data — חוסר הוא מצב מעוצב, לא תקלה --------------------- */
-  --pw-missing-bg:      #F5F2EC;
-  --pw-missing-line:    #E0D8C9;
-  --pw-missing-ink:     #8A7C63;
+  /* קופסת טיפ צהובה — "טיפים מגולשים". רקע ומסגרת, מדנה. */
+  --pw-tip-bg:          #FBF0DC;
+  --pw-tip-line:        #EEDBAF;
+  --pw-tip-ink:         #1C7AA8;
+  --pw-clear-50:        #E6F0E9;
+  --pw-clear-500:       #2F7A5B;
+  --pw-clear-600:       #235C45;
+
+  /* ---- missing data — חוסר הוא מצב מעוצב, לא תקלה ---------------------
+     ⚠️ נדחק לאפור-חול. קודם הוא היה קרם על ממשק קר ובלט מעצמו; עכשיו
+     הממשק עצמו קרם, ולכן החוסר מסומן בהיעדר החום ולא בנוכחותו. */
+  --pw-missing-bg:      #EDEAE4;
+  --pw-missing-line:    #D8D2C6;
+  --pw-missing-ink:     #857F73;
 
   /* ---- radius ------------------------------------------------------------ */
-  --pw-r-xs:  8px;
+  /* מהקנבס: 999 לגלולות · 16 לכרטיסים · 14/12/10 לפנימיים · 2 לקווים. */
+  --pw-r-hair: 2px;
+  --pw-r-xs:  10px;
   --pw-r-sm:  12px;
   --pw-r-md:  16px;
-  --pw-r-lg:  22px;
-  --pw-r-xl:  30px;
+  --pw-r-lg:  20px;
+  --pw-r-xl:  24px;
   --pw-r-pill: 999px;
 
   /* ---- elevation — שתי רמות בלבד. הבריף: "לא יותר מדי צללים" ---------- */
-  --pw-e1: 0 1px 2px rgba(12, 21, 36, .05), 0 1px 3px rgba(12, 21, 36, .04);
-  --pw-e2: 0 2px 5px rgba(12, 21, 36, .04), 0 14px 32px -16px rgba(12, 21, 36, .22);
-  --pw-e-magic: 0 6px 22px -8px rgba(107, 69, 228, .48);
+  --pw-e1: 0 1px 2px rgba(43, 36, 32, .05), 0 1px 3px rgba(43, 36, 32, .04);
+  --pw-e2: 0 2px 5px rgba(43, 36, 32, .05), 0 14px 32px -16px rgba(43, 36, 32, .22);
+  --pw-e-magic: 0 6px 22px -8px rgba(240, 101, 58, .42);
 
   /* ---- space — בסיס 4px -------------------------------------------------- */
   --pw-s1: 4px;  --pw-s2: 8px;  --pw-s3: 12px; --pw-s4: 16px;
@@ -89,14 +111,23 @@
   --pw-s9: 56px; --pw-s10: 72px;
 
   /* ---- type --------------------------------------------------------------
-     Assistant  — עברית וממשק. גיאומטרי, נקי, לא משחקי.
-     Archivo    — שמות מתקנים באנגלית ומספרים. אופי של שילוט ניווט.
-     ההפרדה מכוונת: קול עברי מול שם קנוני אנגלי (סעיף 8, <bdi>). */
-  --pw-font-ui:   "Assistant", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --pw-font-name: "Archivo", "Assistant", -apple-system, sans-serif;
+     Secular One — כותרות. משקל אחד בלבד (400), ולכן הוא לא מקבל bold.
+     Rubik       — ממשק וגוף, 400-800. נושא עברית ולטינית באותה משפחה.
 
-  --pw-t-display: 700 30px/1.16 var(--pw-font-ui);
-  --pw-t-h1:      700 23px/1.24 var(--pw-font-ui);
+     ⚠️ Archivo יצא. הקנבס אינו משתמש בו, ושמירה על גופן שאינו בעיצוב היא
+     שפה שלישית בלי מקור. ההפרדה בין קול עברי לשם קנוני אנגלי (סעיף 8)
+     נשארת — היא נשענת עכשיו על משקל ולא על משפחה, והטוקן נשמר כדי
+     שהחזרה למשפחה נפרדת תהיה שורה אחת.
+
+     ⚠️ סולם הגדלים נשאר של האפליקציה ולא של הקנבס. ה-artboards נמדדו
+     ב-11-14px כי הם מוקאפים ברוחב 390 ב-1:1; גוף טקסט של 11px במוצר
+     אמיתי הוא נסיגה בנגישות, לא נאמנות לעיצוב. */
+  --pw-font-display: "Secular One", "Rubik", -apple-system, sans-serif;
+  --pw-font-ui:   "Rubik", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --pw-font-name: "Rubik", -apple-system, sans-serif;
+
+  --pw-t-display: 400 30px/1.2 var(--pw-font-display);
+  --pw-t-h1:      400 23px/1.28 var(--pw-font-display);
   --pw-t-h2:      600 18px/1.32 var(--pw-font-ui);
   --pw-t-h3:      600 15.5px/1.4 var(--pw-font-ui);
   --pw-t-body:    400 15px/1.62 var(--pw-font-ui);
@@ -120,94 +151,98 @@
    עם ניגודיות נבדקת ולא היפוך נאיבי. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --pw-canvas:          #0B1220;
-    --pw-surface:         #141D2E;
-    --pw-surface-2:       #1A2437;
-    --pw-sunken:          #0F1826;
-    --pw-hairline:        #253148;
-    --pw-hairline-strong: #35455F;
-    --pw-scrim:           rgba(4, 8, 16, .7);
+    --pw-canvas:          #1A1512;
+    --pw-surface:         #241D18;
+    --pw-surface-2:       #2E2620;
+    --pw-sunken:          #150F0C;
+    --pw-hairline:        #392F27;
+    --pw-hairline-strong: #4E4137;
+    --pw-scrim:           rgba(10, 7, 5, .7);
 
-    --pw-ink:             #EEF3FB;
-    --pw-ink-2:           #A8B6CD;
-    --pw-ink-3:           #7A89A3;
+    --pw-ink:             #F4EDE3;
+    --pw-ink-2:           #CBBFB1;
+    --pw-ink-3:           #A8998A;
+    --pw-ink-4:           #8E8073;
+    --pw-ink-muted:       #746859;
 
-    --pw-way-50:          #16233C;
-    --pw-way-100:         #1D2F4F;
-    --pw-way-200:         #2B4470;
-    --pw-way-400:         #6E9BF5;
-    --pw-way-500:         #74A0F7;
-    --pw-way-600:         #9CBCFA;
-    --pw-way-700:         #C2D6FC;
-  --pw-on-way:          #08101E;
-    --pw-on-way:          #08101E;
+    --pw-way-50:          #10333F;
+    --pw-way-100:         #16465A;
+    --pw-way-200:         #1E6180;
+    --pw-way-400:         #57C0EE;
+    --pw-way-500:         #6ECBF2;
+    --pw-way-600:         #9BDDF7;
+    --pw-way-700:         #C4ECFB;
+    --pw-on-way:          #0A1E27;
 
-    --pw-magic-50:        #1E1A38;
-    --pw-magic-100:       #29224C;
-    --pw-magic-300:       #8E71EE;
-    --pw-magic-500:       #A98FF2;
-    --pw-magic-600:       #C4B2F7;
-  --pw-on-magic:        #140E2C;
-    --pw-on-magic:        #140E2C;
+    --pw-magic-50:        #3A1D12;
+    --pw-magic-100:       #4E2717;
+    --pw-magic-300:       #F09A6A;
+    --pw-magic-500:       #FF8156;
+    --pw-magic-600:       #FFA684;
+    --pw-on-magic:        #2B1109;
 
-    --pw-urgent-50:       #33190F;
-    --pw-urgent-500:      #FF9068;
-    --pw-urgent-600:      #FFB294;
-    --pw-clear-50:        #0D2A21;
-    --pw-clear-500:       #4FCB9B;
-    --pw-clear-600:       #7EDCB7;
+    --pw-urgent-50:       #3A1912;
+    --pw-urgent-500:      #E88161;
+    --pw-urgent-600:      #F2A88F;
+    --pw-clear-50:        #12301F;
+    --pw-clear-500:       #62BE96;
+    --pw-clear-600:       #8FD3B4;
 
-    --pw-missing-bg:      #23201A;
-    --pw-missing-line:    #3B3527;
-    --pw-missing-ink:     #C4B695;
+    --pw-missing-bg:      #26231F;
+    --pw-missing-line:    #3B3630;
+    --pw-missing-ink:     #9A9186;
 
     --pw-e1: 0 1px 2px rgba(0, 0, 0, .4), 0 1px 3px rgba(0, 0, 0, .3);
     --pw-e2: 0 2px 5px rgba(0, 0, 0, .35), 0 14px 32px -16px rgba(0, 0, 0, .7);
-    --pw-e-magic: 0 6px 22px -8px rgba(169, 143, 242, .4);
+    --pw-e-magic: 0 6px 22px -8px rgba(255, 129, 86, .4);
   }
 }
 
 :root[data-theme="dark"] {
-  --pw-canvas:          #0B1220;
-  --pw-surface:         #141D2E;
-  --pw-surface-2:       #1A2437;
-  --pw-sunken:          #0F1826;
-  --pw-hairline:        #253148;
-  --pw-hairline-strong: #35455F;
-  --pw-scrim:           rgba(4, 8, 16, .7);
+  --pw-canvas:          #1A1512;
+  --pw-surface:         #241D18;
+  --pw-surface-2:       #2E2620;
+  --pw-sunken:          #150F0C;
+  --pw-hairline:        #392F27;
+  --pw-hairline-strong: #4E4137;
+  --pw-scrim:           rgba(10, 7, 5, .7);
 
-  --pw-ink:             #EEF3FB;
-  --pw-ink-2:           #A8B6CD;
-  --pw-ink-3:           #7A89A3;
+  --pw-ink:             #F4EDE3;
+  --pw-ink-2:           #CBBFB1;
+  --pw-ink-3:           #A8998A;
+  --pw-ink-4:           #8E8073;
+  --pw-ink-muted:       #746859;
 
-  --pw-way-50:          #16233C;
-  --pw-way-100:         #1D2F4F;
-  --pw-way-200:         #2B4470;
-  --pw-way-400:         #6E9BF5;
-  --pw-way-500:         #74A0F7;
-  --pw-way-600:         #9CBCFA;
-  --pw-way-700:         #C2D6FC;
+  --pw-way-50:          #10333F;
+  --pw-way-100:         #16465A;
+  --pw-way-200:         #1E6180;
+  --pw-way-400:         #57C0EE;
+  --pw-way-500:         #6ECBF2;
+  --pw-way-600:         #9BDDF7;
+  --pw-way-700:         #C4ECFB;
+  --pw-on-way:          #0A1E27;
 
-  --pw-magic-50:        #1E1A38;
-  --pw-magic-100:       #29224C;
-  --pw-magic-300:       #8E71EE;
-  --pw-magic-500:       #A98FF2;
-  --pw-magic-600:       #C4B2F7;
+  --pw-magic-50:        #3A1D12;
+  --pw-magic-100:       #4E2717;
+  --pw-magic-300:       #F09A6A;
+  --pw-magic-500:       #FF8156;
+  --pw-magic-600:       #FFA684;
+  --pw-on-magic:        #2B1109;
 
-  --pw-urgent-50:       #33190F;
-  --pw-urgent-500:      #FF9068;
-  --pw-urgent-600:      #FFB294;
-  --pw-clear-50:        #0D2A21;
-  --pw-clear-500:       #4FCB9B;
-  --pw-clear-600:       #7EDCB7;
+  --pw-urgent-50:       #3A1912;
+  --pw-urgent-500:      #E88161;
+  --pw-urgent-600:      #F2A88F;
+  --pw-clear-50:        #12301F;
+  --pw-clear-500:       #62BE96;
+  --pw-clear-600:       #8FD3B4;
 
-  --pw-missing-bg:      #23201A;
-  --pw-missing-line:    #3B3527;
-  --pw-missing-ink:     #C4B695;
+  --pw-missing-bg:      #26231F;
+  --pw-missing-line:    #3B3630;
+  --pw-missing-ink:     #9A9186;
 
   --pw-e1: 0 1px 2px rgba(0, 0, 0, .4), 0 1px 3px rgba(0, 0, 0, .3);
   --pw-e2: 0 2px 5px rgba(0, 0, 0, .35), 0 14px 32px -16px rgba(0, 0, 0, .7);
-  --pw-e-magic: 0 6px 22px -8px rgba(169, 143, 242, .4);
+  --pw-e-magic: 0 6px 22px -8px rgba(255, 129, 86, .4);
 }
 
 /* ==========================================================================

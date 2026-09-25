@@ -11,7 +11,7 @@ apps/web/public
 apps/server/content
 apps/server/db
 docs
-design
+apps/web/design
 evals
 reports
 data

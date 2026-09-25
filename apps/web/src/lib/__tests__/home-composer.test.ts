@@ -4,7 +4,7 @@ import he from "../../i18n/he.json";
 import { P } from "../../../../../scripts/paths";
 
 /**
- * מסך הכניסה, לפי `design/canvas/TimHomeLaylaInspired.dc.html`.
+ * מסך הכניסה, לפי `apps/web/design/canvas/TimHomeLaylaInspired.dc.html`.
  *
  * ⚠️ מה שנבדק כאן הוא **מה שה-artboard הבטיח למשתמש** — לא איך זה
  * נראה. הטקסטים הם ההבטחה: תיבה שאפשר לכתוב בה, שני קיצורים, ומשפט

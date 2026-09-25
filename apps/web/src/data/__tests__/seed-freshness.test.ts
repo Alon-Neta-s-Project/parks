@@ -58,6 +58,19 @@ describe("קובצי הזרע מעודכנים מול המקור שלהם", () =
     expect(run).not.toThrow();
   });
 
+  /**
+   * ⚠️ **דף האישור הציג לנטע פלטה שהמוצר כבר לא היה בה** — הוא נבנה מעותק
+   * ישן של הטוקנים. עכשיו הוא נבנה מהטוקנים של האתר, ונבדק שהוא מעודכן.
+   */
+  it("דף האישור נבנה מהטוקנים של האתר", () => {
+    const run = () =>
+      execFileSync("python3", [join(P.SCRIPTS, "build-preview.py"), "--check"], {
+        encoding: "utf-8",
+        stdio: ["ignore", "pipe", "pipe"],
+      });
+    expect(run).not.toThrow();
+  });
+
   it("knowledge.sql נבנה מ-knowledge/ העדכני", () => {
     const run = () =>
       execFileSync("python3", [join(P.SCRIPTS, "build-knowledge-seed.py"), "--check"], {
