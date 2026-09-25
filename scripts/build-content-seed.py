@@ -613,7 +613,7 @@ for i, chunk in enumerate(parts, 1):
 -- {len(chunk)} מתקנים. להדביק ל-Supabase SQL Editor ולהריץ.
 -- ⚠️ להריץ את החלקים לפי הסדר: 1, ואז 2{"..." if n > 2 else ""}{f", ואז {n}" if n > 2 else ""}.
 --
--- נוצר על ידי scripts/build-content-seed.py מתוך src/data/experiences.json.
+-- נוצר על ידי scripts/build-content-seed.py מתוך {SRC.relative_to(ROOT)}.
 -- אין לערוך ביד — לעדכן את הייצוא ולהריץ את הסקריפט מחדש.
 --
 -- INSERT אחד מרובה-שורות. רשימת העמודות נכתבת פעם אחת.

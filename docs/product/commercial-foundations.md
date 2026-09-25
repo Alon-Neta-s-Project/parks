@@ -96,7 +96,7 @@
 
     motion_sickness · fear_dark · fear_heights · claustrophobia
 
-והקוד ב-`src/lib/sensitivity.ts`, שנבנה היום מול העמודות שקיימות
+והקוד ב-`apps/web/src/lib/sensitivity.ts`, שנבנה היום מול העמודות שקיימות
 בפועל, מכיר:
 
     dark · loudSudden · strobe · heights · motionSickness ·

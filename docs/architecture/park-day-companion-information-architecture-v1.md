@@ -179,7 +179,7 @@ V1 מכיל רק destination אחד (Orlando) ושני resorts (WDW, Universal O
 
 ## 2. הטקסונומיות (מקור אמת יחיד)
 
-כל ה-enums יושבים בקובץ אחד — `src/data/taxonomy.ts` — ומיוצאים גם כטיפוסי TypeScript, גם כ-CHECK constraints ב-DB, וגם כמפתחות לתרגום. **הערך ה"גולמי" באנגלית הוא הנתון; התווית בעברית היא תרגום ולא נשמרת בבסיס הנתונים.** לא מרשים ל-Claude Code להמציא ערך enum בשום מקום אחר בקוד — זה המקור הכי נפוץ לבאגים שקטים בפרויקטים כאלה.
+כל ה-enums יושבים בקובץ אחד — `apps/web/src/data/taxonomy.ts` — ומיוצאים גם כטיפוסי TypeScript, גם כ-CHECK constraints ב-DB, וגם כמפתחות לתרגום. **הערך ה"גולמי" באנגלית הוא הנתון; התווית בעברית היא תרגום ולא נשמרת בבסיס הנתונים.** לא מרשים ל-Claude Code להמציא ערך enum בשום מקום אחר בקוד — זה המקור הכי נפוץ לבאגים שקטים בפרויקטים כאלה.
 
 ### 2.1 סקאלת אינטנסיביות (1-4) — הגדרה מחייבת
 | רמה | תווית | הגדרה אובייקטיבית |
@@ -287,7 +287,7 @@ plan_item      → trip_id, trip_day_id (NULLABLE!), experience_id, ...שדות 
 ### 4.1 אפס מחרוזות בקוד
 כל טקסט בממשק הוא מפתח בקובץ תרגום: `t('plan.addToDay')`. אין מחרוזת עברית אחת בתוך קומפוננטה — גם לא "שמור", גם לא הודעת שגיאה, גם לא `aria-label`.
 - ספרייה מומלצת: **`i18next` + `react-i18next`**. סטנדרט, קל, ובעיקר מטפל נכון בכללי ריבוי — לעברית יש צורת זוגי שאנגלית לא מכירה, ומימוש ידני של זה תמיד נשבר.
-- קבצי התרגום: `src/locales/he/*.json`, `src/locales/en/*.json`, מפוצלים לפי מרחב (`common`, `plan`, `content`, `admin`).
+- קבצי התרגום: `apps/web/src/locales/he/*.json`, `apps/web/src/locales/en/*.json`, מפוצלים לפי מרחב (`common`, `plan`, `content`, `admin`).
 - **אכיפה:** כלל lint שנכשל על מחרוזת לא-ASCII בתוך JSX. זו השורה שמונעת את הרקבון — בלעדיה, תוך חודש יהיו 200 מחרוזות מוטמעות ואף אחד לא ידע איפה.
 
 ### 4.2 טקסט מתורגם בתוכן הוא אובייקט, לא סיומת
@@ -352,14 +352,14 @@ profile → id (= auth user), role: "user" | "admin", display_name, locale, onbo
 למה בכל זאת JSON ב-repo כמקור התוכן: התוכן נכתב על ידי אדם אחד, נדיר משתנה, ועובר ביקורת. שמירתו כקבצים נותנת היסטוריית שינויים, אפשרות לתקן בבת אחת, ו-diff קריא. דשבורד האדמין עורך את ה-DB; סקריפט seed מסנכרן מהקבצים. שני מסלולי כתיבה לאותו יעד, וזה בסדר כל עוד ה-seed הוא idempotent לפי `id`.
 
 ```
-src/data/
+apps/web/src/data/
   taxonomy.ts          ← כל ה-enums + מפתחות תרגום. מקור אמת יחיד.
   schema.ts            ← סכמות Zod. כל קובץ תוכן נבדק מולן בזמן build.
   destinations.json / resorts.json / parks.json / lands.json
   experiences/
     wdw-mk.json  wdw-epcot.json  wdw-hs.json  wdw-ak.json
     uor-us.json  uor-ioa.json    uor-epic.json
-src/locales/
+apps/web/src/locales/
   he/*.json            ← מחרוזות ממשק
   en/*.json            ← שלד ריק ב-V1
 scripts/seed.ts        ← מאמת → זורע ל-Supabase

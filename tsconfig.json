@@ -23,8 +23,10 @@
     ]
   },
   "include": [
-    "src",
+    "apps/web/src",
     "scripts",
-    "vite.config.ts"
+    "apps/web/vite.config.ts",
+    "apps/web/vite.tim.config.ts",
+    "apps/web/vite.tim-test.config.ts"
   ]
 }

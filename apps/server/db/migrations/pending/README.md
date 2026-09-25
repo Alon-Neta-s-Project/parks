@@ -36,7 +36,7 @@
 
 ## נאכף בבדיקה, לא בזיכרון
 
-`src/lib/__tests__/migration-numbering.test.ts` מפיל את הבנייה על:
+`apps/web/src/lib/__tests__/migration-numbering.test.ts` מפיל את הבנייה על:
 
 - קובץ `.sql` ב-`db/migrations/` בלי מספר בתחילתו
 - קובץ ב-`pending/` **עם** מספר — כלומר אחד שכבר קיבל את סימן האישור

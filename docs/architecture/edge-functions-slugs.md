@@ -18,7 +18,7 @@ CORS, והדפדפן הציג "לא נגיש" במקום "לא נמצא".
 
 ## איפה זה חי בקוד
 
-- `src/lib/tim.ts` — הקבוע `TIM_FUNCTION` מחזיק את `quick-worker`.
+- `apps/web/src/lib/tim.ts` — הקבוע `TIM_FUNCTION` מחזיק את `quick-worker`.
   **הקבוע הוא ה-slug ולא השם**, וזה כתוב שם במפורש כדי שלא "יתוקן".
 - `embed` ו-`aliases-function` אינן נקראות מהאתר, ולכן ה-slug שלהן אינו
   בקוד. הוא נדרש רק כשקוראים להן ידנית מבחוץ.

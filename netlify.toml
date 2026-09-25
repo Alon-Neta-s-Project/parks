@@ -9,10 +9,10 @@
 # מייבא דבר מ-`src/data`, ולכן אפס משורות המתקנים נוסעות לדפדפן.
 # ההחלטה על מסכי הרשימות פתוחה, וכל עוד היא פתוחה — הן אינן נבנות.
 #
-# למעבר לאתר המלא: `npm run build` ו-`publish = "dist"`.
+# למעבר לאתר המלא: `npm run build` ו-`publish = "apps/web/dist"`.
 [build]
   command = "npm run build:tim"
-  publish = "dist-tim"
+  publish = "apps/web/dist-tim"
 
 [build.environment]
   NODE_VERSION = "22"
@@ -80,4 +80,4 @@
 # הם עותקים של אותו קובץ — ולכן כולם נושאים אותה.
 [context."tim-test"]
   command = "npm run build:tim-test"
-  publish = "dist-tim-test"
+  publish = "apps/web/dist-tim-test"

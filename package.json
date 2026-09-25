@@ -4,16 +4,16 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build && tsx scripts/prerender.ts",
-    "preview": "vite preview",
-    "test": "vitest run && npm run test:edge",
+    "dev": "vite --config apps/web/vite.config.ts",
+    "build": "tsc -b && vite build --config apps/web/vite.config.ts && tsx scripts/prerender.ts",
+    "preview": "vite preview --config apps/web/vite.config.ts",
+    "test": "vitest run --config apps/web/vite.config.ts && npm run test:edge",
     "test:edge": "deno test --allow-env supabase/functions/tim/index.test.ts",
     "import": "tsx scripts/import-content.ts",
     "artifact": "npm run build && python3 scripts/build-artifact.py",
-    "build:tim": "python3 scripts/build-tim-prompt.py --check && tsc -b && vite build --config vite.tim.config.ts && tsx scripts/verify-tim-build.ts",
+    "build:tim": "python3 scripts/build-tim-prompt.py --check && tsc -b && vite build --config apps/web/vite.tim.config.ts && tsx scripts/verify-tim-build.ts",
     "qa": "bash scripts/qa-gate.sh",
-    "build:tim-test": "tsc -b && vite build --config vite.tim-test.config.ts"
+    "build:tim-test": "tsc -b && vite build --config apps/web/vite.tim-test.config.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.4",

@@ -14,8 +14,8 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { P } from "./paths";
-import experiences from "../src/data/experiences.json";
-import parks from "../src/data/parks.json";
+import experiences from "../apps/web/src/data/experiences.json";
+import parks from "../apps/web/src/data/parks.json";
 
 const DIST = P.DIST;
 

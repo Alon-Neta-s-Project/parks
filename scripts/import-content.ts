@@ -22,7 +22,7 @@ import { P, REL } from "./paths";
 import {
   experienceSchema, parkSchema, REQUIRED_FIELDS,
   type Experience, type Park, type QuadState,
-} from "../src/data/schema";
+} from "../apps/web/src/data/schema";
 
 const WRITE = process.argv.includes("--write");
 

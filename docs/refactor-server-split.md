@@ -19,7 +19,7 @@ scripts/         repo tooling
 | # | Stage | Status |
 |---|---|---|
 | 0 | Decisions: hosting, security review, the gap in the Tim file (see open items) | Open |
-| 1 | npm workspaces and moving folders into the layout above, with no behavior change | 1a ✅ · 1b-1 ✅ (content) · 1b-2 ✅ (db) · 1b-3 onward not started |
+| 1 | npm workspaces and moving folders into the layout above, with no behavior change | 1a ✅ · 1b-1 ✅ content · 1b-2 ✅ db · 1b-3 ✅ web · 1b-4 (root cleanup) not started |
 | 2 | Migrations with dbmate, run from CI with an approval gate | Not started |
 | 3 | Port Tim, `embed` and `aliases` to the Node server, running alongside the Edge Function | Not started |
 | 4 | Point the frontend at the server, retire the Edge Functions, revoke the anon grants | Not started |
@@ -79,6 +79,20 @@ These are the numbers every step in Stage 1 is compared against.
   2. **`FROZEN` + `MOVED`:** a path in a frozen file (the brief as received, the conformance response, `supabase-bundle.sql`) resolves through the move map. **Only there**, so a live document with an old path still fails. The map checks itself (an old path that exists again, or a frozen file that disappeared, is a failure).
   3. Seen failing: removing a file from `FROZEN` flags its reference, and a broken `apps/` reference is caught.
 - **Tests:** `npm run qa` passes · vitest **292** + 1 skipped (+4, the map's self-checks) · deno 75 · `build` 253 pages.
+
+### 1b-3 ✅ Moving the frontend (25.09.2026)
+- `src/`, `public/`, `index.html`, `tim.html`, `tim-test.html` and the three `vite*.config.ts` → `apps/web/` with `git mv`.
+- **Each Vite config got `root: __dirname`.** Without it, Vite treats the directory it was run from as the root, and `/src/main.tsx` in the HTML would resolve against the repo root.
+- `package.json`: the scripts point to `--config apps/web/...`. `tsconfig.json`: `include` covers `apps/web/src` and all three configs. Two of those configs weren't type-checked before.
+- `netlify.toml`: `publish = "apps/web/dist-tim"` / `"apps/web/dist-tim-test"`. The test that checks this now takes the value from `paths.json` rather than a hard-coded string.
+- Relative imports: 23 files in `apps/web/src` (mostly `scripts/paths`) and 2 scripts (`../apps/web/src/...`).
+- `doc-paths`: `src/` → `apps/web/src/` in the moves map. **Frozen:** the signed migrations (`SIGNED`, a pattern rather than a list), `supabase-bundle.sql`, three dated sync records and measurements, and **`supabase/functions/tim/index.ts` until Stage 3** (it's stamped, and a comment edit would force a new stamp and a redeploy). Live references updated in CLAUDE.md, README.md, the team 1 agent, `docs/README.md`, 3 architecture docs and more.
+- `content-seed`: the header line (`נוצר ... מתוך ...`) is now derived from `paths.json`, and was rebuilt. One line changed in each file.
+- **Tests:** `npm run qa` passes · vitest **298** + 1 skipped (+6 self-checks) · deno 75 · `build` 253 pages · `build:tim` · `build:tim-test` · **the dev server**: the page, `main.tsx` and the report outside `apps/web` all return 200.
+
+⚠️ **Deviation from the approved plan: npm workspaces and `packages/shared` are deferred to Stage 3.** Right now `apps/web` would be the only package and `packages/shared` would be empty. They'd bring a new `package-lock`, a change to how Netlify installs dependencies, and another thing that can't be checked locally, for no benefit yet. They become necessary once `apps/server` has dependencies of its own. The resulting tree is identical. `package.json` stays at the root, and so does `reports/` (the import report that `AdminPage` shows).
+
+⚠️ **Netlify wasn't checked against a real build.** What was checked: the `publish` values match where Vite writes, and the builds run. Before pushing this to `release`, a branch deploy on `tim-test` confirms that Netlify serves from the new path.
 
 ---
 

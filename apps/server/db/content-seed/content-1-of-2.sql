@@ -5,7 +5,7 @@
 -- 143 מתקנים. להדביק ל-Supabase SQL Editor ולהריץ.
 -- ⚠️ להריץ את החלקים לפי הסדר: 1, ואז 2.
 --
--- נוצר על ידי scripts/build-content-seed.py מתוך src/data/experiences.json.
+-- נוצר על ידי scripts/build-content-seed.py מתוך apps/web/src/data/experiences.json.
 -- אין לערוך ביד — לעדכן את הייצוא ולהריץ את הסקריפט מחדש.
 --
 -- INSERT אחד מרובה-שורות. רשימת העמודות נכתבת פעם אחת.

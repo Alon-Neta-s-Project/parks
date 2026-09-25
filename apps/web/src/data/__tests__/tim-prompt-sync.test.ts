@@ -1,0 +1,27 @@
+import { join } from "node:path";
+import { execFileSync } from "node:child_process";
+import { describe, expect, it } from "vitest";
+import { P } from "../../../../../scripts/paths";
+
+/**
+ * 🔴 **אותו היגיון מוצרי חי בשני מקומות, וזה מקור אמת שני.**
+ *
+ * "מתאים / לא ידוע אם מתאים / חסר לנו הגובה" נכתב פעם ב-`he.json` למסך
+ * התוצאות, ופעם בהוראות של טים. פולה הצביעה על התקדים ב-`he.json`, ואני
+ * העתקתי אותו ביד — כלומר יצרתי בדיוק את הכפילות שהפרויקט אוסר על עצמו
+ * במקום אחר.
+ *
+ * ⚠️ **ומה שהופך את זה למסוכן: אף בדיקה לא הייתה נופלת.** שני הקבצים
+ * תקינים כל אחד לעצמו. מי שיעדכן את `he.json` — וזה הכלל, כל המחרוזות
+ * שם — לא ייגע בהוראות, ואותה משפחה תקבל שתי תשובות שונות.
+ */
+describe("הוראות טים נבנות מ-he.json", () => {
+  it("בלוק כללי ההתאמה מסונכרן עם המקור", () => {
+    const run = () =>
+      execFileSync("python3", [join(P.SCRIPTS, "build-tim-prompt.py"), "--check"], {
+        encoding: "utf-8",
+        stdio: ["ignore", "pipe", "pipe"],
+      });
+    expect(run).not.toThrow();
+  });
+});

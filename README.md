@@ -33,11 +33,11 @@ npm run build      # בנייה לפרודקשן
 |---|---|
 | האקסל → JSON | `scripts/export-source-xlsx.py` |
 | JSON → דאטה של האפליקציה (232 שורות) | `scripts/build-dataset.py` |
-| טיפוסים וולידציה | `src/data/schema.ts` (Zod) |
-| השאלות, כקונפיגורציה | `src/lib/profile.ts` |
-| **מנוע ההמלצה** | `src/lib/recommend.ts` |
-| הצ'אט | `src/components/Chat.tsx` |
-| כל המחרוזות | `src/i18n/he.json` |
+| טיפוסים וולידציה | `apps/web/src/data/schema.ts` (Zod) |
+| השאלות, כקונפיגורציה | `apps/web/src/lib/profile.ts` |
+| **מנוע ההמלצה** | `apps/web/src/lib/recommend.ts` |
+| הצ'אט | `apps/web/src/components/Chat.tsx` |
+| כל המחרוזות | `apps/web/src/i18n/he.json` |
 
 ### חמש השאלות, וכל אחת ממופה לעמודה שקיימת
 
@@ -53,7 +53,7 @@ npm run build      # בנייה לפרודקשן
 
 ### אחרי ההמלצה — השיחה ממשיכה
 
-`src/lib/refine.ts` מגדיר את ההמשך כקונפיגורציה, באותו מבנה כמו השאלות:
+`apps/web/src/lib/refine.ts` מגדיר את ההמשך כקונפיגורציה, באותו מבנה כמו השאלות:
 "רק מתקנים" · "משהו רגוע יותר" · "משהו עוצמתי יותר" · "רק מה שכלול בחבילה" ועוד.
 
 - אפשרות שלא תשנה כלום **לא מוצעת**.
@@ -84,7 +84,7 @@ npm run build      # בנייה לפרודקשן
 | `apps/server/content/knowledge/` | מסמכי הידע שטים עונה מהם |
 | `docs/spec/content-file-analysis.md` | **דוח הכיסוי בשני הכיוונים** (סעיף 6א.3) — מה הבריף דורש שאין בקובץ, ומה בקובץ שאין לו בית בסכמה |
 | `docs/master-brief-v1.md` | הבריף כפי שהתקבל |
-| `src/styles/tokens.css` | **מקור האמת היחיד לצבע וטיפוגרפיה**. הקובץ היחיד עם ערכי צבע |
+| `apps/web/src/styles/tokens.css` | **מקור האמת היחיד לצבע וטיפוגרפיה**. הקובץ היחיד עם ערכי צבע |
 | `design/tokens.css` | עותק המקור לדף האישור |
 | `design/preview/page.html` | דף האישור של M1 — טוקנים, אייקונים, שלושה מסכים |
 | `design/preview/index.html` | נבנה מהשניים שמעל. **לא לערוך ידנית** |
@@ -101,7 +101,7 @@ python3 scripts/build-preview.py        # tokens.css + page.html -> index.html
 
 | | | |
 |---|---|---|
-| עיצוב | טוקנים ושפה ויזואלית | ✅ `src/styles/tokens.css` |
+| עיצוב | טוקנים ושפה ויזואלית | ✅ `apps/web/src/styles/tokens.css` |
 | דאטה | 232 שורות נגזרות מהאקסל | ✅ 17 בדיקות עוברות |
 | טים | חמש שאלות → המלצה | ✅ עובד מקצה לקצה |
 | הבא | שאלות חופשיות מעל אותו מנוע · השלמת רגישויות וגובה | ממתין |
