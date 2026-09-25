@@ -38,8 +38,8 @@ function producible(): Set<string> {
   const out = new Set<string>();
   // ⚠️ הערך, לא המפתח: `{"open": "open"}` ו-`(…, "check"): "temporarily_closed"`
   // שניהם ממפים **אל** מה שנכתב למסד.
-  for (const m of plain![1].matchAll(/:\s*"([a-z_]+)"/g)) out.add(m[1]);
-  for (const m of decided![1].matchAll(/:\s*"([a-z_]+)"/g)) out.add(m[1]);
+  for (const m of plain![1]!.matchAll(/:\s*"([a-z_]+)"/g)) out.add(m[1]!);
+  for (const m of decided![1]!.matchAll(/:\s*"([a-z_]+)"/g)) out.add(m[1]!);
   return out;
 }
 
@@ -48,7 +48,7 @@ function rendered(): Set<string> {
   const ts = noTsComments(readFileSync(join(ROOT, "supabase", "functions", "tim", "index.ts"), "utf8"));
   const block = ts.match(/const say: Record<string, string> = \{([\s\S]*?)\n\s*\};/);
   expect(block, "מפת הניסוחים לא נמצאה — הבדיקה קוראת קובץ שהשתנה").not.toBe(null);
-  return new Set([...block![1].matchAll(/^\s*([a-z_]+)\s*:/gm)].map((m) => m[1]));
+  return new Set([...block![1]!.matchAll(/^\s*([a-z_]+)\s*:/gm)].map((m) => m[1]!));
 }
 
 describe("אוצר המילים של הסטטוס זהה בשני הצדדים", () => {
