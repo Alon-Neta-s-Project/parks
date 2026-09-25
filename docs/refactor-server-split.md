@@ -59,9 +59,9 @@ Fly.io / Render / Railway / Cloud Run. A new account, a monthly cost, and new se
 A new public endpoint, CORS, the DB role the server connects with, a DDL role for dbmate, an approval gate (GitHub Environment) for migrations, and revoking the anon grants on the RPCs and on `experience`. Category 1. Blocks Stages 2 through 4.
 
 ### O3 — ✅ Closed 25.09 · the Tim file's stamp doesn't match the file, and a CORS fix appears to be missing
-**Decided by Alon (25.09):** merge `tim-test` into `claude/new-session-w47twu`. After the merge the stamp matches, and the CORS fix, the removal of the opening questions (`d06cb81`) and the Netlify fix (`ba3260c`) are all on this branch. The merge brought in one type error in `status-vocabulary.test.ts` (from `62501f8`; `tsc` would fail on `tim-test` too), fixed with `!` on the capture groups.
+**Decided by Alon (25.09):** merge `tim-test` into the refactor branch. After the merge the stamp matches, and the CORS fix, the removal of the opening questions (`d06cb81`) and the Netlify fix (`ba3260c`) are all on this branch. The merge brought in one type error in `status-vocabulary.test.ts` (from `62501f8`; `tsc` would fail on `tim-test` too), fixed with `!` on the capture groups.
 
-**Still open:** the remote of this branch moved (`3939a33`, identical in content to `a0e7d1c`, which already came in through the merge). It needs merging before a push. The attempt was blocked by the permission system and is waiting for Alon.
+**Where the work lives (Alon, 25.09):** the refactor is on a local branch, `refactor/server-split`, which isn't pushed. `claude/new-session-w47twu` was returned to `307c648`, as it was before the refactor, and it contains none of these changes.
 
 <details><summary>Background</summary>
 
