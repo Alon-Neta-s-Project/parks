@@ -6,47 +6,63 @@
 --   כל המיגרציות והנתונים הקבועים, בקובץ אחד, בסדר הנכון. להדביק ל-
 --   Supabase Studio ← SQL Editor ← New query, וללחוץ Run פעם אחת.
 --   נוצר אוטומטית על ידי scripts/build-supabase-bundle.py. אין לערוך אותו
---   ביד — לערוך את הקבצים ב-db/migrations ולהריץ את הסקריפט מחדש.
+--   ביד — לערוך את הקבצים ב-apps/server/db/migrations ולהריץ את הסקריפט מחדש.
 --
 -- הסדר
---   1. מיגרציה 001_extensions_and_taxonomy.sql
---   2. מיגרציה 002_content.sql
---   3. מיגרציה 003_knowledge.sql
---   4. מיגרציה 004_users_trips.sql
---   5. מיגרציה 005_conversations.sql
---   6. מיגרציה 006_rls.sql
---   7. מיגרציה 007_content_fields.sql
---   8. מיגרציה 008_profile_axes.sql
---   9. מיגרציה 009_plan_item_interest.sql
---   10. מיגרציה 010_trip_members.sql
---   11. מיגרציה 011_conformance_fixes.sql
---   12. מיגרציה 012_height_none.sql
---   13. מיגרציה 013_scenic_ride.sql
---   14. מיגרציה 014_gets_wet_na.sql
---   15. מיגרציה 015_trip_park_days.sql
---   16. מיגרציה 016_skip_line_neutral.sql
---   17. מיגרציה 017_drop_skip_line_extra_cost.sql
---   18. מיגרציה 018_rate_limit.sql
---   19. מיגרציה 019_content_fields_from_export.sql
---   20. מיגרציה 020_rate_limit_rpc.sql
---   21. מיגרציה 021_global_daily_cap.sql
---   22. מיגרציה 022_measured_cost.sql
---   23. מיגרציה 023_speed_and_inversions.sql
---   24. מיגרציה 024_embedding_1536.sql
---   25. מיגרציה 025_knowledge_taxonomy.sql
---   26. מיגרציה 026_rate_limit_caps_not_arguments.sql
---   27. מיגרציה 027_ingest_rpc.sql
---   28. מיגרציה 028_match_knowledge.sql
---   29. מיגרציה 029_find_experiences.sql
---   30. מיגרציה 030_find_experiences_by_words.sql
---   31. מיגרציה 031_alias_candidates.sql
---   32. מיגרציה 032_alias_reject_useless.sql
---   33. seed 010_reference.sql
---   34. seed 011_water_parks.sql
---   35. בלוק אימות — שאילתה אחת שמדווחת מה נוצר בפועל.
+--   1. מיגרציה 000_schema_migration.sql
+--   2. מיגרציה 001_extensions_and_taxonomy.sql
+--   3. מיגרציה 002_content.sql
+--   4. מיגרציה 003_knowledge.sql
+--   5. מיגרציה 004_users_trips.sql
+--   6. מיגרציה 005_conversations.sql
+--   7. מיגרציה 006_rls.sql
+--   8. מיגרציה 007_content_fields.sql
+--   9. מיגרציה 008_profile_axes.sql
+--   10. מיגרציה 009_plan_item_interest.sql
+--   11. מיגרציה 010_trip_members.sql
+--   12. מיגרציה 011_conformance_fixes.sql
+--   13. מיגרציה 012_height_none.sql
+--   14. מיגרציה 013_scenic_ride.sql
+--   15. מיגרציה 014_gets_wet_na.sql
+--   16. מיגרציה 015_trip_park_days.sql
+--   17. מיגרציה 016_skip_line_neutral.sql
+--   18. מיגרציה 017_drop_skip_line_extra_cost.sql
+--   19. מיגרציה 018_rate_limit.sql
+--   20. מיגרציה 019_content_fields_from_export.sql
+--   21. מיגרציה 020_rate_limit_rpc.sql
+--   22. מיגרציה 021_global_daily_cap.sql
+--   23. מיגרציה 022_measured_cost.sql
+--   24. מיגרציה 023_speed_and_inversions.sql
+--   25. מיגרציה 024_embedding_1536.sql
+--   26. מיגרציה 025_knowledge_taxonomy.sql
+--   27. מיגרציה 026_rate_limit_caps_not_arguments.sql
+--   28. מיגרציה 027_ingest_rpc.sql
+--   29. מיגרציה 028_match_knowledge.sql
+--   30. מיגרציה 029_find_experiences.sql
+--   31. מיגרציה 030_find_experiences_by_words.sql
+--   32. מיגרציה 031_alias_candidates.sql
+--   33. מיגרציה 032_alias_reject_useless.sql
+--   34. מיגרציה 033_embedding_follows_content.sql
+--   35. מיגרציה 034_eight_hebrew_names.sql
+--   36. מיגרציה 034_sensitivities_vocabulary.sql
+--   37. מיגרציה 035_sources_are_not_public.sql
+--   38. מיגרציה 036_knowledge_is_not_public.sql
+--   39. מיגרציה 037_bucket_daily_cap.sql
+--   40. מיגרציה 038_max_height.sql
+--   41. מיגרציה 039_sensitivity_flags_to_tim.sql
+--   42. מיגרציה 040_sensitivity_four_states.sql
+--   43. מיגרציה 041_park_intro.sql
+--   44. מיגרציה 042_description_and_meet_location.sql
+--   45. מיגרציה 043_park_candidates.sql
+--   46. מיגרציה 044_turn_log.sql
+--   47. מיגרציה 045_country.sql
+--   48. מיגרציה 046_tester_note.sql
+--   49. seed 010_reference.sql
+--   50. seed 011_water_parks.sql
+--   51. בלוק אימות — שאילתה אחת שמדווחת מה נוצר בפועל.
 --
 -- מה שאין כאן, בכוונה
---   db/local/000_auth_shim.sql. הוא מפגם מקומי לסכמת auth. ב-Supabase
+--   apps/server/db/local/000_auth_shim.sql. הוא מפגם מקומי לסכמת auth. ב-Supabase
 --   הסכמה הזו שייכת לפלטפורמה וכבר קיימת, והפיגום היה מתנגש בה.
 --
 -- אם משהו נופל
@@ -77,6 +93,127 @@
 -- search_path מוגדר גם כאן, לפני הכול, כדי שהקובץ יעבוד גם אם מדביקים
 -- אותו מאמצע. הוא נקבע שוב לפני כל בלוק, מאותה סיבה.
 set search_path = public, extensions;
+
+
+-- ==========================================================================
+-- מיגרציה: 000_schema_migration.sql
+-- ==========================================================================
+
+set search_path = public, extensions;
+
+-- 000 — יומן המיגרציות: מה רץ על המסד, ומתי (14.09.2026)
+-- ────────────────────────────────────────────────────────────────────
+-- 📍 להריץ ב: Supabase → SQL Editor
+-- שם השאילתה: 000 — יומן המיגרציות (14.09)
+-- 🔵 **גרסה 2** — מוסיפה את המצב `verified`, ומשדרגת טבלה שכבר קיימת.
+--    אם הרצת גרסה קודמת של הקובץ הזה — להריץ שוב. הוא בטוח להרצה חוזרת.
+--
+-- 🔴 **המסד אינו יודע אילו מ-45 המיגרציות רצו עליו.** הידע הזה חי
+-- ברשימת השאילתות השמורות ב-SQL Editor ובהיסטוריית הצ'אט. זה עבד כל
+-- עוד הרצנו קובץ ביום; זה נשבר ברגע שקובץ אחד ידולג, יורץ פעמיים, או
+-- יתוקן אחרי שכבר רץ.
+--
+-- ⚠️ **ושאילתה שמורה אינה הרצה שהצליחה.** 044 יושבת ברשימה הזו, קיבלה
+-- שם, הודבקה — ונפלה. מי שיקרא את הרשימה יראה אותה ויסיק שהיא רצה.
+--
+-- ── מפתח לפי שם קובץ, לא לפי מספר ─────────────────────────────────
+-- 🔴 יש **שתי** מיגרציות 034: `034_eight_hebrew_names.sql` ו-
+-- `034_sensitivities_vocabulary.sql`. מפתח לפי מספר היה מאבד אחת מהן
+-- בשקט. השם המלא הוא המזהה.
+--
+-- ── `evidence` — שלושה מצבים, ולא שניים ───────────────────────────
+-- ל-44 המיגרציות שכבר רצו אין רישום שנכתב בזמן ההרצה. אבל **יש להן
+-- טביעות אצבע במסד עצמו** — עמודה, אילוץ, הערה על עמודה, או גוף
+-- פונקציה. `verify-migration-log` בודק אותן אחת אחת.
+--
+-- 🔴 **ולכן שלושה מצבים, ולכל אחד מילה:**
+--   `observed` — נרשם ברגע שהמיגרציה רצה.
+--   `verified` — לא ראינו אותה רצה, אבל התוצאה שלה נמצאת במסד.
+--   `assumed`  — הנחנו, ואיש לא בדק.
+--
+-- ⚠️ **וההפרדה בין השניים האחרונים היא כל העניין.** שורה שהייתה
+-- נכתבת כ-`observed` בלי שאיש בדק הייתה בדיוק `NOT NULL DEFAULT`
+-- על שדה שאיש לא בדק — התבנית שנספרה כאן שבע פעמים.
+
+BEGIN;
+
+set local search_path = public, extensions;
+
+create table if not exists schema_migration (
+  filename   text primary key,
+  checksum   text not null,          -- sha256 של גוף הקובץ, בלי בלוק הרישום
+  applied_at timestamptz not null default now(),
+  applied_by text not null check (applied_by in ('sql-editor','ci','verify','backfill')),
+  evidence   text not null check (evidence in ('observed','verified','assumed'))
+);
+
+comment on table schema_migration is
+  'אילו מיגרציות רצו על המסד הזה. מפתח לפי שם קובץ — יש שתי 034.';
+comment on column schema_migration.checksum is
+  'sha256 של הקובץ בלי בלוק הרישום. שינוי בקובץ שכבר רץ נתפס כסטייה.';
+comment on column schema_migration.evidence is
+  'observed = נרשם בזמן ההרצה · verified = לא ראינו, אבל התוצאה נמצאת במסד · assumed = הנחנו, ואיש לא בדק.';
+
+-- ── שדרוג טבלה קיימת ────────────────────────────────────────────────
+-- 🔴 **`create table if not exists` אינו משנה טבלה שכבר קיימת.** אם
+-- הורצה כאן גרסה מוקדמת של הקובץ, האילוצים שלה נשארו — ו-`verified`
+-- היה נופל על אילוץ שאינו מכיר אותו.
+--
+-- ⚠️ **קרה בפועל:** גרסה ראשונה של הקובץ הזה הורצה עם שני מצבי ראיה
+-- בלבד, ועם `backfill` כמקור. שתי השורות הבאות מעדכנות את האילוצים
+-- במקום להניח שהטבלה חדשה. `backfill` נשאר מותר כי יש שורות שנושאות
+-- אותו, ומחיקת ערך שקיים בנתונים אינה שדרוג — היא שבירה.
+alter table schema_migration drop constraint if exists schema_migration_evidence_check;
+alter table schema_migration add  constraint schema_migration_evidence_check
+  check (evidence in ('observed','verified','assumed'));
+
+alter table schema_migration drop constraint if exists schema_migration_applied_by_check;
+alter table schema_migration add  constraint schema_migration_applied_by_check
+  check (applied_by in ('sql-editor','ci','verify','backfill'));
+
+-- ⚠️ הטבלה סגורה. היא נכתבת מה-SQL Editor או מ-CI, לא מהאפליקציה.
+alter table schema_migration enable row level security;
+alter table schema_migration force  row level security;
+revoke all on schema_migration from anon, authenticated;
+
+-- ── הרישום עצמו ─────────────────────────────────────────────────────
+-- ⚠️ **upsert, ולא insert.** קובץ שרץ פעם שנייה (תיקון, הרצה חוזרת)
+-- מעדכן את החתימה ואת הזמן במקום ליפול — ההרצה החוזרת היא עובדה,
+-- והרישום צריך לשקף אותה ולא להתעלם ממנה.
+--
+-- 🔴 **ורישום בזמן הרצה דורס `verified`.** ראיה ישירה גוברת על בדיקה
+-- עקיפה, לעולם לא להפך.
+create or replace function public.record_migration(
+  p_filename text,
+  p_checksum text,
+  p_by       text default 'sql-editor'
+)
+returns void
+language sql
+security definer
+set search_path = public, extensions
+as $$
+  insert into schema_migration (filename, checksum, applied_by, evidence)
+  values (p_filename, p_checksum, p_by, 'observed')
+  on conflict (filename) do update
+    set checksum   = excluded.checksum,
+        applied_at = now(),
+        applied_by = excluded.applied_by,
+        evidence   = 'observed';
+$$;
+
+-- 🔴 **בלי grant ל-anon.** האפליקציה לא רושמת מיגרציות. רק SQL Editor
+-- ו-CI, ושניהם רצים כבעלים.
+revoke all on function public.record_migration(text, text, text) from public;
+
+COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('000_schema_migration.sql', 'sha256:8ce64729b52ffa50f9ceb0681e0b550f',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
 
 
 -- ==========================================================================
@@ -143,6 +280,13 @@ comment on domain authority_tier is
   'שכבת סמכות. T1/T2 לעולם אינם נסתרים על ידי T3-T5. ראה tim-retrieval-and-memory-architecture.md';
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('001_extensions_and_taxonomy.sql', 'sha256:febd46240e77a8da36dea66f41ed0e65',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
 
 
 -- ==========================================================================
@@ -335,6 +479,13 @@ create index experience_source_exp_idx on experience_source (experience_id);
 
 COMMIT;
 
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('002_content.sql', 'sha256:007b31bbf386302575564d417f0f7a5f',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
+
 
 -- ==========================================================================
 -- מיגרציה: 003_knowledge.sql
@@ -438,6 +589,13 @@ create view verification_queue as
        or (d.volatility = 'static'   and d.last_verified < current_date - interval '365 days'));
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('003_knowledge.sql', 'sha256:113dc2b23be1e8c5803b4d76200d22bd',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
 
 
 -- ==========================================================================
@@ -548,6 +706,13 @@ create index plan_item_exp_idx  on plan_item (experience_id);
 
 COMMIT;
 
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('004_users_trips.sql', 'sha256:b5ef6a32ad6597498ce3e7a7335fcf6b',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
+
 
 -- ==========================================================================
 -- מיגרציה: 005_conversations.sql
@@ -620,6 +785,13 @@ create view unanswered_questions as
      and m.answered = false;
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('005_conversations.sql', 'sha256:449870fb67f196bbf5b03d1e6a57f82a',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
 
 
 -- ==========================================================================
@@ -710,6 +882,13 @@ create policy message_self on message for all
 
 COMMIT;
 
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('006_rls.sql', 'sha256:e2181e2c7d0f8293e7372df689e708f0',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
+
 
 -- ==========================================================================
 -- מיגרציה: 007_content_fields.sql
@@ -776,6 +955,13 @@ comment on column experience.sens_strobe        is 'לא בהיקף שלב 1. ל
 create index experience_motion_sickness_idx on experience (motion_sickness_warning);
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('007_content_fields.sql', 'sha256:ba04dc1d8636c84d0e41db0bf0159584',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
 
 
 -- ==========================================================================
@@ -857,6 +1043,13 @@ comment on view profile_effective is
 
 COMMIT;
 
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('008_profile_axes.sql', 'sha256:a9ad8de88a58e9334065170cb6938e7f',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
+
 
 -- ==========================================================================
 -- מיגרציה: 009_plan_item_interest.sql
@@ -895,6 +1088,13 @@ comment on column plan_item.anchor_time is
 create index plan_item_interest_idx on plan_item (trip_id, interest);
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('009_plan_item_interest.sql', 'sha256:5f6beab9801549e1a1b6edce10191fc4',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
 
 
 -- ==========================================================================
@@ -972,6 +1172,13 @@ alter table profile_fact add constraint profile_fact_key_check check (key in (
 
 COMMIT;
 
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('010_trip_members.sql', 'sha256:96fa5d133486ccd82b91215c7587c92d',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
+
 
 -- ==========================================================================
 -- מיגרציה: 011_conformance_fixes.sql
@@ -1027,6 +1234,13 @@ alter table experience alter column sens_strobe        drop default;
 
 COMMIT;
 
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('011_conformance_fixes.sql', 'sha256:b1281393d538698f09aaba3699ba166c',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
+
 
 -- ==========================================================================
 -- מיגרציה: 012_height_none.sql
@@ -1061,6 +1275,13 @@ comment on column experience.height_requirement_cm is
   '0 = נבדק, אין מגבלת גובה (מוצג כטקסט, לעולם לא כמספר). NULL = לא נבדק. 50-200 = המגבלה בפועל.';
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('012_height_none.sql', 'sha256:32705b093ef3b15f4b1dab642ef86294',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
 
 
 -- ==========================================================================
@@ -1111,6 +1332,13 @@ comment on column experience.category is
 
 COMMIT;
 
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('013_scenic_ride.sql', 'sha256:537b8b77b11e65ad212fad1550c6d577',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
+
 
 -- ==========================================================================
 -- מיגרציה: 014_gets_wet_na.sql
@@ -1149,6 +1377,13 @@ comment on column experience.gets_wet is
 
 COMMIT;
 
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('014_gets_wet_na.sql', 'sha256:e1c81fbefd428f39dd19e287bb2c470d',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
+
 
 -- ==========================================================================
 -- מיגרציה: 015_trip_park_days.sql
@@ -1178,6 +1413,13 @@ comment on column trip.park_days is
   'כמה ימי פארק מתוכננים. נפרד מ-start_date/end_date, שהם אורך השהות. NULL = לא ידוע, ולעולם אינו מוחלף באורך השהות.';
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('015_trip_park_days.sql', 'sha256:e27135b6a662d3c0ee7e71797ece82dd',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
 
 
 -- ==========================================================================
@@ -1229,6 +1471,13 @@ comment on column experience.skip_line_system is
   'מוצר דילוג בתור, בשם ניטרלי למפעיל. multi_pass/single_pass = דיסני · express = יוניברסל · none = נבדק ואין · NULL = לא נבדק, ולעולם אינו "אין".';
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('016_skip_line_neutral.sql', 'sha256:9a5c76a1bd5fd8c4ec7f34c188111e6e',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
 
 
 -- ==========================================================================
@@ -1289,6 +1538,13 @@ alter table experience drop column if exists skip_line_extra_cost;
 
 COMMIT;
 
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('017_drop_skip_line_extra_cost.sql', 'sha256:6f77d1fab9c67752db3c52674f336155',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
+
 
 -- ==========================================================================
 -- מיגרציה: 018_rate_limit.sql
@@ -1327,6 +1583,13 @@ comment on table api_call is
   'דלי הגבלת קצב. bucket הוא גיבוב של כתובת עם מלח, לא הכתובת. שורות ישנות מ-24 שעות חסרות ערך וניתן למחוק אותן.';
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('018_rate_limit.sql', 'sha256:0e6a6814952cf9f9e553c9e2549d0f32',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
 
 
 -- ==========================================================================
@@ -1372,6 +1635,13 @@ comment on column experience.status_note is
   'המשפט של הייצוא על הסטטוס. נושא תאריכים — "Opens Sep 14, 2026" — ובלעדיו coming_soon הוא סטטוס בלי מתי.';
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('019_content_fields_from_export.sql', 'sha256:b01b39e913d0b678813c0dbd2418e0f2',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
 
 
 -- ==========================================================================
@@ -1459,6 +1729,13 @@ comment on function public.check_rate_limit(text, int, int) is
 
 COMMIT;
 
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('020_rate_limit_rpc.sql', 'sha256:2b5f1dc15ec0cd8a51ead08816057caa',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
+
 
 -- ==========================================================================
 -- מיגרציה: 021_global_daily_cap.sql
@@ -1482,7 +1759,7 @@ set search_path = public, extensions;
 --   מוחק את החודש, ויום דמו מלא (כ-550) עדיין עובר.
 --
 -- ⚠️ ההחזרה משתנה מבוליאני לטקסט, כדי שנקודת הקצה תדע **איזה** גדר נגע
--- ותאמר למשתמשת את הדבר הנכון. "נסי בעוד שעה" ו"נסי מחר" אינם אותה
+-- ותאמר למשתמש את הדבר הנכון. "נסי בעוד שעה" ו"נסי מחר" אינם אותה
 -- הודעה, וסתימה גורפת היא בדיוק סוג הכשל השקט שנמנע ממנו.
 
 BEGIN;
@@ -1587,6 +1864,13 @@ comment on view usage_today is
 
 COMMIT;
 
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('021_global_daily_cap.sql', 'sha256:6a77b32f3cac6170e5d8d4654f71cadd',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
+
 
 -- ==========================================================================
 -- מיגרציה: 022_measured_cost.sql
@@ -1653,6 +1937,13 @@ comment on view usage_today is
   'כמה שאלות נשאלו ב-24 השעות האחרונות, וכמה נשאר עד הגדר. העלות מוערכת לפי estimated_cost_per_message().';
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('022_measured_cost.sql', 'sha256:a182cff4178674577faa5db87b224389',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
 
 
 -- ==========================================================================
@@ -1731,6 +2022,13 @@ comment on column experience.inversions is
 
 COMMIT;
 
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('023_speed_and_inversions.sql', 'sha256:3d6d140682399ec1c1c3c66456989978',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
+
 
 -- ==========================================================================
 -- מיגרציה: 024_embedding_1536.sql
@@ -1783,6 +2081,13 @@ comment on column knowledge_chunk.embedding is
   '1536 ממדים, gemini-embedding-001. ⚠️ נבחר ולא ברירת מחדל: המודל מייצא גם 3072, ומעל 2000 אין אינדקס ANN ב-pgvector.';
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('024_embedding_1536.sql', 'sha256:53083620830633412a6d721d4db03129',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
 
 
 -- ==========================================================================
@@ -1902,6 +2207,13 @@ create index if not exists knowledge_chunk_pending_idx
 
 COMMIT;
 
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('025_knowledge_taxonomy.sql', 'sha256:75d3755b81d9e8b2156a825e3112d4a9',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
+
 
 -- ==========================================================================
 -- מיגרציה: 026_rate_limit_caps_not_arguments.sql
@@ -1923,7 +2235,7 @@ set search_path = public, extensions;
 --
 -- ⚠️ **ו-021 חמורה יותר מ-020, לא פחות.** גיא שאל אם אותה בעיה קיימת בה;
 -- התשובה היא כן, ובנוסף היא פורצת את הגדר **היומי הגלובלי** — זה שמגן על
--- הארנק ולא רק על חוויית המשתמשת. p_daily_max נבדק לפני הכול, וערך
+-- הארנק ולא רק על חוויית המשתמש. p_daily_max נבדק לפני הכול, וערך
 -- שנשלח מבחוץ גובר על rate_limit_daily_cap(). כלומר ההגנה שנבנתה במפורש
 -- נגד "יום אחד שאוכל חודש" הייתה ניתנת לביטול בשדה JSON אחד.
 --
@@ -2030,6 +2342,13 @@ end
 $$;
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('026_rate_limit_caps_not_arguments.sql', 'sha256:5e397ca0fc13b9b3bd803a803591173d',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
 
 
 -- ==========================================================================
@@ -2214,6 +2533,13 @@ comment on function public.ingest_set_embedding(text, uuid, text, text) is
 
 COMMIT;
 
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('027_ingest_rpc.sql', 'sha256:1f500c8be4515a4e4ef1433899cf6eda',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
+
 
 -- ==========================================================================
 -- מיגרציה: 028_match_knowledge.sql
@@ -2232,7 +2558,7 @@ set search_path = public, extensions;
 --
 -- שקלנו לשכפל אותם ל-knowledge_chunk כמו חמשת השדות שכבר משוכפלים שם.
 -- **לא.** אלה נדרשים **אחרי** השליפה ולא בסינון שלה, והשכפול היה יוצר
--- מקור אמת שני לתאריך שמוצג למשתמשת: מסמך שאומת מחדש בלי חיתוך מחדש
+-- מקור אמת שני לתאריך שמוצג למשתמש: מסמך שאומת מחדש בלי חיתוך מחדש
 -- היה מציג תאריך ישן. במקום זה ה-join נעשה כאן, והם **חלק ממבנה
 -- התוצאה** — אי אפשר לקבל את ה-content בלי לקבל גם אותם. האכיפה היא
 -- בצורה, לא בזיכרון של מי שכותב את הקוד הקורא.
@@ -2308,6 +2634,13 @@ end
 $$;
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('028_match_knowledge.sql', 'sha256:e004bee033d83d0b459a2eb476a51e43',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
 
 
 -- ==========================================================================
@@ -2440,6 +2773,13 @@ end
 $$;
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('029_find_experiences.sql', 'sha256:df969b0e6b22357e56b7069a9df283fa',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
 
 
 -- ==========================================================================
@@ -2602,6 +2942,13 @@ $$;
 
 COMMIT;
 
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('030_find_experiences_by_words.sql', 'sha256:219641a14cbe15dde0367b4f2da4b08b',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
+
 
 -- ==========================================================================
 -- מיגרציה: 031_alias_candidates.sql
@@ -2613,7 +2960,7 @@ set search_path = public, extensions;
 -- מועמדים לשמות נרדפים. **מחוץ ל-experience, בכוונה.**
 --
 -- ⚠️ **נרדף שנכנס בלי אישור מצמיד שאלה למתקן הלא נכון, וזו טעות גרועה
--- מ"לא מצאתי".** המשתמשת מקבלת עובדות מדויקות, מנוסחות היטב ועם תאריך
+-- מ"לא מצאתי".** המשתמש מקבלת עובדות מדויקות, מנוסחות היטב ועם תאריך
 -- בדיקה — על מתקן אחר. התאריך גורם לזה להיראות אמין **יותר**.
 --
 -- לכן המודל כותב **לכאן** ולא ל-experience.aliases_i18n. הטבלה הזו היא
@@ -2729,6 +3076,13 @@ $$;
 
 COMMIT;
 
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('031_alias_candidates.sql', 'sha256:392fce61473b0ac71cd42b651dac73fe',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
+
 
 -- ==========================================================================
 -- מיגרציה: 032_alias_reject_useless.sql
@@ -2814,6 +3168,2319 @@ comment on function public.alias_add(text, text, text, text) is
 delete from alias_candidate where source = 'model' and status = 'pending';
 
 COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('032_alias_reject_useless.sql', 'sha256:6bb4c7604d8cb4ee25b1bd7d932eae8a',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
+
+
+-- ==========================================================================
+-- מיגרציה: 033_embedding_follows_content.sql
+-- ==========================================================================
+
+set search_path = public, extensions;
+
+-- ── 033 · וקטור שלא מתאים לטקסט שלו ──────────────────────────────────
+--
+-- להריץ ב: **סופהבייס → SQL Editor → קוורי חדש**. פעם אחת.
+--
+-- ⚠️ הבעיה שזה סוגר, ובלשון פשוטה:
+--
+-- לכל קטע ידע יש טקסט, ולצידו וקטור — רשימת מספרים שמתארת את
+-- **המשמעות** של הטקסט. השליפה של טים אינה מחפשת מילים; היא מחפשת
+-- וקטור קרוב. כלומר הווקטור הוא מה שקובע מתי הקטע נשלף, והטקסט הוא
+-- מה שנקרא כשהוא נשלף.
+--
+-- ולכן: אם מישהו מתקן את הטקסט ולא מוחק את הווקטור, הקטע ממשיך
+-- להישלף **לפי המשמעות הישנה** ולהיקרא לפי הטקסט החדש. שני הצדדים
+-- נראים תקינים בנפרד. אין שגיאה, אין אזהרה, ואף בדיקת ספירה לא
+-- תתפוס את זה — מספר הקטעים לא השתנה.
+--
+-- זו בדיוק התבנית שנתפסה כאן שבע פעמים, בפעם השמינית: שדה שנראה
+-- כאילו יש בו ערך תקף. הפעם הערך תקף — הוא פשוט של טקסט אחר.
+--
+-- ⚠️ הצינור הרגיל אינו חשוף לזה. build-knowledge-seed.py מוחק את כל
+-- הקטעים וכותב אותם מחדש, ולכן הווקטור נולד NULL ומחושב מאפס. החשיפה
+-- היא ל-UPDATE ידני בעורך ה-SQL — וזה בדיוק מה שעומד לקרות כשפולה
+-- מתקנת ניסוח על שורה בודדת.
+--
+-- מה שזה עושה: מאפס את הווקטור בכל פעם שהטקסט משתנה. הקטע יוצא
+-- מהשליפה עד שהוא מחושב מחדש — כלומר הכשל הופך מ"תשובה שגויה בשקט"
+-- ל"הקטע חסר", וזו נפילה שרואים.
+
+-- ⚠️ BEGIN מפורש, ולא רק `set local`. מחוץ לטרנזקציה `set local` אינו
+-- עושה דבר — והטיפוס vector יושב ב-extensions ולא ב-public, ולכן בלוק
+-- האימות היה נופל על "type vector does not exist" בסופהבייס. זו אותה
+-- נפילת search_path שכבר תפסה אותי כאן, וזה הדפוס שכל שאר המיגרציות
+-- כבר משתמשים בו.
+BEGIN;
+
+set local search_path = public, extensions;
+
+create or replace function knowledge_chunk_content_changed()
+returns trigger
+language plpgsql
+as $$
+begin
+  -- ⚠️ `is distinct from` ולא `<>`. השוואה רגילה מחזירה NULL כששד אחד
+  -- NULL, ו-NULL אינו TRUE — כלומר טקסט שהיה ריק והתמלא היה חומק.
+  if new.content is distinct from old.content then
+    -- ⚠️ שניהם, ולא רק הווקטור. על הטבלה יושבת אילוצת־בדיקה שאומרת
+    -- ש-embedding ו-embedding_model הם NULL יחד או מלאים יחד
+    -- (knowledge_chunk_model_with_embedding). איפוס של אחד בלבד היה
+    -- מפיל כל עריכת ניסוח על שגיאת אילוץ — כלומר הופך תיקון טקסט
+    -- לפעולה בלתי אפשרית.
+    new.embedding       := null;
+    new.embedding_model := null;
+  end if;
+  return new;
+end;
+$$;
+
+comment on function knowledge_chunk_content_changed() is
+  'מאפס את הווקטור כשהטקסט משתנה. וקטור שאינו תואם לטקסט שלו שולף את הקטע לפי המשמעות הישנה, בלי שום שגיאה.';
+
+drop trigger if exists knowledge_chunk_content_changed on knowledge_chunk;
+
+create trigger knowledge_chunk_content_changed
+  before update on knowledge_chunk
+  for each row
+  execute function knowledge_chunk_content_changed();
+
+COMMIT;
+
+-- ── אימות ────────────────────────────────────────────────────────────
+-- ⚠️ בודק את ההתנהגות ולא את קיום הטריגר. טריגר שקיים ואינו יורה נראה
+-- זהה לטריגר שעובד, וזו בדיוק הבחנה שהפרויקט הזה נכשל עליה.
+
+BEGIN;
+
+set local search_path = public, extensions;
+
+do $$
+declare
+  probe_doc  text;
+  probe_id   uuid;
+  after_edit boolean;
+  dim        int;
+begin
+  -- ⚠️ המימד נקרא מהעמודה ולא נכתב כמספר. הוא כבר השתנה פעם אחת
+  -- (1024 → 1536, מיגרציה 024), ומספר קשיח כאן היה נשבר בשקט בפעם
+  -- הבאה — הבדיקה הייתה נכשלת על המימד ולא על מה שהיא באה לבדוק.
+  select atttypmod into dim
+    from pg_attribute
+   where attrelid = 'knowledge_chunk'::regclass
+     and attname  = 'embedding';
+  select id into probe_doc from knowledge_doc limit 1;
+  if probe_doc is null then
+    raise notice '⚠️ אין מסמכים — הטריגר הותקן אך לא נבדק. להריץ שוב אחרי טעינת הידע.';
+    return;
+  end if;
+
+  insert into knowledge_chunk (doc_id, chunk_index, content, authority_tier, locale, review_status)
+  values (probe_doc, -1, 'בדיקת טריגר — נמחקת מיד', 'T1', 'he', 'approved')
+  returning id into probe_id;
+
+  -- וקטור מלאכותי, כדי שיהיה מה לאפס. ⚠️ עם שם מודל, כי האילוץ דורש
+  -- ששני השדות יהיו מלאים יחד.
+  update knowledge_chunk
+     set embedding = (
+           select format('[%s]', string_agg('0.1', ','))::vector
+             from generate_series(1, dim)
+         ),
+         embedding_model = 'probe-033'
+   where id = probe_id;
+
+  update knowledge_chunk set content = 'טקסט אחר לגמרי' where id = probe_id;
+
+  select embedding is null into after_edit from knowledge_chunk where id = probe_id;
+
+  delete from knowledge_chunk where id = probe_id;
+
+  if after_edit then
+    raise notice '✅ תקין — שינוי טקסט מאפס את הווקטור.';
+  else
+    raise exception '❌ הטריגר לא ירה. וקטור ישן שרד שינוי טקסט.';
+  end if;
+end $$;
+
+COMMIT;
+
+select '✅ 033 הותקנה' as "מצב";
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('033_embedding_follows_content.sql', 'sha256:9409c400147bf52bbecaf4e55965bb1f',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
+
+
+-- ==========================================================================
+-- מיגרציה: 034_eight_hebrew_names.sql
+-- ==========================================================================
+
+set search_path = public, extensions;
+
+-- ── שמונה שמות עבריים למפגשי הדמויות ────────────────────────────────
+-- להריץ ב: סופהבייס → SQL Editor → קוורי חדש. פעם אחת.
+--
+-- זה כל ההבדל בין מה שטעון אצלך עכשיו לבין הייצוא החדש. שמונה שורות,
+-- שדה אחד בכל אחת. אין צורך בקבצי התוכן הגדולים.
+--
+-- למה זה חשוב: החיפוש של טים עובר על השם האנגלי, השם העברי והנרדפים.
+-- בלי שם עברי, מי שמקלידה "מפגש עם מואנה" מקבלת אפס תוצאות וטים אומר
+-- "אין לי את המידע" — וזה שקר, השורה קיימת.
+
+BEGIN;
+
+update experience set name_i18n = jsonb_set(coalesce(name_i18n, '{}'::jsonb), '{he}', to_jsonb(v.he))
+  from (values
+    ('EPCOT|Entertainment|JAMMitors', 'ג''אמיטורס'),
+    ('Disney''s Animal Kingdom|Entertainment|Adventures with Kevin on Discovery Island', 'הרפתקאות עם קווין באי הגילוי'),
+    ('Disney''s Animal Kingdom|Entertainment|Meet Favorite Disney Pals at Adventurers Outpost', 'פגישה עם מיקי ומיני ב-Adventurers Outpost'),
+    ('Disney''s Animal Kingdom|Entertainment|Meet Moana at Character Landing', 'פגישה עם מואנה ב-Character Landing'),
+    ('Disney''s Animal Kingdom|Entertainment|Zoogether Day Gathering Spot', 'נקודת המפגש של יום זוגות-יחד'),
+    ('Disney''s Hollywood Studios|Entertainment|Green Army Drum Corps', 'חיל התופים של חיילי הצעצוע הירוקים'),
+    ('Disney''s Hollywood Studios|Entertainment|Hollygroove Swingin''', 'הוליגרוב סווינגין'''),
+    ('Disney''s Hollywood Studios|Entertainment|The Record Setters', 'שוברי השיאים')
+  ) as v(key, he)
+ where experience.key = v.key;
+
+COMMIT;
+
+-- ── אימות ────────────────────────────────────────────────────────────
+select count(*) filter (where name_i18n->>'he' is null or name_i18n->>'he' = '') as "בלי שם עברי (צפוי: 0)",
+       count(*) as "סך השורות (צפוי: 242)"
+  from experience;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('034_eight_hebrew_names.sql', 'sha256:9c3815daa05b88913c37951a9641db64',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
+
+
+-- ==========================================================================
+-- מיגרציה: 034_sensitivities_vocabulary.sql
+-- ==========================================================================
+
+set search_path = public, extensions;
+
+-- ── 034 · אוצר מילים אחד לרגישויות, ו"לא נשאל" שאינו "אין" ──────────
+--
+-- להריץ ב: **סופהבייס → SQL Editor → קוורי חדש**. פעם אחת.
+--
+-- ⚠️ שני פערים, ושניהם עוד לא הזיקו רק מפני שהאפליקציה אינה כותבת
+-- ל-trip_member היום — הפרופיל חי בדפדפן. ברגע שמסך ההרשמה ייכנס
+-- והפרופיל יישמר, שניהם מתחילים לעבוד.
+--
+-- ── הפער הראשון: שני אוצרות מילים ──────────────────────────────────
+--
+-- מיגרציה 010 תיעדה בהערה:
+--     motion_sickness · fear_dark · fear_heights · claustrophobia
+--
+-- והקוד ב-src/lib/sensitivity.ts, שנבנה מול העמודות שקיימות בפועל
+-- בטבלת experience, מכיר:
+--     dark · loudSudden · strobe · heights · motionSickness ·
+--     accessibility · longQueues
+--
+-- אין ביניהם התאמה. ל-010 יש claustrophobia שאין לו עמודה בכלל, ולקוד
+-- יש ארבעה שאין ב-010. שני מקורות אמת לאותו דבר, וזה בדיוק מה שמייצר
+-- ערך שנכתב ואינו נקרא — או גרוע ממנו, ערך שנקרא ואינו מסנן.
+--
+-- ⚠️ **המחרוזות כאן זהות לאלה שבקוד, אות באות, ובכוונה.** הן מזהי
+-- אפליקציה ולא שמות עמודות, וכל תרגום ביניהן — snake_case מול
+-- camelCase — היה קוד שיכול להיסחף. בדיקה ברפו קוראת את הרשימה מכאן
+-- ומשווה אותה למערך ב-TypeScript, כדי שסחיפה בכל אחד מהכיוונים תיפול.
+--
+-- ── הפער השני: NOT NULL DEFAULT '{}' ───────────────────────────────
+--
+-- 🔴 זו התבנית שנתפסה בפרויקט הזה תשע פעמים. מערך ריק אינו "אין
+-- רגישויות" — הוא "לא נשאל", ושני אלה מובילים להתנהגות שונה: על שאלה
+-- שדולגה שואלים פעם נוספת אחת (כלל הברזל החמישי), ועל שאלה שנענתה
+-- בשלילה לא חוזרים לעולם.
+--
+-- בממשק ההבחנה כבר קיימת — יש תשובה מפורשת "אין רגישויות מיוחדות".
+-- העמודה הייתה מוחקת אותה בכניסה.
+--
+--   NULL  — לא נשאל / לא נענה
+--   '{}'  — נשאל, ואין רגישויות
+--   {...} — נשאל, ואלה הן
+
+BEGIN;
+
+set local search_path = public, extensions;
+
+-- ⚠️ סדר הפעולות חשוב. הסרת ה-DEFAULT לפני הסרת ה-NOT NULL תשאיר
+-- שורות קיימות עם '{}' — שהוא ערך תקין, רק שמשמעותו השתנתה. אין
+-- שורות בייצור היום, אבל הסדר נכתב כך שהוא יהיה נכון גם כשיהיו.
+alter table trip_member alter column sensitivities drop default;
+alter table trip_member alter column sensitivities drop not null;
+
+alter table trip_member drop constraint if exists trip_member_sensitivities_vocab;
+alter table trip_member add constraint trip_member_sensitivities_vocab
+  check (
+    sensitivities is null
+    or sensitivities <@ array[
+         'dark',
+         'loudSudden',
+         'strobe',
+         'heights',
+         'motionSickness',
+         'accessibility',
+         'longQueues'
+       ]::text[]
+  );
+
+comment on column trip_member.sensitivities is
+  'NULL = לא נשאל · {} = נשאל ואין · אחרת הרשימה. אוצר המילים נעול ב-CHECK ומשווה ל-src/lib/sensitivity.ts.';
+
+-- ── והכלל שאין לו CHECK, ולכן הוא נכתב כאן ──────────────────────────
+--
+-- ⚠️ trip_member היא **אנונימית לצמיתות**. אין בה שם ואין תאריך לידה,
+-- ויש בה גיל כמספר וגובה רק מתחת לגיל 14.
+--
+-- 🔴 וזה עומד להיבחן. אם המוצר יהפוך לסוכן נסיעות מורשה, יידרש שם מלא
+-- ותאריך לידה — כרטיס נושא שם. הפיתוי יהיה להוסיף את העמודות כאן.
+--
+-- אסור. ברגע שהן באותה שורה, ההבטחה "איננו יודעים מי הילד הזה" מתה
+-- לגבי **כל** מי שנרשם — כולל מי שרק תכנן יום ולא הזמין דבר. זהות
+-- להזמנה שייכת לטבלה נפרדת, שטים אינו קורא ממנה לעולם.
+--
+-- הפירוט ב-docs/product/commercial-foundations.md. בדיקה ברפו נכשלת אם עמודה
+-- כזו נוספת.
+comment on table trip_member is
+  'חבר אחד בקבוצה. אנונימי לצמיתות: בלי שם ובלי תאריך לידה. זהות להזמנה — טבלה נפרדת. ראה docs/product/commercial-foundations.md.';
+
+COMMIT;
+
+-- ── אימות ────────────────────────────────────────────────────────────
+-- ⚠️ בודק התנהגות ולא קיום. אילוץ שקיים ואינו תופס נראה זהה לאילוץ
+-- שעובד, וזו ההבחנה שהפרויקט הזה נכשל עליה שוב ושוב.
+
+BEGIN;
+
+set local search_path = public, extensions;
+
+-- ⚠️ הבדיקה רצה על **עותק** של הטבלה, ולא עליה עצמה. trip_member
+-- תלויה ב-trip שתלויה במשתמש אמיתי, ומיגרציה אינה יכולה לייצר כזה —
+-- וגם אין משתמשים בייצור היום. `LIKE ... INCLUDING CONSTRAINTS` מעתיק
+-- את אילוצי ה-CHECK בלי המפתחות הזרים, ולכן זו אותה בדיקה בדיוק על
+-- אותו אילוץ, בלי להמציא נתונים.
+
+create temp table sens_probe (like trip_member including constraints including defaults)
+  on commit drop;
+
+do $$
+declare
+  rejected boolean;
+begin
+  -- א. ערך שאינו באוצר המילים חייב להידחות
+  begin
+    insert into sens_probe (trip_id, member_key, role, age, sensitivities)
+    values (gen_random_uuid(), 'p1', 'adult', 30, array['fear_dark']);
+    rejected := false;
+  exception when check_violation then
+    rejected := true;
+  end;
+  if not rejected then
+    raise exception '❌ אוצר המילים אינו נאכף — fear_dark התקבל.';
+  end if;
+
+  -- ב. NULL מתקבל, והוא "לא נשאל"
+  insert into sens_probe (trip_id, member_key, role, age, sensitivities)
+  values (gen_random_uuid(), 'p2', 'adult', 30, null);
+
+  -- ג. מערך ריק מתקבל, והוא "נשאל ואין"
+  insert into sens_probe (trip_id, member_key, role, age, sensitivities)
+  values (gen_random_uuid(), 'p3', 'adult', 30, array[]::text[]);
+
+  -- ד. ערכים תקינים מתקבלים
+  insert into sens_probe (trip_id, member_key, role, age, sensitivities)
+  values (gen_random_uuid(), 'p4', 'adult', 30, array['loudSudden','heights']);
+
+  -- ה. ⚠️ וההבחנה עצמה: NULL אינו מערך ריק
+  if (select count(*) from sens_probe where sensitivities is null) <> 1
+     or (select count(*) from sens_probe where sensitivities = array[]::text[]) <> 1 then
+    raise exception '❌ NULL ומערך ריק אינם נבדלים.';
+  end if;
+
+  raise notice '✅ תקין — אוצר המילים נאכף, ו-NULL נבדל ממערך ריק.';
+end $$;
+
+COMMIT;
+
+select '✅ 034 הותקנה' as "מצב";
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('034_sensitivities_vocabulary.sql', 'sha256:e3670a7f30399bf39406d2b6805a6641',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
+
+
+-- ==========================================================================
+-- מיגרציה: 035_sources_are_not_public.sql
+-- ==========================================================================
+
+set search_path = public, extensions;
+
+-- ── 035 · המקורות יורדים מהקריאה הציבורית ───────────────────────────
+--
+-- להריץ ב: **סופהבייס → SQL Editor → קוורי חדש**. פעם אחת.
+-- אושר על ידי גיא, 07.09.
+--
+-- ⚠️ הבעיה, ולמה היא לא נראתה:
+--
+-- כלל הפרויקט אומר "אין מקורות בממשק. הייצוא נושא תאריך בלבד. בדיקה
+-- נכשלת אם URL מגיע לשורה." והבדיקה הזו קיימת ועובדת — אבל היא בודקת
+-- את **הייצוא**.
+--
+-- `experience_source` מחזיקה url · title · tier · retrieved_at, והיא
+-- נכללה ב-006 ברשימת הטבלאות שנפתחו ל-select(true) יחד עם שאר טבלאות
+-- התוכן. כלומר המקורות אינם מוצגים במסך — ונשלפים בקריאה אחת ישירה
+-- ל-PostgREST על ידי כל אנונימי.
+--
+-- 🔴 וזו התבנית: **הגנה שנבדקת בצד אחד ופתוחה בצד השני.** הטבלה ריקה
+-- היום, ולכן שום דבר עוד לא דלף — היא הייתה מתחילה להזיק בדיוק ברגע
+-- שמישהו ימלא אותה, וזה הרגע שבו איש לא יחשוב לבדוק שוב.
+--
+-- ⚠️ ומה שזה **אינו**: זו אינה הכרעה על 242 השורות. הן נשארות ציבוריות,
+-- והשאלה אם להגן עליהן היא החלטת מוצר של נטע ופולה (גיא, 07.09). כאן
+-- יורד רק מה שהכלל כבר אוסר להציג.
+
+BEGIN;
+
+set local search_path = public, extensions;
+
+-- מדיניות הקריאה בלבד. ⚠️ מדיניות האדמין נשארת — אדמין צריך לראות
+-- מקורות כדי לבדוק שורה, וזה בדיוק מה שהיא קיימת בשבילו.
+drop policy if exists experience_source_read on experience_source;
+
+comment on table experience_source is
+  'מקורות. ⚠️ אינה קריאה לציבור — הכלל אוסר מקורות בממשק, ומיגרציה 035 הורידה אותה מ-select(true). רק אדמין.';
+
+COMMIT;
+
+-- ── אימות ────────────────────────────────────────────────────────────
+-- ⚠️ בודק את ההתנהגות ולא את היעדר השורה ב-pg_policies. מדיניות שנמחקה
+-- בעוד טבלה אחרת פותחת את אותה גישה נראית זהה למדיניות שהוסרה.
+
+BEGIN;
+
+set local search_path = public, extensions;
+
+do $$
+declare
+  readable boolean;
+  others   int;
+begin
+  -- א. לאנונימי אין יותר מדיניות קריאה על הטבלה
+  select exists (
+    select 1 from pg_policies
+     where schemaname = 'public'
+       and tablename  = 'experience_source'
+       and cmd in ('SELECT', 'ALL')
+       and 'anon' = any(coalesce(roles, array['public']))
+  ) into readable;
+
+  -- ⚠️ `using (true)` נכתב ל-role ציבורי, ולכן הבדיקה למעלה עלולה
+  -- לפספס. השנייה היא הישירה: האם נותרה מדיניות SELECT כלשהי שאינה
+  -- מותנית ב-is_admin().
+  select count(*) into others
+    from pg_policies
+   where schemaname = 'public'
+     and tablename  = 'experience_source'
+     and cmd in ('SELECT', 'ALL')
+     and coalesce(qual, '') not like '%is_admin%';
+
+  if others > 0 then
+    raise exception '❌ נותרה מדיניות קריאה שאינה מוגבלת לאדמין על experience_source (% מדיניות).', others;
+  end if;
+
+  -- ב. ו-RLS עצמה חייבת להישאר פעילה. טבלה בלי RLS פתוחה לגמרי,
+  -- והסרת המדיניות האחרונה ממנה לא הייתה סוגרת דבר.
+  if not (select relrowsecurity from pg_class
+           where oid = to_regclass('public.experience_source')) then
+    raise exception '❌ RLS כבויה על experience_source. הסרת מדיניות בלעדיה אינה סוגרת כלום.';
+  end if;
+
+  -- ג. ⚠️ ושאר טבלאות התוכן **נשארות** קריאות. זו אינה הכרעה על
+  -- הפתיחות הכללית, וסגירה שלהן כאן הייתה חורגת ממה שאושר.
+  if not exists (select 1 from pg_policies
+                  where schemaname='public' and tablename='experience'
+                    and cmd in ('SELECT','ALL')
+                    and coalesce(qual,'') not like '%is_admin%') then
+    raise exception '❌ experience נסגרה בטעות. 035 נוגעת ב-experience_source בלבד.';
+  end if;
+
+  raise notice '✅ תקין — המקורות סגורים, RLS פעילה, ושאר התוכן נשאר קריא.';
+end $$;
+
+COMMIT;
+
+select '✅ 035 הותקנה' as "מצב";
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('035_sources_are_not_public.sql', 'sha256:8cb16bb8493d794a21962391abbaf216',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
+
+
+-- ==========================================================================
+-- מיגרציה: 036_knowledge_is_not_public.sql
+-- ==========================================================================
+
+set search_path = public, extensions;
+
+-- ── 036 · מאגר הידע יורד מהקריאה הציבורית ───────────────────────────
+--
+-- להריץ ב: **סופהבייס → SQL Editor → קוורי חדש**. פעם אחת.
+-- נמצא על ידי גיא, 07.09, בעקבות בקשת פולה.
+--
+-- ⚠️ מה שהיה חשוף, ואומת במסד: **259 קטעי ידע נראים לכל אנונימי
+-- בקריאה ישירה ל-PostgREST.** ולא רק הטקסט:
+--
+--   knowledge_doc   — source_url · source_kind · reviewed_by ·
+--                     submitted_by · authority_tier
+--   knowledge_chunk — embedding (הווקטור הגולמי) · authority_tier
+--
+-- שלוש בעיות נפרדות בחשיפה אחת:
+--
+-- 1. 🔴 `source_url` — **המקום השני של אותו באג בדיוק.** הכלל אומר
+--    "אין מקורות בממשק", והבדיקה שאוכפת אותו בודקת את הייצוא. כאן
+--    הם יצאו מהדלת האחורית, בדיוק כמו ב-experience_source (מיגרציה
+--    035). באג שנמצא פעמיים בשני מקומות אינו מקרה — הוא אומר
+--    שההגנה נבדקת בצד הלא נכון.
+--
+-- 2. 🔴 `submitted_by` ו-`reviewed_by` — מזהי משתמשים. תוכן קהילתי
+--    נכתב בהנחה שהכותב אינו מזוהה; הכלל על יומן השאלות ("מי שכותב
+--    אינו יכול לקרוא, גם לא את מה שהוא עצמו כתב") קיים בדיוק בשביל
+--    זה. עמודה שמחזירה uuid של כותב מבטלת אותו.
+--
+-- 3. ⚠️ `embedding` — הווקטור הוא ייצוג המשמעות של כל קטע. מי שמוריד
+--    259 ווקטורים מקבל את שכבת השליפה עצמה, לא רק את הטקסט.
+--
+-- ── ולמה סגירה מלאה ולא view ─────────────────────────────────────────
+--
+-- גיא הציע view שחושף content · scope · locale. זה היה עובד — אבל
+-- **הדפדפן אינו קורא את הטבלאות האלה בכלל.** מדדתי: אין ולו הפניה
+-- אחת אליהן בקוד הלקוח. טים קורא דרך `match_knowledge`, שהיא
+-- `security definer` — כלומר עוקפת RLS ואינה מושפעת.
+--
+-- ⚠️ ולכן view היה מוסיף משטח שאיש לא צריך. אין דבר בטוח יותר משטח
+-- שאינו קיים.
+--
+-- **נמדד לפני שנכתב** (מסד מקומי, 259 קטעים אמיתיים):
+--   קריאה ישירה כ-anon:  259 → 0
+--   דרך match_knowledge:   5 → 5   ← טים אינו נפגע
+
+BEGIN;
+
+set local search_path = public, extensions;
+
+drop policy if exists knowledge_chunk_read on knowledge_chunk;
+drop policy if exists knowledge_doc_read   on knowledge_doc;
+
+comment on table knowledge_doc is
+  'מסמכי ידע. ⚠️ אינם קריאים לציבור — מכילים source_url, submitted_by ו-reviewed_by. טים קורא דרך match_knowledge (security definer). מיגרציה 036.';
+comment on table knowledge_chunk is
+  'קטעי ידע. ⚠️ אינם קריאים לציבור — מכילים embedding. טים קורא דרך match_knowledge (security definer). מיגרציה 036.';
+
+COMMIT;
+
+-- ── אימות ────────────────────────────────────────────────────────────
+-- ⚠️ בודק את שני הצדדים: שהדלת נסגרה, **ושטים עדיין עובר בה.** בדיקה
+-- שרק מוודאת סגירה עוברת גם על מסד שבו טים שבור.
+
+BEGIN;
+
+set local search_path = public, extensions;
+
+do $$
+declare
+  open_policies int;
+  through_tim   int;
+  probe         text;
+begin
+  -- א. לא נותרה מדיניות קריאה שאינה מוגבלת לאדמין
+  select count(*) into open_policies
+    from pg_policies
+   where schemaname = 'public'
+     and tablename in ('knowledge_doc','knowledge_chunk')
+     and cmd in ('SELECT','ALL')
+     and coalesce(qual,'') not like '%is_admin%';
+  if open_policies > 0 then
+    raise exception '❌ נותרו % מדיניות קריאה פתוחות על טבלאות הידע.', open_policies;
+  end if;
+
+  -- ב. RLS פעילה. טבלה בלעדיה פתוחה לגמרי, והסרת מדיניות ממנה
+  --    אינה סוגרת דבר.
+  if not (select bool_and(relrowsecurity) from pg_class
+           where oid in (to_regclass('public.knowledge_doc'),
+                         to_regclass('public.knowledge_chunk'))) then
+    raise exception '❌ RLS כבויה על אחת מטבלאות הידע.';
+  end if;
+
+  -- ג. 🔴 וטים עדיין שולף. security definer אמור לעקוף את RLS, אבל
+  --    "אמור" אינו מדידה — וסגירה ששוברת את טים גרועה מהחשיפה.
+  select embedding::text into probe
+    from knowledge_chunk where embedding is not null limit 1;
+  if probe is null then
+    raise notice '⚠️ אין ווקטורים — הסגירה בוצעה אך לא נבדק שטים עובר. להריץ שוב אחרי החישוב.';
+    return;
+  end if;
+  -- ⚠️ **כ-anon, ולא כמי שמריץ את המיגרציה.** בלוק שרץ כמנהל עוקף RLS
+  -- ממילא, ולכן הוא היה מדווח ✅ גם על מסד שבו טים שבור לחלוטין —
+  -- כלומר בודק את ההרשאות של האדם הלא נכון. זה נתפס בבדיקה ההפוכה.
+  set local role anon;
+  select count(*) into through_tim from match_knowledge(probe, 5, null);
+  reset role;
+  if through_tim = 0 then
+    raise exception '❌ match_knowledge מחזירה אפס. הסגירה שברה את השליפה של טים.';
+  end if;
+
+  raise notice '✅ תקין — הידע סגור לקריאה ישירה, וטים שולף % קטעים דרך match_knowledge.', through_tim;
+end $$;
+
+COMMIT;
+
+select '✅ 036 הותקנה' as "מצב";
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('036_knowledge_is_not_public.sql', 'sha256:e1960194177c70bf62a45326d6eec657',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
+
+
+-- ==========================================================================
+-- מיגרציה: 037_bucket_daily_cap.sql
+-- ==========================================================================
+
+set search_path = public, extensions;
+
+-- ── 037 · גג יומי לכל דלי, לא רק לכולם יחד ──────────────────────────
+--
+-- להריץ ב: **סופהבייס → SQL Editor → קוורי חדש**. פעם אחת.
+-- אושר על ידי גיא, 07.09, לפני פתיחת הכתובת.
+--
+-- ⚠️ החשבון שלא עלה, ושבגללו זה נכתב:
+--
+--   גג לחלון: 20 קריאות לכל 60 דקות
+--   גג גלובלי: 600 ליום
+--
+--   20 × 24 שעות = **480 קריאות ליום מדלי אחד** — 80% מהמכסה של כולם.
+--
+-- שני המספרים סבירים כל אחד לחוד. הם אינם סבירים יחד: **דלי אחד יכול
+-- לצרוך 80% מהיום בלי לחרוג משום מגבלה, ושניים סוגרים את היום.**
+--
+-- ⚠️ ומה שזה אומר בפועל: הגג הגלובלי מגן על הארנק ולא על השירות.
+-- משפחה שתיכנס בערב תקבל "נגמרה המכסה" בגלל מישהו אחר.
+--
+-- ── ולמה זה לא מחליף את auth.uid() ולא מוחלף בו ─────────────────────
+--
+-- גיא הציע לקשור את הגג ל-auth.uid() במקום לדלי מהלקוח. הכיוון נכון
+-- והוא סוגר את ה-80% לגמרי — **אבל אינו מחליף את זה**:
+--
+--   · מי שיכול לפתוח חשבונות חופשי מקבל מכסה טרייה לכל חשבון (Sybil)
+--   · ההרשמה עצמה, איפוס סיסמה, וכל מה שלפני הזדהות — אין להם uid
+--
+-- כלומר צריך את שניהם: **לפי כתובת מגן על הכניסה, לפי משתמש מגן על
+-- השימוש.** וכאן נבנה הראשון, כי מסך ההרשמה עוד לא קיים ואין uid
+-- לקשור אליו. auth.uid() מצטרף כשההרשמה עולה (סוכם עם גיא, 07.09).
+
+BEGIN;
+
+set local search_path = public, extensions;
+
+-- ⚠️ פונקציה ולא ארגומנט, בדיוק כמו שאר הגגות ומאותה סיבה: ארגומנט
+-- מגיע מהקוראת, והקוראת היא דפדפן עם מפתח ציבורי. זה הלקח מ-021.
+create or replace function public.rate_limit_bucket_daily_cap() returns int
+language sql immutable parallel safe
+as $$ select 60 $$;
+
+comment on function public.rate_limit_bucket_daily_cap() is
+  'גג יומי לדלי בודד. ⚠️ 60 ולא 480: הגג הגלובלי הוא 600, ודלי אחד אינו אמור לצרוך יותר מ-10% מהיום של כולם.';
+
+create or replace function public.check_rate_limit(p_bucket text)
+returns text
+language plpgsql
+security definer
+set search_path = public, extensions
+as $$
+declare
+  used_bucket     int;
+  used_bucket_day int;
+  used_global     int;
+  cap_window      int := public.rate_limit_window_minutes();
+  cap_bucket      int := public.rate_limit_max_per_window();
+  cap_bucket_day  int := public.rate_limit_bucket_daily_cap();
+  cap_global      int := public.rate_limit_daily_cap();
+begin
+  if p_bucket is null or length(p_bucket) < 8 then
+    raise exception 'bucket חסר או קצר מדי';
+  end if;
+
+  -- הגדר הגלובלי נבדק ראשון. אם כולם חסומים, אין טעם לספור דלי בודד.
+  select count(*) into used_global
+  from api_call
+  where created_at > now() - interval '24 hours';
+
+  if used_global >= cap_global then
+    return 'global';
+  end if;
+
+  select count(*) into used_bucket
+  from api_call
+  where bucket = p_bucket
+    and created_at > now() - make_interval(mins => cap_window);
+
+  if used_bucket >= cap_bucket then
+    return 'user';
+  end if;
+
+  -- ⚠️ החדש: אותו דלי, אבל על פני יממה. בלעדיו החלון לבדו מתיר 480
+  -- ליום, וזו כל הבעיה.
+  --
+  -- ⚠️ ומוחזר 'user' ולא ערך חדש, בכוונה. הקוראת — הפונקציה של טים —
+  -- מכירה שלושה ערכים, וערך רביעי היה נופל אצלה לענף ברירת המחדל
+  -- ומוצג למשתמש כתקלה כללית במקום כ"הגעת למכסה". שינוי אוצר המילים
+  -- מחייב שינוי בשני הצדדים, וזה בדיוק סוג הפער שנתפס כאן שוב ושוב.
+  select count(*) into used_bucket_day
+  from api_call
+  where bucket = p_bucket
+    and created_at > now() - interval '24 hours';
+
+  if used_bucket_day >= cap_bucket_day then
+    return 'user';
+  end if;
+
+  insert into api_call (bucket) values (p_bucket);
+  delete from api_call where created_at < now() - interval '48 hours';
+
+  return 'ok';
+end
+$$;
+
+comment on function public.check_rate_limit(text) is
+  'גג קריאות: חלון לדלי · יממה לדלי · יממה גלובלי. ⚠️ שלושתם נקראים מפונקציות במסד ואינם ניתנים לשליחה מבחוץ.';
+
+-- ⚠️ ההרשאות נכתבות מחדש. `create or replace` שומר אותן, אבל הסתמכות
+-- על כך פירושה שמיגרציה עתידית שתעשה drop+create תשאיר את הפונקציה
+-- בלי גישה — וטים ייפול על 403 בלי שאיש יבין למה.
+revoke all on function public.check_rate_limit(text) from public;
+do $$
+declare r text;
+begin
+  foreach r in array array['anon','authenticated','service_role'] loop
+    if exists (select 1 from pg_roles where rolname = r) then
+      execute format('grant execute on function public.check_rate_limit(text) to %I', r);
+    end if;
+  end loop;
+end
+$$;
+
+COMMIT;
+
+-- ── אימות ────────────────────────────────────────────────────────────
+-- ⚠️ בודק את ההתנהגות מקצה לקצה, ולא את קיום הפונקציה. הגג הקודם
+-- (021) נראה מותקן וניתן היה לעקוף אותו מבחוץ; הלקח היה שהמדידה
+-- חייבת להיות "מה קורה בקריאה ה-N", לא "האם הפונקציה שם".
+
+BEGIN;
+
+set local search_path = public, extensions;
+
+do $$
+declare
+  b       text := 'probe-037-' || gen_random_uuid()::text;
+  cap_day int  := public.rate_limit_bucket_daily_cap();
+  cap_win int  := public.rate_limit_max_per_window();
+  answer  text;
+  allowed int  := 0;
+begin
+  -- ⚠️ הבדיקה מזייפת זמן: קריאות נכתבות ישירות ל-api_call עם חותמות
+  -- מפוזרות על פני היממה, כדי לעקוף את גג החלון ולהגיע לגג היומי.
+  -- בלי זה החלון היה חוסם ראשון והגג היומי לא היה נבדק כלל.
+  insert into api_call (bucket, created_at)
+  select b, now() - make_interval(mins => 90 + g * 20)
+    from generate_series(1, cap_day - 1) g;
+
+  -- הקריאה שמשלימה למכסה חייבת לעבור
+  answer := public.check_rate_limit(b);
+  if answer <> 'ok' then
+    raise exception '❌ קריאה % נחסמה (%), והיא עדיין בתוך המכסה היומית של %.',
+      cap_day, answer, cap_day;
+  end if;
+
+  -- והבאה אחריה חייבת להיחסם
+  answer := public.check_rate_limit(b);
+  if answer <> 'user' then
+    raise exception '❌ קריאה % החזירה "%" ולא "user". הגג היומי לדלי אינו נאכף.',
+      cap_day + 1, answer;
+  end if;
+
+  -- ⚠️ ודלי אחר אינו מושפע. גג שחוסם את כולם בגלל אחד הוא באג ולא הגנה.
+  answer := public.check_rate_limit('probe-037-other-' || gen_random_uuid()::text);
+  if answer <> 'ok' then
+    raise exception '❌ דלי אחר נחסם ("%"). הגג דולף בין דליים.', answer;
+  end if;
+
+  delete from api_call where bucket like 'probe-037-%';
+
+  raise notice '✅ תקין — דלי נחסם אחרי % ליממה, ודלי אחר אינו מושפע.', cap_day;
+end $$;
+
+COMMIT;
+
+-- ── מה שרואים עכשיו ──────────────────────────────────────────────────
+select public.rate_limit_daily_cap()        as "גג יומי גלובלי",
+       public.rate_limit_bucket_daily_cap() as "גג יומי לדלי",
+       public.rate_limit_max_per_window()   as "גג בחלון",
+       public.rate_limit_window_minutes()   as "אורך החלון",
+       round(100.0 * public.rate_limit_bucket_daily_cap()
+                   / public.rate_limit_daily_cap()) || '%' as "מה דלי אחד יכול לצרוך";
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('037_bucket_daily_cap.sql', 'sha256:8b7b0c2f1477aa9a2e27eb3a4e6b0064',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
+
+
+-- ==========================================================================
+-- מיגרציה: 038_max_height.sql
+-- ==========================================================================
+
+set search_path = public, extensions;
+
+-- ── 038 · גובה מקסימלי — הכיוון השני של אותה עמודה ─────────────────
+--
+-- להריץ ב: **סופהבייס → SQL Editor → קוורי חדש**. פעם אחת.
+-- אושר על ידי פולה דרך פיליפ, 08.09.
+--
+-- 🔴 הבעיה, ולמה היא נראתה כמו נתון תקין:
+--
+-- למאסטר עמודת גובה אחת, ומשמעותה "מינימום לעלייה". בחמישה אזורי מים
+-- לפעוטות המספר שבה הוא **המקסימום המותר** — ולכן אותו מספר אמר בדיוק
+-- את ההפך ממה שהתכוון:
+--
+--   Bay Slides 152 · Runamukka Reef 137 · Ketchakiddee Creek 122
+--   Tike's Peak 122 · Tot Tiki Reef 122
+--
+-- ⚠️ טים אמר למשפחה ש"מגבלת הגובה בטייקס פיק היא 122 ס״מ". ילדה בגובה
+-- 130 הבינה שהיא גדולה מספיק, כשבפועל היא **גדולה מדי**; ונער בגובה 160,
+-- שבאמת אינו יכול לעלות, לא קיבל שום אזהרה.
+--
+-- ── איך זה נמצא ─────────────────────────────────────────────────────
+--
+-- לא ממקור חיצוני אלא מסתירה בתוך הדאטא עצמו: הקטגוריה **העדינה ביותר**
+-- החזיקה את המספר הגבוה ביותר במאגר —
+--
+--   עוצמה 1 (עדין) · 17 שורות · הגבוה ביותר: 152
+--   עוצמה 4 (חזק)  · 22 שורות · הגבוה ביותר: 137
+--
+-- מגלשת ילדים שדורשת יותר מ-Hulk ומ-Doctor Doom אינה אפשרית. רוני אימתה
+-- מול המקורות, ופולה אישרה שדה נפרד.
+--
+-- ── ולמה שדה נפרד ולא איפוס ─────────────────────────────────────────
+--
+-- 🔴 הפיתוי היה לאפס את החמישה ל-0 ולסגור את זה היום. **אסור.**
+--
+-- `0` אצלנו פירושו "נבדק, ואין מגבלה". על מתקן שיש בו תקרה אמיתית זו
+-- הצהרה שקרית **בכיוון ההפוך** — נחליף חסימת ילד נמוך בהזמנת ילד גבוה
+-- מדי למתקן שלא ייתן לו לעלות. **התיקון המהיר גרוע מהבאג.**
+--
+-- ⚠️ ומאותה סיבה `height_requirement_cm` על החמישה נשאר **NULL ולא 0**:
+-- רוני אימתה את התקרה; איש לא אימת שאין רצפה. 0 היה הצהרה שלא נאמרה.
+
+BEGIN;
+
+set local search_path = public, extensions;
+
+alter table experience
+  add column if not exists max_height_requirement_cm int;
+
+-- ⚠️ אותו טווח כמו הרצפה, ומאותה סיבה: מספר מחוץ ל-50..200 אינו גובה של
+-- אדם אלא שגיאת הקלדה או יחידה אחרת, ועדיף שייעצר כאן.
+do $$
+begin
+  if not exists (select 1 from pg_constraint where conname = 'experience_max_height_range') then
+    alter table experience add constraint experience_max_height_range
+      check (max_height_requirement_cm is null
+             or max_height_requirement_cm between 50 and 200);
+  end if;
+end $$;
+
+-- ⚠️ **ואיסור על שתי המשמעויות באותה שורה.** שורה שנושאת גם רצפה וגם
+-- תקרה אפשרית בעולם, אבל אצלנו היא כמעט תמיד סימן שהמספר הועתק לשתי
+-- העמודות במקום להיות מפורש נכון באחת. אם תגיע שורה כזו באמת — היא
+-- תיעצר כאן ותיבדק, ולא תיכנס בשקט.
+do $$
+begin
+  if not exists (select 1 from pg_constraint where conname = 'experience_height_one_direction') then
+    alter table experience add constraint experience_height_one_direction
+      check (max_height_requirement_cm is null
+             or height_requirement_cm is null
+             or height_requirement_cm < max_height_requirement_cm);
+  end if;
+end $$;
+
+comment on column experience.max_height_requirement_cm is
+  'תקרת גובה: עד כמה מותר להיות גבוה כדי לעלות. ⚠️ ההפך מ-height_requirement_cm. חמישה אזורי מים לפעוטות בלבד. מיגרציה 038.';
+
+-- 🔴 **drop לפני create, ובכוונה.**
+--
+-- `create or replace` אינו יכול לשנות את מבנה הטבלה שהפונקציה מחזירה.
+-- העמודה החדשה משנה אותו, ולכן ההרצה נכשלת עם:
+--   "cannot change return type of existing function"
+--
+-- ⚠️ ומה שזה מוחק יחד עם הפונקציה: **ההרשאות.** drop מסיר גם את
+-- ה-grant ל-anon, וטים היה נופל על 403 בלי ששום דבר ייראה שבור. בלוק
+-- ההרשאות בסוף הקובץ כותב אותן מחדש — הוא לא קישוט.
+--
+-- ⚠️ והכל בתוך טרנזקציה אחת: בין ה-drop ל-create הפונקציה אינה קיימת,
+-- ובלי BEGIN/COMMIT היה חלון שבו טים מחזיר 404.
+drop function if exists public.find_experiences(text, text, int, int);
+
+create or replace function public.find_experiences(
+  p_name        text default null,
+  p_park        text default null,
+  p_height_cm   int  default null,
+  p_limit       int  default 8
+)
+returns table (
+  id            text,
+  name          text,
+  name_he       text,
+  park          text,
+  land          text,
+  category      text,
+  status        text,
+  status_note   text,
+  intensity     int,
+  height_cm     int,
+  max_height_cm int,
+  gets_wet      text,
+  wheelchair    text,
+  motion_sickness text,
+  skip_line     text,
+  last_verified date,
+  fits          boolean
+)
+language sql
+stable
+security definer
+set search_path = public, extensions
+as $$
+  with tok as (
+    -- ⚠️ פיצול על רווח בלבד, וקיצוץ פיסוק מהקצוות ב-btrim.
+    -- **בכוונה בלי מחלקות תווים כמו [:alnum:]** — הן תלויות ב-locale,
+    -- והמסד המקומי (C) והמסד בסופאבייס (UTF-8) היו מתנהגים אחרת.
+    -- זה הכשל שכבר תפס אותי שלוש פעמים (search_path, format_type),
+    -- ואות עברית היא בדיוק סוג התו שנופל בין ההגדרות.
+    select distinct btrim(t, ',.;:!?()"''[]{}<>/-') as t
+    from regexp_split_to_table(coalesce(p_name, ''), '[[:space:]]+') t
+  ),
+  words as (
+    -- שתי אותיות אינן מילה מזהה; הן שאריות של מילות קישור.
+    select t from tok where length(t) >= 3
+  ),
+  -- ⚠️ **תחיליות עבריות.** "לספייס" ו-"באקספדישן" הן אותה מילה עם אות
+  -- אחת מלפנים, ו-ilike על מחרוזת אינו יודע את זה. בלי זה שאלה טבעית
+  -- ("כדאי ללכת לספייס מאונטיין") מחזירה אפס על מתקן שקיים.
+  -- הקיצוץ מוגבל למילים בנות 5 ומעלה, כדי שלא ניצור מילים קצרות
+  -- ומקריות שיתאימו לחצי מהטבלה.
+  forms as (
+    select t as t, t as root from words
+    union
+    select t, substr(t, 2) from words
+    where length(t) >= 5 and substr(t, 1, 1) in ('ל','ב','ה','מ','ש','ו','כ')
+  ),
+  scored as (
+    select
+      e.id, e.name, e.name_i18n->>'he' as name_he,
+      p.name as park_name, l.name as land_name,
+      e.category, e.status, e.status_note, e.intensity,
+      e.height_requirement_cm, e.max_height_requirement_cm, e.gets_wet, e.wheelchair,
+      e.motion_sickness_warning, e.skip_line_system, e.last_verified,
+      -- ⚠️ **count(distinct f.t) ולא count(*)** — מילה אחת שמתאימה גם
+      -- בצורתה המלאה וגם בלי התחילית היא **מילה אחת**, ושתי צורות של
+      -- אותה מילה לא אמורות לדחוק החוצה מתקן שהתאים בשתי מילים שונות.
+      (select count(distinct f.t) from forms f
+        where e.name ilike '%' || f.root || '%'
+           or coalesce(e.name_i18n->>'he', '') ilike '%' || f.root || '%'
+           -- ⚠️ גם השמות הנרדפים. "מסע אל ההר" ו-"אוורסט" הם אותו מתקן.
+           or exists (
+             select 1 from jsonb_array_elements_text(
+               coalesce(e.aliases_i18n->'he', '[]'::jsonb)) a
+             where a ilike '%' || f.root || '%'
+           )) as hits
+    from experience e
+    join park p on p.id = e.park_id
+    left join land l on l.id = e.land_id
+    where (p_park is null or p.id = p_park or p.name ilike '%' || p_park || '%')
+  )
+  select
+    s.id, s.name, s.name_he, s.park_name, s.land_name,
+    s.category, s.status, s.status_note, s.intensity,
+    s.height_requirement_cm, s.max_height_requirement_cm, s.gets_wet, s.wheelchair,
+    s.motion_sickness_warning, s.skip_line_system, s.last_verified,
+    -- ⚠️ **שלושה מצבים, ו-NULL אינו "מתאים לכולם"** (CLAUDE.md).
+    --   0     → נבדק ואין מגבלה → מתאים
+    --   מספר  → מתאים אם הילד/ה מגיע/ה
+    --   NULL  → **לא נבדק** → NULL, ולא true
+    -- נגזר בזמן ריצה ואינו מאוחסן — אחרת היה מקור אמת שני שמתיישן
+    -- ברגע שהגובה של הילד/ה משתנה.
+    -- 🔴 **והתקרה, שנוספה ב-038.** חמישה אזורי מים לפעוטות מגבילים גובה
+    -- כלפי מעלה, וכל עוד רק הרצפה נבדקה כאן, ילד גבוה מדי קיבל "מתאים".
+    --
+    -- ⚠️ הסדר: פסילה לפני התאמה. מי שגבוה מהתקרה **אינו** מתאים, גם אם
+    -- הוא עובר את הרצפה בהרבה — וזה בדיוק המקרה שהיה חוזר true.
+    --
+    -- ⚠️ ותקרה לבדה היא תשובה. על חמש השורות האלה הרצפה היא NULL ("לא
+    -- נבדק"), ובלי השורה הזו fits היה נשאר NULL — כלומר "אין לי מידע" על
+    -- שורה שיש עליה מידע מלא בכיוון שנשאל.
+    case
+      when p_height_cm is null then null
+      when s.max_height_requirement_cm is not null
+           and p_height_cm > s.max_height_requirement_cm then false
+      when s.height_requirement_cm is null
+        then case when s.max_height_requirement_cm is null then null else true end
+      else p_height_cm >= s.height_requirement_cm
+    end
+  from scored s
+  where
+    -- בלי שם — כל הפארק, לפי הסינון בלבד.
+    (select count(*) from words) = 0
+    -- ⚠️ עם שם — **רק ההתאמות הטובות ביותר.** ראה ההערה בראש הקובץ.
+    or s.hits = (select max(x.hits) from scored x where x.hits > 0)
+  -- ⚠️ מתקן סגור **מוחזר**, עם הסטטוס שלו. סינון שקט היה גורם לטים לומר
+  -- "לא מצאתי מתקן כזה" על מתקן שקיים ופשוט סגור.
+  order by
+    case when p_name is not null and s.name ilike p_name || '%' then 0 else 1 end,
+    s.name
+  limit least(coalesce(p_limit, 8), 25)
+$$;
+
+comment on function public.find_experiences(text, text, int, int) is
+  'עובדות על מתקנים, מהטבלה. ⚠️ התאמה לפי מילים ולא לפי ביטוי — שאלה היא משפט, לא שם (הבאג של 029). מוחזרות רק השורות עם מספר המילים התואמות הגבוה ביותר, כדי שמילה אחת מקרית לא תכניס מתקן זר להקשר. fits נגזר בזמן ריצה, ו-NULL בו פירושו "הגובה לא נבדק" ולא "מתאים". ⚠️ 038: max_height_requirement_cm הוא תקרה ולא רצפה, ומי שגבוה ממנה אינו מתאים.';
+
+revoke all on function public.find_experiences(text, text, int, int) from public;
+do $$
+declare r text;
+begin
+  foreach r in array array['anon','authenticated','service_role'] loop
+    if exists (select 1 from pg_roles where rolname = r) then
+      execute format('grant execute on function public.find_experiences(text, text, int, int) to %I', r);
+    end if;
+  end loop;
+end
+$$;
+
+COMMIT;
+
+-- ── אימות ────────────────────────────────────────────────────────────
+-- ⚠️ בודק את ההתנהגות ולא את קיום העמודה. עמודה שנוספה ופונקציה שאינה
+-- מחזירה אותה נראות זהות מבחוץ, וזה בדיוק הפער שנתפס כאן שוב ושוב.
+
+BEGIN;
+
+set local search_path = public, extensions;
+
+do $$
+declare
+  n         int;
+  tall      boolean;
+  short     boolean;
+  probe_key text := 'probe-038';
+begin
+  -- א. העמודה קיימת
+  select count(*) into n
+    from information_schema.columns
+   where table_name = 'experience' and column_name = 'max_height_requirement_cm';
+  if n = 0 then
+    raise exception '❌ העמודה max_height_requirement_cm לא נוספה.';
+  end if;
+
+  -- ב. והפונקציה מחזירה אותה. עמודה שנוספה ופונקציה שלא עודכנה נראות
+  --    זהות מבחוץ, וזה בדיוק הפער שנתפס כאן שוב ושוב.
+  select count(*) into n
+    from information_schema.routines r
+    join information_schema.parameters p on p.specific_name = r.specific_name
+   where r.routine_name = 'find_experiences' and p.parameter_name = 'max_height_cm';
+  if n = 0 then
+    raise exception '❌ find_experiences אינה מחזירה max_height_cm. העמודה נוספה והפונקציה נשארה מאחור.';
+  end if;
+
+  -- ג. 🔴 **ההתנהגות, ולא ההגדרה.** שורת בדיקה אמיתית נכנסת לטבלה, נשאלת
+  --    דרך הפונקציה בשני גבהים, ונמחקת. בלי זה הבדיקה מאשרת שהצינור בנוי
+  --    ולא שהוא מוביל מים.
+  -- 🔴 **השורה מועתקת משורה אמיתית, ולא נבנית מאפס.**
+  --
+  -- הגרסה הקודמת מנתה עמודות ביד ונכשלה על `type` — עמודת NOT NULL
+  -- שלא הייתה ברשימה. תיקון עמודה־עמודה היה נכשל שוב על הבאה: הטבלה
+  -- נושאת עשרות עמודות, וכל אחת שנוספת בעתיד הייתה שוברת את הבדיקה.
+  --
+  -- ⚠️ `select *` מעותק של הטבלה מבטיח שכל עמודות החובה מלאות בערכים
+  -- חוקיים, ושרק מה שנבדק כאן נדרס. עמודה חדשה שתתווסף מחר לא תשבור
+  -- כלום.
+  create temporary table probe_row on commit drop as
+    select * from experience limit 1;
+  update probe_row set
+                     id = probe_key, key = probe_key,
+                     name = 'Probe Tot Area 038',
+                     status = 'open', status_note = null,
+                     -- ⚠️ הרצפה ריקה והתקרה מלאה — בדיוק המצב של חמש השורות האמיתיות,
+                     -- והמצב שבו fits חייב להיגזר מהתקרה לבדה.
+                     height_requirement_cm = null,
+                     max_height_requirement_cm = 122;
+  insert into experience select * from probe_row;
+
+  -- ילד בגובה 130 גבוה מהתקרה של 122 → **אינו** מתאים
+  select f.fits into tall
+    from find_experiences('Probe Tot Area 038', null, 130, 5) f
+   limit 1;
+
+  -- וילד בגובה 100 נמצא מתחתיה → מתאים
+  select f.fits into short
+    from find_experiences('Probe Tot Area 038', null, 100, 5) f
+   limit 1;
+
+  delete from experience where key = probe_key;
+
+  if tall is distinct from false then
+    raise exception '❌ ילד בגובה 130 קיבל fits=% על תקרה של 122. התקרה אינה נאכפת.', coalesce(tall::text, 'NULL');
+  end if;
+  if short is distinct from true then
+    raise exception '❌ ילד בגובה 100 קיבל fits=% על תקרה של 122. התקרה חוסמת את מי שהיא נועדה לשרת.', coalesce(short::text, 'NULL');
+  end if;
+
+  raise notice '✅ 038 הותקנה — 130 ס"מ נחסם מתקרה של 122, ו-100 ס"מ עובר.';
+exception when others then
+  -- ⚠️ שורת הבדיקה נמחקת גם כשמשהו נכשל. שורה מלאכותית ששרדה במסד היא
+  -- מתקן שלא קיים, והוא היה מופיע בתשובות של טים.
+  delete from experience where key = probe_key;
+  raise;
+end $$;
+
+COMMIT;
+
+-- ── מה שרואים עכשיו ──────────────────────────────────────────────────
+-- ⚠️ אחרי טעינת התוכן החדש, חמש השורות האלה צריכות להופיע כאן — ורק הן.
+select name,
+       height_requirement_cm     as "רצפה",
+       max_height_requirement_cm as "תקרה"
+  from experience
+ where max_height_requirement_cm is not null
+ order by name;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('038_max_height.sql', 'sha256:a3d4d18cb6811b99c45cc25ea10c548d',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
+
+
+-- ==========================================================================
+-- מיגרציה: 039_sensitivity_flags_to_tim.sql
+-- ==========================================================================
+
+set search_path = public, extensions;
+
+-- ── 039 · ארבעת דגלי הרגישות מגיעים לטים ────────────────────────────
+--
+-- להריץ ב: **סופהבייס → SQL Editor → קוורי חדש**. פעם אחת, **אחרי 038**.
+-- אושר על ידי פולה דרך פיליפ, 08.09.
+--
+-- 🔴 מה שהיה, ואיש לא ידע:
+--
+-- נטע שאלה את טים אם Buzz Lightyear מתאים לילד שמפחד מחושך. הוא ענה
+-- "אין לי מידע מפורט לגבי רמת החשיכה" — **והוא צדק.**
+--
+-- `find_experiences` החזירה גובה · עוצמה · הרטבה · דילוג בתור · סטטוס.
+-- ארבע עמודות הרגישות — חושך, גבהים, רעש פתאומי, הבזקים — לא היו ברשימה
+-- כלל. הנתון מלא על כל 165 המתקנים, ומעולם לא עזב את הטבלה.
+--
+-- ⚠️ וזה **הפיצ'ר שאין לאף מתחרה בעברית**. הוא נאסף, נבדק, אוחסן — ולא
+-- הוצג. כשל בתפר, לא בדאטא ולא במודל.
+--
+-- ── תנאי הניסוח של פולה, ולמה הוא בגוף המיגרציה ─────────────────────
+--
+-- הדגלים הם מחקר של רוני, לא מקור רשמי מדרגה T1. טים חייב לומר "לפי
+-- המידע שלנו, המתקן מסומן כ..." ולא "המתקן כולל הבזקי אור".
+--
+-- ⚠️ ההבדל אינו נימוס: משפחה עם ילד רגיש לאור מקבלת החלטה רפואית
+-- מהמשפט הזה, וההבדל בין "בדקנו וזה כך" ל"כך אנחנו מסמנים" הוא ההבדל
+-- בין מידע לבין הבטחה. ההוראה יושבת ב-index.ts, והתזכורת כאן כדי שמי
+-- שיקרא את הפונקציה יידע שהיא קיימת.
+
+BEGIN;
+
+set local search_path = public, extensions;
+
+-- 🔴 **drop לפני create, ובכוונה.**
+--
+-- `create or replace` אינו יכול לשנות את מבנה הטבלה שהפונקציה מחזירה.
+-- העמודה החדשה משנה אותו, ולכן ההרצה נכשלת עם:
+--   "cannot change return type of existing function"
+--
+-- ⚠️ ומה שזה מוחק יחד עם הפונקציה: **ההרשאות.** drop מסיר גם את
+-- ה-grant ל-anon, וטים היה נופל על 403 בלי ששום דבר ייראה שבור. בלוק
+-- ההרשאות בסוף הקובץ כותב אותן מחדש — הוא לא קישוט.
+--
+-- ⚠️ והכל בתוך טרנזקציה אחת: בין ה-drop ל-create הפונקציה אינה קיימת,
+-- ובלי BEGIN/COMMIT היה חלון שבו טים מחזיר 404.
+drop function if exists public.find_experiences(text, text, int, int);
+
+create or replace function public.find_experiences(
+  p_name        text default null,
+  p_park        text default null,
+  p_height_cm   int  default null,
+  p_limit       int  default 8
+)
+returns table (
+  id            text,
+  name          text,
+  name_he       text,
+  park          text,
+  land          text,
+  category      text,
+  status        text,
+  status_note   text,
+  intensity     int,
+  height_cm     int,
+  max_height_cm int,
+  gets_wet      text,
+  wheelchair    text,
+  motion_sickness text,
+  sens_dark     boolean,
+  sens_heights  boolean,
+  sens_loud     boolean,
+  sens_strobe   boolean,
+  skip_line     text,
+  last_verified date,
+  fits          boolean
+)
+language sql
+stable
+security definer
+set search_path = public, extensions
+as $$
+  with tok as (
+    -- ⚠️ פיצול על רווח בלבד, וקיצוץ פיסוק מהקצוות ב-btrim.
+    -- **בכוונה בלי מחלקות תווים כמו [:alnum:]** — הן תלויות ב-locale,
+    -- והמסד המקומי (C) והמסד בסופאבייס (UTF-8) היו מתנהגים אחרת.
+    -- זה הכשל שכבר תפס אותי שלוש פעמים (search_path, format_type),
+    -- ואות עברית היא בדיוק סוג התו שנופל בין ההגדרות.
+    select distinct btrim(t, ',.;:!?()"''[]{}<>/-') as t
+    from regexp_split_to_table(coalesce(p_name, ''), '[[:space:]]+') t
+  ),
+  words as (
+    -- שתי אותיות אינן מילה מזהה; הן שאריות של מילות קישור.
+    select t from tok where length(t) >= 3
+  ),
+  -- ⚠️ **תחיליות עבריות.** "לספייס" ו-"באקספדישן" הן אותה מילה עם אות
+  -- אחת מלפנים, ו-ilike על מחרוזת אינו יודע את זה. בלי זה שאלה טבעית
+  -- ("כדאי ללכת לספייס מאונטיין") מחזירה אפס על מתקן שקיים.
+  -- הקיצוץ מוגבל למילים בנות 5 ומעלה, כדי שלא ניצור מילים קצרות
+  -- ומקריות שיתאימו לחצי מהטבלה.
+  forms as (
+    select t as t, t as root from words
+    union
+    select t, substr(t, 2) from words
+    where length(t) >= 5 and substr(t, 1, 1) in ('ל','ב','ה','מ','ש','ו','כ')
+  ),
+  scored as (
+    select
+      e.id, e.name, e.name_i18n->>'he' as name_he,
+      p.name as park_name, l.name as land_name,
+      e.category, e.status, e.status_note, e.intensity,
+      e.height_requirement_cm, e.max_height_requirement_cm, e.gets_wet, e.wheelchair,
+      e.motion_sickness_warning,
+      e.sens_enclosed_dark, e.sens_heights, e.sens_loud_sudden, e.sens_strobe,
+      e.skip_line_system, e.last_verified,
+      -- ⚠️ **count(distinct f.t) ולא count(*)** — מילה אחת שמתאימה גם
+      -- בצורתה המלאה וגם בלי התחילית היא **מילה אחת**, ושתי צורות של
+      -- אותה מילה לא אמורות לדחוק החוצה מתקן שהתאים בשתי מילים שונות.
+      (select count(distinct f.t) from forms f
+        where e.name ilike '%' || f.root || '%'
+           or coalesce(e.name_i18n->>'he', '') ilike '%' || f.root || '%'
+           -- ⚠️ גם השמות הנרדפים. "מסע אל ההר" ו-"אוורסט" הם אותו מתקן.
+           or exists (
+             select 1 from jsonb_array_elements_text(
+               coalesce(e.aliases_i18n->'he', '[]'::jsonb)) a
+             where a ilike '%' || f.root || '%'
+           )) as hits
+    from experience e
+    join park p on p.id = e.park_id
+    left join land l on l.id = e.land_id
+    where (p_park is null or p.id = p_park or p.name ilike '%' || p_park || '%')
+  )
+  select
+    s.id, s.name, s.name_he, s.park_name, s.land_name,
+    s.category, s.status, s.status_note, s.intensity,
+    s.height_requirement_cm, s.max_height_requirement_cm, s.gets_wet, s.wheelchair,
+    s.motion_sickness_warning,
+    s.sens_enclosed_dark, s.sens_heights, s.sens_loud_sudden, s.sens_strobe,
+    s.skip_line_system, s.last_verified,
+    -- ⚠️ **שלושה מצבים, ו-NULL אינו "מתאים לכולם"** (CLAUDE.md).
+    --   0     → נבדק ואין מגבלה → מתאים
+    --   מספר  → מתאים אם הילד/ה מגיע/ה
+    --   NULL  → **לא נבדק** → NULL, ולא true
+    -- נגזר בזמן ריצה ואינו מאוחסן — אחרת היה מקור אמת שני שמתיישן
+    -- ברגע שהגובה של הילד/ה משתנה.
+    -- 🔴 **והתקרה, שנוספה ב-038.** חמישה אזורי מים לפעוטות מגבילים גובה
+    -- כלפי מעלה, וכל עוד רק הרצפה נבדקה כאן, ילד גבוה מדי קיבל "מתאים".
+    --
+    -- ⚠️ הסדר: פסילה לפני התאמה. מי שגבוה מהתקרה **אינו** מתאים, גם אם
+    -- הוא עובר את הרצפה בהרבה — וזה בדיוק המקרה שהיה חוזר true.
+    --
+    -- ⚠️ ותקרה לבדה היא תשובה. על חמש השורות האלה הרצפה היא NULL ("לא
+    -- נבדק"), ובלי השורה הזו fits היה נשאר NULL — כלומר "אין לי מידע" על
+    -- שורה שיש עליה מידע מלא בכיוון שנשאל.
+    case
+      when p_height_cm is null then null
+      when s.max_height_requirement_cm is not null
+           and p_height_cm > s.max_height_requirement_cm then false
+      when s.height_requirement_cm is null
+        then case when s.max_height_requirement_cm is null then null else true end
+      else p_height_cm >= s.height_requirement_cm
+    end
+  from scored s
+  where
+    -- בלי שם — כל הפארק, לפי הסינון בלבד.
+    (select count(*) from words) = 0
+    -- ⚠️ עם שם — **רק ההתאמות הטובות ביותר.** ראה ההערה בראש הקובץ.
+    or s.hits = (select max(x.hits) from scored x where x.hits > 0)
+  -- ⚠️ מתקן סגור **מוחזר**, עם הסטטוס שלו. סינון שקט היה גורם לטים לומר
+  -- "לא מצאתי מתקן כזה" על מתקן שקיים ופשוט סגור.
+  order by
+    case when p_name is not null and s.name ilike p_name || '%' then 0 else 1 end,
+    s.name
+  limit least(coalesce(p_limit, 8), 25)
+$$;
+
+comment on function public.find_experiences(text, text, int, int) is
+  'עובדות על מתקנים, מהטבלה. ⚠️ התאמה לפי מילים ולא לפי ביטוי — שאלה היא משפט, לא שם (הבאג של 029). מוחזרות רק השורות עם מספר המילים התואמות הגבוה ביותר, כדי שמילה אחת מקרית לא תכניס מתקן זר להקשר. ⚠️ 039: ארבעת דגלי הרגישות מוחזרים, והם מחקר שלנו ולא מקור רשמי — הניסוח חייב לומר "לפי המידע שלנו". fits נגזר בזמן ריצה, ו-NULL בו פירושו "הגובה לא נבדק" ולא "מתאים". ⚠️ 038: max_height_requirement_cm הוא תקרה ולא רצפה, ומי שגבוה ממנה אינו מתאים.';
+
+revoke all on function public.find_experiences(text, text, int, int) from public;
+do $$
+declare r text;
+begin
+  foreach r in array array['anon','authenticated','service_role'] loop
+    if exists (select 1 from pg_roles where rolname = r) then
+      execute format('grant execute on function public.find_experiences(text, text, int, int) to %I', r);
+    end if;
+  end loop;
+end
+$$;
+
+COMMIT;
+
+-- ── אימות ────────────────────────────────────────────────────────────
+-- ⚠️ בודק שהערך **מגיע**, ולא שהעמודה קיימת. זה בדיוק הפער שנוצר כאן:
+-- העמודה הייתה מלאה, הפונקציה לא החזירה אותה, וכל שכבה נראתה תקינה.
+
+BEGIN;
+
+set local search_path = public, extensions;
+
+do $$
+declare
+  probe_key text := 'probe-039';
+  got       boolean;
+  n         int;
+begin
+  select count(*) into n
+    from information_schema.routines r
+    join information_schema.parameters p on p.specific_name = r.specific_name
+   where r.routine_name = 'find_experiences'
+     and p.parameter_name in ('sens_dark','sens_heights','sens_loud','sens_strobe');
+  if n < 4 then
+    raise exception '❌ find_experiences מחזירה % דגלי רגישות מתוך 4.', n;
+  end if;
+
+  -- 🔴 וההתנהגות: דגל שנכתב בטבלה חייב לחזור מהפונקציה. שורת בדיקה
+  -- אמיתית, ונמחקת גם בכישלון.
+  -- 🔴 **השורה מועתקת משורה אמיתית, ולא נבנית מאפס.**
+  --
+  -- הגרסה הקודמת מנתה עמודות ביד ונכשלה על `type` — עמודת NOT NULL
+  -- שלא הייתה ברשימה. תיקון עמודה־עמודה היה נכשל שוב על הבאה: הטבלה
+  -- נושאת עשרות עמודות, וכל אחת שנוספת בעתיד הייתה שוברת את הבדיקה.
+  --
+  -- ⚠️ `select *` מעותק של הטבלה מבטיח שכל עמודות החובה מלאות בערכים
+  -- חוקיים, ושרק מה שנבדק כאן נדרס. עמודה חדשה שתתווסף מחר לא תשבור
+  -- כלום.
+  create temporary table probe_row on commit drop as
+    select * from experience limit 1;
+  update probe_row set
+                     id = probe_key, key = probe_key,
+                     name = 'Probe Dark Ride 039',
+                     status = 'open', status_note = null,
+                     sens_enclosed_dark = true;
+  insert into experience select * from probe_row;
+
+  select f.sens_dark into got
+    from find_experiences('Probe Dark Ride 039', null, null, 5) f limit 1;
+
+  delete from experience where key = probe_key;
+
+  if got is distinct from true then
+    raise exception '❌ הדגל נכתב כ-true וחזר כ-%. הערך אינו עובר את הפונקציה.', coalesce(got::text, 'NULL');
+  end if;
+
+  raise notice '✅ 039 הותקנה — דגל שנכתב בטבלה חוזר מהפונקציה.';
+exception when others then
+  delete from experience where key = probe_key;
+  raise;
+end $$;
+
+COMMIT;
+
+select '✅ 039 הותקנה' as "מצב";
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('039_sensitivity_flags_to_tim.sql', 'sha256:7470162c5a7eca7d8c06977fd1191f8a',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
+
+
+-- ==========================================================================
+-- מיגרציה: 040_sensitivity_four_states.sql
+-- ==========================================================================
+
+set search_path = public, extensions;
+
+-- ── 040 · ארבעת דגלי הרגישות עוברים לארבעה מצבים ────────────────────
+--
+-- להריץ ב: **סופהבייס → SQL Editor → קוורי חדש**. פעם אחת, **אחרי 039**.
+-- אושר על ידי פולה דרך פיליפ, 08.09.
+--
+-- 🔴 הבאג, וההופעה השלישית שלו:
+--
+-- המאסטר כותב `N/A` על 77 שורות Entertainment — מופעים, מצעדים ומפגשי
+-- דמויות — ומשמעותו **"השאלה אינה חלה"**. `boolean` מחזיק שלושה מצבים
+-- בלבד, ולכן `N/A` כווץ ל-`NULL`, שאצלנו פירושו **"לא נבדק"**.
+--
+-- ⚠️ שתי אמירות שונות לגמרי נשמעו זהות. ומה שזה עשה בפועל: משפחה שביקשה
+-- להימנע מגבהים **איבדה את כל 77 המופעים מהתוצאות** — בדיוק מה שהכי
+-- מתאים לה — וקיבלה הודעה שהנתון לא נבדק, בעוד שהוא כן.
+--
+-- ⚠️ ולא היה כאן מיפוי חסר. `boolFlag` לא "שכח" למפות — **לא היה ל-na
+-- לאן ללכת.** טיפוס היעד לא הכיר את הערך, בשלוש השכבות: סכימה, ייבוא,
+-- ועמודה במסד.
+--
+-- ── והופעה רביעית כבר גלויה ─────────────────────────────────────────
+--
+-- ארבע עמודות מספריות נושאות N/A היום: inversions (222) · max_speed_kmh
+-- (219) · duration_minutes (88) · opened_year (10). למופע אין מהירות
+-- מרבית — זה "לא חל", לא "לא נמדד". מנגנון למספרים שונה מזה של דגל,
+-- והוא סבב נפרד; `src/lib/__tests__/na-columns.test.ts` מחזיק אותן
+-- ברשימה מפורשת כדי שההיעדר ייראה ולא ייבלע.
+
+BEGIN;
+
+set local search_path = public, extensions;
+
+-- ⚠️ ההמרה מפורשת ואינה נשענת על cast אוטומטי. `true::text` ב-Postgres
+-- הוא 't' ולא 'true', ו-cast שקט היה ממלא את העמודה בערכים שאינם
+-- באוצר המילים — ואז ה-CHECK היה נכשל על נתונים תקינים.
+do $$
+declare c text;
+begin
+  foreach c in array array['sens_enclosed_dark','sens_heights','sens_loud_sudden','sens_strobe'] loop
+    if (select data_type from information_schema.columns
+         where table_name = 'experience' and column_name = c) = 'boolean' then
+      execute format(
+        'alter table experience alter column %I type text using
+           case when %I is true then ''true'' when %I is false then ''false'' end', c, c, c);
+    end if;
+    execute format('alter table experience drop constraint if exists experience_%s_quad', c);
+    execute format(
+      'alter table experience add constraint experience_%s_quad
+         check (%I is null or %I in (''true'',''false'',''na''))', c, c, c);
+  end loop;
+end $$;
+
+comment on column experience.sens_heights is
+  'רגישות לגבהים. ⚠️ ארבעה מצבים: true/false/na/null. "na" = השאלה אינה חלה (מופע), ואינו "לא נבדק". מיגרציה 040.';
+
+-- 🔴 **drop לפני create, ובכוונה.**
+--
+-- `create or replace` אינו יכול לשנות את מבנה הטבלה שהפונקציה מחזירה.
+-- העמודה החדשה משנה אותו, ולכן ההרצה נכשלת עם:
+--   "cannot change return type of existing function"
+--
+-- ⚠️ ומה שזה מוחק יחד עם הפונקציה: **ההרשאות.** drop מסיר גם את
+-- ה-grant ל-anon, וטים היה נופל על 403 בלי ששום דבר ייראה שבור. בלוק
+-- ההרשאות בסוף הקובץ כותב אותן מחדש — הוא לא קישוט.
+--
+-- ⚠️ והכל בתוך טרנזקציה אחת: בין ה-drop ל-create הפונקציה אינה קיימת,
+-- ובלי BEGIN/COMMIT היה חלון שבו טים מחזיר 404.
+drop function if exists public.find_experiences(text, text, int, int);
+
+create or replace function public.find_experiences(
+  p_name        text default null,
+  p_park        text default null,
+  p_height_cm   int  default null,
+  p_limit       int  default 8
+)
+returns table (
+  id            text,
+  name          text,
+  name_he       text,
+  park          text,
+  land          text,
+  category      text,
+  status        text,
+  status_note   text,
+  intensity     int,
+  height_cm     int,
+  max_height_cm int,
+  gets_wet      text,
+  wheelchair    text,
+  motion_sickness text,
+  sens_dark     text,
+  sens_heights  text,
+  sens_loud     text,
+  sens_strobe   text,
+  skip_line     text,
+  last_verified date,
+  fits          boolean
+)
+language sql
+stable
+security definer
+set search_path = public, extensions
+as $$
+  with tok as (
+    -- ⚠️ פיצול על רווח בלבד, וקיצוץ פיסוק מהקצוות ב-btrim.
+    -- **בכוונה בלי מחלקות תווים כמו [:alnum:]** — הן תלויות ב-locale,
+    -- והמסד המקומי (C) והמסד בסופאבייס (UTF-8) היו מתנהגים אחרת.
+    -- זה הכשל שכבר תפס אותי שלוש פעמים (search_path, format_type),
+    -- ואות עברית היא בדיוק סוג התו שנופל בין ההגדרות.
+    select distinct btrim(t, ',.;:!?()"''[]{}<>/-') as t
+    from regexp_split_to_table(coalesce(p_name, ''), '[[:space:]]+') t
+  ),
+  words as (
+    -- שתי אותיות אינן מילה מזהה; הן שאריות של מילות קישור.
+    select t from tok where length(t) >= 3
+  ),
+  -- ⚠️ **תחיליות עבריות.** "לספייס" ו-"באקספדישן" הן אותה מילה עם אות
+  -- אחת מלפנים, ו-ilike על מחרוזת אינו יודע את זה. בלי זה שאלה טבעית
+  -- ("כדאי ללכת לספייס מאונטיין") מחזירה אפס על מתקן שקיים.
+  -- הקיצוץ מוגבל למילים בנות 5 ומעלה, כדי שלא ניצור מילים קצרות
+  -- ומקריות שיתאימו לחצי מהטבלה.
+  forms as (
+    select t as t, t as root from words
+    union
+    select t, substr(t, 2) from words
+    where length(t) >= 5 and substr(t, 1, 1) in ('ל','ב','ה','מ','ש','ו','כ')
+  ),
+  scored as (
+    select
+      e.id, e.name, e.name_i18n->>'he' as name_he,
+      p.name as park_name, l.name as land_name,
+      e.category, e.status, e.status_note, e.intensity,
+      e.height_requirement_cm, e.max_height_requirement_cm, e.gets_wet, e.wheelchair,
+      e.motion_sickness_warning,
+      e.sens_enclosed_dark, e.sens_heights, e.sens_loud_sudden, e.sens_strobe,
+      e.skip_line_system, e.last_verified,
+      -- ⚠️ **count(distinct f.t) ולא count(*)** — מילה אחת שמתאימה גם
+      -- בצורתה המלאה וגם בלי התחילית היא **מילה אחת**, ושתי צורות של
+      -- אותה מילה לא אמורות לדחוק החוצה מתקן שהתאים בשתי מילים שונות.
+      (select count(distinct f.t) from forms f
+        where e.name ilike '%' || f.root || '%'
+           or coalesce(e.name_i18n->>'he', '') ilike '%' || f.root || '%'
+           -- ⚠️ גם השמות הנרדפים. "מסע אל ההר" ו-"אוורסט" הם אותו מתקן.
+           or exists (
+             select 1 from jsonb_array_elements_text(
+               coalesce(e.aliases_i18n->'he', '[]'::jsonb)) a
+             where a ilike '%' || f.root || '%'
+           )) as hits
+    from experience e
+    join park p on p.id = e.park_id
+    left join land l on l.id = e.land_id
+    where (p_park is null or p.id = p_park or p.name ilike '%' || p_park || '%')
+  )
+  select
+    s.id, s.name, s.name_he, s.park_name, s.land_name,
+    s.category, s.status, s.status_note, s.intensity,
+    s.height_requirement_cm, s.max_height_requirement_cm, s.gets_wet, s.wheelchair,
+    s.motion_sickness_warning,
+    s.sens_enclosed_dark, s.sens_heights, s.sens_loud_sudden, s.sens_strobe,
+    s.skip_line_system, s.last_verified,
+    -- ⚠️ **שלושה מצבים, ו-NULL אינו "מתאים לכולם"** (CLAUDE.md).
+    --   0     → נבדק ואין מגבלה → מתאים
+    --   מספר  → מתאים אם הילד/ה מגיע/ה
+    --   NULL  → **לא נבדק** → NULL, ולא true
+    -- נגזר בזמן ריצה ואינו מאוחסן — אחרת היה מקור אמת שני שמתיישן
+    -- ברגע שהגובה של הילד/ה משתנה.
+    -- 🔴 **והתקרה, שנוספה ב-038.** חמישה אזורי מים לפעוטות מגבילים גובה
+    -- כלפי מעלה, וכל עוד רק הרצפה נבדקה כאן, ילד גבוה מדי קיבל "מתאים".
+    --
+    -- ⚠️ הסדר: פסילה לפני התאמה. מי שגבוה מהתקרה **אינו** מתאים, גם אם
+    -- הוא עובר את הרצפה בהרבה — וזה בדיוק המקרה שהיה חוזר true.
+    --
+    -- ⚠️ ותקרה לבדה היא תשובה. על חמש השורות האלה הרצפה היא NULL ("לא
+    -- נבדק"), ובלי השורה הזו fits היה נשאר NULL — כלומר "אין לי מידע" על
+    -- שורה שיש עליה מידע מלא בכיוון שנשאל.
+    case
+      when p_height_cm is null then null
+      when s.max_height_requirement_cm is not null
+           and p_height_cm > s.max_height_requirement_cm then false
+      when s.height_requirement_cm is null
+        then case when s.max_height_requirement_cm is null then null else true end
+      else p_height_cm >= s.height_requirement_cm
+    end
+  from scored s
+  where
+    -- בלי שם — כל הפארק, לפי הסינון בלבד.
+    (select count(*) from words) = 0
+    -- ⚠️ עם שם — **רק ההתאמות הטובות ביותר.** ראה ההערה בראש הקובץ.
+    or s.hits = (select max(x.hits) from scored x where x.hits > 0)
+  -- ⚠️ מתקן סגור **מוחזר**, עם הסטטוס שלו. סינון שקט היה גורם לטים לומר
+  -- "לא מצאתי מתקן כזה" על מתקן שקיים ופשוט סגור.
+  order by
+    case when p_name is not null and s.name ilike p_name || '%' then 0 else 1 end,
+    s.name
+  limit least(coalesce(p_limit, 8), 25)
+$$;
+
+comment on function public.find_experiences(text, text, int, int) is
+  'עובדות על מתקנים, מהטבלה. ⚠️ התאמה לפי מילים ולא לפי ביטוי — שאלה היא משפט, לא שם (הבאג של 029). מוחזרות רק השורות עם מספר המילים התואמות הגבוה ביותר, כדי שמילה אחת מקרית לא תכניס מתקן זר להקשר. ⚠️ 040: ארבעת הדגלים הם ארבעה מצבים — true/false/na/null — ו-na אינו "לא נבדק". ⚠️ 039: ארבעת דגלי הרגישות מוחזרים, והם מחקר שלנו ולא מקור רשמי — הניסוח חייב לומר "לפי המידע שלנו". fits נגזר בזמן ריצה, ו-NULL בו פירושו "הגובה לא נבדק" ולא "מתאים". ⚠️ 038: max_height_requirement_cm הוא תקרה ולא רצפה, ומי שגבוה ממנה אינו מתאים.';
+
+revoke all on function public.find_experiences(text, text, int, int) from public;
+do $$
+declare r text;
+begin
+  foreach r in array array['anon','authenticated','service_role'] loop
+    if exists (select 1 from pg_roles where rolname = r) then
+      execute format('grant execute on function public.find_experiences(text, text, int, int) to %I', r);
+    end if;
+  end loop;
+end
+$$;
+
+COMMIT;
+
+-- ── אימות ────────────────────────────────────────────────────────────
+-- ⚠️ בודק שההבחנה **שורדת מקצה לקצה**, ולא שהעמודה שינתה טיפוס. עמודה
+-- שהומרה ופונקציה שנשארה בוליאנית נראות תקינות עד שמישהו שואל.
+
+BEGIN;
+
+set local search_path = public, extensions;
+
+do $$
+declare
+  probe_key text := 'probe-040';
+  got       text;
+begin
+  -- 🔴 **השורה מועתקת משורה אמיתית, ולא נבנית מאפס.**
+  --
+  -- הגרסה הקודמת מנתה עמודות ביד ונכשלה על `type` — עמודת NOT NULL
+  -- שלא הייתה ברשימה. תיקון עמודה־עמודה היה נכשל שוב על הבאה: הטבלה
+  -- נושאת עשרות עמודות, וכל אחת שנוספת בעתיד הייתה שוברת את הבדיקה.
+  --
+  -- ⚠️ `select *` מעותק של הטבלה מבטיח שכל עמודות החובה מלאות בערכים
+  -- חוקיים, ושרק מה שנבדק כאן נדרס. עמודה חדשה שתתווסף מחר לא תשבור
+  -- כלום.
+  create temporary table probe_row on commit drop as
+    select * from experience limit 1;
+  update probe_row set
+                     id = probe_key, key = probe_key,
+                     name = 'Probe Parade 040',
+                     status = 'open', status_note = null,
+                     -- ⚠️ 'na' ולא null. זו כל הנקודה: הערך חייב לשרוד עד הפונקציה.
+                     sens_heights = 'na';
+  insert into experience select * from probe_row;
+
+  select f.sens_heights into got
+    from find_experiences('Probe Parade 040', null, null, 5) f limit 1;
+
+  delete from experience where key = probe_key;
+
+  if got is distinct from 'na' then
+    raise exception '❌ "na" נכתב בטבלה וחזר כ-%. ההבחנה בין "לא חל" ל"לא נבדק" אינה שורדת.', coalesce(got, 'NULL');
+  end if;
+
+  raise notice '✅ 040 הותקנה — "לא חל" שורד מהטבלה ועד הפונקציה.';
+exception when others then
+  delete from experience where key = probe_key;
+  raise;
+end $$;
+
+COMMIT;
+
+-- ── מה שרואים עכשיו ──────────────────────────────────────────────────
+-- ⚠️ אחרי טעינת התוכן: 77 שורות ב-na, וכולן Entertainment.
+select sens_heights as "ערך", count(*) as "שורות"
+  from experience group by 1 order by 2 desc;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('040_sensitivity_four_states.sql', 'sha256:83465f62943fcdb016eb8c31ba594e92',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
+
+
+-- ==========================================================================
+-- מיגרציה: 041_park_intro.sql
+-- ==========================================================================
+
+set search_path = public, extensions;
+
+-- 041 — שדה פתיח לטבלת park (09.09.2026)
+-- ────────────────────────────────────────────────────────────────────
+-- 📍 להריץ ב: Supabase → SQL Editor
+-- שם השאילתה: 041 — שדה פתיח לטבלת park (09.09)
+--
+-- משימה של פיליפ, 09.09. לעמוד מדריך הפארק שדנה מעצבת יש סעיף פתיח קצר
+-- על אופי הפארק, לפני הטאבים — ולטבלת park אין היום שדה מתאים.
+--
+-- 🔴 **nullable, בלי ברירת מחדל ובלי מחרוזת ריקה.**
+--
+-- זה לא סגנון. `not null default ''` על שדה שהתוכן שלו מגיע מאיסוף
+-- חיצוני הוא הצהרה ששבע פעמים עד כה התבררה כשקר: הוא הופך "טרם נכתב"
+-- ל"נכתב, וריק", ומוחק את ההבדל לפני שמישהו הספיק לשאול. אותה תבנית
+-- בדיוק שהפילה את gets_wet, את ארבעת ה-sens_*, את height_requirement_cm
+-- ואת skip_line_system.
+--
+-- ⚠️ ריק כאן פירושו **טרם נכתב**. הממשק אינו מציג מציין מקום ואינו
+-- ממציא פתיח — הוא פשוט אינו מציג את הסעיף.
+--
+-- מקור התוכן: רוני, מסעיף "מה מייחד את הפארק" במדריכי אופי הפארק.
+-- שלושה מהם (שלושת פארקי יוניברסל) כבר נכנסו ל-knowledge/ כמסמכי ידע
+-- לטים. השדה הזה הוא לעמוד המדריך, שהוא צרכן אחר של אותו תוכן.
+
+BEGIN;
+
+alter table park add column if not exists intro_he text;
+
+comment on column park.intro_he is
+  'פתיח קצר על אופי הפארק, 2-3 משפטים. NULL = טרם נכתב, ולעולם לא מחרוזת ריקה.';
+
+-- אימות: השדה קיים, nullable, בלי ברירת מחדל, ואף פארק לא קיבל ערך.
+select column_name as "עמודה",
+       is_nullable as "מקבל NULL",
+       coalesce(column_default, '— אין ברירת מחדל —') as "ברירת מחדל"
+  from information_schema.columns
+ where table_name = 'park' and column_name = 'intro_he';
+
+select count(*) as "פארקים",
+       count(intro_he) as "עם פתיח (צפוי: 0)"
+  from park;
+
+COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('041_park_intro.sql', 'sha256:87781504e654dea6cefc46f6c17dfb14',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
+
+
+-- ==========================================================================
+-- מיגרציה: 042_description_and_meet_location.sql
+-- ==========================================================================
+
+set search_path = public, extensions;
+
+-- 042 — תיאור ומיקום מפגש (09.09.2026)
+-- ────────────────────────────────────────────────────────────────────
+-- 📍 להריץ ב: Supabase → SQL Editor
+-- שם השאילתה: 042 — תיאור ומיקום מפגש (09.09)
+--
+-- 🔴 **הנתיב שהיה חסר, ובגללו תוכן מאושר נעצר לפני הקוד.**
+--
+-- פולה אישרה ב-07.09 שמונה תיאורים מלאים עם מקורות. הדגלים שלהם נכנסו
+-- (Kevin עם sens_loud_sudden=true), הטקסט לא — כי לייצוא שאנחנו מייבאים
+-- ממנו לא הייתה בכלל עמודת תיאור. כלומר כל תיאור שרוני כותבת ופולה
+-- מאשרת נעצר במקום שאיש לא הסתכל בו.
+--
+-- ⚠️ **וזה התגלה במקרה**, מהערה של פולה על The Record Setters: התיאור
+-- שלה מכיל את המיקום המדויק ("בולוואר הוליווד ליד אגם אקו") בעוד
+-- שבטבלה שלנו השורה רשומה בלי אזור כלל.
+--
+-- שני שדות, ושניהם nullable בלי ברירת מחדל:
+--
+-- · description_he — התיאור העובדתי. NULL = טרם נכתב.
+--
+-- · meet_location — **המקום בפועל, ואינו תחליף ל-land.** land הוא האזור
+--   הרשמי של הפארק (Fantasyland, World Nature); meet_location הוא איפה
+--   הדבר קורה ("Adventurers Outpost"). שמונה שורות נושאות land ריק —
+--   ארבע מהן מפגשי דמויות שהמקום שלהן כתוב בשם עצמו — ולהן זה נועד.
+--
+-- ⚠️ **ולא NOT NULL DEFAULT ''.** זו התבנית שהפילה כאן שבעה שדות עד
+-- כה: מחרוזת ריקה כברירת מחדל הופכת "טרם נכתב" ל"נכתב, וריק", ומוחקת
+-- את ההבדל לפני שמישהו הספיק לשאול.
+
+BEGIN;
+
+alter table experience add column if not exists description_he  text;
+alter table experience add column if not exists meet_location    text;
+
+comment on column experience.description_he is
+  'תיאור עובדתי, 2-3 משפטים. NULL = טרם נכתב, ולעולם לא מחרוזת ריקה.';
+comment on column experience.meet_location is
+  'המקום בפועל, כשאין land רשמי. NULL = לא נבדק. אינו תחליף ל-land_id.';
+
+-- אימות: שתי העמודות קיימות, nullable, בלי ברירת מחדל.
+select column_name as "עמודה", is_nullable as "מקבל NULL",
+       coalesce(column_default, '— אין ברירת מחדל —') as "ברירת מחדל"
+  from information_schema.columns
+ where table_name = 'experience'
+   and column_name in ('description_he', 'meet_location')
+ order by column_name;
+
+select count(*) as "שורות",
+       count(description_he) as "עם תיאור (צפוי: 0)",
+       count(meet_location)  as "עם מיקום מפגש (צפוי: 0)"
+  from experience;
+
+COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('042_description_and_meet_location.sql', 'sha256:dad982920aa4c925272c9b373d6c2856',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
+
+
+-- ==========================================================================
+-- מיגרציה: 043_park_candidates.sql
+-- ==========================================================================
+
+set search_path = public, extensions;
+
+-- 043 — מועמדים לפי פארק, לשאלות המלצה (09.09.2026)
+-- ────────────────────────────────────────────────────────────────────
+-- 📍 להריץ ב: Supabase → SQL Editor
+-- שם השאילתה: 043 — מועמדים לפי פארק (09.09)
+--
+-- 🔴 **על שאלת המלצה טים לא קיבל ולו מתקן אחד.**
+--
+-- `find_experiences` נקראת רק כששולפים שם מתקן מהשאלה. "מעדיפים פארקים
+-- עם תפאורה יפה" אינה מכילה שם, ולכן חזרו אפס שורות — וכל מה שהיה לו
+-- לענות ממנו היה מדריכי האופי, שהם פרוזה. לכן הוא ענה בפסקאות אווירה
+-- בלי ולו מתקן אחד בשם.
+--
+-- ⚠️ **הכרעת פולה, 09.09:** לכל פארק שמוצג יש לצרף 2-3 מתקנים ספציפיים
+-- בשם, מסוננים לפי מה שנאמר. שורת אווירה לבדה אינה המלצה.
+--
+-- ⚠️ **ואין כאן סינון עוצמה, בכוונה.** התפתיתי להוסיף p_max_intensity
+-- ולגזור אותו מהשאלה — אבל "לא אוהבים אקסטרים מדי" הוא משפט שמודל קורא
+-- נכון ו-regex קורא בערך. פרישה על פני רמות העוצמה נשלחת אליו, הוא
+-- מסנן, וההוראות אומרות לו במפורש לפי מה. סינון שגוי בשרת היה מוחק
+-- מתקנים מתאימים בלי שאיש יראה.
+
+BEGIN;
+
+drop function if exists public.park_candidates(int);
+
+create function public.park_candidates(p_per_park int default 4)
+returns table (
+  park          text,
+  name          text,
+  name_he       text,
+  land          text,
+  category      text,
+  intensity     int,
+  height_cm     int,
+  max_height_cm int,
+  gets_wet      text
+)
+language sql
+stable
+security definer
+set search_path = public, extensions
+as $$
+  with ranked as (
+    select
+      p.name as park_name,
+      e.name,
+      e.name_i18n->>'he' as name_he,
+      l.name as land_name,
+      e.category,
+      e.intensity,
+      e.height_requirement_cm,
+      e.max_height_requirement_cm,
+      e.gets_wet,
+      -- ⚠️ פרישה על פני העוצמות, ולא "הכי פופולרי". מטרת השורות האלה
+      -- היא לתת למודל ממה לבחור בשני הכיוונים — מי שרוצה רגוע ומי
+      -- שרוצה חזק — ולכן הדירוג הוא בתוך כל רמת עוצמה בנפרד.
+      row_number() over (
+        partition by p.id, e.intensity
+        order by e.name
+      ) as rn
+    from experience e
+    join park p on p.id = e.park_id
+    left join land l on l.id = e.land_id
+    where p.park_kind = 'theme'
+      -- ⚠️ שבעת פארקי הנושא בלבד (הכרעת פולה). פארק מים אינו תשובה
+      -- לשאלה "איזה פארק מתאים לנו".
+      and e.kind = 'attraction'
+      -- ⚠️ מתקן סגור אינו מועמד להמלצה. זה שונה משאלה על מתקן שמות,
+      -- שם סגור **כן** מוחזר עם הסטטוס שלו — כי שם נשאלנו עליו.
+      and e.status = 'open'
+      -- 🔴 **ומתקן בלי דירוג עוצמה אינו נכנס** (CLAUDE.md). הוא היה
+      -- מגיע כ"עוצמה לא דורגה" לתוך תשובה שכל כולה על עוצמה.
+      and e.intensity is not null
+  )
+  select park_name, name, name_he, land_name, category,
+         intensity, height_requirement_cm, max_height_requirement_cm, gets_wet
+    from ranked
+   where rn <= greatest(coalesce(p_per_park, 4), 1)
+   order by park_name, intensity, name
+$$;
+
+revoke all on function public.park_candidates(int) from public;
+grant execute on function public.park_candidates(int) to anon, authenticated;
+
+-- אימות: שבעה פארקים, פרישה על פני רמות העוצמה, ואפס לא־מדורגים.
+select park as "פארק", count(*) as "מועמדים",
+       min(intensity) as "עוצמה מינ׳", max(intensity) as "עוצמה מקס׳"
+  from public.park_candidates(3)
+ group by park order by park;
+
+select count(*) filter (where intensity is null) as "בלי דירוג (צפוי: 0)"
+  from public.park_candidates(3);
+
+COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('043_park_candidates.sql', 'sha256:8667d1de9033ebdc5f4956abeb587367',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
+
+
+-- ==========================================================================
+-- מיגרציה: 044_turn_log.sql
+-- ==========================================================================
+
+set search_path = public, extensions;
+
+-- 044 — יומן תשובות: מה טים לא ידע, ולמה (14.09.2026)
+-- ────────────────────────────────────────────────────────────────────
+-- 📍 להריץ ב: Supabase → SQL Editor
+-- שם השאילתה: 044 — יומן תשובות (14.09)
+--
+-- 🔴 **אנחנו עיוורים.** אנחנו יודעים שמשהו בטים שבור רק אם נטע שואלת
+-- במקרה את השאלה הנכונה. ב-09.09 זה קרה שש פעמים — כולל תשובה "אין לי
+-- את הנתון" על מתקן שהעמודה שלו מלאה אצלנו, שחיה ימים בלי שאיש ידע.
+--
+-- ── למה טבלה נפרדת, ולא `conversation`/`message` מ-005 ───────────────
+--
+-- ⚠️ **הגרסה הקודמת של הקובץ הזה ניסתה למחזר את הטבלאות של 005 ונפלה:**
+-- `conversation.user_id` הוא `not null references profile(id)`. זו לא
+-- תקלה טכנית שצריך לעקוף — זו הטבלה **אומרת בקול** למה היא נועדה.
+-- 005 בנוי לשיחות של משתמש מזוהה, עם RLS לפי `auth.uid()` (006).
+-- היומן הזה בנוי להיות אנונימי. שני דברים מנוגדים.
+--
+-- 🔴 **ולעקוף היה עולה פעמיים.** היה צריך (א) להפוך `user_id` ל-nullable
+-- — ואז שיחה אמיתית שנשמרת בלי בעלים נעלמת מתחת ל-RLS בשקט, בדיוק
+-- הכשל שהמוצר בנוי נגדו; (ב) `revoke all` על הטבלאות, כלומר לנעול
+-- מראש את השיחות המזוהות שנטע ביקשה שנאסוף.
+--
+-- ✅ **טבלה נפרדת פותרת את שתיהן, ומחזקת את תנאי 4 של גיא:** ל-`turn_log`
+-- אין עמודה שיכולה להחזיק מזהה. לא `user_id`, לא `conversation_id`,
+-- לא IP. זו אינה הבטחה בהערה — אין לאן לכתוב.
+--
+-- ── ארבעת התנאים של גיא (09.09), וכולם נאכפים כאן ולא בקריאה ──────
+--
+-- 1. **RLS בלי policy.** הטבלה נסגרת לחלוטין. PostgREST אינו יכול לקרוא
+--    או לכתוב אליה ישירות — הכתיבה עוברת דרך פונקציה אחת.
+-- 2. **90 יום, נאכף בקוד.** כל כתיבה מוחקת את מה שעבר את החלון. בלי
+--    מתזמן, בלי משימה שמישהו צריך לזכור להריץ.
+-- 3. **תקרת אורך**, כדי ששורה אחת לא תישא מסמך.
+-- 4. **טקסט השאלה רק כשטים לא ידע לענות.**
+--
+-- 🔴 **ותנאי 4 נאכף בפונקציה ולא בקריאה אליה.** אילו הקורא היה מחליט
+-- מה לשלוח, באג אחד בצד הלקוח היה שומר הכול — והתנאי של גיא היה הופך
+-- להמלצה. הפונקציה מאפסת את הטקסט בעצמה כשהתשובה נענתה, ולכן גם קריאה
+-- שגויה אינה יכולה לחרוג.
+
+BEGIN;
+
+set local search_path = public, extensions;
+
+-- ── 1. הטבלה ────────────────────────────────────────────────────────
+-- ⚠️ **שורה אחת לכל תור, בלי קישור בין תורות.** מזהה שיחה שנשמר לאורך
+-- זמן הוא מזהה משתמש בתחפושת, וקישור בין תורות אינו נדרש לשום דבר
+-- שהיומן הזה נועד לו.
+create table if not exists turn_log (
+  id             uuid primary key default gen_random_uuid(),
+
+  -- 🔴 **null כאן פירושו "נענתה, ולכן לא נשמרה"** — לא "לא נבדק".
+  -- זה המצב היחיד שבו העמודה ריקה, והפונקציה היא זו שמאפסת אותה.
+  question       text check (length(question) <= 500),
+
+  answered       boolean not null,
+  refusal_reason text check (refusal_reason in
+                    ('no_data','unverified','safety_official_only','out_of_scope')),
+  model          text,
+  input_tokens   int,
+  output_tokens  int,
+  created_at     timestamptz not null default now(),
+
+  -- תנאי 4, גם ברמת הסכמה ולא רק בפונקציה: תשובה שנענתה לא נושאת טקסט.
+  constraint turn_log_answered_has_no_question
+    check (not (answered and question is not null))
+);
+
+create index if not exists turn_log_age_idx on turn_log (created_at);
+create index if not exists turn_log_unanswered_idx on turn_log (created_at desc)
+  where answered = false;
+
+comment on table turn_log is
+  'יומן תורות אנונימי. אין בו עמודה שיכולה להחזיק מזהה משתמש — זו ההגנה, לא הערה.';
+comment on column turn_log.question is
+  'טקסט השאלה נשמר רק כשטים לא ידע לענות. null = נענתה. נאכף ב-log_turn וב-check.';
+
+-- ── 2. סגירה מלאה ───────────────────────────────────────────────────
+-- ⚠️ **בלי policy בכוונה.** RLS בלי מדיניות פירושו שאיש אינו עובר —
+-- וזו בדיוק הכוונה. security definer עוקף, וזה השער היחיד.
+alter table turn_log enable row level security;
+alter table turn_log force  row level security;
+revoke all on turn_log from anon, authenticated;
+
+-- ── 3. השער היחיד ───────────────────────────────────────────────────
+create or replace function public.log_turn(
+  p_question       text,
+  p_answered       boolean,
+  p_refusal_reason text default null,
+  p_model          text default null,
+  p_input_tokens   int  default null,
+  p_output_tokens  int  default null
+)
+returns void
+language plpgsql
+security definer
+set search_path = public, extensions
+as $$
+declare
+  v_question text;
+begin
+  -- 🔴 **תנאי 4 של גיא, ונאכף כאן.** תשובה שנענתה אינה שומרת את השאלה,
+  -- ולא משנה מה נשלח. הקורא אינו יכול לחרוג מזה גם בטעות.
+  v_question := case when p_answered then null
+                     else left(coalesce(p_question, ''), 500) end;
+  if v_question = '' then v_question := null; end if;
+
+  insert into turn_log (
+    question, answered, refusal_reason, model, input_tokens, output_tokens
+  ) values (
+    v_question, p_answered,
+    case when p_answered then null else p_refusal_reason end,
+    p_model, p_input_tokens, p_output_tokens
+  );
+
+  -- 🔴 **תנאי 2, ונאכף בכל כתיבה.** מחיקה מתוזמנת היא משימה שמישהו
+  -- צריך לזכור, וזה בדיוק סוג הדבר שנשכח כאן שלוש פעמים באותו יום.
+  delete from turn_log t
+   where t.id in (
+     select t2.id from turn_log t2
+      where t2.created_at < now() - interval '90 days'
+      limit 200
+   );
+end;
+$$;
+
+revoke all on function public.log_turn(text, boolean, text, text, int, int) from public;
+grant execute on function public.log_turn(text, boolean, text, text, int, int)
+  to anon, authenticated;
+
+-- ── 4. מה שנטע וגיא קוראים ──────────────────────────────────────────
+-- ⚠️ ה-View יורש את ה-RLS של הטבלה, ולכן נקרא רק מה-SQL Editor.
+create or replace view unanswered_turns as
+  select created_at, refusal_reason, question, model
+    from turn_log
+   where answered = false
+   order by created_at desc;
+
+COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('044_turn_log.sql', 'sha256:2c1748938e0ab76ed2e507cffbc26254',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
+
+
+-- ==========================================================================
+-- מיגרציה: 045_country.sql
+-- ==========================================================================
+
+set search_path = public, extensions;
+
+-- 045 — country על knowledge_doc (21.09.2026)
+-- ────────────────────────────────────────────────────────────────────
+-- 📍 להריץ ב: Supabase → SQL Editor
+-- שם השאילתה: 045 — country על knowledge_doc (21.09)
+--
+-- 🔴 **הערך שסוכן-האיסוף מתייג בקפידה לא היה נוחת בשום מקום.**
+--
+-- פולה שינתה (18.09) את שדה הסקרייפר מ"אזור" ל-country, כדי שלא יתנגש
+-- עם "אזור" של המסדר — שהוא אזור בתוך הפארק. השם תוקן; העמודה לא
+-- הייתה קיימת. כלומר פריט מבריטניה ופריט שמקורו לא ידוע היו נראים
+-- זהים בשאילתה, בלי שום שגיאה.
+--
+-- ⚠️ **nullable ובלי default**, כמו 019 ו-025. `not null default 'XX'`
+-- כאן היה המופע השמיני של אותו כלל: הצהרה שאיש לא בדק.
+--   מספר = נלכד · NULL = לא נלכד · ואין ערך שלישי שמשמעו "אין מדינה".
+--
+-- ⚠️ **והבדיקה היא על תבנית, לא על רשימה.** ISO 3166-1 alpha-2 אינו
+-- אוצר מילים סגור כמו purchase_type — הוא 249 ערכים שמשתנים. התבנית
+-- תופסת את מה שבאמת נשבר: 'usa', 'ארה"ב', 'United States', מחרוזת
+-- ריקה. קוד תקין־בתבנית אך שגוי ('FR' במקום 'GB') הוא באג מיפוי
+-- במקור, ורשימה סגורה לא הייתה תופסת אותו גם היא.
+--
+-- ⚠️ **ואין upper() בטריגר.** נורמליזציה שקטה מסתירה כותב שגוי במקום
+-- להפיל אותו. הכותב מנרמל, המסד דוחה.
+--
+-- ⚠️ **ו-IL אינו מוחרג.** ישראל מחוץ להיקף הסקרייפר האוטומטי — לא
+-- מחוץ לשדה. הערוץ הידני הנפרד כותב אותה.
+
+BEGIN;
+
+set local search_path = public, extensions;
+
+alter table knowledge_doc add column if not exists country text;
+
+alter table knowledge_doc drop constraint if exists knowledge_doc_country_iso;
+alter table knowledge_doc add constraint knowledge_doc_country_iso
+  check (country is null or country ~ '^[A-Z]{2}$');
+
+comment on column knowledge_doc.country is
+  'ISO 3166-1 alpha-2 של מקור הפריט. NULL = לא נלכד, ואינו "אין מדינה". נגזר מהמקור, לעולם לא מתוכן הפריט.';
+
+-- ── אימות ───────────────────────────────────────────────────────────
+-- 🔴 עמודת "עובר" חייבת להיות ✅ בכל שורה.
+select 'העמודה קיימת' as "הבדיקה",
+       (select count(*)::text from information_schema.columns
+         where table_name = 'knowledge_doc' and column_name = 'country') as "יצא",
+       '1' as "צפוי"
+union all
+select 'והיא nullable',
+       (select is_nullable from information_schema.columns
+         where table_name = 'knowledge_doc' and column_name = 'country'), 'YES'
+union all
+select 'ובלי default',
+       (select coalesce(column_default, 'אין') from information_schema.columns
+         where table_name = 'knowledge_doc' and column_name = 'country'), 'אין'
+union all
+select 'האילוץ קיים',
+       (select count(*)::text from pg_constraint
+         where conname = 'knowledge_doc_country_iso'), '1';
+
+COMMIT;
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('045_country.sql', 'sha256:6fe2287748ddec538af1f891d52a0f3b',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
+
+
+-- ==========================================================================
+-- מיגרציה: 046_tester_note.sql
+-- ==========================================================================
+
+set search_path = public, extensions;
+
+-- 046 — הערות בודק, מגרסת הבדיקה של טים (22.09.2026)
+-- ────────────────────────────────────────────────────────────────────
+-- 📍 להריץ ב: Supabase → SQL Editor
+-- שם השאילתה: 046 — הערות בודק (22.09)
+--
+-- ⛔ **לפני ההרצה: להחליף את מפתח הבודק בשורה המסומנת.** לייצר
+-- מחרוזת אקראית ארוכה, ולהדביק אותה גם כאן וגם במסך גרסת הבדיקה.
+-- לא לשלוח אותה בצ'אט.
+--
+-- 🔴 **למה זה קיים:** ההערות של נטע נשמרו ב-localStorage של הדפדפן.
+-- ניקוי נתוני אתר מוחק אותן, ומעבר למחשב אחר מאבד אותן. מקור יחיד
+-- שאפשר לאבד בלחיצה אינו מקור.
+--
+-- ── מה זה לא ─────────────────────────────────────────────────────────
+-- ⚠️ **זו אינה עמודה על `message`.** פולה הציעה `tester_note text`
+-- שם. טבלה נפרדת, ומשלוש סיבות: מי שכותב אינו בעל השיחה ולכן צריך
+-- מדיניות אחרת; סבב בדיקה נגמר וההערות נמחקות בלי לגעת בשיחות; ו-
+-- `insert` לטבלה ריקה אינו אותו סיכון כמו `update` על טבלת השיחות.
+--
+-- ⚠️ **ואין `author_id`.** הבודקים הם נטע והצוות, וזהות הכותב אינה
+-- נדרשת למטרה. אם תידרש — זו החלטה, לא שדה שמוסיפים כי נוח.
+
+BEGIN;
+
+set local search_path = public, extensions;
+
+create table if not exists tester_note (
+  id          uuid primary key default gen_random_uuid(),
+  -- ⚠️ מזהה התור מהמסך (`q0`, `q1`…) ולא מפתח זר ל-`message`.
+  -- גרסת הבדיקה אינה כותבת ל-`message` כלל, ומפתח זר לשורה שאינה
+  -- קיימת היה מפיל את הכתיבה.
+  turn_ref    text not null check (length(turn_ref) between 1 and 64),
+  session_ref text not null check (length(session_ref) between 1 and 64),
+  question    text check (length(question) <= 2000),
+  answer      text check (length(answer) <= 8000),
+  note        text not null check (length(note) between 1 and 2000),
+  created_at  timestamptz not null default now()
+);
+
+create index if not exists tester_note_session_idx on tester_note (session_ref, created_at);
+
+alter table tester_note enable row level security;
+alter table tester_note force  row level security;
+
+-- 🔴 **אין policy, בכוונה — כמו `turn_log`.** `force row level security`
+-- בלי policy חוסם את כולם, כולל הבעלים. הכתיבה עוברת דרך הפונקציה
+-- למטה בלבד, והקריאה דרך פונקציה נפרדת.
+revoke all on tester_note from anon, authenticated;
+
+-- ── מפתח הבודק ──────────────────────────────────────────────────────
+-- ⚠️ **המפתח אינו סוד חזק, והוא לא מתיימר להיות.** הוא יושב בדפדפן
+-- של נטע ומי שפותח את כלי המפתחים רואה אותו. מה שהוא כן עושה: מונע
+-- ממי שנתקל בכתובת לכתוב שורות. זה הסיכון הריאלי, והטבלה מחזיקה
+-- הערות של נטע ולא נתוני משתמשים.
+create or replace function public.tester_key() returns text
+language sql immutable parallel safe
+as $$ select 'YOUR-TESTER-KEY-HERE' $$;  -- ⛔ להחליף לפני ההרצה
+
+revoke all on function public.tester_key() from public, anon, authenticated;
+
+create or replace function public.save_tester_note(
+  p_key         text,
+  p_turn_ref    text,
+  p_session_ref text,
+  p_note        text,
+  p_question    text default null,
+  p_answer      text default null
+)
+returns void
+language plpgsql
+security definer
+set search_path = public, extensions
+as $$
+begin
+  -- ⚠️ **נופל, ולא מחזיר בשקט.** כתיבה שנדחתה ולא נאמרה נראית למי
+  -- שכותבת בדיוק כמו כתיבה שהצליחה — וההערה תיעלם בלי שתדע.
+  if p_key is distinct from public.tester_key() then
+    raise exception 'מפתח בודק שגוי';
+  end if;
+
+  if coalesce(trim(p_note), '') = '' then
+    raise exception 'הערה ריקה אינה נשמרת';
+  end if;
+
+  insert into tester_note (turn_ref, session_ref, note, question, answer)
+  values (
+    left(p_turn_ref, 64),
+    left(p_session_ref, 64),
+    left(trim(p_note), 2000),
+    left(p_question, 2000),
+    left(p_answer, 8000)
+  );
+
+  -- ⚠️ תקרה, כדי שדף שנתקע בלולאה לא ימלא את המסד. 500 הערות הן
+  -- הרבה מעבר לסבב בדיקה אמיתי.
+  delete from tester_note
+   where id in (
+     select id from tester_note order by created_at desc offset 500
+   );
+end;
+$$;
+
+revoke all on function public.save_tester_note(text, text, text, text, text, text) from public;
+grant execute on function public.save_tester_note(text, text, text, text, text, text) to anon, authenticated;
+
+-- ── קריאה — דרך שער, לא דרך גרנט ────────────────────────────────────
+create or replace function public.tester_notes(p_limit int default 200)
+returns table (created_at timestamptz, session_ref text, turn_ref text,
+               note text, question text, answer text)
+language sql
+stable
+security definer
+set search_path = public, extensions
+as $$
+  select created_at, session_ref, turn_ref, note, question, answer
+    from tester_note
+   order by created_at desc
+   limit least(coalesce(p_limit, 200), 500);
+$$;
+
+revoke all on function public.tester_notes(int) from public, anon, authenticated;
+
+-- 🔴 **ולמי כן — `ci_verify`, וזו הכרעה שצריכה את גיא.**
+--
+-- נטע קבעה (14.09) שהיא אינה מריצה בדיקות ידניות, והצעתי לה קובץ
+-- להרצה. זו הייתה חזרה לאחור. הקריאה צריכה לקרות בלי שהיא תיגע בכלום,
+-- ולכן היא עוברת ל-CI — אותו דפוס כמו כל שאר הסודות כאן.
+--
+-- ⚠️ **ו-`ci_verify` ולא תפקיד רביעי חדש**, כי הוא כבר קיים ויש לו
+-- סוד ב-GitHub. תפקיד נוסף פירושו סיסמה נוספת שנטע מדביקה.
+--
+-- ⚠️ **ומה שזה כן מותח:** גיא פיצל את `ci_verify` מ-`ci_content`
+-- בכוונה, והערות בודק אינן אף אחד משניהם. הטיעון בעד: הטבלה מחזיקה
+-- מילים של נטע על תשובות של טים — אין בה נתוני משתמשים, ואין בה מה
+-- לדלוף. הטיעון נגד: זו הרחבה שלישית לתפקיד שהוגדר למשימה אחת.
+--
+-- **זו שאלה לגיא ולא החלטה שלי.** אם הוא מעדיף תפקיד נפרד — השורה
+-- הזו יורדת ונכתב קובץ תפקיד משלו.
+grant execute on function public.tester_notes(int) to ci_verify;
+
+COMMIT;
+
+-- ── אימות ───────────────────────────────────────────────────────────
+-- 🔴 עמודת "עובר" חייבת להיות ✅ בכל שורה.
+select 'הטבלה קיימת' as "הבדיקה",
+       (select count(*)::text from information_schema.tables
+         where table_schema = 'public' and table_name = 'tester_note') as "יצא",
+       '1' as "צפוי"
+union all
+select 'RLS כפוי בלי policy',
+       (select count(*)::text from pg_policies where tablename = 'tester_note'), '0'
+union all
+select 'ל-anon אין גישה ישירה לטבלה',
+       (select count(*)::text from information_schema.role_table_grants
+         where grantee = 'anon' and table_name = 'tester_note'), '0'
+union all
+select 'ול-anon יש רק את פונקציית הכתיבה',
+       (select count(*)::text from information_schema.role_routine_grants
+         where grantee = 'anon' and routine_name in ('save_tester_note','tester_notes','tester_key')), '1'
+union all
+select '⛔ המפתח הוחלף',
+       case when public.tester_key() = 'YOUR-TESTER-KEY-HERE'
+            then '🔴 לא הוחלף' else 'כן' end, 'כן';
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('046_tester_note.sql', 'sha256:2987c9f9e159b5d032f0eeb909c3c931',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
 
 
 -- ==========================================================================

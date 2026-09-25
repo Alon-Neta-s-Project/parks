@@ -45,6 +45,19 @@ describe("קובצי הזרע מעודכנים מול המקור שלהם", () =
     }
   });
 
+  /**
+   * ⚠️ **קובץ ההקמה התיישן שבועות, ואיש לא ידע** — מ-07.09 חסרו בו כל
+   * המיגרציות מ-000 והלאה. מי שהקים ממנו מסד קיבל סכמה ישנה בלי אזהרה.
+   */
+  it("supabase-bundle.sql נבנה מהמיגרציות העדכניות", () => {
+    const run = () =>
+      execFileSync("python3", [join(P.SCRIPTS, "build-supabase-bundle.py"), "--check"], {
+        encoding: "utf-8",
+        stdio: ["ignore", "pipe", "pipe"],
+      });
+    expect(run).not.toThrow();
+  });
+
   it("knowledge.sql נבנה מ-knowledge/ העדכני", () => {
     const run = () =>
       execFileSync("python3", [join(P.SCRIPTS, "build-knowledge-seed.py"), "--check"], {

@@ -114,9 +114,17 @@ The branches have diverged: `tim-test` has 7 commits this branch doesn't have, a
 ### O4 — Port the Python scripts to TypeScript · proposal, not decided
 13 tooling scripts in `scripts/` are Python, and the QA gate and 5 tests depend on them. With a Node server that's a second toolchain, and it already caused a false failure (the system Python 3.9 is too old). Proposal: a step after Stage 1, porting one script at a time with the same `--check` output and a test run after each.
 
-### O5 — `supabase-bundle.sql` is stale, and nothing checks it · found 25.09
+### O5 — ✅ Closed 25.09 · `supabase-bundle.sql` is stale, and nothing checks it
+**Decided by Alon (25.09): keep the bundle with the full migration history.** It was rebuilt: all 48 migrations (`000` to `046`, both `034`s) plus 2 seeds plus the verification block, 290 KB. `build-supabase-bundle.py` got a `--check` mode, and `seed-freshness.test.ts` runs it, so the bundle can't go stale silently again. The test was seen failing on the stale bundle before the rebuild. The bundle came out of `FROZEN` in `doc-paths`, because its text now points to the new paths.
+
+⚠️ **Not checked:** actually running the bundle against Postgres. There's no local Postgres on this machine (`verify-probes.sh` and `db-conformance.ts` need one). What's checked is that the bundle is identical to what gets built from the migrations, not that it runs cleanly on an empty database.
+
+<details><summary>Background</summary>
+
 `apps/server/db/supabase-bundle.sql` (a single file of every migration plus seed plus verification block, for setting up a database) was last updated on 07.09. Rebuilding it with `build-supabase-bundle.py` adds about 2,700 lines: every migration since, starting with `000`. **Anyone who sets up a database from it today gets a schema that's weeks old, with no warning.** This is exactly the pattern CLAUDE.md warns about: "a derived file goes stale silently". The seeds have `seed-freshness.test.ts`, and the bundle has nothing.
 
 It wasn't rebuilt during the move so as not to slip a large, unrelated change into a commit of renames only. It's marked `FROZEN` in `doc-paths` for now.
 
 **Proposal:** rebuild it in a separate commit and add a freshness check (like `seed-freshness`). Or, if nobody uses it since the switch to dbmate (Stage 2), delete it along with its script. Needs a decision: is anyone still setting up a database from the bundle?
+
+</details>

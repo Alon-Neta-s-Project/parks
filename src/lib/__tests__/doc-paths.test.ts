@@ -67,14 +67,10 @@ const KNOWN_STALE = [
  * נתיב ישן במסמך חי — בדיוק מה שהבדיקה קיימת כדי לתפוס. מסמך חי מתוקן;
  * רק מה שאסור לגעת בו נכנס לכאן:
  * - הבריף כפי שהתקבל, ותשובת ההתאמה שנכתבה מולו — תיעוד היסטורי.
- * - `supabase-bundle.sql` — קובץ נגזר שהתיישן לפני ההזזה (O5 במסמך
- *   הרפקטור). בנייה מחדש מוסיפה כ-2,700 שורות, ולכן היא לא נעשית
- *   בקומיט שמזיז קבצים.
  */
 const FROZEN = [
   "docs/master-brief-v1.md",
   "docs/spec/conformance-response.md",
-  "apps/server/db/supabase-bundle.sql",
 ];
 
 /** פיצול הרפו (docs/refactor-server-split.md): המיקום הישן → החדש. */

@@ -13,10 +13,15 @@ file with no transaction at all could leave a half-applied migration behind.
 ⚠️ apps/server/db/local/000_auth_shim.sql is deliberately excluded. On Supabase the auth
 schema belongs to the platform; the shim would collide with the real one.
 
-Usage: python3 scripts/build-supabase-bundle.py
+Usage: python3 scripts/build-supabase-bundle.py [--check]
+
+🔴 **`--check` exists because the bundle went stale silently.** From 07.09 to
+25.09 it lacked every migration from 000 on, and nothing said so: anyone setting
+up a database from it got a schema weeks old. `seed-freshness.test.ts` runs it.
 """
 import pathlib
 import re
+import sys
 
 from paths import P, ROOT  # noqa: E402 — המקור: scripts/paths.json
 OUT = P.DB / "supabase-bundle.sql"
@@ -119,7 +124,16 @@ parts += [
     "",
 ]
 
-OUT.write_text("\n".join(parts) + "\n", encoding="utf-8")
+content = "\n".join(parts) + "\n"
+
+if "--check" in sys.argv:
+    if not OUT.exists() or OUT.read_text(encoding="utf-8") != content:
+        print(f"🔴 {OUT.relative_to(ROOT)} אינו מעודכן מול המיגרציות. להריץ: python3 scripts/build-supabase-bundle.py")
+        raise SystemExit(1)
+    print(f"✅ {OUT.relative_to(ROOT)} מעודכן · {len(migrations)} מיגרציות, {len(seeds)} זרעים")
+    raise SystemExit(0)
+
+OUT.write_text(content, encoding="utf-8")
 size = OUT.stat().st_size
 print(f"{OUT.relative_to(ROOT)}  {size / 1024:.0f} KB")
 print(f"  {len(migrations)} migrations: {migrations[0].name} … {migrations[-1].name}")
