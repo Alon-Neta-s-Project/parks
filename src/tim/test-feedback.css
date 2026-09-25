@@ -47,17 +47,6 @@
   margin-block-start: 0.3rem;
 }
 
-.feedback__export {
-  margin-block: 1.2rem;
-  padding: 0.8rem;
-  border: 1px dashed currentColor;
-  border-radius: 0.5rem;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.6rem;
-  font-size: 0.85rem;
-}
 
 .feedback__preview {
   inline-size: 100%;
@@ -100,13 +89,83 @@
     margin-inline-start: 0;
   }
 
-  /* הכפתורים בשורה אחת שנשברת, ולא נדחסים לרוחב של אייקון. */
-  .feedback__export button {
-    padding-block: 0.5rem;
-    padding-inline: 0.9rem;
-  }
-
   .feedback__preview {
     max-block-size: 8rem;
   }
+}
+
+/* ── לוח ההערות — כפתור צף, ולא חלק מהשיחה ─────────────────────────
+ *
+ * 🔴 **נטע, 25.09: "לא נוח שתיבת ההצעות יושבת לי בצ'אט".** הלוח היה
+ * פתוח תמיד ודחף את השיחה מטה; בטלפון הוא תפס חצי מסך.
+ *
+ * ⚠️ CSS לוגי בלבד — inset-inline / inset-block, ולא left/right.
+ */
+.notes-pill {
+  position: fixed;
+  inset-inline-start: 0.8rem;
+  inset-block-end: 5.5rem;
+  z-index: 20;
+  padding-block: 0.55rem;
+  padding-inline: 0.95rem;
+  border: none;
+  border-radius: 999px;
+  background: #7a1f1f;
+  color: #fff;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgb(0 0 0 / 0.25);
+}
+
+.notes-panel {
+  position: fixed;
+  inset-inline: 0.8rem;
+  inset-block-end: 9rem;
+  z-index: 21;
+  max-block-size: 60vh;
+  overflow: auto;
+  padding: 0.9rem;
+  border-radius: 0.75rem;
+  background: var(--pw-surface, #fff);
+  box-shadow: 0 4px 24px rgb(0 0 0 / 0.25);
+  font-size: 0.85rem;
+}
+
+/* ⚠️ מרווח גדול יותר במסך רחב — שם הלוח אינו צריך את כל הרוחב. */
+@media (min-width: 700px) {
+  .notes-panel { inset-inline-start: auto; max-inline-size: 34rem; }
+}
+
+.notes-panel__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-block-end: 0.6rem;
+}
+
+.notes-panel__head button {
+  border: none;
+  background: transparent;
+  font-size: 1rem;
+  cursor: pointer;
+  /* יעד נגיעה, ולא רק תו. */
+  padding: 0.3rem 0.5rem;
+}
+
+.notes-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-block-end: 0.6rem;
+}
+
+.notes-panel__actions button {
+  padding-block: 0.5rem;
+  padding-inline: 0.9rem;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
 }
