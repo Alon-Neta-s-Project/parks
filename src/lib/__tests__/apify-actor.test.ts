@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { ROOT } from "../../../scripts/paths";
 
 /**
  * 🔴 **אקטור רשמי בלבד — הכרעת נטע, 22.09.**
@@ -19,7 +20,6 @@ import { describe, expect, it } from "vitest";
  * את apify.com). הוא בודק את הדבר היחיד שכן ניתן לבדיקה: הבעלות.
  */
 
-const ROOT = join(__dirname, "..", "..", "..");
 const ACTOR_RE = /api\.apify\.com\/v2\/acts\/([^/'"\s]+)/g;
 
 function tracked(): string[] {

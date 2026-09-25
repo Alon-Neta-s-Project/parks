@@ -16,6 +16,10 @@
 # הרצה: bash scripts/verify-probes.sh
 set -uo pipefail
 cd "$(dirname "$0")/.."
+# הנתיבים מ-scripts/paths.json — המקום היחיד שבו כתוב איפה דברים יושבים.
+DB_LOCAL=$(python3 scripts/paths.py DB_LOCAL)
+DB_SEED=$(python3 scripts/paths.py DB_SEED)
+MIGRATIONS=$(python3 scripts/paths.py MIGRATIONS)
 
 PORT="${PGPORT:-55432}"
 # ⚠️ שגיאת ניתוח ("הטבלה אינה קיימת") היא תשובה, לא תקלה: ההשפעה
@@ -29,7 +33,7 @@ probe() {
 
 su postgres -c "psql -h /tmp -p $PORT -d postgres -q -c 'drop database if exists probes' -c 'create database probes'" >/dev/null 2>&1
 
-su postgres -c "psql -h /tmp -p $PORT -d probes -q -f db/local/000_auth_shim.sql" >/dev/null 2>&1
+su postgres -c "psql -h /tmp -p $PORT -d probes -q -f $DB_LOCAL/000_auth_shim.sql" >/dev/null 2>&1
 
 # ⚠️ ארבע מיגרציות בודקות את עצמן מול שורות אמיתיות, ולכן דורשות
 # שתי שורות זרע לפני שהן רצות.
@@ -42,7 +46,7 @@ seed_rows() {
   # ⚠️ הפארקים מגיעים מ-db/seed ולא מהמיגרציות. בלעדיהם ה-FK של
   # experience אינו מסופק, והזרע נכשל בשקט — כלומר ארבע הבדיקות
   # היו מדווחות ככישלון שאינו שלהן.
-  for sd in db/seed/0*.sql; do
+  for sd in "$DB_SEED"/0*.sql; do
     su postgres -c "psql -h /tmp -p $PORT -d probes -q -f $sd" >/dev/null 2>&1
   done
   su postgres -c "psql -h /tmp -p $PORT -d probes -q -c \"
@@ -54,7 +58,7 @@ seed_rows() {
 }
 
 early=(); never=(); skipped=()
-for f in db/migrations/*.sql; do
+for f in "$MIGRATIONS"/*.sql; do
   name=$(basename "$f")
   # 000 בונה את היומן עצמו ואין לה בדיקה — היא אינה מיגרציית תוכן.
   if [ "$name" = "000_schema_migration.sql" ]; then
@@ -82,7 +86,7 @@ done
 
 echo
 echo "── מי בודק את הבודקות ──────────────────────────────────"
-printf '%s\n' "  נבדקו: $(ls db/migrations/*.sql | wc -l) מיגרציות"
+printf '%s\n' "  נבדקו: $(ls "$MIGRATIONS"/*.sql | wc -l) מיגרציות"
 if [ ${#early[@]} -gt 0 ]; then
   echo "  🔴 רפויות — היו true עוד לפני המיגרציה שלהן:"
   printf '     · %s\n' "${early[@]}"

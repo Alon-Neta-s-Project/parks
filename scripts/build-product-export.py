@@ -16,7 +16,7 @@ from pathlib import Path
 
 import openpyxl
 
-ROOT = Path(__file__).resolve().parent.parent
+from paths import P, ROOT  # noqa: E402 — המקור: scripts/paths.json
 SHEET = "ACTIVITY_DATABASE"
 SCOPE = ("Attraction", "Entertainment")
 
@@ -39,7 +39,7 @@ def main() -> int:
         return 2
     master = Path(sys.argv[1])
 
-    mapping = json.loads((ROOT / "content-mapping.json").read_text("utf-8"))
+    mapping = json.loads((P.CONTENT_MAPPING).read_text("utf-8"))
     want = mapping["requiredColumns"]
 
     wb = openpyxl.load_workbook(master, read_only=True, data_only=True)
@@ -82,7 +82,7 @@ def main() -> int:
         w.writerows(out)
 
     columns_hash = hashlib.sha256("|".join(want).encode()).hexdigest()[:12]
-    (ROOT / "data/source/product_export_manifest.json").write_text(
+    (P.SOURCE / "product_export_manifest.json").write_text(
         json.dumps({
             "generated": __import__("datetime").date.today().isoformat(),
             "source_file": master.name,

@@ -18,9 +18,9 @@ import pathlib
 import re
 import sys
 
-ROOT = pathlib.Path(__file__).resolve().parent.parent
-GUIDES = ROOT / "knowledge"
-OUT = ROOT / "data" / "deploy" / "park-intro.txt"
+from paths import P, ROOT  # noqa: E402 — המקור: scripts/paths.json
+GUIDES = P.KNOWLEDGE
+OUT = P.DEPLOY / "park-intro.txt"
 
 SECTION = "## מה מייחד אותו"
 

@@ -12,9 +12,9 @@ Run after `npm run build`. Usage: python3 scripts/build-artifact.py
 import pathlib
 import re
 
-ROOT = pathlib.Path(__file__).resolve().parent.parent
-DIST = ROOT / "dist"
-OUT = ROOT / "design" / "preview" / "tim.html"
+from paths import P, ROOT  # noqa: E402 — המקור: scripts/paths.json
+DIST = P.DIST
+OUT = P.DESIGN / "preview" / "tim.html"
 
 FONTS = (
     "https://fonts.googleapis.com/css2?"

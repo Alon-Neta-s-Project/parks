@@ -10,11 +10,11 @@
  *   npx tsx scripts/db-conformance.ts
  */
 import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { P } from "./paths";
 import { execFileSync } from "node:child_process";
 
 const PORT = process.env.PGPORT ?? "55432";
-const experiences = JSON.parse(readFileSync(join(process.cwd(), "src/data/experiences.json"), "utf8"));
+const experiences = JSON.parse(readFileSync(P.EXPERIENCES_JSON, "utf8"));
 
 const sql = (q: string) =>
   execFileSync("su", ["postgres", "-c", `psql -h /tmp -p ${PORT} -d pdc -At -F'|' -c ${JSON.stringify(q)}`], {

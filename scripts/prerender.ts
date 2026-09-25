@@ -13,12 +13,11 @@
  */
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { P } from "./paths";
 import experiences from "../src/data/experiences.json";
 import parks from "../src/data/parks.json";
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const DIST = join(ROOT, "dist");
+const DIST = P.DIST;
 
 const shell = readFileSync(join(DIST, "index.html"), "utf8");
 const esc = (s: string) =>

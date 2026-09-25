@@ -19,7 +19,7 @@ scripts/         repo tooling
 | # | Stage | Status |
 |---|---|---|
 | 0 | Decisions: hosting, security review, the gap in the Tim file (see open items) | Open |
-| 1 | npm workspaces and moving folders into the layout above, with no behavior change | Not started |
+| 1 | npm workspaces and moving folders into the layout above, with no behavior change | 1a ✅ · 1b not started |
 | 2 | Migrations with dbmate, run from CI with an approval gate | Not started |
 | 3 | Port Tim, `embed` and `aliases` to the Node server, running alongside the Edge Function | Not started |
 | 4 | Point the frontend at the server, retire the Edge Functions, revoke the anon grants | Not started |
@@ -47,6 +47,17 @@ After every step (a separate commit): `npm run qa`, plus `npm run build` if the 
 | `build` | Passes, 253 pages |
 
 These are the numbers every step in Stage 1 is compared against.
+
+---
+
+## Stage log
+
+### 1a ✅ The paths module (25.09.2026)
+- **The only place that says where things live: [scripts/paths.json](../scripts/paths.json).** Thin loaders read it: `paths.py` (Python), `paths.ts` (TypeScript) and `python3 scripts/paths.py KEY` (bash). One list, not three.
+- **Moved to reading from it:** 12 Python scripts, 4 TypeScript scripts, 2 shell scripts (`ci-content.sh`, `verify-probes.sh`) and 20 tests. `process.cwd()` and the three-`..` `__dirname` roots are gone.
+- **Deliberately not changed:** text written into generated files (e.g. `נוצר מ-knowledge/...` in the seeds), static JSON imports (`prerender.ts`; `tsc` fails loudly on those in a move), and `mapping.source` inside `content-mapping.json`. The last two are handled in 1b.
+- **New guard:** [paths.test.ts](../src/lib/__tests__/paths.test.ts). Every key in `paths.json` must exist. Seen failing with a wrong key before it passed.
+- **Tests:** `npm run qa` passes · vitest **288 passed** + 1 skipped (+1 new, the guard) · deno 75 · `build` 253 pages · `npm run import` (dry run) identical · the scripts run correctly from a different working directory · **no generated file changed**.
 
 ---
 

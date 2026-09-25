@@ -1,5 +1,7 @@
+import { join } from "node:path";
 import { execFileSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
+import { P } from "../../../scripts/paths";
 
 /**
  * 🔴 **אותו היגיון מוצרי חי בשני מקומות, וזה מקור אמת שני.**
@@ -16,7 +18,7 @@ import { describe, expect, it } from "vitest";
 describe("הוראות טים נבנות מ-he.json", () => {
   it("בלוק כללי ההתאמה מסונכרן עם המקור", () => {
     const run = () =>
-      execFileSync("python3", ["scripts/build-tim-prompt.py", "--check"], {
+      execFileSync("python3", [join(P.SCRIPTS, "build-tim-prompt.py"), "--check"], {
         encoding: "utf-8",
         stdio: ["ignore", "pipe", "pipe"],
       });

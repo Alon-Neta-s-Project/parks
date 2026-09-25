@@ -13,6 +13,7 @@ import {
   sensitivityStateFor,
   uncheckedFor,
 } from "../sensitivity";
+import { P } from "../../../scripts/paths";
 
 /**
  * Every row here is constructed, and that is the point.
@@ -234,7 +235,7 @@ describe("the database and the code share one vocabulary", () => {
   // או מיגרציה שמוסיפה ערך שהקוד אינו מכיר.
   it("locks the same seven values in the migration and in the type", () => {
     const sql = readFileSync(
-      join(process.cwd(), "db/migrations/034_sensitivities_vocabulary.sql"),
+      join(P.MIGRATIONS, "034_sensitivities_vocabulary.sql"),
       "utf8",
     );
     const block = sql.slice(
@@ -251,7 +252,7 @@ describe("the database and the code share one vocabulary", () => {
   // תשע פעמים.
   it("lets the column say 'not asked' at all", () => {
     const sql = readFileSync(
-      join(process.cwd(), "db/migrations/034_sensitivities_vocabulary.sql"),
+      join(P.MIGRATIONS, "034_sensitivities_vocabulary.sql"),
       "utf8",
     );
     expect(sql).toMatch(/alter column sensitivities drop not null/);
@@ -268,7 +269,7 @@ describe("trip_member stays anonymous, whatever the business becomes", () => {
   // ⚠️ זו בדיקה על **קבצי המיגרציה**, ולא על טיפוס. אפשר להוסיף עמודה
   // למסד בלי לגעת בשורת קוד אחת, וזה בדיוק המסלול שצריך לחסום.
   it("never gains a name, a birth date, or a document number", () => {
-    const dir = join(process.cwd(), "db/migrations");
+    const dir = P.MIGRATIONS;
     const forbidden =
       /\b(full_name|first_name|last_name|surname|given_name|birth_date|date_of_birth|dob|passport|id_number|national_id)\b/i;
 

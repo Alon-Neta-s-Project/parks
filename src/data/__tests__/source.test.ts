@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import rows from "./db-rows.fixture.json";
+import { P } from "../../../scripts/paths";
 
 const state = { configured: true, result: {} as unknown };
 
@@ -31,7 +32,7 @@ beforeEach(() => {
 /** מספר השורות שהייצוא הנוכחי הביא, לפי המניפסט. */
 function bundledRows(): number {
   return JSON.parse(
-    readFileSync(join(process.cwd(), "data/source/product_export_manifest.json"), "utf8"),
+    readFileSync(join(P.SOURCE, "product_export_manifest.json"), "utf8"),
   ).rows;
 }
 

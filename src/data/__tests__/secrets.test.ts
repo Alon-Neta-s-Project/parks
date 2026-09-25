@@ -1,5 +1,7 @@
+import { join } from "node:path";
 import { execFileSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
+import { P } from "../../../scripts/paths";
 
 /**
  * 🔴 **אנחנו מייצרים קבצים ושולחים אותם, וזה עוקף כל הגנה של git.**
@@ -15,7 +17,7 @@ import { describe, expect, it } from "vitest";
 describe("אין סודות ברפו ובקבצים שנשלחים", () => {
   it("לא נמצאה תבנית של מפתח", () => {
     const run = () =>
-      execFileSync("python3", ["scripts/check-secrets.py"], {
+      execFileSync("python3", [join(P.SCRIPTS, "check-secrets.py")], {
         encoding: "utf-8",
         stdio: ["ignore", "pipe", "pipe"],
       });

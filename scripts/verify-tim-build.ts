@@ -1,5 +1,6 @@
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { P } from "./paths";
 
 /**
  * הבדיקה שהופכת את "טים בלבד" לטענה מדידה.
@@ -8,9 +9,9 @@ import { join } from "node:path";
  * או אפילו טיפוס שנגרר איתו — מחזיר את 242 השורות לחבילה, בלי שגיאה
  * ובלי שאיש ישים לב. הבדיקה הזו קוראת את מה שנבנה בפועל וסופרת.
  */
-const OUT = "dist-tim";
+const OUT = P.DIST_TIM;
 const rows: { nameEn: string; nameHe: string | null }[] = JSON.parse(
-  readFileSync("src/data/experiences.json", "utf8"),
+  readFileSync(P.EXPERIENCES_JSON, "utf8"),
 );
 
 const files: string[] = [];
@@ -38,7 +39,7 @@ const bundle = files
  * התרגום הוא טקסט שמישהו כתב; שם שנמצא בחבילה ואינו שם — הגיע מהדאטא.
  * רשימת היתרים הייתה מתיישנת; זו מתעדכנת מעצמה עם הניסוח.
  */
-const copy = readFileSync("src/i18n/he.json", "utf8");
+const copy = readFileSync(P.HE_JSON, "utf8");
 const fromData = (name: string) => bundle.includes(name) && !copy.includes(name);
 
 const leakedEn = rows.filter((r) => fromData(r.nameEn));
@@ -51,7 +52,7 @@ const inCopy = rows.filter(
 // ⚠️ ושמות הפארקים נבדקים בנפרד. הם בודדים ועלולים להופיע בטקסט ממשק
 // לגמרי לגיטימי, ולכן הם מדווחים ואינם מפילים — אבל הם כן סימן שמשהו
 // מהדאטא נגרר.
-const parks: { name: string }[] = JSON.parse(readFileSync("src/data/parks.json", "utf8"));
+const parks: { name: string }[] = JSON.parse(readFileSync(P.PARKS_JSON, "utf8"));
 const leakedParks = parks.filter((p) => fromData(p.name));
 
 const total = files.reduce((n, f) => n + statSync(f).size, 0);

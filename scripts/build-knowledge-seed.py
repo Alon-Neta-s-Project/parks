@@ -22,9 +22,9 @@ import re
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-DIR = ROOT / "knowledge"
-OUT = ROOT / "db" / "knowledge-seed" / "knowledge.sql"
+from paths import P, ROOT  # noqa: E402 — המקור: scripts/paths.json
+DIR = P.KNOWLEDGE
+OUT = P.KNOWLEDGE_SEED / "knowledge.sql"
 
 REQUIRED = ["id", "title", "doc_type", "authority_tier", "scope_resort",
             "volatility", "source_url", "last_verified",
@@ -303,7 +303,7 @@ select
         from collections import Counter
         counts = Counter(v.split("'")[1] for v in chunk_rows)
         rows = ",\n".join(f"    ('{d}', {n})" for d, n in sorted(counts.items()))
-        out = ROOT / "data" / "deploy" / "content-live-check.txt"
+        out = P.DEPLOY / "content-live-check.txt"
         out.write_text(LIVE_CHECK.format(rows=rows), encoding="utf-8")
         print(f"✅ {out.relative_to(ROOT)} · {len(counts)} מסמכים")
         return 0
@@ -319,7 +319,7 @@ select
         if not docs:
             print("\u2717 \u05d0\u05d9\u05df \u05de\u05e1\u05de\u05da \u05d1\u05e9\u05dd " + want)
             return 1
-        out = ROOT / "data" / "deploy" / (want + ".txt")
+        out = P.DEPLOY / (want + ".txt")
         sep = ",\n"
         out.write_text(DOC_DEPLOY.format(
             want=want, cols=", ".join(DOC_COLS), doc=docs[0],

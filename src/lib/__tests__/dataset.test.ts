@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { experiences, parks } from "../../data";
 import { experienceSchema, parkSchema } from "../../data/schema";
+import { P } from "../../../scripts/paths";
 
 describe("dataset", () => {
   it("every row validates against the schema", () => {
@@ -18,7 +19,7 @@ describe("dataset", () => {
     // ומתוקן בלי מחשבה, וכך הוא מפסיק להיות שמירה. מול המניפסט הוא
     // שואל את השאלה האמיתית: האם הדאטהסט מכיל את מה שהייצוא הביא.
     const manifest = JSON.parse(
-      readFileSync(join(process.cwd(), "data/source/product_export_manifest.json"), "utf8"),
+      readFileSync(join(P.SOURCE, "product_export_manifest.json"), "utf8"),
     );
     expect(experiences).toHaveLength(manifest.rows);
     expect(new Set(experiences.map((e) => e.kind))).toEqual(
@@ -107,7 +108,7 @@ describe("the master never reaches the repo", () => {
       // המאסטר השתנה. אושר על ידי פולה, 08.09.
       "max_height.csv",
     ]);
-    for (const file of readdirSync(join(process.cwd(), "data/source"))) {
+    for (const file of readdirSync(P.SOURCE)) {
       expect(allowed).toContain(file);
     }
   });
@@ -121,7 +122,7 @@ describe("the master never reaches the repo", () => {
   // הרגישות, כל שורה מצהירה מה היא מחליפה, ובלי URL — המקורות שייכים
   // למאסטר ולעולם לא לייצוא.
   it("keeps the flag patch to the four sens_* columns, and every row declares what it replaces", () => {
-    const path = join(process.cwd(), "data/source/sens_patch.csv");
+    const path = join(P.SOURCE, "sens_patch.csv");
     if (!existsSync(path)) return; // נמחק כשהמאסטר משלים אותו — וזה תקין
     const [header = "", ...lines] = readFileSync(path, "utf8").trim().split(/\r?\n/);
     expect(header.trim()).toBe("Key,column,from,to");
@@ -139,7 +140,7 @@ describe("the master never reaches the repo", () => {
   });
 
   it("keeps the Hebrew-name patch to two columns and nothing more", () => {
-    const path = join(process.cwd(), "data/source/name_he_patch.csv");
+    const path = join(P.SOURCE, "name_he_patch.csv");
     if (!existsSync(path)) return; // נמחק כשהמאסטר משלים אותו — וזה תקין
     const [header = "", ...lines] = readFileSync(path, "utf8").trim().split(/\r?\n/);
     expect(header.trim()).toBe("Key,name_he");
@@ -164,7 +165,7 @@ describe("the master never reaches the repo", () => {
 
 describe("the closed vocabulary", () => {
   const map: Record<string, { type: string; category: string }> = JSON.parse(
-    readFileSync(join(process.cwd(), "data/source/subtype_map.json"), "utf8"),
+    readFileSync(join(P.SOURCE, "subtype_map.json"), "utf8"),
   );
 
   it("covers every row, so no row needs a default", () => {
@@ -297,7 +298,7 @@ describe("what must never be inferred", () => {
     // fractional value exists. Durations happen to be whole numbers now that the
     // master was corrected, and a test that depended on 2.583 still being there
     // would have stopped guarding anything the moment it was fixed.
-    const csv = readFileSync(join(process.cwd(), "data/source/product_export.csv"), "utf8");
+    const csv = readFileSync(join(P.SOURCE, "product_export.csv"), "utf8");
     const rows = parseCsv(csv);
     const [headers] = rows;
     const keyAt = headers!.indexOf("Key");
@@ -358,7 +359,7 @@ describe("every park carries its own photo", () => {
   // ושורת הפארקים מאבדת תמונה בלי שאיש ידע. הבדיקה הזו היא מה שהופך
   // את זה לכשל שרואים.
   it("has a webp named for every park slug, and no orphans", () => {
-    const dir = join(process.cwd(), "public/parks");
+    const dir = join(P.WEB_PUBLIC, "parks");
     const files = readdirSync(dir).filter((f) => f.endsWith(".webp"));
     const have = new Set(files.map((f) => f.replace(/\.webp$/, "")));
     const want = new Set(parks.map((p) => p.slug));
@@ -372,7 +373,7 @@ describe("every park carries its own photo", () => {
   it("keeps each photo small enough for a rail of ten", () => {
     // עשר תמונות נטענות במסך הכניסה. המקור היה 3 MB; ⚠️ תמונה אחת
     // שתחזור בגודל המקורי מחזירה את הטעינה למקום שממנו באנו.
-    const dir = join(process.cwd(), "public/parks");
+    const dir = join(P.WEB_PUBLIC, "parks");
     for (const file of readdirSync(dir).filter((f) => f.endsWith(".webp"))) {
       expect(statSync(join(dir, file)).size).toBeLessThan(120_000);
     }

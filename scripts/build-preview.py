@@ -8,14 +8,14 @@ hand -- that keeps the published page and the repo file from drifting.
 """
 import pathlib
 
-ROOT = pathlib.Path(__file__).resolve().parent.parent
-tokens = (ROOT / "design" / "tokens.css").read_text(encoding="utf-8")
-page = (ROOT / "design" / "preview" / "page.html").read_text(encoding="utf-8")
+from paths import P, ROOT  # noqa: E402 — המקור: scripts/paths.json
+tokens = (P.DESIGN / "tokens.css").read_text(encoding="utf-8")
+page = (P.DESIGN / "preview" / "page.html").read_text(encoding="utf-8")
 
 MARKER = "/* @TOKENS@ */"
 if MARKER not in page:
     raise SystemExit(f"marker {MARKER} not found in page.html")
 
-out = ROOT / "design" / "preview" / "index.html"
+out = P.DESIGN / "preview" / "index.html"
 out.write_text(page.replace(MARKER, tokens.strip()), encoding="utf-8")
 print(f"built {out.relative_to(ROOT)} ({out.stat().st_size:,} bytes)")

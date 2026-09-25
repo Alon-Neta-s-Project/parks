@@ -1,6 +1,7 @@
 import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { P } from "../../../scripts/paths";
 
 /**
  * המספר הוא סימן האישור.
@@ -15,7 +16,7 @@ import { describe, expect, it } from "vitest";
  * ⚠️ והבדיקה כאן היא מה שהופך את זה לכלל ולא לכוונה. כלל שכתוב רק
  * בהערה תלוי בזיכרון של מי שכותב, וזו החולשה שהוא נועד לסלק.
  */
-const MIGRATIONS = join(process.cwd(), "db/migrations");
+const MIGRATIONS = P.MIGRATIONS;
 const PENDING = join(MIGRATIONS, "pending");
 const NUMBERED = /^\d{3}_/;
 

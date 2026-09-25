@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { experiences } from "../../data";
+import { P } from "../../../scripts/paths";
 
 /**
  * 🔴 חוק הבנייה שפולה אישרה דרך פיליפ, 08.09.
@@ -98,7 +99,7 @@ function parseCsv(text: string): { headers: string[]; rows: string[][] } {
 }
 
 const CSV = parseCsv(
-  readFileSync(join(process.cwd(), "data/source/product_export.csv"), "utf8"),
+  readFileSync(join(P.SOURCE, "product_export.csv"), "utf8"),
 );
 
 const isNa = (v: string) => /^n\/?a$/i.test(v.trim());

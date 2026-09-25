@@ -1,6 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { P } from "../../../scripts/paths";
 
 /**
  * 🔴 **הדרישה של נטע: גרסת הבדיקה לא תתערבב עם הקיים.**
@@ -14,8 +15,7 @@ import { describe, expect, it } from "vitest";
  * זה**, וזו בדיוק הסיבה שהבדיקה הזו סופרת ולא רק קוראת.
  */
 
-const ROOT = join(__dirname, "..", "..", "..");
-const PUBLIC_DIR = join(ROOT, "dist-tim", "assets");
+const PUBLIC_DIR = join(P.DIST_TIM, "assets");
 
 /** סימנים שקיימים רק בגרסת הבדיקה. */
 const TEST_ONLY = [
@@ -50,7 +50,7 @@ describe("גרסת הבדיקה אינה נכנסת לחבילה הציבורי�
    * אלה שמתחתיה רצות תמיד וקוראות את המקור.
    */
   it("TimOnlyApp אינו מייבא את רכיב הפידבק", () => {
-    const src = readFileSync(join(ROOT, "src", "tim", "TimOnlyApp.tsx"), "utf8");
+    const src = readFileSync(join(P.WEB_SRC, "tim", "TimOnlyApp.tsx"), "utf8");
     // ⚠️ **ייבוא או שימוש ב-JSX — לא אזכור.** הגרסה הראשונה של הבדיקה
     // חיפשה את השם בכל מקום, ונפלה על ההערה שמסבירה למה הוא לא שם.
     // בדיקה שאוסרת לתעד את הבאג היא בדיקה שתוסר.
@@ -59,16 +59,16 @@ describe("גרסת הבדיקה אינה נכנסת לחבילה הציבורי�
   });
 
   it("רק נקודת הכניסה של הבדיקה מייבאת אותו", () => {
-    const testMain = readFileSync(join(ROOT, "src", "tim", "test-main.tsx"), "utf8");
+    const testMain = readFileSync(join(P.WEB_SRC, "tim", "test-main.tsx"), "utf8");
     expect(testMain.includes("FeedbackNote")).toBe(true);
 
-    const publicMain = readFileSync(join(ROOT, "src", "tim", "main.tsx"), "utf8");
+    const publicMain = readFileSync(join(P.WEB_SRC, "tim", "main.tsx"), "utf8");
     expect(publicMain.includes("FeedbackNote")).toBe(false);
     expect(publicMain.includes("test-feedback.css")).toBe(false);
     expect(publicMain.includes("save-note")).toBe(false);
 
     // ⚠️ וגם מסך הצ'אט המשותף אינו יודע על נתיב הכתיבה.
-    const app = readFileSync(join(ROOT, "src", "tim", "TimOnlyApp.tsx"), "utf8");
+    const app = readFileSync(join(P.WEB_SRC, "tim", "TimOnlyApp.tsx"), "utf8");
     expect(/^\s*import\b.*save-note/m.test(app)).toBe(false);
   });
 
@@ -90,7 +90,7 @@ describe("גרסת הבדיקה אינה נכנסת לחבילה הציבורי�
      *
      * **הכלל שיוצא מזה: לבדוק את הערך, לא את הטקסט שסביבו.**
      */
-    const toml = readFileSync(join(ROOT, "netlify.toml"), "utf8")
+    const toml = readFileSync(P.NETLIFY_TOML, "utf8")
       .split("\n")
       .filter((line) => !line.trimStart().startsWith("#"))
       .join("\n");
@@ -116,7 +116,7 @@ describe("גרסת הבדיקה אינה נכנסת לחבילה הציבורי�
    * פועלת ואינה פועלת היא בדיוק הכשל שהתברר כאן.
    */
   it("אין ניתוב או כותרות לפי הקשר — Netlify מתעלם מהם", () => {
-    const toml = readFileSync(join(ROOT, "netlify.toml"), "utf8")
+    const toml = readFileSync(P.NETLIFY_TOML, "utf8")
       .split("\n")
       .filter((line) => !line.trimStart().startsWith("#"))
       .join("\n");
@@ -130,7 +130,7 @@ describe("גרסת הבדיקה אינה נכנסת לחבילה הציבורי�
    * גם כאן. שניהם עותקים של אותו דף — אין כאן מסך שני שיתפצל.
    */
   it("תצורת הבנייה מוציאה את שני דפי הנפילה", () => {
-    const cfg = readFileSync(join(ROOT, "vite.tim-test.config.ts"), "utf8");
+    const cfg = readFileSync(P.VITE_TIM_TEST_CONFIG, "utf8");
     // ⚠️ ההערות מוסרות — הן מזכירות את שמות הקבצים שוב ושוב, וזו הפעם
     // הרביעית בסשן הזה שגלאי שכתבתי היה קורא פרוזה כאילו היא הדבר עצמו.
     const code = cfg.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
@@ -138,7 +138,7 @@ describe("גרסת הבדיקה אינה נכנסת לחבילה הציבורי�
     expect(code.includes('"tim.html"')).toBe(true);
   });
 
-  const DIST_TEST = join(ROOT, "dist-tim-test");
+  const DIST_TEST = P.DIST_TIM_TEST;
   it.skipIf(!existsSync(join(DIST_TEST, "tim-test.html")))(
     "והיא אכן הוציאה אותם, עם noindex",
     () => {
@@ -151,8 +151,8 @@ describe("גרסת הבדיקה אינה נכנסת לחבילה הציבורי�
   );
 
   it("שתי הבניות נפרדות לחלוטין", () => {
-    const pub = readFileSync(join(ROOT, "vite.tim.config.ts"), "utf8");
-    const test = readFileSync(join(ROOT, "vite.tim-test.config.ts"), "utf8");
+    const pub = readFileSync(P.VITE_TIM_CONFIG, "utf8");
+    const test = readFileSync(P.VITE_TIM_TEST_CONFIG, "utf8");
     expect(pub.includes("dist-tim-test")).toBe(false);
     expect(test.includes("dist-tim-test")).toBe(true);
     expect(pub.includes("tim-test.html")).toBe(false);

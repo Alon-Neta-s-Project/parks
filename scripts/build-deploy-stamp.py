@@ -21,8 +21,8 @@ import pathlib
 import re
 import sys
 
-ROOT = pathlib.Path(__file__).resolve().parent.parent
-FN = ROOT / "supabase" / "functions" / "tim" / "index.ts"
+from paths import P, ROOT  # noqa: E402 — המקור: scripts/paths.json
+FN = P.TIM_FN
 
 LINE = re.compile(r'^const DEPLOY_STAMP = "[0-9a-f]{12}";$', re.M)
 BLANK = 'const DEPLOY_STAMP = "";'

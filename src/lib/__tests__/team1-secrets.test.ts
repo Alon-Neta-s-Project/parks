@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { ROOT } from "../../../scripts/paths";
 
 /**
  * 🔴 **התנאי של גיא, נאכף ולא מתואר.**
@@ -14,7 +15,6 @@ import { describe, expect, it } from "vitest";
  * זמין לכל שלב — בלי שגיאה ובלי שאיש ישים לב. הבדיקה הזו נופלת על זה.
  */
 
-const ROOT = join(__dirname, "..", "..", "..");
 const WORKFLOW = join(ROOT, ".github", "workflows", "team1-collect.yml");
 const AGENTS = join(ROOT, ".claude", "agents");
 

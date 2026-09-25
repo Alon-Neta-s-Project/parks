@@ -10,6 +10,9 @@
 # ושום דבר לא צועק.
 set -euo pipefail
 cd "$(dirname "$0")/.."
+# הנתיבים מ-scripts/paths.json — המקום היחיד שבו כתוב איפה דברים יושבים.
+KNOWLEDGE=$(python3 scripts/paths.py KNOWLEDGE)
+DEPLOY=$(python3 scripts/paths.py DEPLOY)
 
 : "${CI_CONTENT_URL:?חסרה מחרוזת החיבור של ci_content}"
 : "${INGEST_SECRET:?חסר הסוד של embed}"
@@ -36,16 +39,16 @@ if [ -z "$BEFORE" ]; then
   exit 1
 fi
 
-changed=$(git diff --name-only "$BEFORE" HEAD -- knowledge/ | sed 's|knowledge/||; s|\.md$||')
+changed=$(git diff --name-only "$BEFORE" HEAD -- "$KNOWLEDGE/" | sed "s|^$KNOWLEDGE/||; s|\.md\$||")
 
 if [ -z "$changed" ]; then
   echo "אין מסמכי ידע שהשתנו."
 else
   echo "▸ מסמכים שהשתנו:"; printf '   · %s\n' $changed
   for doc in $changed; do
-    [ -f "knowledge/$doc.md" ] || { echo "   ⚠️ $doc נמחק — דילוג"; continue; }
+    [ -f "$KNOWLEDGE/$doc.md" ] || { echo "   ⚠️ $doc נמחק — דילוג"; continue; }
     python3 scripts/build-knowledge-seed.py --doc "$doc" >/dev/null
-    psql "$CI_CONTENT_URL" -v ON_ERROR_STOP=1 -q -f "data/deploy/$doc.txt"
+    psql "$CI_CONTENT_URL" -v ON_ERROR_STOP=1 -q -f "$DEPLOY/$doc.txt"
     echo "   ✓ $doc"
   done
 fi
@@ -53,7 +56,7 @@ fi
 # ── הפתיח נגזר ממדריכי האופי, ולכן הוא נשלח יחד איתם ────────────────
 if echo "$changed" | grep -q "park-character-"; then
   python3 scripts/build-park-intro.py >/dev/null
-  psql "$CI_CONTENT_URL" -v ON_ERROR_STOP=1 -q -f data/deploy/park-intro.txt
+  psql "$CI_CONTENT_URL" -v ON_ERROR_STOP=1 -q -f "$DEPLOY/park-intro.txt"
   echo "   ✓ park-intro"
 fi
 
@@ -84,7 +87,7 @@ done
 echo "▸ ווידוא שהתוכן נשלף"
 python3 scripts/build-knowledge-seed.py --live-check >/dev/null
 result=$(psql "$CI_CONTENT_URL" -At -v ON_ERROR_STOP=1 \
-           -f data/deploy/content-live-check.txt)
+           -f "$DEPLOY/content-live-check.txt")
 echo "$result"
 
 # 🔴 **אישור חיובי, משורה שנועדה למכונה.** כותרת נועדה לאדם, והכרעה

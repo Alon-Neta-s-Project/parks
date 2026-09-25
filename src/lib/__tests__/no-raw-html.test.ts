@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { ROOT } from "../../../scripts/paths";
 
 /**
  * 🔴 **תנאי של גיא (22.09), ונאכף במקום להיכתב.**
@@ -21,7 +22,6 @@ import { describe, expect, it } from "vitest";
  * כשבוחרים אותה, ולא אחר כך.
  */
 
-const ROOT = join(__dirname, "..", "..", "..");
 /**
  * ⚠️ **מורכבות בזמן ריצה — והבדיקה סימנה את עצמה בלי זה.**
  *

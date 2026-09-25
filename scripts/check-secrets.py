@@ -18,7 +18,7 @@ import re
 import subprocess
 import sys
 
-ROOT = pathlib.Path(__file__).resolve().parent.parent
+from paths import P, ROOT  # noqa: E402 — המקור: scripts/paths.json
 
 # ⚠️ **תבניות של חומר מפתח, ולא שמות.** `service_role` הוא שם תפקיד
 # שמופיע לגיטימית בעשרים מיגרציות; חיפוש אחריו היה מייצר רעש שמלמד
@@ -86,7 +86,7 @@ def main() -> int:
     hits: list[str] = []
     # ⚠️ גם `data/deploy/` — הקבצים שאני שולח לנטע. הם בדרך כלל במעקב,
     # אבל לא תמיד, וזה בדיוק הערוץ שדולף בלי לעבור דרך git.
-    files = set(tracked()) | set((ROOT / "data" / "deploy").glob("*.txt"))
+    files = set(tracked()) | set((P.DEPLOY).glob("*.txt"))
 
     for f in sorted(files):
         if not f.is_file():

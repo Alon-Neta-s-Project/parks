@@ -1,5 +1,7 @@
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import he from "../../i18n/he.json";
+import { P } from "../../../scripts/paths";
 
 /**
  * מסך הכניסה, לפי `design/canvas/TimHomeLaylaInspired.dc.html`.
@@ -50,13 +52,13 @@ describe("מסך הכניסה", () => {
 describe("תצלום מסך הכניסה", () => {
   it("קיים כקובץ ולא כ-base64 ברכיב", async () => {
     const { statSync } = await import("node:fs");
-    const s = statSync("public/home-hero.jpg");
+    const s = statSync(join(P.WEB_PUBLIC, "home-hero.jpg"));
     expect(s.size).toBeGreaterThan(10_000);
   });
 
   it("הרכיב אינו נושא שורת קרדיט", async () => {
     const { readFileSync } = await import("node:fs");
-    const src = readFileSync("src/pages/HomePage.tsx", "utf8");
+    const src = readFileSync(join(P.WEB_SRC, "pages", "HomePage.tsx"), "utf8");
     // ⚠️ בגוף ה-JSX בלבד. ההערה בראש הקובץ כן מסבירה שהאישור ניתן.
     const jsx = src.slice(src.indexOf("return ("));
     for (const word of ["קרדיט", "צילום:", "Photo by", "Unsplash", "Pexels"]) {

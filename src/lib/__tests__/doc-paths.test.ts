@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { ROOT } from "../../../scripts/paths";
 
 /**
  * 🔴 **קיים כי ארבעה קבצים הופנו ביום אחד לנתיבים שאינם קיימים**
@@ -13,7 +14,6 @@ import { describe, expect, it } from "vitest";
  * את כל ההפניות אליו מצביעות למקום הישן, בשקט.
  */
 
-const ROOT = join(__dirname, "..", "..", "..");
 
 /** כל הקבצים במעקב git — אותו מקור כמו check-secrets. */
 function tracked(): string[] {

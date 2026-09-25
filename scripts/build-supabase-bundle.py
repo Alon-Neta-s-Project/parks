@@ -18,12 +18,12 @@ Usage: python3 scripts/build-supabase-bundle.py
 import pathlib
 import re
 
-ROOT = pathlib.Path(__file__).resolve().parent.parent
-OUT = ROOT / "db" / "supabase-bundle.sql"
+from paths import P, ROOT  # noqa: E402 — המקור: scripts/paths.json
+OUT = P.DB / "supabase-bundle.sql"
 
-migrations = sorted((ROOT / "db" / "migrations").glob("*.sql"))
-seeds = sorted((ROOT / "db" / "seed").glob("*.sql"))
-verify = ROOT / "db" / "verify.sql"
+migrations = sorted((P.MIGRATIONS).glob("*.sql"))
+seeds = sorted((P.DB_SEED).glob("*.sql"))
+verify = P.DB / "verify.sql"
 
 if not migrations:
     raise SystemExit("no migrations found")

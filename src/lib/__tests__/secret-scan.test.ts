@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { P, ROOT } from "../../../scripts/paths";
 
 /**
  * 🔴 **הסורק עצמו צריך בדיקה — וזה בדיוק הלקח של #26.**
@@ -16,9 +17,8 @@ import { describe, expect, it } from "vitest";
  * בדיקה שאיש לא קורא.
  */
 
-const ROOT = join(__dirname, "..", "..", "..");
-const SCANNER = join(ROOT, "scripts", "check-secrets.py");
-const HOOK = join(ROOT, "scripts", "hook-scan-issue.py");
+const SCANNER = join(P.SCRIPTS, "check-secrets.py");
+const HOOK = join(P.SCRIPTS, "hook-scan-issue.py");
 
 /** מריץ את הסורק על טקסט. true = נקי, false = נמצא סוד. */
 function clean(text: string): boolean {

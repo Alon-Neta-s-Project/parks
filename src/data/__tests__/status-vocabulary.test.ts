@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { P } from "../../../scripts/paths";
 
 /**
  * 🔴 **הבדיקה הזו נכתבה אחרי שהעדרה כמעט מחק שלוש שורות אמיתיות.**
@@ -19,7 +20,6 @@ import { describe, expect, it } from "vitest";
  * הצדדים** — כשהיא נאכפת ולא רק כתובה.
  */
 
-const ROOT = join(__dirname, "..", "..", "..");
 
 /** ⚠️ ההערות מוסרות. שני הקבצים מזכירים את הערכים בפרוזה. */
 const noPyComments = (s: string) => s.replace(/^\s*#.*$/gm, "");
@@ -28,7 +28,7 @@ const noTsComments = (s: string) =>
 
 /** אוצר המילים שבונה הזרע יכול לייצר. */
 function producible(): Set<string> {
-  const py = noPyComments(readFileSync(join(ROOT, "scripts", "build-content-seed.py"), "utf8"));
+  const py = noPyComments(readFileSync(join(P.SCRIPTS, "build-content-seed.py"), "utf8"));
 
   const plain = py.match(/^STATUS\s*=\s*\{([^}]*)\}/m);
   const decided = py.match(/^STATUS_DECIDED\s*=\s*\{([\s\S]*?)^\}/m);
@@ -45,7 +45,7 @@ function producible(): Set<string> {
 
 /** אוצר המילים שטים יודע לנסח בעברית. */
 function rendered(): Set<string> {
-  const ts = noTsComments(readFileSync(join(ROOT, "supabase", "functions", "tim", "index.ts"), "utf8"));
+  const ts = noTsComments(readFileSync(P.TIM_FN, "utf8"));
   const block = ts.match(/const say: Record<string, string> = \{([\s\S]*?)\n\s*\};/);
   expect(block, "מפת הניסוחים לא נמצאה — הבדיקה קוראת קובץ שהשתנה").not.toBe(null);
   return new Set([...block![1]!.matchAll(/^\s*([a-z_]+)\s*:/gm)].map((m) => m[1]!));

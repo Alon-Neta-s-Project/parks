@@ -17,9 +17,9 @@ import pathlib
 import re
 import sys
 
-ROOT = pathlib.Path(__file__).resolve().parent.parent
-HE = ROOT / "src" / "i18n" / "he.json"
-FN = ROOT / "supabase" / "functions" / "tim" / "index.ts"
+from paths import P, ROOT  # noqa: E402 — המקור: scripts/paths.json
+HE = P.HE_JSON
+FN = P.TIM_FN
 
 # ⚠️ המפתחות שהם המקור. מפתח שנמחק מ-he.json מפיל כאן, ולא נעלם בשקט.
 KEYS = ["everyone", "unknown", "unknownWhy", "unmeasuredWhy", "childSwap"]

@@ -26,9 +26,9 @@ import hashlib
 import pathlib
 import sys
 
-ROOT = pathlib.Path(__file__).resolve().parent.parent
-MIG = ROOT / "db" / "migrations"
-DEPLOY = ROOT / "data" / "deploy"
+from paths import P, ROOT  # noqa: E402 — המקור: scripts/paths.json
+MIG = P.MIGRATIONS
+DEPLOY = P.DEPLOY
 
 OPEN, CLOSE = "-- <migration-log>", "-- </migration-log>"
 

@@ -28,8 +28,8 @@ import os
 import pathlib
 from collections import Counter
 
-ROOT = pathlib.Path(__file__).resolve().parent.parent
-SRC = ROOT / "src" / "data" / "experiences.json"
+from paths import P, ROOT  # noqa: E402 — המקור: scripts/paths.json
+SRC = P.EXPERIENCES_JSON
 # 🔴 **ניתן לניתוב, כי הקובץ הנגזר כבר התיישן בשקט פעם אחת.**
 #
 # תיקון תוכן ב-`knowledge/` נערך ולא נבנה, והמסד קיבל את הישן במשך יום.
@@ -39,7 +39,7 @@ SRC = ROOT / "src" / "data" / "experiences.json"
 # ⚠️ הבנייה כותבת כמה קבצים ומוחקת קודם את הישנים, ולכן ההשוואה נעשית
 # על ידי בנייה לתיקייה זמנית — ולא בדגל שמנסה לדמות את הכתיבה.
 OUTDIR = pathlib.Path(os.environ["CONTENT_SEED_OUT"]) if os.environ.get("CONTENT_SEED_OUT") \
-    else ROOT / "db" / "content-seed"
+    else P.CONTENT_SEED
 
 # Roughly how many characters of VALUES rows go into one part. The Supabase
 # SQL editor handles the 75 KB migration bundle comfortably; this keeps each

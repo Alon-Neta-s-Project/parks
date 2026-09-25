@@ -1,6 +1,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { P } from "../../../scripts/paths";
 
 /**
  * The upsert in db/content-seed is generated, and the generator derives the
@@ -13,7 +14,7 @@ import { describe, expect, it } from "vitest";
  * was withdrawn upstream would silently keep the withdrawn rating — the cell
  * has a value, it is simply the wrong one, and nothing looks broken.
  */
-const DIR = join(process.cwd(), "db", "content-seed");
+const DIR = P.CONTENT_SEED;
 const parts = readdirSync(DIR)
   .filter((f) => f.startsWith("content-") && f.endsWith(".sql"))
   .map((f) => ({ name: f, sql: readFileSync(join(DIR, f), "utf8") }));

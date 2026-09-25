@@ -17,14 +17,13 @@
  */
 import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
+import { P, ROOT } from "./paths";
 import {
   experienceSchema, parkSchema, REQUIRED_FIELDS,
   type Experience, type Park, type QuadState,
 } from "../src/data/schema";
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const WRITE = process.argv.includes("--write");
 
 // ── minimal CSV reader: quoted fields, embedded commas, doubled quotes ──────
@@ -192,7 +191,7 @@ const slugify = (park: string, name: string) =>
     .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
 // ── run ─────────────────────────────────────────────────────────────────────
-const mapping = JSON.parse(readFileSync(join(ROOT, "content-mapping.json"), "utf8"));
+const mapping = JSON.parse(readFileSync(P.CONTENT_MAPPING, "utf8"));
 const csv = readFileSync(join(ROOT, mapping.source), "utf8");
 const rows = parseCsv(csv);
 const headers = Object.keys(rows[0] ?? {});
@@ -202,7 +201,7 @@ const headers = Object.keys(rows[0] ?? {});
  * mismatch is how the previous export shipped an obsolete column name, empty in
  * all 232 rows, without anything failing loudly. Stop instead.
  */
-const manifest = JSON.parse(readFileSync(join(ROOT, "data/source/product_export_manifest.json"), "utf8"));
+const manifest = JSON.parse(readFileSync(join(P.SOURCE, "product_export_manifest.json"), "utf8"));
 const columnsHash = createHash("sha256").update(headers.join("|")).digest("hex").slice(0, 12);
 if (columnsHash !== manifest.columns_hash) {
   console.error(`✗ ABORT — column-set hash mismatch.`);
@@ -230,7 +229,7 @@ if (columnsHash !== manifest.columns_hash) {
  * holds would make the export a suggestion, and the next person to correct a
  * name in the master would watch the correction disappear with no error.
  */
-const patchPath = join(ROOT, "data/source/name_he_patch.csv");
+const patchPath = join(P.SOURCE, "name_he_patch.csv");
 const namePatch: Record<string, string> = {};
 if (existsSync(patchPath)) {
   for (const row of parseCsv(readFileSync(patchPath, "utf8"))) {
@@ -285,7 +284,7 @@ for (const row of rows) {
  * the master and leave no trace — which is the same silent-overwrite failure in
  * a new costume.
  */
-const sensPatchPath = join(ROOT, "data/source/sens_patch.csv");
+const sensPatchPath = join(P.SOURCE, "sens_patch.csv");
 interface SensPatch { key: string; column: string; from: string; to: string }
 const sensPatches: SensPatch[] = existsSync(sensPatchPath)
   ? parseCsv(readFileSync(sensPatchPath, "utf8"))
@@ -337,7 +336,7 @@ for (const patch of sensPatches) {
  * one place rather than spread across 232 rows.
  */
 const subtypeMap: Record<string, { type: string; category: string }> =
-  JSON.parse(readFileSync(join(ROOT, "data/source/subtype_map.json"), "utf8"));
+  JSON.parse(readFileSync(join(P.SOURCE, "subtype_map.json"), "utf8"));
 
 // A master-only column in the export means the export leaked. Stop.
 const leaked = mapping.neverExpected.columns.filter((c: string) => headers.includes(c));
@@ -372,7 +371,7 @@ const unexpectedColumns = headers.filter((h) => !mapping.requiredColumns.include
  * "Water play area"; Bay Slides is "Body slide". A subtype rule would have
  * missed the one with the largest error in it.
  */
-const maxHeightPath = join(ROOT, "data/source/max_height.csv");
+const maxHeightPath = join(P.SOURCE, "max_height.csv");
 const maxHeights = new Map<string, number>();
 if (existsSync(maxHeightPath)) {
   for (const r of parseCsv(readFileSync(maxHeightPath, "utf8"))) {
@@ -617,8 +616,8 @@ const report = {
   incomplete: incomplete.slice(0, 400),
 };
 
-mkdirSync(join(ROOT, "reports"), { recursive: true });
-writeFileSync(join(ROOT, "reports/import-gap-report.json"), JSON.stringify(report, null, 2) + "\n");
+mkdirSync(P.REPORTS, { recursive: true });
+writeFileSync(join(P.REPORTS, "import-gap-report.json"), JSON.stringify(report, null, 2) + "\n");
 
 // ── console summary ─────────────────────────────────────────────────────────
 console.log(`\n${WRITE ? "IMPORT" : "DRY RUN"} — ${mapping.source}`);
@@ -677,7 +676,7 @@ console.log(`\n  pages complete: ${report.pagesComplete} / ${experiences.length}
 console.log(`  gap report → reports/import-gap-report.json`);
 
 if (WRITE) {
-  const out = join(ROOT, "src/data");
+  const out = join(P.WEB_SRC, "data");
   mkdirSync(out, { recursive: true });
   writeFileSync(join(out, "experiences.json"), JSON.stringify(experiences, null, 1) + "\n");
   writeFileSync(join(out, "parks.json"), JSON.stringify(parks, null, 1) + "\n");

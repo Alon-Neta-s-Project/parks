@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { P } from "../../../scripts/paths";
 
 /**
  * ⚠️ **הכלל "CSS לוגי בלבד" עבר מהערה לאכיפה.**
@@ -35,8 +36,8 @@ const lines = (f: string) =>
     .filter((l) => !l.text.includes(ALLOW));
 
 describe("CSS לוגי בלבד", () => {
-  const css = walk("src/styles", [".css"]).filter((f) => !f.includes("__tests__"));
-  const tsx = walk("src", [".tsx"]);
+  const css = walk(join(P.WEB_SRC, "styles"), [".css"]).filter((f) => !f.includes("__tests__"));
+  const tsx = walk(P.WEB_SRC, [".tsx"]);
 
   it("אין תכונות CSS פיזיות בגיליונות הסגנון", () => {
     // margin-left, padding-right, border-left, inset-right, ובודדים left:/right:

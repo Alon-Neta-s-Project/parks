@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { P, ROOT } from "../../../scripts/paths";
 
 /**
  * 🔴 **`FIT_STAMP` אמר "זהה" על פונקציה ישנה, וזה נמדד באוויר.**
@@ -17,14 +18,13 @@ import { describe, expect, it } from "vitest";
  * להתיישן בשקט — אותה צורה בדיוק כמו `seed-freshness.test.ts`.
  */
 
-const ROOT = join(__dirname, "..", "..", "..");
 
 describe("החותם של הפריסה מכסה את הקובץ כולו", () => {
   it("והוא מעודכן", () => {
     // ⚠️ **הסקריפט עצמו הוא הבודק** — לא העתק שלו כאן. שכפול הלוגיקה
     // היה מייצר בדיוק את המקור השני שהפרויקט אוסר.
     const run = () =>
-      execFileSync("python3", [join(ROOT, "scripts", "build-deploy-stamp.py"), "--check"], {
+      execFileSync("python3", [join(P.SCRIPTS, "build-deploy-stamp.py"), "--check"], {
         cwd: ROOT,
         encoding: "utf8",
       });

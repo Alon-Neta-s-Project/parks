@@ -20,8 +20,8 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-DIR = ROOT / "knowledge"
+from paths import P, ROOT  # noqa: E402 — המקור: scripts/paths.json
+DIR = P.KNOWLEDGE
 
 # אוצרי המילים — זהים ל-domain-ים ב-001 ול-check ב-003. ערך שאינו כאן
 # עוצר את המסמך ולא נופל לברירת מחדל.
