@@ -104,3 +104,30 @@ describe("ההיסטוריה סגורה, והחדשות של dbmate", () => {
     expect(stamped).toEqual([]);
   });
 });
+
+/**
+ * ה-baseline נוצר מ-pg_dump, והוא נכנס ל-dbmate כמו שהוא. שלושה דברים
+ * ששברו אותו בהרצה הראשונה, או שהיו שוברים:
+ */
+describe("ה-baseline של dbmate", () => {
+  const file = () => readdirSync(DBMATE).find((f) => f.endsWith("_baseline.sql"));
+
+  it("קיים, ואחד", () => {
+    expect(readdirSync(DBMATE).filter((f) => f.endsWith("_baseline.sql"))).toHaveLength(1);
+  });
+
+  it("אין בו פקודות של psql — dbmate אינו psql", async () => {
+    const { readFileSync } = await import("node:fs");
+    const meta = readFileSync(join(DBMATE, file()!), "utf8").split("\n").filter((l) => l.startsWith("\\"));
+    expect(meta).toEqual([]);
+  });
+
+  // ⚠️ המפתח האמיתי של tester_key() יושב בייצור בגוף הפונקציה (O8). ה-baseline
+  // נבנה מהמיגרציות, ולכן נושא את הערך המציין — וכך זה חייב להישאר.
+  it("tester_key() נושאת את הערך המציין, לא מפתח", async () => {
+    const { readFileSync } = await import("node:fs");
+    const sql = readFileSync(join(DBMATE, file()!), "utf8");
+    const body = sql.slice(sql.indexOf("FUNCTION public.tester_key()"));
+    expect(body.slice(0, 400)).toContain("YOUR-TESTER-KEY-HERE");
+  });
+});

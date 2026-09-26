@@ -1,0 +1,51 @@
+-- 📍 להריץ ב: Supabase ← SQL Editor
+-- שם השאילתה: dbmate-baseline — סימון שה-baseline כבר רץ (26.09)
+-- ⚠️ פעם אחת בלבד. בטוח להרצה חוזרת — הרצה שנייה אינה משנה דבר.
+-- ────────────────────────────────────────────────────────────────────
+--
+-- 🔴 **מה זה עושה: שורה אחת בטבלה אחת. שום אובייקט קיים לא משתנה.**
+--
+-- מכאן המיגרציות רצות ב-dbmate (apps/server/db/migrations/), ולא בהדבקה.
+-- המיגרציה הראשונה שם היא baseline — הסכמה של הייצור עצמו. בייצור הכול
+-- כבר קיים, ולכן היא **אינה רצה** כאן: הקובץ הזה רק רושם אותה כ"רצה",
+-- כדי ש-dbmate לא ינסה לבנות מחדש את מה שכבר בנוי.
+--
+-- ⚠️ **ובלי הקובץ הזה, dbmate לא ירוץ על הייצור בכלל.** ה-workflow
+-- (.github/workflows/migrate.yml) בודק את השורה הזו לפני כל הרצה, ונעצר
+-- בלעדיה — כי הרצת baseline על מסד מלא הייתה נופלת על האובייקט הראשון.
+--
+-- ✅ **נבדק לפני:** הסכמה של הייצור הושוותה לזו שה-baseline בונה, אובייקט
+-- באובייקט, כולל כל הרשאה (scripts/baseline/fingerprint.sql, 26.09). אפס
+-- הבדלים, מלבד שלושה צפויים — docs/refactor-server-split.md, שלב 2ב.
+-- ✅ **ונוסה:** הקובץ הזה רץ על המסד המקומי שנבנה מ-48 המיגרציות, כמו
+-- הייצור, ו-dbmate הראה אחריו "Applied: 1, Pending: 0".
+
+BEGIN;
+
+set local search_path = public, extensions;
+
+-- ── בדיקת שפיות: זה המסד הנכון ───────────────────────────────────────
+-- ⚠️ אם tester_note (מיגרציה 046, האחרונה) חסרה — זה אינו מסד הייצור,
+-- או שלא כל המיגרציות רצו עליו. במקרה כזה אסור לסמן שה-baseline רץ.
+do $$
+begin
+  if to_regclass('public.tester_note') is null then
+    raise exception '❌ tester_note חסרה — זה אינו מסד שכל 48 המיגרציות רצו עליו. לא סומן דבר.';
+  end if;
+end
+$$;
+
+-- ── הטבלה של dbmate, כפי שהוא יוצר אותה ─────────────────────────────
+create table if not exists public.dbmate_migrations (version varchar primary key);
+
+-- ⚠️ ברירות המחדל של Supabase נותנות ל-anon גישה לכל טבלה חדשה ב-public.
+-- יומן המיגרציות אינו עניינו של אף אחד מבחוץ.
+revoke all on public.dbmate_migrations from public, anon, authenticated;
+
+insert into public.dbmate_migrations (version) values ('20260926000000')
+on conflict (version) do nothing;
+
+COMMIT;
+
+-- ── מה צריך לראות ───────────────────────────────────────────────────
+select version as "סומן כרץ" from public.dbmate_migrations order by version;

@@ -171,6 +171,8 @@ npm run test:edge  # רק פונקציות ה-Edge (Deno)
 npm run import     # ייבוא יבש; --write כדי לכתוב
 npm run build      # בנייה + רינדור מוקדם של 243 דפים
 npx tsx scripts/db-conformance.ts   # טעינת 232 השורות למסד אמיתי
+npm run db:local-pg  # Postgres נקי ב-Docker מה-baseline, עם כל התוכן
+npm run db:new <שם>  # מיגרציה חדשה (dbmate) — לא עוד הדבקה ב-SQL Editor
 ```
 
 הקמת מסד מקומי: `apps/server/db/README-local.md`.

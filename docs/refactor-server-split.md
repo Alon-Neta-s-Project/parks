@@ -20,7 +20,7 @@ scripts/         repo tooling
 |---|---|---|
 | 0 | Decisions: hosting, security review, the gap in the Tim file (see open items) | Open |
 | 1 | npm workspaces and moving folders into the layout above, with no behavior change | ✅ Done 25.09 (workspaces and `packages/shared` deferred to 3) |
-| 2 | Migrations with dbmate, run from CI with an approval gate | Not started |
+| 2 | Migrations with dbmate, run from CI with an approval gate | ✅ In the repo, 26.09 · marking production (one file) waits on O2 |
 | 3 | Port Tim, `embed` and `aliases` to the Node server, running alongside the Edge Function | 3a ✅ workspaces · 3b ✅ server + Tim · 3c ✅ embed + aliases · 3d ✅ Docker (local) · deployment waits on O1 |
 | 4 | Point the frontend at the server, retire the Edge Functions, revoke the anon grants | Not started |
 | 5 | Shared logic in `packages/shared`, a browse API, close direct table reads | Not started |
@@ -231,7 +231,27 @@ Correct (112 cm, the child is 110). `retrieval: ok` · 5 chunks · 1 attraction 
 - `publicDir: false` in the Tim configs was removed, because there's no `public/` anymore. Instead, **a test: no image in the Tim build** (`test-build-separation`). Before, the config guaranteed it; now it depends on what gets imported. **Seen failing:** a temporary import in `TimOnlyApp` put `home-hero-U4e2b5tN.jpg` into the build, and the test caught it.
 - **Tests:** `npm run qa` passes · web **302** (+1) · server 11 · deno 104 · `build`: 11 images, all hashed, and 0 images in the Tim build.
 
-### O6 — The migrations can't build a database from scratch · found 25.09 on a local database
+### 2a + 2b ✅ dbmate: a baseline identical to production (26.09.2026)
+Using **read access only** to production (Alon: "complete the migration here, with read access only"). Nothing was written to production.
+
+- **2a:** the 48 migrations → `apps/server/db/migrations-history/`, untouched (48 signed). `migrations/` belongs to dbmate. The history is locked at 48 (a test).
+- **2b, the baseline:** `apps/server/db/migrations/20260926000000_baseline.sql`, **generated** by `scripts/baseline/assemble.py`:
+  - **The structure:** `pg_dump --schema-only` of a clean database built from the 48, **plus the three deploy files that created schema objects outside any migration**: `ci-roles.txt` (the `unanswered_sample` function and the CI policies), `team1-role.txt`, `team1-policy-fix.txt`. They were discovered when production had a function that no migration creates.
+  - **The permissions:** from **production's catalog** (`relacl`/`attacl`/`proacl`) via `scripts/baseline/prod-grants.sql`. Readable by `reviewer_readonly`. 191 statements, including team 1's column-level permissions.
+  - Why not `pg_dump` from production: it locks every table, and `reviewer_readonly` deliberately can't read 13 of the 24.
+- ✅ **The proof: identical to production.** A clean Postgres 17 in Docker (not Supabase) → `dbmate up` → the comparison (`scripts/baseline/fingerprint.sql`: 782 objects including every permission) against production. **The only differences are the three expected ones:** `rls_auto_enable` (a Supabase platform function), `tester_key` (production holds the real key, the baseline a placeholder), and `dbmate_migrations` (created in production by the marking).
+- ✅ **O6 is closed:** on that database the seeds, content, knowledge and park intros loaded **with no workaround**. 242 attractions, 314 chunks. `npm run db:local-pg` builds it from scratch in about half a minute.
+- ✅ **A rehearsal of the production step:** `data/deploy/dbmate-baseline.txt` (one row in dbmate's table) ran on the local Supabase database, which was built from the 48 like production. Afterwards `dbmate status` → `Applied: 1, Pending: 0`, and `up` runs nothing. It's safe to run twice, and **it refuses on a database that isn't production** (a check for `tester_note`, seen failing on an empty database).
+- `.github/workflows/migrate.yml`: an approval gate (Environment `production-db`), and **it stops if the baseline isn't marked in production**, rather than trying to build a schema on a full database.
+- Tests: 3 new ones on the baseline (exactly one; no psql commands; `tester_key` placeholder). **Seen failing,** including a sabotage that first failed to plant a backslash (zsh's `echo` turns `\r` into a carriage return). The test was correct, the sabotage wasn't.
+- **Tests:** `npm run qa` passes · web **308** · server 11 · deno 104.
+
+**What's left in production (waits on O2, Guy):**
+1. Neta runs `data/deploy/dbmate-baseline.txt` once, in the SQL Editor.
+2. Guy defines the role (DDL) → secret `MIGRATE_DATABASE_URL`, and the approvers in the Environment.
+From then on, new migrations: `npm run db:new <name>`, and CI with approval.
+
+### O6 — ✅ Closed 26.09 (the baseline, Stage 2b) · The migrations can't build a database from scratch · found 25.09 on a local database
 While setting up a local database (`supabase start`, config in `apps/server/db/supabase-local/`), the setup file stopped **at migration 038**. That's the practical check O5 left open, and it failed.
 
 **Three causes, all the same pattern: the migrations assume a database that was built by hand, not by the migrations:**
@@ -288,3 +308,6 @@ The system catalog of production compared object by object with the local databa
 **Proposal:** `apps/pipeline/`, **split by flow**: `attractions/`, `knowledge/`, `community/`, plus shared `enrich/` (embed, aliases as CLI jobs, not routes), `verify/`, and `content/` (the sources). Each flow runs source → build (in the repo, deterministic) → load (database role) → enrich (Gemini) → verify. `db/` shared at the root. The server keeps only Tim. `scripts/` keeps only repo tooling.
 
 **Waiting on Alon:** split by flow or by stage, and where `db/` goes. Before this: Stage 2 (a dbmate baseline matching production, O6/O8).
+
+### O10 — `anon` has `TRUNCATE` on the tables in production · found 26.09 · for Guy
+While generating the baseline's permissions from production's catalog: `anon` and `authenticated` have `TRUNCATE, TRIGGER, REFERENCES, MAINTAIN` on the content tables (e.g. `experience`, `knowledge_doc`), and **row-level security doesn't apply to `TRUNCATE`.** Practical risk is low: `anon` can't log in directly, and PostgREST doesn't expose `TRUNCATE`. But it's a permission nobody needs. The baseline reproduces it **as it is**, because its job is to describe production, not fix it. **Proposal:** a dbmate migration that revokes `TRUNCATE, TRIGGER, REFERENCES, MAINTAIN` from `anon, authenticated`. That's the first migration dbmate would run, once O2 is approved.

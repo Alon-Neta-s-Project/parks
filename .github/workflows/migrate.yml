@@ -1,0 +1,71 @@
+# מריץ מיגרציות חדשות על הייצור, ב-dbmate — במקום הדבקה ב-SQL Editor.
+#
+# 🔴 **שני תנאים לפני שורה אחת של SQL:**
+#   1. ה-Environment `production-db` — מאשר אנושי לוחץ Approve. ההדבקה
+#      הידנית מפסיקה, והאישור האנושי נשאר.
+#   2. ה-baseline מסומן כרץ (data/deploy/dbmate-baseline.txt). בלעדיו
+#      dbmate היה מנסה לבנות את כל הסכמה על מסד מלא, ונופל על האובייקט
+#      הראשון. ה-workflow בודק ועוצר, עם הודעה מה להריץ.
+#
+# ⚠️ **ממתין להכרעת גיא (O2):** התפקיד שהמיגרציות רצות בו (DDL בלבד) והמאשרים
+# ב-Environment. עד אז הסוד MIGRATE_DATABASE_URL אינו מוגדר, וה-workflow נעצר
+# בצעד הראשון.
+name: migrate
+
+on:
+  push:
+    branches: [release]
+    paths:
+      - "apps/server/db/migrations/*.sql"
+      - ".github/workflows/migrate.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: migrate-production
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    environment: production-db
+    env:
+      DATABASE_URL: ${{ secrets.MIGRATE_DATABASE_URL }}
+      DBMATE_MIGRATIONS_DIR: apps/server/db/migrations
+      DBMATE_MIGRATIONS_TABLE: dbmate_migrations
+      DBMATE_NO_DUMP_SCHEMA: "true"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: הסוד מוגדר
+        run: |
+          [ -n "$DATABASE_URL" ] || { echo "🔴 MIGRATE_DATABASE_URL חסר — ממתין להכרעת גיא על התפקיד (O2)."; exit 1; }
+
+      - name: dbmate
+        run: |
+          curl -fsSL -o /usr/local/bin/dbmate https://github.com/amacneil/dbmate/releases/download/v2.36.0/dbmate-linux-amd64
+          chmod +x /usr/local/bin/dbmate
+
+      # ⚠️ psql ולא dbmate: dbmate status היה יוצר את הטבלה אם אינה קיימת —
+      # כלומר מסמן מסד כ"מוכן" בדיוק כשהוא אינו.
+      - name: ה-baseline מסומן כרץ
+        run: |
+          marked=$(psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 -c \
+            "select count(*) from information_schema.tables where table_schema='public' and table_name='dbmate_migrations'")
+          if [ "$marked" = "1" ]; then
+            marked=$(psql "$DATABASE_URL" -At -c "select count(*) from public.dbmate_migrations where version='20260926000000'")
+          else
+            marked=0
+          fi
+          [ "$marked" = "1" ] || {
+            echo "🔴 ה-baseline אינו מסומן בייצור. להריץ פעם אחת את data/deploy/dbmate-baseline.txt ב-SQL Editor, ואז שוב."
+            exit 1
+          }
+
+      - name: מה ממתין
+        run: dbmate status
+
+      - name: dbmate up
+        run: dbmate up
+
+      - name: אחרי
+        run: dbmate status
