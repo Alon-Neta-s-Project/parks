@@ -34,4 +34,4 @@
  *
  * ⚠️ **נוצר בידי `scripts/build-deploy-stamp.py`. אין לערוך ידנית.**
  */
-export const DEPLOY_STAMP = "449136bbe7f8";
+export const DEPLOY_STAMP = "d3ece6b34e7c";

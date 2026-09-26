@@ -44,3 +44,19 @@ export function corsFor(req: Request, env: Record<string, string | undefined>) {
   if (value) h["Access-Control-Allow-Origin"] = value;
   return h;
 }
+
+/**
+ * צעד שאינו יכול להמשיך — והתשובה שהוא היה נותן. `handle` מחזיר אותה כמות
+ * שהיא, ולכן הקודים והגופים זהים לאלה שנכתבו פעם בתוך `handle` עצמו.
+ */
+export type Fail = { fail: { status: number; body: Record<string, unknown> } };
+export const failWith = (status: number, body: Record<string, unknown>): Fail => ({ fail: { status, body } });
+export const isFail = (x: unknown): x is Fail => typeof x === "object" && x !== null && "fail" in x;
+
+export function jsonResponder(cors: Record<string, string>) {
+  return (body: unknown, status = 200) =>
+    new Response(JSON.stringify(body), {
+      status,
+      headers: { ...cors, "Content-Type": "application/json; charset=utf-8" },
+    });
+}

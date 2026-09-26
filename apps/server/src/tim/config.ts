@@ -1,3 +1,4 @@
+import { failWith, type Fail } from "./http";
 /**
  * שם המודל. ניתן לשינוי בסוד GEMINI_MODEL בלי לגעת בקוד — רשימת המודלים
  * של גוגל משתנה, ושם שהיה תקף נעלם בלי הודעה. 404 מגוגל על נתיב תקין
@@ -89,4 +90,23 @@ export function thinkingConfig(env: Record<string, string | undefined>) {
   if (raw && Number.isFinite(budget)) cfg.thinkingBudget = budget;
   if (level) cfg.thinkingLevel = level;
   return Object.keys(cfg).length ? { thinkingConfig: cfg } : {};
+}
+
+// שתי תקלות שונות לגמרי, ולכן שתי הודעות שונות. "לא הוגדר או לא מתחיל
+// ב-AIza" שלח את נטע לבדוק את שתי האפשרויות בלי לדעת באיזו היא נמצאת.
+// שום חלק מהמפתח אינו מוחזר — רק אורכו, שמספיק כדי לזהות הדבקה חלקית.
+export function keyProblem(key: string | undefined): Fail | null {
+  if (key === undefined || key.trim() === "") {
+    return failWith(500, {
+      error: "missing_api_key",
+      detail: "הסוד GEMINI_API_KEY אינו קיים. לבדוק את השם המדויק ב-Edge Functions ← Secrets, ואז Deploy מחדש — סוד חדש נכנס לפונקציה רק בפריסה הבאה.",
+    });
+  }
+  if (!looksLikeGeminiKey(key)) {
+    return failWith(500, {
+      error: "malformed_api_key",
+      detail: `הסוד קיים, אבל הערך קצר מדי או מכיל רווח. אורך שהתקבל: ${key.trim().length} (מפתח תקין הוא כ-39 תווים). סביר שההדבקה הייתה חלקית.`,
+    });
+  }
+  return null;
 }

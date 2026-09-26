@@ -1,3 +1,5 @@
+import type { Db } from "./rate-limit";
+import { extractHeight, wantsRecommendation } from "./understand";
 /** מתקן כפי שהוא חוזר מ-find_experiences. */
 export interface ExperienceRow {
   name: string;
@@ -79,4 +81,103 @@ export interface KnowledgeChunk {
    * שנשענת רק על דרגה נמוכה יותר היא ממצא ולא תקלה.
    */
   authority_tier: string | null;
+}
+
+/**
+ * 🔴 **על שאלת המלצה טים לא קיבל ולו מתקן אחד.**
+ *
+ * `ridesTask` רצה רק כששולפים שם מתקן מהשאלה, ו"מעדיפים פארקים עם
+ * תפאורה יפה" אינה מכילה שם. לכן חזרו אפס שורות, וכל מה שהיה לו
+ * לענות ממנו היה מדריכי האופי — פרוזה. הוא ענה בפסקאות אווירה בלי
+ * ולו מתקן אחד בשם, וזה מה שפולה תפסה.
+ *
+ * ⚠️ **ורק כששאלו אותנו לבחור.** שליפה כזו על כל שאלה הייתה מזריקה
+ * עשרים שורות מתקנים להקשר של "מה קורה אם יורד גשם", ויש בדיקה
+ * שאוסרת בדיוק את זה.
+ */
+export async function findCandidates({ url, dbKey }: Db, asked: string | null, question: string): Promise<ParkCandidate[]> {
+  if (asked || !wantsRecommendation(question)) return [];
+  try {
+    const res = await fetch(`${url}/rest/v1/rpc/park_candidates`, {
+      method: "POST",
+      headers: {
+        apikey: dbKey,
+        Authorization: `Bearer ${dbKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ p_per_park: 3 }),
+    });
+    const rows = res.ok ? await res.json() : null;
+    return Array.isArray(rows) ? rows : [];
+  } catch { /* נפילה רכה, כמו השאר */ }
+  return [];
+}
+
+export async function findRides({ url, dbKey }: Db, asked: string | null, question: string): Promise<ExperienceRow[]> {
+  if (!asked) return [];
+  try {
+    const res = await fetch(`${url}/rest/v1/rpc/find_experiences`, {
+      method: "POST",
+      headers: {
+        apikey: dbKey,
+        Authorization: `Bearer ${dbKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        p_name: asked,
+        p_height_cm: extractHeight(question),
+        p_limit: 6,
+      }),
+    });
+    const rows = res.ok ? await res.json() : null;
+    return Array.isArray(rows) ? rows : [];
+  } catch { /* נפילה רכה, כמו השליפה */ }
+  return [];
+}
+
+// ── השליפה ───────────────────────────────────────────────────────────
+export async function retrieveKnowledge({ url, dbKey }: Db, key: string, question: string): Promise<{
+  chunks: KnowledgeChunk[];
+  retrieval: "ok" | "empty" | "failed";
+}> {
+  let chunks: KnowledgeChunk[] = [];
+  let retrieval: "ok" | "empty" | "failed" = "empty";
+  try {
+    // ⚠️ השאלה מקודדת כ-RETRIEVAL_QUERY ולא כ-RETRIEVAL_DOCUMENT. שני
+    // התפקידים אינם סימטריים, וקידוד בתפקיד הלא נכון **עובד** ומחזיר
+    // תוצאות גרועות יותר בלי שום שגיאה — אותה מלכודת כמו בצד הטעינה.
+    const emb = await fetch(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+        body: JSON.stringify({
+          model: "models/gemini-embedding-001",
+          content: { parts: [{ text: question }] },
+          taskType: "RETRIEVAL_QUERY",
+          outputDimensionality: 1536,
+        }),
+      },
+    );
+    const vector = emb.ok ? (await emb.json())?.embedding?.values : null;
+    if (Array.isArray(vector) && vector.length === 1536) {
+      const res = await fetch(`${url}/rest/v1/rpc/match_knowledge`, {
+        method: "POST",
+        headers: {
+          apikey: dbKey,
+          Authorization: `Bearer ${dbKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ p_embedding: JSON.stringify(vector), p_limit: 5 }),
+      });
+      const rows = res.ok ? await res.json() : null;
+      chunks = Array.isArray(rows) ? rows : [];
+      retrieval = res.ok ? (chunks.length > 0 ? "ok" : "empty") : "failed";
+    } else {
+      retrieval = "failed";
+    }
+  } catch {
+    retrieval = "failed";
+  }
+  return { chunks, retrieval };
 }

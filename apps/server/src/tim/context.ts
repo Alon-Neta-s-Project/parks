@@ -1,3 +1,4 @@
+import { todayLine } from "./prompt";
 import type { ExperienceRow, KnowledgeChunk, ParkCandidate } from "./lookup";
 
 /**
@@ -308,4 +309,24 @@ export function formatChunks(chunks: KnowledgeChunk[]): string {
   }
 
   return blocks.join("\n\n");
+}
+
+/**
+ * מה שנכנס לתור של המשתמשת — ההקשר ואז השאלה.
+ *
+ * ⚠️ המתקנים לפני המסמכים. עובדה מהטבלה גוברת על פרוזה, ומודל
+ * נוטה לתת משקל למה שהוא רואה קודם.
+ */
+export function composeContext(p: {
+  rides: ExperienceRow[]; candidates: ParkCandidate[]; chunks: KnowledgeChunk[]; question: string;
+}): string {
+  return [
+    todayLine(),
+    p.rides.length ? formatExperiences(p.rides) : null,
+    // ⚠️ אחרי המתקנים שנשאלו עליהם ולפני המסמכים: אלה עובדות
+    // מהטבלה, והן גוברות על פרוזה.
+    p.candidates.length ? formatCandidates(p.candidates) : null,
+    p.chunks.length ? formatChunks(p.chunks) : null,
+    `השאלה: ${p.question}`,
+  ].filter(Boolean).join("\n\n---\n\n");
 }

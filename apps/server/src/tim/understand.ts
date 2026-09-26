@@ -1,3 +1,4 @@
+import { MAX_HISTORY_CHARS, MAX_HISTORY_TURNS } from "./config";
 /**
  * הגובה שנמסר בשאלה, בסנטימטרים.
  *
@@ -62,4 +63,31 @@ export function wantsRecommendation(q: string): boolean {
   if (/(מה\s+דעת|מה\s+עדיף|איז[הו]\s.{0,40}?\s?(מתאימ|עדיפ))/.test(t)) return true;
   return /(מעדיפ|אוהב|מחפשים|מחפש|בא לנו)/.test(t)
     && /(פארק|פארקים|מתקנים|אטרקציות|רכבות|מופעים|חופשה|טיול)/.test(t);
+}
+
+// 🔴 **טים לא זכר דבר, ולכן שאל את אותה שאלה שלוש פעמים ברצף.**
+//
+// נטע ענתה "זוג בני 30 ואין העדפות", והוא שאל שוב "איזה גילים
+// המטיילים?". כל הודעה הגיעה אליו לבדה — `askTim` שלח `{ question }`
+// וזהו — ולכן כל תשובה שלה נראתה לו כשאלה חדשה בלי הקשר.
+//
+// ⚠️ **וזו הפרה של כלל הברזל החמישי**, שאומר שאלה שדולגה נשאלת פעם
+// נוספת אחת ואז ממשיכים עם מה שיש. הכלל היה בהוראות; המנגנון שמאפשר
+// לקיים אותו לא היה קיים. הוראה בלי דרך לקיים אותה אינה כלל.
+//
+// ⚠️ **חסום בהיקף בכוונה.** ההיסטוריה היא טקסט של משתמשת שנוסע לספק
+// חיצוני ונספר לתוך אותה גדר קצב. שמונה תורות אחרונות, וכל אחת
+// חתוכה — יותר מזה אינו משפר תשובה והוא כן מגדיל עלות ודליפה.
+export type Turn = { role: "user" | "model"; text: string };
+export function readHistory(raw: unknown): Turn[] {
+  const rawHistory = Array.isArray(raw) ? raw : [];
+  return rawHistory
+    .slice(-MAX_HISTORY_TURNS)
+    .flatMap((t): Turn[] => {
+      if (typeof t !== "object" || t === null) return [];
+      const { role, text } = t as { role?: unknown; text?: unknown };
+      if (typeof text !== "string" || text.trim() === "") return [];
+      if (role !== "user" && role !== "model") return [];
+      return [{ role, text: text.slice(0, MAX_HISTORY_CHARS) }];
+    });
 }

@@ -48,3 +48,15 @@ export function logTurn(
     .EdgeRuntime;
   if (typeof rt?.waitUntil === "function") rt.waitUntil(write);
 }
+
+// 🔴 **וההערכה כאן משוערת, ואומרת זאת.** `answered` נגזר משילוב של
+// איתותים — אפס מקורות, ולשון סירוב שההוראות שלנו עצמן מכתיבות —
+// ולא מהצהרה של המודל. זו הערכה טובה מספיק כדי לראות מגמה, **ולא
+// מספיק כדי להסיק ממנה על שורה בודדת.** מי שיקרא את היומן צריך לדעת
+// את זה, ולכן זה כתוב כאן ולא רק בראש שלי.
+export function wasAnswered(p: { rides: unknown[]; chunks: unknown[]; candidates: unknown[]; answer: string }): boolean {
+  const noSources = p.rides.length === 0 && p.chunks.length === 0 && p.candidates.length === 0;
+  const refusalPhrasing = /(אין לי את הנתון|אין לנו את הנתון|לא ידוע אם קיימת|לא נבדק)/
+    .test(p.answer ?? "");
+  return !(noSources && refusalPhrasing);
+}

@@ -1,3 +1,5 @@
+import { failWith, type Fail } from "./http";
+import { DEFAULT_MODEL } from "./config";
 import { thinkingConfig } from "./config";
 import { allowedOrigins } from "./http";
 import { FIT_STAMP } from "./prompt";
@@ -53,4 +55,26 @@ export function diagnose(env: Record<string, string | undefined>) {
     // על פונקציה ישנה.
     deploy_stamp: DEPLOY_STAMP,
   };
+}
+
+// {"diagnose":"models"} — שואל את גוגל אילו מודלים זמינים למפתח הזה.
+// שמות מודלים אינם סוד, והמפתח אינו חוזר בתשובה.
+export async function listModels(env: Record<string, string | undefined>): Promise<Fail | { current: string; usable: string[] }> {
+  const k = env.GEMINI_API_KEY;
+  if (!k) return failWith(500, { error: "missing_api_key" });
+  let r: Response;
+  try {
+    r = await fetch("https://generativelanguage.googleapis.com/v1beta/models", {
+      headers: { "x-goog-api-key": k },
+    });
+  } catch {
+    return failWith(502, { error: "upstream_unreachable" });
+  }
+  if (!r.ok) return failWith(502, { error: "upstream_error", status: r.status });
+  const list = await r.json().catch(() => null);
+  const usable = (list?.models ?? [])
+    .filter((m: { supportedGenerationMethods?: string[] }) =>
+      m.supportedGenerationMethods?.includes("generateContent"))
+    .map((m: { name: string }) => m.name.replace(/^models\//, ""));
+  return { current: env.GEMINI_MODEL?.trim() || DEFAULT_MODEL, usable };
 }
