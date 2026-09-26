@@ -229,7 +229,12 @@ insert into probe (filename, checksum, found)
   union all
   select '046_tester_note.sql'::text, 'sha256:2987c9f9e159b5d032f0eeb909c3c931'::text,
          (pg_temp.has_fn('save_tester_note')
-         and pg_temp.fn_src('save_tester_note') like '%tester_key%');
+         and pg_temp.fn_src('save_tester_note') like '%tester_key%')
+  union all
+  select '047_tester_key_hashed.sql'::text, 'sha256:33472234c99540b53323efcd136527aa'::text,
+         (to_regclass('public.tester_key_store') is not null
+         and pg_temp.has_fn('tester_key_matches')
+         and not pg_temp.has_fn('tester_key'));
 
 -- ── הרישום ──────────────────────────────────────────────────────────
 insert into schema_migration (filename, checksum, applied_by, evidence)

@@ -5,7 +5,7 @@ function assertEquals<T>(actual: T, expected: T, msg?: string) {
 }
 import {
   handle, thinkingConfig, formatChunks, formatExperiences, scrubAnswer,
-  extractHeight, extractRideName, looksLikeGeminiKey, bucketKey,
+  extractHeight, extractRideName, looksLikeGeminiKey, bucketKey, splitUiHint
 } from "./index.ts";
 import type { KnowledgeChunk } from "./index.ts";
 
@@ -1234,4 +1234,59 @@ Deno.test("קטע בלי דרגה אינו נעלם ואינו מוצג כמאו
   assertEquals(out.includes("בלי דרגה"), true, "הקטע נעלם");
   assertEquals(out.indexOf("רשמי") < out.indexOf("בלי דרגה"), true, "לא מאומת הוצג לפני רשמי");
   assertEquals(out.includes("לא מסווג"), true);
+});
+
+/**
+ * 🔴 **שורת הבקרה לעולם אינה מגיעה למשתמשת.**
+ *
+ * דרישת פולה (26.09): רכיבים מוטבעים בבועה של טים. המסך אינו יכול
+ * לנחש מהטקסט איזו שאלה זו — ניסוח משתנה, והקשר כזה נשבר בשקט. לכן
+ * המודל מסיים בשורת בקרה, והפונקציה מסירה אותה.
+ *
+ * ⚠️ **והמסך אינו מנקה.** אם היא נשארת בטקסט, היא מוצגת. זו הבדיקה
+ * היחידה שעומדת בין המשתמשת לבין "[[ui:group]]" בתוך בועה.
+ */
+Deno.test("שורת הבקרה מופרדת, והטקסט יוצא נקי", () => {
+  const r = splitUiHint("מי נוסע איתך?\n[[ui:group]]");
+  assertEquals(r.answer, "מי נוסע איתך?");
+  assertEquals(r.ui?.kind, "group");
+  assertEquals(r.answer.includes("[[ui"), false);
+});
+
+Deno.test("heights נושאת מספר, ומספר שבור אינו נקרא כאפס", () => {
+  assertEquals(splitUiHint("מה הגובה?\n[[ui:heights:2]]").ui?.count, 2);
+
+  // ⚠️ שבור אינו "אפס ילדים" — הוא שורה שלא הובנה. הרכיב יורד,
+  // הטקסט נשאר, והשורה עדיין נמחקת.
+  for (const bad of ["heights:0", "heights:abc", "heights:-1", "heights:99"]) {
+    const r = splitUiHint(`שאלה\n[[ui:${bad}]]`);
+    assertEquals(r.ui, undefined);
+    assertEquals(r.answer, "שאלה");
+  }
+});
+
+Deno.test("choice ו-chips מפוצלות, ואפשרות יחידה אינה בחירה", () => {
+  const c = splitUiHint("סגנון?\n[[ui:choice:א|ב|ג]]");
+  assertEquals(c.ui?.options, ["א", "ב", "ג"]);
+
+  const ch = splitUiHint("רגישויות?\n[[ui:chips:חושך|גבהים]]");
+  assertEquals(ch.ui?.kind, "chips");
+  assertEquals(ch.ui?.options?.length, 2);
+
+  // ⚠️ אפשרות אחת אינה בחירה — כפתור יחיד שמוביל למקום אחד.
+  assertEquals(splitUiHint("שאלה\n[[ui:choice:רק אחת]]").ui, undefined);
+});
+
+Deno.test("ערך שאינו באוצר המילים עוצר, ואינו נופל לברירת מחדל", () => {
+  const r = splitUiHint("שאלה\n[[ui:whatever]]");
+  assertEquals(r.ui, undefined);
+  // 🔴 ועדיין נמחק. מוטב בועה בלי רכיב מאשר בועה עם סימן בתוכה.
+  assertEquals(r.answer, "שאלה");
+});
+
+Deno.test("תשובה רגילה אינה נוגעת בכלום", () => {
+  const plain = "מגבלת הגובה היא 102 ס\"מ.";
+  const r = splitUiHint(plain);
+  assertEquals(r.answer, plain);
+  assertEquals(r.ui, undefined);
 });

@@ -95,6 +95,11 @@ PROBES: dict[str, str] = {
     "043_park_candidates.sql":         "pg_temp.has_fn('park_candidates')",
     "044_turn_log.sql":                "to_regclass('public.turn_log') is not null",
     "046_tester_note.sql":              "pg_temp.has_fn('save_tester_note')\n         and pg_temp.fn_src('save_tester_note') like '%tester_key%'",
+    # ⚠️ **הבדיקה היא על המצב, ולא על ההרצה** — ולכן היא מנוסחת
+    # כ"המפתח אינו בגוף הפונקציה", ולא כ"047 רצה". 047 מפילה את
+    # tester_key() ומחליפה אותה ב-tester_key_matches; כל עוד המצב
+    # הזה קיים, המפתח אינו קריא מ-pg_proc.
+    "047_tester_key_hashed.sql":       "to_regclass('public.tester_key_store') is not null\n         and pg_temp.has_fn('tester_key_matches')\n         and not pg_temp.has_fn('tester_key')",
     "045_country.sql":                 "pg_temp.has_col('knowledge_doc','country')\n         and pg_temp.con('knowledge_doc','knowledge_doc_country_iso') like '%A-Z%'",
 }
 

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Orb } from "../components/Orb";
+import { AskWidget } from "./AskWidgets";
 import { Thinking } from "../components/Thinking";
 import { shouldAskUpFront } from "../lib/ask-intent";
 import { askTim, type TimReply, type TimTurn } from "../lib/tim";
@@ -256,6 +257,18 @@ export default function TimOnlyApp({ feedback }: TimOnlyAppProps = {}) {
                 )}
               </div>
               {/* ⚠️ רק כשיש reply. אין טעם להעיר על תשובה שעוד בדרך. */}
+              {/* 🔴 **הרכיב מוטבע בבועה, ורק בשאלה האחרונה.**
+                  דרישת פולה (26.09). ומה שחשוב לא פחות: רכיב על
+                  שאלה שכבר נענתה היה מאפשר לענות פעמיים על אותה
+                  שאלה, והשיחה הייתה מתפצלת. */}
+              {turn.reply !== null &&
+              turn.reply !== "clarify" &&
+              turn.reply.status === "ok" &&
+              turn.reply.ui &&
+              turn.id === turns[turns.length - 1]?.id ? (
+                <AskWidget ui={turn.reply.ui} busy={busy} onAnswer={(text) => void send(text)} />
+              ) : null}
+
               {feedback && turn.reply !== null
                 ? feedback.renderNote({
                     id: turn.id,

@@ -167,3 +167,10 @@ select 'המפתח נקבע',
        (select count(*)::text from tester_key_store where id = 1), '1';
 
 -- ── END-047 ───────────────────────────────────────────────────────
+
+-- <migration-log>
+-- ⚠️ נוצר על ידי scripts/migration-log.py. אין לערוך ביד.
+-- השורה רושמת את המיגרציה ב-schema_migration ברגע שהיא רצה.
+select public.record_migration('047_tester_key_hashed.sql', 'sha256:33472234c99540b53323efcd136527aa',
+  coalesce(current_setting('app.migration_source', true), 'sql-editor'));
+-- </migration-log>
