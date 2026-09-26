@@ -58,7 +58,7 @@ jobs:
             echo "🔴 התשובה אינה מחזירה deploy_stamp — הפונקציה החיה ישנה מהרפו." >&2
             exit 1
           }
-          repo=$(grep -o 'DEPLOY_STAMP = "[^"]*"' $(python3 scripts/paths.py TIM_FN) | head -1 | cut -d'"' -f2)
+          repo=$(grep -o 'DEPLOY_STAMP = "[^"]*"' $(python3 scripts/paths.py TIM_STAMP) | head -1 | cut -d'"' -f2)
 
           echo "▶ deploy_stamp שחי:   $live"
           echo "▶ deploy_stamp שברפו: $repo"

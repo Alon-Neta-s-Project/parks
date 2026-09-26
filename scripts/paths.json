@@ -25,6 +25,9 @@
   "DB_LOCAL": "apps/server/db/local",
   "CONTENT_SEED": "apps/server/db/content-seed",
   "KNOWLEDGE_SEED": "apps/server/db/knowledge-seed",
-  "TIM_FN": "apps/server/src/tim/index.ts",
+  "TIM_DIR": "apps/server/src/tim",
+  "TIM_PROMPT": "apps/server/src/tim/prompt.ts",
+  "TIM_STAMP": "apps/server/src/tim/stamp.ts",
+  "TIM_EDGE": "apps/server/src/edge/tim.ts",
   "SCRIPTS": "scripts"
 }

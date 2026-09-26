@@ -19,7 +19,7 @@ import sys
 
 from paths import P, ROOT  # noqa: E402 — המקור: scripts/paths.json
 HE = P.HE_JSON
-FN = P.TIM_FN
+FN = P.TIM_PROMPT
 
 # ⚠️ המפתחות שהם המקור. מפתח שנמחק מ-he.json מפיל כאן, ולא נעלם בשקט.
 KEYS = ["everyone", "unknown", "unknownWhy", "unmeasuredWhy", "childSwap"]
@@ -48,7 +48,8 @@ def build() -> tuple[str, str]:
 def render(rules: str, stamp: str) -> str:
     return (
         "// <fit-rules>\n"
-        f'const FIT_STAMP = "{stamp}";\n'
+        # export: diagnose.ts מחזיר אותו. הבלוק נכתב מחדש כולו, ולכן גם המילה.
+        f'export const FIT_STAMP = "{stamp}";\n'
         f"const FIT_RULES = {json.dumps(rules, ensure_ascii=False)};\n"
         "// </fit-rules>"
     )
@@ -59,7 +60,7 @@ def main() -> int:
     src = FN.read_text(encoding="utf-8")
     block = re.search(r"// <fit-rules>.*?// </fit-rules>", src, re.S)
     if not block:
-        raise SystemExit("🔴 אין בלוק <fit-rules> ב-index.ts")
+        raise SystemExit(f"🔴 אין בלוק <fit-rules> ב-{FN.relative_to(ROOT)}")
     updated = src[: block.start()] + render(rules, stamp) + src[block.end():]
 
     if "--check" in sys.argv:

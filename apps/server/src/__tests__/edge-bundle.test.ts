@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { build } from "esbuild";
 import { describe, expect, it } from "vitest";
@@ -27,14 +27,14 @@ describe("החבילות ל-Supabase", () => {
   }
 
   it("החותם של טים בחבילה הוא החותם שבמקור", async () => {
-    const src = readFileSync(join(SRC, "tim", "index.ts"), "utf8").match(/DEPLOY_STAMP = "([0-9a-f]{12})"/)![1];
+    const src = readFileSync(join(SRC, "tim", "stamp.ts"), "utf8").match(/DEPLOY_STAMP = "([0-9a-f]{12})"/)![1];
     expect(await bundle("tim")).toContain(`DEPLOY_STAMP = "${src}"`);
   });
 
   // ⚠️ השרת עצמו אינו מכיר את Deno. הכניסות הן המקום היחיד.
   it("הלוגיקה אינה נוגעת ב-Deno", () => {
-    for (const name of ["tim"]) {
-      const code = readFileSync(join(SRC, name, "index.ts"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
+    for (const name of readdirSync(join(SRC, "tim")).filter((f) => f.endsWith(".ts") && !f.endsWith(".test.ts"))) {
+      const code = readFileSync(join(SRC, "tim", name), "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
       expect(code, name).not.toMatch(/\bDeno\./);
     }
   });

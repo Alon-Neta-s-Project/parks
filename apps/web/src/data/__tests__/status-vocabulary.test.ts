@@ -45,7 +45,7 @@ function producible(): Set<string> {
 
 /** אוצר המילים שטים יודע לנסח בעברית. */
 function rendered(): Set<string> {
-  const ts = noTsComments(readFileSync(P.TIM_FN, "utf8"));
+  const ts = noTsComments(readFileSync(join(P.TIM_DIR, "context.ts"), "utf8"));
   const block = ts.match(/const say: Record<string, string> = \{([\s\S]*?)\n\s*\};/);
   expect(block, "מפת הניסוחים לא נמצאה — הבדיקה קוראת קובץ שהשתנה").not.toBe(null);
   return new Set([...block![1]!.matchAll(/^\s*([a-z_]+)\s*:/gm)].map((m) => m[1]!));
