@@ -84,3 +84,24 @@ describe("the rate-limit bucket on Netlify comes from context.ip", () => {
     expect(buckets[0]).not.toBe(buckets[1]);
   });
 });
+
+/**
+ * 🔴 **The turn log survives the response.** Tim does not await the write, and
+ * Netlify may freeze the function once the answer is out — unless the write was
+ * handed to `context.waitUntil`.
+ */
+describe("the turn log on Netlify", () => {
+  it("hands the log write to context.waitUntil", async () => {
+    vi.stubGlobal("fetch", vi.fn(async (url: string) =>
+      String(url).endsWith("/rpc/check_rate_limit")
+        ? new Response(JSON.stringify("ok"), { status: 200 })
+        : new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: "שלום" }] } }] }), { status: 200 })));
+    const held: Promise<unknown>[] = [];
+    const res = await createNetlifyHandler(baseEnv)(post("/api/tim"), {
+      ip: "9.9.9.9",
+      waitUntil: (p) => { held.push(p); },
+    });
+    expect(res.status).toBe(200);
+    expect(held).toHaveLength(1);
+  });
+});

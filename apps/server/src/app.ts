@@ -3,7 +3,7 @@ import { Hono, type Context } from "hono";
 // Edge Function run the *same file*. A copy here would be a second Tim that drifts
 // from the one that is live, and the file is stamped (DEPLOY_STAMP), so it is not
 // edited to move it either. In stage 4 it moves into apps/server for real.
-import { handle as tim } from "./tim/index";
+import { handle as tim, type Host } from "./tim/index";
 
 export type Env = Record<string, string | undefined>;
 
@@ -11,6 +11,8 @@ export interface AppOptions {
   env: Env;
   /** The socket's address. Injected, so the app is testable without a network. */
   remoteAddress?: (c: Context) => string | undefined;
+  /** Keeps work alive after the response (the turn log). Only serverless hosts need it. */
+  waitUntil?: (c: Context) => Host["waitUntil"];
 }
 
 /**
@@ -42,7 +44,7 @@ async function withClientIp(req: Request, ip: string): Promise<Request> {
   });
 }
 
-export function createApp({ env, remoteAddress }: AppOptions): Hono {
+export function createApp({ env, remoteAddress, waitUntil }: AppOptions): Hono {
   const app = new Hono();
 
   app.get("/health", (c) => c.json({ ok: true }));
@@ -51,7 +53,7 @@ export function createApp({ env, remoteAddress }: AppOptions): Hono {
   app.all("/tim", async (c) => {
     const req = await withClientIp(c.req.raw, clientIp(c.req.raw, env, remoteAddress?.(c)));
     try {
-      return await tim(req, env);
+      return await tim(req, env, { waitUntil: waitUntil?.(c) });
     } catch (err) {
       // The same shape as the Deno.serve wrapper in the function file.
       return c.json({ error: "unhandled", detail: err instanceof Error ? err.message : String(err) }, 500);

@@ -26,7 +26,7 @@
  */
 export { looksLikeGeminiKey, thinkingConfig } from "./config";
 export { formatCandidates, formatChunks, formatExperiences } from "./context";
-export { handle } from "./handler";
+export { handle, type Host } from "./handler";
 export type { ExperienceRow, KnowledgeChunk, ParkCandidate } from "./lookup";
 export { todayLine } from "./prompt";
 export { bucketKey } from "./rate-limit";

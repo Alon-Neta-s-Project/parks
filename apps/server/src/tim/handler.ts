@@ -7,7 +7,7 @@ import { findCandidates, findRides, retrieveKnowledge } from "./lookup";
 import { SYSTEM } from "./prompt";
 import { checkRateLimit, dbAccess } from "./rate-limit";
 import { scrubAnswer } from "./safety";
-import { logTurn, wasAnswered } from "./turn-log";
+import { logTurn, wasAnswered, type WaitUntil } from "./turn-log";
 import { extractRideName, readHistory } from "./understand";
 
 /**
@@ -19,7 +19,16 @@ import { extractRideName, readHistory } from "./understand";
  * יושבים שם, ליד הקוד. צעד שאינו יכול להמשיך מחזיר `Fail` — בדיוק התשובה
  * שנכתבה פעם כאן — ו-`handle` מחזיר אותה כמות שהיא.
  */
-export async function handle(req: Request, env: Record<string, string | undefined>): Promise<Response> {
+/** What the host gives Tim beyond the request and the env. Every field is optional. */
+export interface Host {
+  waitUntil?: WaitUntil;
+}
+
+export async function handle(
+  req: Request,
+  env: Record<string, string | undefined>,
+  host: Host = {},
+): Promise<Response> {
   const CORS = corsFor(req, env);
   const json = jsonResponder(CORS);
   const reply = (r: Fail) => json(r.fail.body, r.fail.status);
@@ -141,7 +150,7 @@ export async function handle(req: Request, env: Record<string, string | undefine
     reason: answered ? null : (retrieval === "failed" ? "unverified" : "no_data"),
     model,
     usage,
-  });
+  }, host.waitUntil);
 
   return json({
     answer, model, usage, retrieval,

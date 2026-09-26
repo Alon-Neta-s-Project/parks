@@ -55,6 +55,16 @@ export function extractRideName(q: string): string | null {
   return stripped.length >= 3 ? stripped : null;
 }
 
+/**
+ * האם השאלה מבקשת שנבחר עבור מי ששואל.
+ *
+ * ⚠️ **אותו אוצר מילים כמו `apps/web/src/lib/ask-intent.ts`, ובכוונה.** שתי
+ * רשימות מילים בשני צדדים היו נעשות שונות תוך שבוע, ואז אותה שאלה
+ * הייתה מסווגת אחרת בדפדפן ובשרת — בלי שאיש ישים לב.
+ *
+ * ⚠️ ומילת עובדה גוברת: "כמה זמן כדאי לתכנן ל-Everest" היא שאלה שיש לה
+ * תשובה בטבלה, ושורות מועמדים עליה הן רעש.
+ */
 export function wantsRecommendation(q: string): boolean {
   const t = q.trim().toLowerCase();
   if (!t) return false;

@@ -1,19 +1,20 @@
 /**
- * האם השאלה מבקשת שנבחר עבור מי ששואל.
- *
- * ⚠️ **אותו אוצר מילים כמו `apps/web/src/lib/ask-intent.ts`, ובכוונה.** שתי
- * רשימות מילים בשני צדדים היו נעשות שונות תוך שבוע, ואז אותה שאלה
- * הייתה מסווגת אחרת בדפדפן ובשרת — בלי שאיש ישים לב.
- *
- * ⚠️ ומילת עובדה גוברת: "כמה זמן כדאי לתכנן ל-Everest" היא שאלה שיש לה
- * תשובה בטבלה, ושורות מועמדים עליה הן רעש.
+ * מה שהמארח נותן כדי להחזיק משימה חיה אחרי שהתשובה יצאה.
+ * Netlify: `context.waitUntil` · Supabase: `EdgeRuntime.waitUntil` · Node: אין צורך.
  */
+export type WaitUntil = (p: Promise<unknown>) => void;
+
 /**
  * כתיבה ליומן התשובות. **נכשלת בשקט, בכוונה.**
  *
- * ⚠️ `EdgeRuntime.waitUntil` כשהוא קיים — הוא מאפשר לבקשה להסתיים בלי
- * לחכות לכתיבה. כשאינו קיים, המתנה **חסומה בזמן**: שנייה אחת ולא יותר.
- * בלי הגבול הזה מסד איטי היה הופך לעיכוב על המסך של משפחה.
+ * ⚠️ **הכתיבה אינה ממתינה** — התשובה למשפחה אינה מחכה ליומן. ולכן מישהו
+ * צריך להחזיק אותה חיה: `waitUntil` של המארח כשניתן, ואחרת
+ * `EdgeRuntime.waitUntil` של Supabase. ב-Node התהליך ממשיך לרוץ ואין צורך.
+ * 🔴 **ב-Netlify בלי waitUntil הכתיבה נעלמת** — הפונקציה מוקפאת אחרי
+ * התשובה, ובשקט, כי היומן נכשל בשקט.
+ *
+ * ⚠️ השנייה (`AbortSignal.timeout`) חוסמת את הכתיבה עצמה, לא את התשובה —
+ * איש אינו ממתין לה. היא מה שמונע ממסד תקוע להחזיק את הפונקציה חיה.
  */
 export function logTurn(
   url: string,
@@ -25,6 +26,7 @@ export function logTurn(
     model: string;
     usage: { input?: number; output?: number } | null;
   },
+  waitUntil?: WaitUntil,
 ): void {
   const write = fetch(`${url}/rest/v1/rpc/log_turn`, {
     method: "POST",
@@ -44,8 +46,8 @@ export function logTurn(
     signal: AbortSignal.timeout(1000),
   }).catch(() => {});
 
-  const rt = (globalThis as { EdgeRuntime?: { waitUntil?: (p: Promise<unknown>) => void } })
-    .EdgeRuntime;
+  if (waitUntil) return waitUntil(write);
+  const rt = (globalThis as { EdgeRuntime?: { waitUntil?: WaitUntil } }).EdgeRuntime;
   if (typeof rt?.waitUntil === "function") rt.waitUntil(write);
 }
 
