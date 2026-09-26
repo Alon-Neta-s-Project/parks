@@ -397,7 +397,7 @@ On a 429 "You exceeded your current quota", Tim's `hint` says Google is busy and
 | `find_ride(name, height_cm?)` | a named ride — a closed one is returned with its status |
 | `query_rides(filters)` — **new** | set questions: park, land, kind, max intensity, height, sensitivities to avoid, open only, `per_park`, capped rows. A database function, like `find_experiences`, so the fit and the NULL rules stay in one place. 🔴 A filter never turns an unknown into a match. |
 | `park_candidates(preferences?)` | "which park suits us" — kept (Alon) |
-| `search_knowledge(query)` | prose; the model may rephrase, e.g. from the history |
+| `search_knowledge(query, resort?, park?)` | prose; the model may rephrase, e.g. from the history. `resort` (`wdw`/`uor`) uses the `p_resort` filter `match_knowledge` already has and Tim never passes; `park` needs a small migration (a `scope_park` filter — the column exists on every chunk and the search ignores it). |
 
 **Why not a generic SQL tool:** raw rows skip `formatExperiences`, where every state gets a word — and NULL read as "no limit" is the pattern CLAUDE.md counts seven times. Also a second source of truth for "fits", source columns reachable, and arbitrary queries (Guy).
 
@@ -409,3 +409,10 @@ On a 429 "You exceeded your current quota", Tim's `hint` says Google is busy and
 - `query_rides` "avoid" on a sensitivity that was never checked: excluded (proposed) or shown with "לא ידוע" — **Paula**.
 - New golden cases, and the change in Tim's behaviour — **Paula**. A tool that reads the database — **Guy (O2)**.
 - `park_candidates` as it is today: up to 3 rides **per park and per intensity level** (up to 84 rows), picked **alphabetically** within each level. The comment in `lookup.ts` says "3 per park". Recorded, not changed.
+
+### O14 — The knowledge chunks reach Gemini without their document's title · found 26.09 · next task
+`match_knowledge` returns `title`, but `formatChunks` (`apps/server/src/tim/context.ts`) sends only the chunk text, which starts with its `##` heading. So Gemini gets "## למי נדרש כרטיס?" ("who needs a ticket?") without "Child Swap — יוניברסל אורלנדו" — **and can't tell whether a chunk is about Disney or Universal** unless the text says so. That is part of how an unrelated Disney chunk (strollers) sat in the context of a Space Mountain question.
+
+**The fix:** the title in each chunk's label — `[קטע 2 · Child Swap — יוניברסל אורלנדו · יציב · נבדק 2026-09-01]`. One change in `formatChunks`, plus a test seen failing first. Independent of the agent (O13).
+
+⚠️ It changes what Gemini sees, i.e. Tim's behaviour: `npm run golden` before and after, and the change in the stamp.
