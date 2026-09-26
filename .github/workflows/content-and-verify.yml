@@ -35,11 +35,6 @@ jobs:
         with:
           node-version: "22"
 
-      # 🔴 דנו נדרש ל-npm test. ההרצה הראשונה של פריסת טים נפלה בלעדיו.
-      - uses: denoland/setup-deno@v2
-        with:
-          deno-version: v2.x
-
       - name: התקנה
         run: npm ci
 

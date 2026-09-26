@@ -42,7 +42,7 @@ python3 scripts/build-park-intro.py --check
 step "טיפוסים"
 npx tsc -b --noEmit
 
-step "בדיקות — vitest ו-deno"
+step "בדיקות — vitest (ממשק, שרת, ופונקציות ה-Edge)"
 npm test
 
 step "חבילת טים — אפס שורות מתקנים בדפדפן"

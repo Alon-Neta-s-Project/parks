@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # db-local-pg — מסד Postgres נקי ב-Docker, מאפס, מה-baseline ועם כל התוכן.
 #
-#   npm run db:local-pg            # postgres://postgres:postgres@127.0.0.1:55433/postgres
+#   npm run db:local-pg            # postgres://postgres@127.0.0.1:55433/postgres
 #
 # 🔴 **זו ההוכחה ש-O6 נסגר.** עד 26.09 המיגרציות לא יכלו לבנות מסד מאפס —
 # 038–040 העתיקו שורה קיימת, 046 הניחה תפקיד שאיש לא יצר. כאן: Postgres
@@ -16,7 +16,10 @@ cd "$(dirname "$0")/.."
 
 NAME=park-pg
 PORT=55433
-export DATABASE_URL="postgres://postgres:postgres@127.0.0.1:${PORT}/postgres?sslmode=disable"
+# ⚠️ **בלי סיסמה, ובכוונה.** המכולה נמחקת בכל הרצה ומקשיבה ל-127.0.0.1 בלבד,
+# ולכן trust מספיק. סיסמה קבועה כאן הייתה מחרוזת חיבור עם סיסמה בקוד — וסורק
+# הסודות תפס בדיוק את זה (26.09), בצדק גם כשהיא מקומית.
+export DATABASE_URL="postgres://postgres@127.0.0.1:${PORT}/postgres?sslmode=disable"
 export DBMATE_MIGRATIONS_DIR=$(python3 scripts/paths.py MIGRATIONS)
 export DBMATE_MIGRATIONS_TABLE=dbmate_migrations DBMATE_NO_DUMP_SCHEMA=true
 DB=$(python3 scripts/paths.py DB)
@@ -25,7 +28,7 @@ command -v dbmate >/dev/null || { echo "🔴 dbmate לא נמצא: brew install 
 
 echo "▸ Postgres 17 + pgvector, נקי"
 docker rm -f "$NAME" >/dev/null 2>&1 || true
-docker run -d --name "$NAME" -e POSTGRES_PASSWORD=postgres -p "$PORT:5432" pgvector/pgvector:pg17 >/dev/null
+docker run -d --name "$NAME" -e POSTGRES_HOST_AUTH_METHOD=trust -p "127.0.0.1:$PORT:5432" pgvector/pgvector:pg17 >/dev/null
 for _ in $(seq 1 60); do docker exec "$NAME" pg_isready -U postgres >/dev/null 2>&1 && break; sleep 0.5; done
 
 psql_run() {

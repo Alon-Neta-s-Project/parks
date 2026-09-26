@@ -43,7 +43,12 @@ FAKE = re.compile(r"TESTKEY|YOUR-|your-|xxxx|XXXX|0000000000")
 
 def tracked() -> list[pathlib.Path]:
     out = subprocess.run(
-        ["git", "ls-files", "-z"], cwd=ROOT, capture_output=True, text=True, check=True
+        # ⚠️ **גם קבצים חדשים שאינם מוחרגים** (--others --exclude-standard), ולא רק
+        # במעקב. ב-26.09 השער עבר על קובץ שעוד לא נוסף ל-git, והקובץ נכנס לקומיט
+        # עם מחרוזת חיבור — הסורק פשוט לא ראה אותו. מה שנבדק לפני קומיט חייב
+        # להיות מה שייכנס אליו.
+        ["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard"],
+        cwd=ROOT, capture_output=True, text=True, check=True
     ).stdout
     return [ROOT / p for p in out.split("\0") if p]
 

@@ -3,6 +3,7 @@ function assertEquals<T>(actual: T, expected: T, msg?: string) {
   if (a !== b) throw new Error(`${msg ?? "לא זהה"}\n  התקבל : ${a}\n  ציפינו: ${b}`);
 }
 
+import { test } from "vitest";
 import { handle, keepKnown, SYSTEM, type PendingRide } from "./index.ts";
 
 const SECRET = "ingest-secret-value";
@@ -44,7 +45,7 @@ const db = (pending: PendingRide[], out: unknown, remaining: unknown = 0) => (ur
 };
 
 // ── השער ──────────────────────────────────────────────────────────────
-Deno.test("בלי INGEST_SECRET — נעצר, ולא פונה לשום מקום", async () => {
+test("בלי INGEST_SECRET — נעצר, ולא פונה לשום מקום", async () => {
   const s = stub(() => new Response("[]"));
   const r = await handle(post(), { ...FULL, INGEST_SECRET: undefined });
   s.restore();
@@ -52,7 +53,7 @@ Deno.test("בלי INGEST_SECRET — נעצר, ולא פונה לשום מקום"
   assertEquals(s.calls.length, 0, "אסור שתהיה ולו קריאה אחת החוצה");
 });
 
-Deno.test("סוד שגוי נדחה, ולא נפנה למודל", async () => {
+test("סוד שגוי נדחה, ולא נפנה למודל", async () => {
   const s = stub(() => new Response("[]"));
   const r = await handle(post({ "x-ingest-secret": "wrong" }), FULL);
   s.restore();
@@ -60,7 +61,7 @@ Deno.test("סוד שגוי נדחה, ולא נפנה למודל", async () => {
   assertEquals(s.calls.length, 0);
 });
 
-Deno.test("GET נדחה", async () => {
+test("GET נדחה", async () => {
   assertEquals((await handle(new Request("http://x"), FULL)).status, 405);
 });
 
@@ -68,7 +69,7 @@ Deno.test("GET נדחה", async () => {
 // ⚠️ **שום מועמד אינו נכנס ל-experience.** הפונקציה כותבת רק לתור
 // האישור. נרדף לא מאושר שמצמיד שאלה למתקן הלא נכון גרוע מ"לא מצאתי",
 // כי הוא נראה כמו תשובה — עם תאריך בדיקה שגורם לו להיראות אמין יותר.
-Deno.test("שום כתיבה אינה נוגעת ב-experience או מסמנת approved", async () => {
+test("שום כתיבה אינה נוגעת ב-experience או מסמנת approved", async () => {
   const s = stub(db([ride("a")], [{ id: "a", candidates: ["אלף", "בית"] }]));
   await handle(post(), FULL);
   s.restore();
@@ -80,7 +81,7 @@ Deno.test("שום כתיבה אינה נוגעת ב-experience או מסמנת a
   }
 });
 
-Deno.test("מסלול תקין — כל מועמד נכתב בנפרד כ-model", async () => {
+test("מסלול תקין — כל מועמד נכתב בנפרד כ-model", async () => {
   const s = stub(db([ride("a")], [{ id: "a", candidates: ["אלף", "בית"] }]));
   const r = await handle(post(), FULL);
   s.restore();
@@ -89,33 +90,33 @@ Deno.test("מסלול תקין — כל מועמד נכתב בנפרד כ-model"
   assertEquals(body.rides, 1);
   const writes = s.calls.filter((c) => c.url.endsWith("/alias_add"));
   assertEquals(writes.length, 2);
-  assertEquals(JSON.parse(writes[0].init!.body as string).p_source, "model");
+  assertEquals(JSON.parse(writes[0]!.init!.body as string).p_source, "model");
 });
 
 // ⚠️ המפתח הזר במסד דוחה מזהה שאינו קיים — אבל **לא** מזהה קיים שלא
 // היה במנה. הסינון בקוד הוא זה שתופס את המקרה השני.
-Deno.test("מזהה שלא נשלח במנה אינו נכתב, גם אם הוא מתקן אמיתי", () => {
+test("מזהה שלא נשלח במנה אינו נכתב, גם אם הוא מתקן אמיתי", () => {
   const sent = [ride("a"), ride("b")];
   const out = keepKnown([
     { id: "a", candidates: ["אלף"] },
     { id: "space-mountain", candidates: ["ספייס"] },
   ], sent);
   assertEquals(out.length, 1);
-  assertEquals(out[0].id, "a");
+  assertEquals(out[0]!.id, "a");
 });
 
-Deno.test("מועמד ריק או ארוך מדי נזרק", () => {
+test("מועמד ריק או ארוך מדי נזרק", () => {
   const out = keepKnown([{ id: "a", candidates: ["", " ", "ב", "בית", "x".repeat(61)] }], [ride("a")]);
-  assertEquals(out[0].candidates, ["בית"]);
+  assertEquals(out[0]!.candidates, ["בית"]);
 });
 
-Deno.test("candidates חסר אינו מפיל", () => {
+test("candidates חסר אינו מפיל", () => {
   const out = keepKnown([{ id: "a" } as unknown as { id: string; candidates: string[] }], [ride("a")]);
-  assertEquals(out[0].candidates, []);
+  assertEquals(out[0]!.candidates, []);
 });
 
 // ── מה שאסור לדלוף ────────────────────────────────────────────────────
-Deno.test("המפתח של ג'מיני אינו נשלח למסד, ולהיפך", async () => {
+test("המפתח של ג'מיני אינו נשלח למסד, ולהיפך", async () => {
   const s = stub(db([ride("a")], [{ id: "a", candidates: ["אלף"] }]));
   await handle(post(), FULL);
   s.restore();
@@ -130,7 +131,7 @@ Deno.test("המפתח של ג'מיני אינו נשלח למסד, ולהיפך"
   }
 });
 
-Deno.test("שגיאת גוגל מוחזרת בלי המפתח", async () => {
+test("שגיאת גוגל מוחזרת בלי המפתח", async () => {
   const s = stub((url) =>
     url.includes("generativelanguage")
       ? new Response(JSON.stringify({ error: { message: "quota for key AIzaSyDEADBEEF" } }), { status: 429 })
@@ -144,7 +145,7 @@ Deno.test("שגיאת גוגל מוחזרת בלי המפתח", async () => {
 });
 
 // ── ספירה ─────────────────────────────────────────────────────────────
-Deno.test("אין מה לעבד — done ולא פונים למודל", async () => {
+test("אין מה לעבד — done ולא פונים למודל", async () => {
   const s = stub(() => new Response("[]", { status: 200 }));
   const r = await handle(post(), FULL);
   s.restore();
@@ -153,7 +154,7 @@ Deno.test("אין מה לעבד — done ולא פונים למודל", async ()
 });
 
 // ⚠️ "לא הצלחתי לספור" אינו "אפס". אותו באג בדיוק כמו ב-embed.
-Deno.test("ספירה שנכשלה מוחזרת כ-null ולא כאפס", async () => {
+test("ספירה שנכשלה מוחזרת כ-null ולא כאפס", async () => {
   const s = stub((url) => {
     if (url.includes("generativelanguage")) {
       return new Response(
@@ -172,14 +173,14 @@ Deno.test("ספירה שנכשלה מוחזרת כ-null ולא כאפס", async 
   assertEquals(body.done, false, "בלי ספירה אסור לדווח שסיימנו");
 });
 
-Deno.test("404 מפנה למיגרציה 031", async () => {
+test("404 מפנה למיגרציה 031", async () => {
   const s = stub(() => new Response("", { status: 404 }));
   const r = await handle(post(), FULL);
   s.restore();
   assertEquals((await r.json()).detail.includes("031"), true);
 });
 
-Deno.test("פלט שאינו JSON נעצר ואינו נכתב", async () => {
+test("פלט שאינו JSON נעצר ואינו נכתב", async () => {
   const s = stub((url) =>
     url.includes("generativelanguage")
       ? new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: "לא JSON" }] } }] }), { status: 200 })
@@ -197,7 +198,7 @@ Deno.test("פלט שאינו JSON נעצר ואינו נכתב", async () => {
 // "אקרובטיקו אפקוט" (שם + פארק), "אדוונסד טריינינג לאב" (כפילות),
 // ו-"מתקן אווטאר" (תיאור גנרי) — שהאחרון הוכח כמחזיר מתקן אקראי על
 // השאלה "איזה מתקן הכי מפחיד".
-Deno.test("ההוראה מבקשת כתיבים, ואוסרת את שלושת הדפוסים שנמדדו", () => {
+test("ההוראה מבקשת כתיבים, ואוסרת את שלושת הדפוסים שנמדדו", () => {
   assertEquals(SYSTEM.includes("להקליד"), true);
   assertEquals(SYSTEM.includes("שם פארק"), true, "האיסור על שם פארק חסר");
   assertEquals(SYSTEM.includes("חזרה על השם"), true, "האיסור על כפילות חסר");

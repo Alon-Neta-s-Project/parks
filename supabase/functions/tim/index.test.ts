@@ -3,6 +3,7 @@ function assertEquals<T>(actual: T, expected: T, msg?: string) {
   const a = JSON.stringify(actual), b = JSON.stringify(expected);
   if (a !== b) throw new Error(`${msg ?? "לא זהה"}\n  התקבל : ${a}\n  ציפינו: ${b}`);
 }
+import { test } from "vitest";
 import {
   handle, thinkingConfig, formatChunks, formatExperiences, scrubAnswer,
   extractHeight, extractRideName, looksLikeGeminiKey, bucketKey,
@@ -40,7 +41,7 @@ const geminiMultiPart = () =>
     }],
   }), { status: 200 });
 
-Deno.test("סוד חסר וסוד פגום הם שתי שגיאות שונות", async () => {
+test("סוד חסר וסוד פגום הם שתי שגיאות שונות", async () => {
   const missing = await handle(ask({ question: "היי" }), {});
   assertEquals(missing.status, 500);
   assertEquals((await missing.json()).error, "missing_api_key");
@@ -57,7 +58,7 @@ Deno.test("סוד חסר וסוד פגום הם שתי שגיאות שונות",
   assertEquals(b.detail.includes("AIzaSy"), false, "אבל לא הערך עצמו");
 });
 
-Deno.test("בדיקת השפיות תופסת הדבקה חלקית, ולא מניחה פורמט של ספק", () => {
+test("בדיקת השפיות תופסת הדבקה חלקית, ולא מניחה פורמט של ספק", () => {
   assertEquals(looksLikeGeminiKey(undefined), false);
   assertEquals(looksLikeGeminiKey("AIzaSy"), false, "קצר מדי — הדבקה חלקית");
   assertEquals(looksLikeGeminiKey("AIza with a space in it xxxxxxxxxxxxxxx"), false, "רווח");
@@ -67,14 +68,14 @@ Deno.test("בדיקת השפיות תופסת הדבקה חלקית, ולא מנ
   assertEquals(looksLikeGeminiKey("x".repeat(39)), true);
 });
 
-Deno.test("שאלה ריקה, ארוכה מדי, ו-JSON פגום — כל אחת עם קוד משלה", async () => {
+test("שאלה ריקה, ארוכה מדי, ו-JSON פגום — כל אחת עם קוד משלה", async () => {
   assertEquals((await handle(ask({ question: "" }), { GEMINI_API_KEY: KEY })).status, 400);
   assertEquals((await handle(ask({}), { GEMINI_API_KEY: KEY })).status, 400);
   const long = { question: "א".repeat(1001) };
   assertEquals((await handle(ask(long), { GEMINI_API_KEY: KEY })).status, 413);
 });
 
-Deno.test("GET נדחה, OPTIONS מקבל CORS", async () => {
+test("GET נדחה, OPTIONS מקבל CORS", async () => {
   assertEquals((await handle(ask({}, "GET"), { GEMINI_API_KEY: KEY })).status, 405);
   const o = await handle(new Request("http://x", { method: "OPTIONS" }), {});
   assertEquals(o.headers.get("Access-Control-Allow-Origin"), "*");
@@ -88,7 +89,7 @@ const dbSays = (verdict: "ok" | "user" | "global") => (url: string) =>
     ? new Response(JSON.stringify(verdict), { status: 200 })
     : geminiOk();
 
-Deno.test("מסלול תקין — המפתח נשלח לגוגל ואינו חוזר לדפדפן", async () => {
+test("מסלול תקין — המפתח נשלח לגוגל ואינו חוזר לדפדפן", async () => {
   const s = stub(dbSays("ok"));
   const r = await handle(ask({ question: "היי" }), FULL);
   s.restore();
@@ -100,7 +101,7 @@ Deno.test("מסלול תקין — המפתח נשלח לגוגל ואינו ח�
   assertEquals((gemini.init?.headers as Record<string, string>)["x-goog-api-key"], KEY);
 });
 
-Deno.test("שגיאה מגוגל מוחזרת כקוד בלבד, בלי גוף התשובה שלה", async () => {
+test("שגיאה מגוגל מוחזרת כקוד בלבד, בלי גוף התשובה שלה", async () => {
   const s = stub((url) =>
     url.includes("/rpc/check_rate_limit")
       ? new Response('"ok"', { status: 200 })
@@ -114,7 +115,7 @@ Deno.test("שגיאה מגוגל מוחזרת כקוד בלבד, בלי גוף �
   assertEquals(JSON.parse(body).error, "upstream_error");
 });
 
-Deno.test("הגבלת קצב חוסמת מעל הגג ולא מתחתיו", async () => {
+test("הגבלת קצב חוסמת מעל הגג ולא מתחתיו", async () => {
   const under = stub(dbSays("ok"));
   assertEquals((await handle(ask({ question: "היי" }), FULL)).status, 200);
   under.restore();
@@ -127,7 +128,7 @@ Deno.test("הגבלת קצב חוסמת מעל הגג ולא מתחתיו", asyn
 
 // שני הגדרות אינם אותה הודעה. מבקרת שנשלחה לחכות שעה בזמן שהמכסה
 // היומית נגמרה תגלה את זה רק בעוד שעה — וזה כשל שקט.
-Deno.test("הגדר האישי והגלובלי נבדלים בתשובה, לא רק בקוד", async () => {
+test("הגדר האישי והגלובלי נבדלים בתשובה, לא רק בקוד", async () => {
   const u = stub(dbSays("user"));
   const user = await handle(ask({ question: "היי" }), FULL);
   u.restore();
@@ -146,7 +147,7 @@ Deno.test("הגדר האישי והגלובלי נבדלים בתשובה, לא 
 
 // מסד שנשאר על 020 מחזיר true. אם true ייקרא כ"מותר", הגדר היומי נעלם
 // בלי שאיש יראה — ולכן בוליאני הוא כישלון מפורש, לא היתר.
-Deno.test("בוליאני מ-020 אינו נחשב היתר", async () => {
+test("בוליאני מ-020 אינו נחשב היתר", async () => {
   const s = stub((url) =>
     url.includes("/rpc/") ? new Response("true", { status: 200 }) : geminiOk()
   );
@@ -164,7 +165,7 @@ Deno.test("בוליאני מ-020 אינו נחשב היתר", async () => {
 // הגרסה הראשונה דילגה על ההגבלה כשלא ניתן היה לאכוף אותה, והמשיכה למודל.
 // זו הייתה נקודת קצה פתוחה בשקט, בדיוק כשאימות הטוקן כבוי.
 
-Deno.test("בלי הגדרות מסד — נעצר, ולא ממשיך למודל", async () => {
+test("בלי הגדרות מסד — נעצר, ולא ממשיך למודל", async () => {
   const s = stub(() => geminiOk());
   const r = await handle(ask({ question: "היי" }), { GEMINI_API_KEY: KEY });
   s.restore();
@@ -173,7 +174,7 @@ Deno.test("בלי הגדרות מסד — נעצר, ולא ממשיך למודל
   assertEquals(s.calls.length, 0, "אסור שתהיה ולו קריאה אחת החוצה");
 });
 
-Deno.test("תשובה שאינה 'ok'/'user'/'global' נחשבת ככישלון, לא כהיתר", async () => {
+test("תשובה שאינה 'ok'/'user'/'global' נחשבת ככישלון, לא כהיתר", async () => {
   for (const bad of [
     new Response("", { status: 500 }),                    // המסד שגה
     new Response("", { status: 404 }),                    // המיגרציה לא רצה
@@ -191,7 +192,7 @@ Deno.test("תשובה שאינה 'ok'/'user'/'global' נחשבת ככישלון,
   }
 });
 
-Deno.test("הספירה וההכנסה אטומיות — קריאה אחת למסד, לא שתיים", async () => {
+test("הספירה וההכנסה אטומיות — קריאה אחת למסד, לא שתיים", async () => {
   const s = stub(dbSays("ok"));
   await handle(ask({ question: "היי" }), FULL);
   // ⚠️ הבדיקה על **גדר הקצב** בלבד. מאז השליפה יש עוד קריאות למסד,
@@ -203,7 +204,7 @@ Deno.test("הספירה וההכנסה אטומיות — קריאה אחת למ
   assertEquals(gate, 1);
 });
 
-Deno.test("CORS מצטמצם לדומיין ברגע ש-ALLOWED_ORIGIN מוגדר", async () => {
+test("CORS מצטמצם לדומיין ברגע ש-ALLOWED_ORIGIN מוגדר", async () => {
   const withOrigin = (o: string) =>
     new Request("http://x/tim", { method: "OPTIONS", headers: { origin: o } });
 
@@ -225,7 +226,7 @@ Deno.test("CORS מצטמצם לדומיין ברגע ש-ALLOWED_ORIGIN מוגד�
  * היה חוסם כל בקשה אמיתית, והתסמין — CORS — נראה כמו תקלת רשת ולא כמו
  * הגדרה שגויה. זו בדיוק צורת הכשל שחוזרת כאן: ערך שנראה נכון לחלוטין.
  */
-Deno.test("סלאש בסוף אינו חוסם, ומקור זר עדיין נחסם", async () => {
+test("סלאש בסוף אינו חוסם, ומקור זר עדיין נחסם", async () => {
   const withOrigin = (o: string) =>
     new Request("http://x/tim", { method: "OPTIONS", headers: { origin: o } });
   const env = { ALLOWED_ORIGIN: "https://parkday.example/" };
@@ -241,7 +242,7 @@ Deno.test("סלאש בסוף אינו חוסם, ומקור זר עדיין נח�
  * ⚠️ **גרסת הבדיקה היא מקור אחר.** `tim-test--<אתר>.netlify.app` אינו
  * האתר הציבורי, וערך יחיד פירושו שאחד מהשניים חסום תמיד.
  */
-Deno.test("שני מקורות מופרדים בפסיק — ושניהם עוברים", async () => {
+test("שני מקורות מופרדים בפסיק — ושניהם עוברים", async () => {
   const withOrigin = (o: string) =>
     new Request("http://x/tim", { method: "OPTIONS", headers: { origin: o } });
   const env = {
@@ -265,7 +266,7 @@ Deno.test("שני מקורות מופרדים בפסיק — ושניהם עוב
  * 🔴 **ערך שמתנרמל לריק נפתח, ולא נסגר** — `*` לכולם, ונראה מוגדר.
  * `diagnose` מחזיר את המספר כדי שההבדל ייראה מהסביבה החיה.
  */
-Deno.test("האבחון סופר מקורות מנורמלים, לא תווים", async () => {
+test("האבחון סופר מקורות מנורמלים, לא תווים", async () => {
   const ask = async (env: Record<string, string | undefined>) => {
     const r = await handle(
       new Request("http://x/tim", { method: "POST", body: JSON.stringify({ diagnose: true }) }),
@@ -281,7 +282,7 @@ Deno.test("האבחון סופר מקורות מנורמלים, לא תווים"
   assertEquals(await ask({ GEMINI_API_KEY: KEY, ALLOWED_ORIGIN: "https://a, https://b" }), 2);
 });
 
-Deno.test("הדלי הוא גיבוב — כתובת ה-IP עצמה אינה נשמרת", async () => {
+test("הדלי הוא גיבוב — כתובת ה-IP עצמה אינה נשמרת", async () => {
   const a = await bucketKey("203.0.113.9", "salt");
   const b = await bucketKey("203.0.113.9", "salt");
   const c = await bucketKey("203.0.113.10", "salt");
@@ -291,7 +292,7 @@ Deno.test("הדלי הוא גיבוב — כתובת ה-IP עצמה אינה נ�
 });
 
 
-Deno.test("האבחון מחזיר נוכחות ואורך, ולעולם לא ערך", async () => {
+test("האבחון מחזיר נוכחות ואורך, ולעולם לא ערך", async () => {
   const env = { GEMINI_API_KEY: KEY, SUPABASE_URL: "http://db", MY_OWN_SECRET: "hunter2" };
   const r = await handle(
     new Request("http://x/tim", { method: "POST", body: JSON.stringify({ diagnose: true }) }),
@@ -311,7 +312,7 @@ Deno.test("האבחון מחזיר נוכחות ואורך, ולעולם לא ע
 });
 
 
-Deno.test("אבחון מודלים מחזיר שמות בלבד, ומסנן לפי generateContent", async () => {
+test("אבחון מודלים מחזיר שמות בלבד, ומסנן לפי generateContent", async () => {
   const s = stub(() =>
     new Response(JSON.stringify({
       models: [
@@ -332,7 +333,7 @@ Deno.test("אבחון מודלים מחזיר שמות בלבד, ומסנן לפ
   assertEquals(b.usable, ["gemini-x-flash"]);   // רק מה שיודע generateContent
 });
 
-Deno.test("404 מגוגל מסביר שהשם אינו קיים, ומצביע על האבחון", async () => {
+test("404 מגוגל מסביר שהשם אינו קיים, ומצביע על האבחון", async () => {
   const s = stub((url) =>
     url.includes("/rpc/") ? new Response('"ok"', { status: 200 }) : new Response("", { status: 404 })
   );
@@ -345,7 +346,7 @@ Deno.test("404 מגוגל מסביר שהשם אינו קיים, ומצביע ע
 });
 
 
-Deno.test("תשובה בכמה חלקים נאספת, ולא רק parts[0]", async () => {
+test("תשובה בכמה חלקים נאספת, ולא רק parts[0]", async () => {
   const s = stub((url) =>
     url.includes("/rpc/") ? new Response('"ok"', { status: 200 }) : geminiMultiPart()
   );
@@ -357,7 +358,7 @@ Deno.test("תשובה בכמה חלקים נאספת, ולא רק parts[0]", asy
   assertEquals((await r.json()).answer, "חלק\nשני");
 });
 
-Deno.test("תשובה ריקה מסבירה למה, ולא רק שהיא ריקה", async () => {
+test("תשובה ריקה מסבירה למה, ולא רק שהיא ריקה", async () => {
   const s = stub((url) =>
     url.includes("/rpc/")
       ? new Response('"ok"', { status: 200 })
@@ -371,7 +372,7 @@ Deno.test("תשובה ריקה מסבירה למה, ולא רק שהיא ריק�
   assertEquals(b.finish_reason, "MAX_TOKENS");
 });
 
-Deno.test("גוף שאינו JSON מגוגל אינו מפיל את הפונקציה", async () => {
+test("גוף שאינו JSON מגוגל אינו מפיל את הפונקציה", async () => {
   const s = stub((url) =>
     url.includes("/rpc/") ? new Response('"ok"', { status: 200 }) : new Response("<html>", { status: 200 })
   );
@@ -384,7 +385,7 @@ Deno.test("גוף שאינו JSON מגוגל אינו מפיל את הפונקצ
 });
 
 
-Deno.test("503 מגוגל מקבל ניסיון חוזר אחד, ומצליח בו", async () => {
+test("503 מגוגל מקבל ניסיון חוזר אחד, ומצליח בו", async () => {
   let geminiCalls = 0;
   const s = stub((url) => {
     if (url.includes("/rpc/")) return new Response('"ok"', { status: 200 });
@@ -399,7 +400,7 @@ Deno.test("503 מגוגל מקבל ניסיון חוזר אחד, ומצליח ב
   assertEquals((await r.json()).answer, "שלום, אני מחובר.");
 });
 
-Deno.test("503 שחוזר גם בניסיון השני מוחזר עם הסבר, ובלי ניסיון שלישי", async () => {
+test("503 שחוזר גם בניסיון השני מוחזר עם הסבר, ובלי ניסיון שלישי", async () => {
   let geminiCalls = 0;
   const s = stub((url) => {
     if (url.includes("/rpc/")) return new Response('"ok"', { status: 200 });
@@ -416,7 +417,7 @@ Deno.test("503 שחוזר גם בניסיון השני מוחזר עם הסבר,
   assertEquals(b.hint.includes("עמוסה"), true);
 });
 
-Deno.test("404 אינו זמני, ולכן אינו מנוסה שוב", async () => {
+test("404 אינו זמני, ולכן אינו מנוסה שוב", async () => {
   let geminiCalls = 0;
   const s = stub((url) => {
     if (url.includes("/rpc/")) return new Response('"ok"', { status: 200 });
@@ -433,7 +434,7 @@ Deno.test("404 אינו זמני, ולכן אינו מנוסה שוב", async ()
 // ההערכה שלי לעלות הודעה שגתה פעם אחת בפי עשרים. המספרים של גוגל
 // חוזרים ב-usageMetadata, ומכאן ההחלטות נשענות עליהם ולא על טבלה.
 
-Deno.test("usageMetadata מוחזר, כולל אסימוני חשיבה וקאש", async () => {
+test("usageMetadata מוחזר, כולל אסימוני חשיבה וקאש", async () => {
   const s = stub((url) =>
     url.includes("/rpc/")
       ? new Response('"ok"', { status: 200 })
@@ -459,7 +460,7 @@ Deno.test("usageMetadata מוחזר, כולל אסימוני חשיבה וקאש
 // ⚠️ גוגל אינה מחזירה cachedContentTokenCount כשהקאש לא נגע. אם החֶסֶר
 // היה חוזר כ-null, "לא ידוע" היה נקרא כ"אולי כן" — ואנחנו שוקלים על סמך
 // המספר הזה אם קאשינג שווה משהו. חסר = 0, במפורש.
-Deno.test("קאש שלא נגע נספר כאפס, לא כלא-ידוע", async () => {
+test("קאש שלא נגע נספר כאפס, לא כלא-ידוע", async () => {
   const s = stub((url) =>
     url.includes("/rpc/")
       ? new Response('"ok"', { status: 200 })
@@ -478,7 +479,7 @@ Deno.test("קאש שלא נגע נספר כאפס, לא כלא-ידוע", async 
   assertEquals(b.usage.thinking, 0);
 });
 
-Deno.test("בלי usageMetadata התשובה עדיין נמסרת, והמדידה null", async () => {
+test("בלי usageMetadata התשובה עדיין נמסרת, והמדידה null", async () => {
   const s = stub(dbSays("ok"));
   const r = await handle(ask({ question: "היי" }), FULL);
   s.restore();
@@ -496,7 +497,7 @@ const sentToGemini = (calls: { url: string; init?: RequestInit }[]) =>
   // deno-lint-ignore no-explicit-any
   JSON.parse(calls.find((c) => c.url.includes("generateContent"))!.init!.body as any);
 
-Deno.test("בלי הסוד — לא נשלח thinkingConfig כלל", async () => {
+test("בלי הסוד — לא נשלח thinkingConfig כלל", async () => {
   const s = stub(dbSays("ok"));
   await handle(ask({ question: "היי" }), FULL);
   s.restore();
@@ -505,14 +506,14 @@ Deno.test("בלי הסוד — לא נשלח thinkingConfig כלל", async () =>
   assertEquals(body.generationConfig.maxOutputTokens, 2048);
 });
 
-Deno.test("עם הסוד — התקציב נשלח כמספר", async () => {
+test("עם הסוד — התקציב נשלח כמספר", async () => {
   const s = stub(dbSays("ok"));
   await handle(ask({ question: "היי" }), { ...FULL, GEMINI_THINKING_BUDGET: "128" });
   s.restore();
   assertEquals(sentToGemini(s.calls).generationConfig.thinkingConfig, { thinkingBudget: 128 });
 });
 
-Deno.test("אפס הוא תקציב, לא 'לא הוגדר'", async () => {
+test("אפס הוא תקציב, לא 'לא הוגדר'", async () => {
   const s = stub(dbSays("ok"));
   await handle(ask({ question: "היי" }), { ...FULL, GEMINI_THINKING_BUDGET: "0" });
   s.restore();
@@ -521,7 +522,7 @@ Deno.test("אפס הוא תקציב, לא 'לא הוגדר'", async () => {
 
 // סוד עם שגיאת הקלדה שמפיל את טים לגמרי הוא מחיר גבוה מדי על ידית
 // אופציונלית. ערך שאינו מספר מתעלמים ממנו, ולא שולחים אותו הלאה.
-Deno.test("ערך פגום בסוד אינו נשלח, וטים ממשיך לעבוד", async () => {
+test("ערך פגום בסוד אינו נשלח, וטים ממשיך לעבוד", async () => {
   for (const bad of ["", "   ", "הרבה", "NaN"]) {
     const s = stub(dbSays("ok"));
     const r = await handle(ask({ question: "היי" }), { ...FULL, GEMINI_THINKING_BUDGET: bad });
@@ -532,7 +533,7 @@ Deno.test("ערך פגום בסוד אינו נשלח, וטים ממשיך לע�
 });
 
 // המודל יושב בסוד ולא בקוד, כדי שמעבר ל-3.6 לא ידרוש פריסת קוד.
-Deno.test("שם המודל מגיע מהסוד, ומוחזר בתשובה", async () => {
+test("שם המודל מגיע מהסוד, ומוחזר בתשובה", async () => {
   const s = stub(dbSays("ok"));
   const r = await handle(ask({ question: "היי" }), { ...FULL, GEMINI_MODEL: "gemini-3.6-flash" });
   s.restore();
@@ -540,7 +541,7 @@ Deno.test("שם המודל מגיע מהסוד, ומוחזר בתשובה", asyn
   assertEquals(s.calls.some((c) => c.url.includes("gemini-3.6-flash")), true);
 });
 
-Deno.test("GEMINI_THINKING_LEVEL נשלח כשהוא מוגדר, ולצד budget", async () => {
+test("GEMINI_THINKING_LEVEL נשלח כשהוא מוגדר, ולצד budget", async () => {
   const s = stub(dbSays("ok"));
   await handle(ask({ question: "היי" }), { ...FULL, GEMINI_THINKING_LEVEL: "low" });
   s.restore();
@@ -562,7 +563,7 @@ Deno.test("GEMINI_THINKING_LEVEL נשלח כשהוא מוגדר, ולצד budget
 // ⚠️ סוד שלא הגיע לפונקציה, וסוד שהגיע והמודל התעלם ממנו, נראים זהים
 // מבחוץ. האבחון חייב להראות את מה שנשלח בפועל — ומאותו חישוב, אחרת הוא
 // לוח בקרה שמראה מתג במצב שאינו המצב.
-Deno.test("האבחון מראה את מה שנשלח בפועל, ומאותו מקור", async () => {
+test("האבחון מראה את מה שנשלח בפועל, ומאותו מקור", async () => {
   const env = { ...FULL, GEMINI_THINKING_LEVEL: "low" };
   const r = await handle(
     new Request("http://x", {
@@ -579,7 +580,7 @@ Deno.test("האבחון מראה את מה שנשלח בפועל, ומאותו �
   assertEquals(b.known.GEMINI_THINKING_BUDGET, "חסר");
 });
 
-Deno.test("בלי שום סוד חשיבה — האבחון מראה ריק, לא ניחוש", async () => {
+test("בלי שום סוד חשיבה — האבחון מראה ריק, לא ניחוש", async () => {
   const r = await handle(
     new Request("http://x", {
       method: "POST",
@@ -595,7 +596,7 @@ Deno.test("בלי שום סוד חשיבה — האבחון מראה ריק, ל�
 // "400" בלי סיבה עלה לנו סבב שלם: לא ידענו איזה שדה נדחה. מוחזר
 // error.message בלבד — משפט על הבקשה, לא תוכן שלה.
 
-Deno.test("סיבת 400 מוחזרת, והמפתח לא נוסע איתה", async () => {
+test("סיבת 400 מוחזרת, והמפתח לא נוסע איתה", async () => {
   const s = stub((url) =>
     url.includes("/rpc/") ? new Response('"ok"', { status: 200 }) : new Response(
       JSON.stringify({
@@ -615,7 +616,7 @@ Deno.test("סיבת 400 מוחזרת, והמפתח לא נוסע איתה", asyn
   assertEquals(b.upstream_detail.includes("AIzaSyDEADBEEF"), false, "המפתח אסור שישרוד");
 });
 
-Deno.test("גוף שאינו JSON, או בלי error.message — לא ממציאים סיבה", async () => {
+test("גוף שאינו JSON, או בלי error.message — לא ממציאים סיבה", async () => {
   for (const bad of ["<html>502</html>", "{}", '{"error":{}}', '{"error":{"message":123}}']) {
     const s = stub((url) =>
       url.includes("/rpc/")
@@ -629,7 +630,7 @@ Deno.test("גוף שאינו JSON, או בלי error.message — לא ממציא
 });
 
 // הודעה ארוכה עלולה לגרור איתה חלקים מהבקשה. נחתכת.
-Deno.test("סיבה ארוכה נחתכת ל-300 תווים", async () => {
+test("סיבה ארוכה נחתכת ל-300 תווים", async () => {
   const s = stub((url) =>
     url.includes("/rpc/") ? new Response('"ok"', { status: 200 }) : new Response(
       JSON.stringify({ error: { message: "ש".repeat(5000) } }),
@@ -649,7 +650,7 @@ Deno.test("סיבה ארוכה נחתכת ל-300 תווים", async () => {
 // הבדיקה נועלת את התיקון: **דלי בלבד נשלח.** כל שדה נוסף כאן הוא גג
 // שהקוראת בוחרת לעצמה, וזה בדיוק מה שהיה.
 
-Deno.test("נשלח דלי בלבד — שום גג אינו נשלח מהקוד למסד", async () => {
+test("נשלח דלי בלבד — שום גג אינו נשלח מהקוד למסד", async () => {
   const s = stub(dbSays("ok"));
   await handle(ask({ question: "היי" }), FULL);
   s.restore();
@@ -659,7 +660,7 @@ Deno.test("נשלח דלי בלבד — שום גג אינו נשלח מהקוד
   assertEquals(Object.keys(sent), ["p_bucket"]);
 });
 
-Deno.test("404 מהמסד מפנה למיגרציה 026, לא לחתימה הישנה", async () => {
+test("404 מהמסד מפנה למיגרציה 026, לא לחתימה הישנה", async () => {
   const s = stub((url) =>
     url.includes("/rpc/") ? new Response("", { status: 404 }) : geminiOk()
   );
@@ -672,7 +673,7 @@ Deno.test("404 מהמסד מפנה למיגרציה 026, לא לחתימה הי�
 // ⚠️ הסימון בכל קטע מגיע מ-volatility ולא מהטקסט. פסקת סייג בגוף כל
 // מסמך הייתה מקרבת את כולם זה לזה במרחב ה-embedding וכופלת שדה קיים.
 
-Deno.test("כל קטע מסומן לפי volatility, ולא לפי הטקסט שלו", () => {
+test("כל קטע מסומן לפי volatility, ולא לפי הטקסט שלו", () => {
   const out = formatChunks([
     { content: "אלף", volatility: "volatile", last_verified: "2026-09-01" , authority_tier: "T1" },
     { content: "בית", volatility: "seasonal", last_verified: null , authority_tier: "T1" },
@@ -685,13 +686,13 @@ Deno.test("כל קטע מסומן לפי volatility, ולא לפי הטקסט ש
 
 // ⚠️ ברירת המחדל היא לכיוון הבטוח. קטע בלי סימון נאמר בזהירות, לא
 // בביטחון — "לא ידוע" אינו "יציב".
-Deno.test("volatility חסר נקרא כמשתנה ולא כיציב", () => {
+test("volatility חסר נקרא כמשתנה ולא כיציב", () => {
   const out = formatChunks([{ content: "x", volatility: null, last_verified: null , authority_tier: "T1" }]);
   assertEquals(out.includes("משתנה"), true);
   assertEquals(out.includes("יציב"), false);
 });
 
-Deno.test("ערך שאינו באוצר המילים אינו הופך ליציב", () => {
+test("ערך שאינו באוצר המילים אינו הופך ליציב", () => {
   const out = formatChunks([{ content: "x", volatility: "unknown-value", last_verified: null , authority_tier: "T1" }]);
   assertEquals(out.includes("משתנה"), true);
 });
@@ -711,7 +712,7 @@ const withChunks = (rows: unknown[]) => (url: string) => {
   return geminiOk();
 };
 
-Deno.test("הקטעים נכנסים להקשר, לפני השאלה", async () => {
+test("הקטעים נכנסים להקשר, לפני השאלה", async () => {
   const s = stub(withChunks([
     { content: "Multi Pass עולה כך וכך", volatility: "volatile", last_verified: "2026-09-01" , authority_tier: "T1" },
   ]));
@@ -727,7 +728,7 @@ Deno.test("הקטעים נכנסים להקשר, לפני השאלה", async () 
 
 // ⚠️ השאלה מקודדת בתפקיד אחר מהמסמכים. קידוד בתפקיד הלא נכון עובד
 // ומחזיר תוצאות גרועות יותר בלי שום שגיאה.
-Deno.test("השאלה מקודדת כ-RETRIEVAL_QUERY", async () => {
+test("השאלה מקודדת כ-RETRIEVAL_QUERY", async () => {
   const s = stub(withChunks([]));
   await handle(ask({ question: "היי" }), FULL);
   s.restore();
@@ -741,7 +742,7 @@ Deno.test("השאלה מקודדת כ-RETRIEVAL_QUERY", async () => {
 // ⚠️ שליפה שנכשלת אינה עוצרת את התשובה — בניגוד לגדר הקצב. גדר שנופלת
 // משאירה נקודת קצה פתוחה; שליפה שנופלת רק משאירה את טים בלי ידע,
 // וההוראות שלו כבר אוסרות עליו להמציא.
-Deno.test("שליפה שנכשלה מדווחת, ואינה מונעת תשובה", async () => {
+test("שליפה שנכשלה מדווחת, ואינה מונעת תשובה", async () => {
   const s = stub((url) => {
     if (url.includes("/rpc/check_rate_limit")) return new Response('"ok"', { status: 200 });
     if (url.includes(":embedContent")) return new Response("", { status: 500 });
@@ -757,7 +758,7 @@ Deno.test("שליפה שנכשלה מדווחת, ואינה מונעת תשוב�
 
 // ⚠️ "אין קטעים מתאימים" ו"השליפה נפלה" נראים זהים על המסך, והראשון הוא
 // תשובה בעוד השני הוא תקלה.
-Deno.test("אין קטעים ותקלת שליפה הם שתי סיבות שונות", async () => {
+test("אין קטעים ותקלת שליפה הם שתי סיבות שונות", async () => {
   const s = stub(withChunks([]));
   const r = await handle(ask({ question: "היי" }), FULL);
   s.restore();
@@ -770,7 +771,7 @@ Deno.test("אין קטעים ותקלת שליפה הם שתי סיבות שונ
 // match_knowledge מחזירה authority_tier מאז 028, והוא נבלע בדרך — כלומר
 // שישה ממקרי סט הזהב שדורשים must_cite_tier לא היו ניתנים לבדיקה כלל.
 // הוא יוצא כדי שבדיקה תדע על מה התשובה נשענה, ולא כדי שהמודל יראה אותו.
-Deno.test("דרגת המקור מדווחת בתשובה, בלי כפילויות", async () => {
+test("דרגת המקור מדווחת בתשובה, בלי כפילויות", async () => {
   const s = stub(withChunks([
     { content: "א", volatility: "stable", last_verified: null, authority_tier: "T1" },
     { content: "ב", volatility: "stable", last_verified: null, authority_tier: "T1" },
@@ -784,7 +785,7 @@ Deno.test("דרגת המקור מדווחת בתשובה, בלי כפילויו�
 
 // ⚠️ ודרגת המקור **אינה** מגיעה למודל. היא נועדה לבדיקה, ואילו הייתה
 // בהקשר, המודל היה מצטט אותה למשתמש — וזה ייחוס למקור, שאסור.
-Deno.test("דרגת המקור אינה נכנסת להקשר של המודל", async () => {
+test("דרגת המקור אינה נכנסת להקשר של המודל", async () => {
   const s = stub(withChunks([
     { content: "א", volatility: "stable", last_verified: null, authority_tier: "T1" },
   ]));
@@ -798,7 +799,7 @@ Deno.test("דרגת המקור אינה נכנסת להקשר של המודל", 
 // ⚠️ עובדה על מתקן נשלפת מהטבלה ולא מחיפוש סמנטי. "מה גובה המינימום"
 // צריכה את המספר מהשורה, לא את הקטע שנשמע דומה.
 
-Deno.test("גובה נשלף מהשאלה רק כשהוא באמת גובה", () => {
+test("גובה נשלף מהשאלה רק כשהוא באמת גובה", () => {
   assertEquals(extractHeight("הילדה בגובה 105"), 105);
   assertEquals(extractHeight('היא 112 ס"מ'), 112);
   // ⚠️ מספר בלי הקשר אינו גובה.
@@ -811,7 +812,7 @@ Deno.test("גובה נשלף מהשאלה רק כשהוא באמת גובה", ()
 
 // ⚠️ מילות ברכה ושיחה אינן שם מתקן. "היי" עבר קודם, ופנה לטבלה על כל
 // ברכה — קריאה מיותרת בכל שיחה.
-Deno.test("ברכה אינה שם מתקן", () => {
+test("ברכה אינה שם מתקן", () => {
   assertEquals(extractRideName("היי"), null);
   assertEquals(extractRideName("שלום, מה שלומך?"), null);
   assertEquals(extractRideName("מה זה"), null);
@@ -826,7 +827,7 @@ Deno.test("ברכה אינה שם מתקן", () => {
 //
 // המסקנה נשמרת כאן כבדיקה ולא כהערה: הפונקציה מחזירה **צירוף מילים**,
 // ולכן צד המסד **חייב** להתאים לפי מילים. מיגרציה 030 עושה זאת.
-Deno.test("מה שנשלף הוא צירוף מילים, ולכן ההתאמה במסד חייבת להיות לפי מילה", () => {
+test("מה שנשלף הוא צירוף מילים, ולכן ההתאמה במסד חייבת להיות לפי מילה", () => {
   const asked = extractRideName("הבת שלי בגובה 112 סנטימטר, היא יכולה לעלות על אקספדישן אוורסט?");
   assertEquals(asked !== null, true);
   // ⚠️ יותר ממילה אחת — וזה בדיוק מה שהתאמת-ביטוי אינה יכולה למצוא.
@@ -844,7 +845,7 @@ Deno.test("מה שנשלף הוא צירוף מילים, ולכן ההתאמה �
 // ⚠️ והתיקון הוא כאן ולא בסינון המועמדים, כי מילה גנרית מופיעה גם
 // בנרדף לגיטימי ("מופע היפה והחיה"). מה שחייב ליפול הוא הצד של
 // **השאלה**, ואז שום נרדף מאושר אינו יכול לייצר את הכשל הזה.
-Deno.test("מילה גנרית אינה מגיעה למסד כמילת חיפוש", () => {
+test("מילה גנרית אינה מגיעה למסד כמילת חיפוש", () => {
   // ⚠️ הכלל אינו "מחזיר null" — מילה שנשארת ואינה מתאימה לאף מתקן
   // עולה קריאה אחת מיותרת וזה מחיר מקובל (ראה ההערה בפונקציה).
   // הכלל הוא ש**המילה הגנרית עצמה** לא נשלחת, כי היא זו שמתאימה
@@ -862,7 +863,7 @@ Deno.test("מילה גנרית אינה מגיעה למסד כמילת חיפו�
   assertEquals(extractRideName("איזה מתקן זה אוורסט")?.includes("אוורסט"), true);
 });
 
-Deno.test("שם המתקן נשלף גם כשהוא עטוף במילות שאלה", () => {
+test("שם המתקן נשלף גם כשהוא עטוף במילות שאלה", () => {
   assertEquals(extractRideName("מה גובה המינימום באקספדישן אוורסט?")?.includes("אוורסט"), true);
   // ⚠️ שאלת מחיר על מתקן ספציפי — ולכן הזיהוי אינו לפי רשימת מילות מפתח.
   assertEquals(extractRideName("כמה עולה אוורסט")?.includes("אוורסט"), true);
@@ -870,7 +871,7 @@ Deno.test("שם המתקן נשלף גם כשהוא עטוף במילות שאל
 
 // ⚠️ שלושת מצבי הגובה, במילים שונות. מודל שמקבל 0 עלול לכתוב
 // "גובה מינימום 0 ס\"מ", וזה בדיוק מה שהכלל אוסר.
-Deno.test("שלושת מצבי הגובה נכתבים כשלוש אמירות שונות", () => {
+test("שלושת מצבי הגובה נכתבים כשלוש אמירות שונות", () => {
   const base = {
     name: "X", name_he: null, park: "P", land: null, status: "open",
     status_note: null, intensity: 3, gets_wet: null, skip_line: null,
@@ -897,7 +898,7 @@ Deno.test("שלושת מצבי הגובה נכתבים כשלוש אמירות �
 });
 
 // ⚠️ fits === null אינו נאמר כ"מתאים". הוא פשוט לא נאמר.
-Deno.test("התאמה לא ידועה אינה נאמרת כהתאמה", () => {
+test("התאמה לא ידועה אינה נאמרת כהתאמה", () => {
   const base = {
     name: "X", name_he: null, park: "P", land: null, status: "open",
     status_note: null, intensity: 3, gets_wet: null, skip_line: null,
@@ -917,7 +918,7 @@ Deno.test("התאמה לא ידועה אינה נאמרת כהתאמה", () => {
 //
 // ⚠️ וזה נחשף רק כשהבדיקות התחילו לרוץ. הן לא רצו כלל: `Deno.serve`
 // נקרא בטעינת המודול ו-`deno test` נפל על הרשאת רשת לפני בדיקה אחת.
-Deno.test("מתקן שדורש אימות מסומן בניסוח פולה, עם המשפט שלו", () => {
+test("מתקן שדורש אימות מסומן בניסוח פולה, עם המשפט שלו", () => {
   const out = formatExperiences([{
     name: "Slush Gusher", name_he: null, park: "P", land: null,
     status: "check",
@@ -931,7 +932,7 @@ Deno.test("מתקן שדורש אימות מסומן בניסוח פולה, עם
 
 // ⚠️ שלושת הערכים שהייבוא באמת פולט חייבים תג עברי. ערך שנופל לברירת
 // המחדל מגיע למסך כמילה באנגלית — וזה כבר קרה ל-`check`.
-Deno.test("שלושת הסטטוסים של הסכמה מקבלים תג עברי, בלי ברירת מחדל", () => {
+test("שלושת הסטטוסים של הסכמה מקבלים תג עברי, בלי ברירת מחדל", () => {
   const base = {
     name: "X", name_he: null, park: "P", land: null, status_note: null,
     intensity: 3, height_cm: null, gets_wet: null, skip_line: null,
@@ -947,7 +948,7 @@ Deno.test("שלושת הסטטוסים של הסכמה מקבלים תג עבר�
 //
 // `"false"` שתק, וטים ענה "אין לי את הנתון לגבי רגישות לחושך במתקן
 // Buzz Lightyear" על עמודה שכתוב בה `false`. הבדיקה הזו לא הייתה קיימת.
-Deno.test("כל אחד מארבעת מצבי הרגישות נאמר במפורש", () => {
+test("כל אחד מארבעת מצבי הרגישות נאמר במפורש", () => {
   const base = {
     name: "X", name_he: null, park: "P", land: null, status: "open",
     status_note: null, intensity: 3, height_cm: null, gets_wet: null,
@@ -974,7 +975,7 @@ Deno.test("כל אחד מארבעת מצבי הרגישות נאמר במפור�
 });
 
 // ⚠️ `undefined` אינו "לא נבדק". מסד בלי 039 אינו מייצר אמירה כלל.
-Deno.test("דגל שלא הגיע מהמסד אינו נאמר כלא-נבדק", () => {
+test("דגל שלא הגיע מהמסד אינו נאמר כלא-נבדק", () => {
   const out = formatExperiences([{
     name: "X", name_he: null, park: "P", land: null, status: "open",
     status_note: null, intensity: 3, height_cm: null, gets_wet: null,
@@ -987,7 +988,7 @@ Deno.test("דגל שלא הגיע מהמסד אינו נאמר כלא-נבדק",
 //
 // Bay Slides נושא תקרה מדודה של 152 ורצפה שלא נבדקה. טים פתח ב"לא
 // נבדקה", ומשפחה שקוראת משפט שנפתח בחסר לא מגיעה לנתון שכן יש.
-Deno.test("תקרת הגובה נאמרת לפני הרצפה החסרה", () => {
+test("תקרת הגובה נאמרת לפני הרצפה החסרה", () => {
   const out = formatExperiences([{
     name: "Bay Slides", name_he: null, park: "P", land: null, status: "open",
     status_note: null, intensity: 1, height_cm: null, max_height_cm: 152,
@@ -1003,7 +1004,7 @@ Deno.test("תקרת הגובה נאמרת לפני הרצפה החסרה", () =>
 //
 // נטע שאלה על JAMMitors, וטים ענה "המידע לגבי האזור אינו מופיע אצלי"
 // על נתון שנבדק ונכתב במאסטר כ-`N/A` — שמונה אמנים נודדים בלי מקום קבוע.
-Deno.test("אזור ריק נאמר כמשתנה, ואינו נשמט", () => {
+test("אזור ריק נאמר כמשתנה, ואינו נשמט", () => {
   const base = {
     name: "JAMMitors", name_he: null, park: "EPCOT", status: "open",
     status_note: null, intensity: 1, height_cm: 0, gets_wet: null,
@@ -1027,7 +1028,7 @@ Deno.test("אזור ריק נאמר כמשתנה, ואינו נשמט", () => {
  * יכול לא לציית לה — וזו בדיוק המטרה של prompt injection. לכן הפלט
  * נבדק אחרי שהמודל סיים.
  */
-Deno.test("קישור ומפתח אינם יוצאים בתשובה", () => {
+test("קישור ומפתח אינם יוצאים בתשובה", () => {
   const a = scrubAnswer("הפרטים באתר https://disneyworld.disney.go.com/tickets/ וכדאי לבדוק");
   assertEquals(a.clean.includes("http"), false);
   assertEquals(a.clean.includes("באתר הרשמי"), true);
@@ -1043,7 +1044,7 @@ Deno.test("קישור ומפתח אינם יוצאים בתשובה", () => {
   assertEquals(c.hits.length, 0);
 });
 
-Deno.test("עוצמה שלא דורגה נאמרת ככזו", () => {
+test("עוצמה שלא דורגה נאמרת ככזו", () => {
   const out = formatExperiences([{
     name: "X", name_he: null, park: "P", land: null, status: "open",
     status_note: null, intensity: null, height_cm: 0, gets_wet: null,
@@ -1068,7 +1069,7 @@ const withRides = (rows: unknown[]) => (url: string) => {
   return geminiOk();
 };
 
-Deno.test("שאלה על מתקן פונה לטבלה, והמתקנים לפני המסמכים", async () => {
+test("שאלה על מתקן פונה לטבלה, והמתקנים לפני המסמכים", async () => {
   const s = stub(withRides([{
     name: "Expedition Everest", name_he: "אקספדישן אוורסט", park: "Disney's Animal Kingdom",
     land: "Asia", status: "open", status_note: null, intensity: 4, height_cm: 112,
@@ -1105,7 +1106,7 @@ Deno.test("שאלה על מתקן פונה לטבלה, והמתקנים לפני
  * אחת, ואז ממשיכים. הכלל היה כתוב בהוראות; המנגנון שמאפשר לקיים אותו
  * לא היה קיים. **הוראה בלי דרך לקיים אותה אינה כלל.**
  */
-Deno.test("ההיסטוריה מגיעה למודל כתורות, לפני השאלה", async () => {
+test("ההיסטוריה מגיעה למודל כתורות, לפני השאלה", async () => {
   const s = stub(withRides([]));
   await handle(ask({
     question: "מתקנים עם תפאורות מגניבות",
@@ -1134,7 +1135,7 @@ Deno.test("ההיסטוריה מגיעה למודל כתורות, לפני הש�
  * לספק חיצוני ונספרת לתוך אותה גדר קצב; "כל השיחה" הוא וקטור עלות
  * ודליפה, לא שיפור תשובה.
  */
-Deno.test("היסטוריה חריגה נחתכת ואינה מפילה", async () => {
+test("היסטוריה חריגה נחתכת ואינה מפילה", async () => {
   const s = stub(withRides([]));
   await handle(ask({
     question: "שאלה",
@@ -1158,7 +1159,7 @@ Deno.test("היסטוריה חריגה נחתכת ואינה מפילה", async 
   for (const c of sent) assertEquals(c.parts[0].text.length <= 2000, true);
 });
 
-Deno.test("שאלה שאינה על מתקן מחזירה אפס שורות ואינה מזהמת את ההקשר", async () => {
+test("שאלה שאינה על מתקן מחזירה אפס שורות ואינה מזהמת את ההקשר", async () => {
   const s = stub(withRides([]));
   const r = await handle(ask({ question: "מה קורה אם יורד גשם" }), FULL);
   s.restore();
@@ -1186,7 +1187,7 @@ const chunk = (tier: string | null, content: string): KnowledgeChunk => ({
   authority_tier: tier,
 });
 
-Deno.test("ההקשר מגיע בשכבות, והרשמי ראשון", () => {
+test("ההקשר מגיע בשכבות, והרשמי ראשון", () => {
   const out = formatChunks([
     chunk("T4", "שמעתי שפותחים מוקדם"),
     chunk("T1", "הפארק נפתח ב-9:00"),
@@ -1205,14 +1206,14 @@ Deno.test("ההקשר מגיע בשכבות, והרשמי ראשון", () => {
   assertEquals(out.indexOf("הפארק נפתח") < out.indexOf("שמעתי שפותחים"), true);
 });
 
-Deno.test("שם הדרגה אינו נכנס להקשר גם אחרי השכבות", () => {
+test("שם הדרגה אינו נכנס להקשר גם אחרי השכבות", () => {
   const out = formatChunks([chunk("T1", "רשמי"), chunk("T5", "קהילתי")]);
   for (const code of ["T1", "T2", "T3", "T4", "T5"]) {
     assertEquals(out.includes(code), false, `${code} דלף להקשר`);
   }
 });
 
-Deno.test("שכבה ריקה אינה מופיעה ככותרת בלי תוכן", () => {
+test("שכבה ריקה אינה מופיעה ככותרת בלי תוכן", () => {
   const out = formatChunks([chunk("T1", "רשמי בלבד")]);
   assertEquals(out.includes("[מניסיון מבקרים — לא מאומת]"), false);
   assertEquals(out.includes("[מהתוכן שלנו]"), false);
@@ -1220,7 +1221,7 @@ Deno.test("שכבה ריקה אינה מופיעה ככותרת בלי תוכן"
 
 // 🔴 המספור הוא מה שמאפשר כבילת ציטוט (סעיף 3 שלב 6). אם הוא מתאפס
 // בכל שכבה, "קטע 1" מצביע על שלושה דברים שונים.
-Deno.test("המספור רץ על פני השכבות ואינו מתאפס", () => {
+test("המספור רץ על פני השכבות ואינו מתאפס", () => {
   const out = formatChunks([chunk("T1", "א"), chunk("T4", "ב"), chunk("T3", "ג")]);
   assertEquals(out.includes("[קטע 1 ·"), true);
   assertEquals(out.includes("[קטע 2 ·"), true);
@@ -1229,7 +1230,7 @@ Deno.test("המספור רץ על פני השכבות ואינו מתאפס", ()
 
 // ⚠️ הסכמה אומרת not null, אבל ברירת מחדל שקטה היא בדיוק מה שנשבר כאן
 // שוב ושוב. קטע בלי דרגה יורד, ולא עולה ולא נעלם.
-Deno.test("קטע בלי דרגה אינו נעלם ואינו מוצג כמאומת", () => {
+test("קטע בלי דרגה אינו נעלם ואינו מוצג כמאומת", () => {
   const out = formatChunks([chunk("T1", "רשמי"), chunk(null, "בלי דרגה")]);
   assertEquals(out.includes("בלי דרגה"), true, "הקטע נעלם");
   assertEquals(out.indexOf("רשמי") < out.indexOf("בלי דרגה"), true, "לא מאומת הוצג לפני רשמי");

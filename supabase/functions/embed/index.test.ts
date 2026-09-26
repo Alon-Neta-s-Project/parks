@@ -4,6 +4,7 @@ function assertEquals<T>(actual: T, expected: T, msg?: string) {
   if (a !== b) throw new Error(`${msg ?? "לא זהה"}\n  התקבל : ${a}\n  ציפינו: ${b}`);
 }
 
+import { test } from "vitest";
 import { handle } from "./index.ts";
 
 const SECRET = "ingest-secret-value";
@@ -50,7 +51,7 @@ const db = (pending: unknown[], remaining: unknown = 0) => (url: string) => {
 // ── השער ──────────────────────────────────────────────────────────────
 // ⚠️ נקודת קצה שעולה כסף. סוד שלא הוגדר אינו "אין צורך בסוד".
 
-Deno.test("בלי INGEST_SECRET — נעצר, ולא פונה לשום מקום", async () => {
+test("בלי INGEST_SECRET — נעצר, ולא פונה לשום מקום", async () => {
   const s = stub(() => new Response("[]"));
   const r = await handle(post(), { ...FULL, INGEST_SECRET: undefined });
   s.restore();
@@ -59,7 +60,7 @@ Deno.test("בלי INGEST_SECRET — נעצר, ולא פונה לשום מקום"
   assertEquals(s.calls.length, 0, "אסור שתהיה ולו קריאה אחת החוצה");
 });
 
-Deno.test("סוד שגוי נדחה, ולא נפנה למודל", async () => {
+test("סוד שגוי נדחה, ולא נפנה למודל", async () => {
   const s = stub(() => new Response("[]"));
   const r = await handle(post({ "x-ingest-secret": "wrong-secret" }), FULL);
   s.restore();
@@ -67,13 +68,13 @@ Deno.test("סוד שגוי נדחה, ולא נפנה למודל", async () => {
   assertEquals(s.calls.length, 0);
 });
 
-Deno.test("GET נדחה", async () => {
+test("GET נדחה", async () => {
   assertEquals((await handle(new Request("http://x"), FULL)).status, 405);
 });
 
 // ── המסלול התקין ──────────────────────────────────────────────────────
 
-Deno.test("מסלול תקין — הווקטור ושם המודל נכתבים יחד", async () => {
+test("מסלול תקין — הווקטור ושם המודל נכתבים יחד", async () => {
   const pending = [chunk("a"), chunk("b")];
   const s = stub(db(pending));
   const r = await handle(post(), FULL);
@@ -93,7 +94,7 @@ Deno.test("מסלול תקין — הווקטור ושם המודל נכתבים
 
 // ⚠️ המסמכים והשאלה מקודדים בתפקידים שונים. קידוד שניהם באותו תפקיד
 // עובד — ומחזיר תוצאות גרועות יותר בלי שום שגיאה.
-Deno.test("המסמכים מקודדים כ-RETRIEVAL_DOCUMENT, ובממד הנכון", async () => {
+test("המסמכים מקודדים כ-RETRIEVAL_DOCUMENT, ובממד הנכון", async () => {
   const s = stub(db([chunk("a")]));
   await handle(post(), FULL);
   s.restore();
@@ -103,7 +104,7 @@ Deno.test("המסמכים מקודדים כ-RETRIEVAL_DOCUMENT, ובממד הנ�
   assertEquals(sent.requests[0].outputDimensionality, 1536);
 });
 
-Deno.test("המפתח של ג'מיני אינו נשלח למסד, ולהיפך", async () => {
+test("המפתח של ג'מיני אינו נשלח למסד, ולהיפך", async () => {
   const s = stub(db([chunk("a")]));
   await handle(post(), FULL);
   s.restore();
@@ -117,7 +118,7 @@ Deno.test("המפתח של ג'מיני אינו נשלח למסד, ולהיפך"
   }
 });
 
-Deno.test("אין מה לחשב — מדווח done ולא פונה למודל", async () => {
+test("אין מה לחשב — מדווח done ולא פונה למודל", async () => {
   const s = stub(() => new Response("[]", { status: 200 }));
   const r = await handle(post(), FULL);
   s.restore();
@@ -129,7 +130,7 @@ Deno.test("אין מה לחשב — מדווח done ולא פונה למודל",
 // ⚠️ התאמה לפי מיקום על מספרים שונים מצמידה וקטור לקטע הלא נכון —
 // שליפה שמחזירה את התשובה הלא נכונה, בלי שום סימן שמשהו נשבר.
 
-Deno.test("פחות וקטורים מקטעים — לא נכתב דבר", async () => {
+test("פחות וקטורים מקטעים — לא נכתב דבר", async () => {
   const pending = [chunk("a"), chunk("b"), chunk("c")];
   const s = stub((url) =>
     url.includes("generativelanguage")
@@ -143,7 +144,7 @@ Deno.test("פחות וקטורים מקטעים — לא נכתב דבר", async
   assertEquals(s.calls.some((c) => c.url.endsWith("/ingest_set_embedding")), false, "אסור שתהיה כתיבה");
 });
 
-Deno.test("ממד שגוי — לא נכתב דבר", async () => {
+test("ממד שגוי — לא נכתב דבר", async () => {
   const pending = [chunk("a")];
   const s = stub((url) =>
     url.includes("generativelanguage")
@@ -160,7 +161,7 @@ Deno.test("ממד שגוי — לא נכתב דבר", async () => {
 
 // ⚠️ "לא הצלחתי לספור" ו"אפס נשארו" הם שני דברים, ואחד מהם אומר
 // "סיימנו" בטעות. זה בדיוק הבאג שכבר נתפס פעם אחת בהגבלת הקצב.
-Deno.test("ספירה שנכשלה מוחזרת כ-null ולא כאפס", async () => {
+test("ספירה שנכשלה מוחזרת כ-null ולא כאפס", async () => {
   const pending = [chunk("a")];
   // ⚠️ ingest_remaining שנכשלת — "לא הצלחתי לספור", לא "אפס".
   const s = stub((url) => {
@@ -180,7 +181,7 @@ Deno.test("ספירה שנכשלה מוחזרת כ-null ולא כאפס", async 
 
 // ⚠️ שלוש תקלות שנראות זהות מבחוץ — מיגרציה חסרה, סוד לא תואם, וכל השאר.
 // בלי הפרדה, כל אחת מהן שולחת לחיפוש בשלושה מקומות.
-Deno.test("404 מפנה למיגרציה 027, וסוד שגוי מפנה ל-ingest_set_key", async () => {
+test("404 מפנה למיגרציה 027, וסוד שגוי מפנה ל-ingest_set_key", async () => {
   const missing = stub(() => new Response("", { status: 404 }));
   const a = await handle(post(), FULL);
   missing.restore();
@@ -196,7 +197,7 @@ Deno.test("404 מפנה למיגרציה 027, וסוד שגוי מפנה ל-inge
 
 // ⚠️ עדכון שלא פגע בשום שורה מוחזר כ-false. 200 בלבד היה סופר אותו
 // כהצלחה, והקטע היה נשאר בלי וקטור בלי שאיש יראה.
-Deno.test("כתיבה שלא פגעה בשורה נעצרת ואינה נספרת כהצלחה", async () => {
+test("כתיבה שלא פגעה בשורה נעצרת ואינה נספרת כהצלחה", async () => {
   const s = stub((url) => {
     if (url.includes("generativelanguage")) {
       return new Response(JSON.stringify({ embeddings: [{ values: vec() }] }), { status: 200 });
@@ -212,7 +213,7 @@ Deno.test("כתיבה שלא פגעה בשורה נעצרת ואינה נספר�
 });
 
 // ⚠️ הסוד נשלח בגוף לכל קריאה למסד, ולעולם לא לגוגל.
-Deno.test("הסוד נשלח למסד בלבד", async () => {
+test("הסוד נשלח למסד בלבד", async () => {
   const s = stub(db([chunk("a")]));
   await handle(post(), FULL);
   s.restore();
@@ -226,7 +227,7 @@ Deno.test("הסוד נשלח למסד בלבד", async () => {
   }
 });
 
-Deno.test("שגיאת גוגל מוחזרת בלי המפתח", async () => {
+test("שגיאת גוגל מוחזרת בלי המפתח", async () => {
   const pending = [chunk("a")];
   const s = stub((url) =>
     url.includes("generativelanguage")

@@ -20,7 +20,7 @@
     "build": "tsc -b && vite build --config apps/web/vite.config.ts && tsx scripts/prerender.ts",
     "preview": "vite preview --config apps/web/vite.config.ts",
     "test": "vitest run --config apps/web/vite.config.ts && vitest run --config apps/server/vitest.config.ts && npm run test:edge",
-    "test:edge": "deno test --allow-env supabase/functions/tim/index.test.ts supabase/functions/embed/index.test.ts supabase/functions/aliases/index.test.ts",
+    "test:edge": "vitest run --config supabase/functions/vitest.config.ts",
     "import": "tsx scripts/import-content.ts",
     "artifact": "npm run build && python3 scripts/build-artifact.py",
     "build:tim": "python3 scripts/build-tim-prompt.py --check && tsc -b && vite build --config apps/web/vite.tim.config.ts && tsx scripts/verify-tim-build.ts",

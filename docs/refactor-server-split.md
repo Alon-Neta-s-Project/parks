@@ -251,6 +251,16 @@ Using **read access only** to production (Alon: "complete the migration here, wi
 2. Guy defines the role (DDL) → secret `MIGRATE_DATABASE_URL`, and the approvers in the Environment.
 From then on, new migrations: `npm run db:new <name>`, and CI with approval.
 
+### 4a ✅ Deno out of development and testing (26.09.2026)
+Alon asked to retire Deno. **Stage 1 of 2: development and testing only.** The functions themselves still deploy to Supabase until the cut-over, because production Tim is served from there.
+- **104 tests moved from `deno test` to vitest** (`supabase/functions/vitest.config.ts`): tim 75, embed 14, aliases 15. The conversion is `Deno.test(` → `test(` and nothing else. **104 = 104.** **Seen failing:** breaking `extractHeight` fails two of them.
+- **Type checking:** the tests joined `tsconfig` (with `allowImportingTsExtensions`). The project is stricter than Deno (`noUncheckedIndexedAccess`), and it found 4 index accesses in `aliases` that were fixed.
+- `setup-deno` was removed from 3 workflows (deploy-tim, content-and-verify, team1-publish), and the QA gate label and CLAUDE.md were updated.
+- **Proof:** `npm run qa` passes **on a PATH with no Deno at all**.
+- 🔴 **A gap that was found and closed:** the secret scanner checked only files tracked by git, so in `e79babb` a file (`db-local-pg.sh`) with a local connection string plus password went in, even though the gate passed before it was added. The scanner now also checks new files that aren't ignored (`--others --exclude-standard`), and the local database runs with no password (`trust`, `127.0.0.1` only).
+
+**Stage 2 (the cut-over, once the server is hosted, O1):** the files move into `apps/server/src/`, the `Deno.serve` wrappers are removed, and `supabase/functions/` and `deploy-tim.yml` are deleted.
+
 ### O6 — ✅ Closed 26.09 (the baseline, Stage 2b) · The migrations can't build a database from scratch · found 25.09 on a local database
 While setting up a local database (`supabase start`, config in `apps/server/db/supabase-local/`), the setup file stopped **at migration 038**. That's the practical check O5 left open, and it failed.
 

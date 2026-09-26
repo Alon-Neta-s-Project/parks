@@ -16,6 +16,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
+    "allowImportingTsExtensions": true,
     "skipLibCheck": true,
     "types": [
       "vite/client",
@@ -26,6 +27,7 @@
     "apps/web/src",
     "apps/server/src",
     "apps/server/vitest.config.ts",
+    "supabase/functions",
     "scripts",
     "apps/web/vite.config.ts",
     "apps/web/vite.tim.config.ts",
