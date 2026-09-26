@@ -105,3 +105,18 @@ describe("the turn log on Netlify", () => {
     expect(held).toHaveLength(1);
   });
 });
+
+describe("the log line on Netlify", () => {
+  it("carries Netlify's requestId and says it ran on Netlify", async () => {
+    const out: string[] = [];
+    vi.spyOn(console, "warn").mockImplementation((s: string) => { out.push(s); });
+    const res = await createNetlifyHandler(baseEnv)(
+      new Request(`${site}/api/tim`, { method: "POST", body: JSON.stringify({ question: "" }) }),
+      { ip: "9.9.9.9", requestId: "01NETLIFYREQUEST" },
+    );
+    vi.restoreAllMocks();
+    const line = JSON.parse(out[0]!);
+    expect([line.req, line.platform, line.outcome]).toEqual(["01NETLIFYREQUEST", "netlify", "empty_question"]);
+    expect(res.headers.get("x-request-id")).toBe("01NETLIFYREQUEST");
+  });
+});

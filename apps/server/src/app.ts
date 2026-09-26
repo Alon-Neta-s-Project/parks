@@ -3,7 +3,7 @@ import { Hono, type Context } from "hono";
 // Edge Function run the *same file*. A copy here would be a second Tim that drifts
 // from the one that is live, and the file is stamped (DEPLOY_STAMP), so it is not
 // edited to move it either. In stage 4 it moves into apps/server for real.
-import { handle as tim, type Host } from "./tim/index";
+import { handle as tim, logged, type Host } from "./tim/index";
 
 export type Env = Record<string, string | undefined>;
 
@@ -13,6 +13,10 @@ export interface AppOptions {
   remoteAddress?: (c: Context) => string | undefined;
   /** Keeps work alive after the response (the turn log). Only serverless hosts need it. */
   waitUntil?: (c: Context) => Host["waitUntil"];
+  /** Where the log line says it ran: "node", "netlify". */
+  platform?: string;
+  /** The host's request id (Netlify: `context.requestId`). Without one, the log makes one. */
+  requestId?: (c: Context) => string | undefined;
 }
 
 /**
@@ -44,20 +48,20 @@ async function withClientIp(req: Request, ip: string): Promise<Request> {
   });
 }
 
-export function createApp({ env, remoteAddress, waitUntil }: AppOptions): Hono {
+export function createApp({ env, remoteAddress, waitUntil, platform = "node", requestId }: AppOptions): Hono {
   const app = new Hono();
 
+  // ⚠️ Not logged: Docker's health check calls it every 30s, and a line per call
+  // would bury the lines that matter.
   app.get("/health", (c) => c.json({ ok: true }));
 
   // `all`, not `post`: Tim answers OPTIONS (CORS) and 405 itself, as it does on Supabase.
+  // One log line per request, and exceptions caught there (tim/log.ts): the browser
+  // gets a request id, never the exception's message.
   app.all("/tim", async (c) => {
     const req = await withClientIp(c.req.raw, clientIp(c.req.raw, env, remoteAddress?.(c)));
-    try {
-      return await tim(req, env, { waitUntil: waitUntil?.(c) });
-    } catch (err) {
-      // The same shape as the Deno.serve wrapper in the function file.
-      return c.json({ error: "unhandled", detail: err instanceof Error ? err.message : String(err) }, 500);
-    }
+    return logged(req, { platform, route: "/tim", req: requestId?.(c), waitUntil: waitUntil?.(c) },
+      (r, host) => tim(r, env, host));
   });
 
 

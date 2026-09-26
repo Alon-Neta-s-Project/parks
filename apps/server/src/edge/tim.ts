@@ -8,20 +8,13 @@
  *
  * ⚠️ עד המעבר (שלב 4 במסמך הרפקטור) הייצור עונה מכאן. אחריו הקובץ נמחק.
  */
-import { handle } from "../tim/index";
+import { handle, logged } from "../tim/index";
 
 declare const Deno: {
   serve: (handler: (req: Request) => Promise<Response>) => void;
   env: { toObject(): Record<string, string | undefined> };
 };
 
-Deno.serve(async (req) => {
-  try {
-    return await handle(req, Deno.env.toObject());
-  } catch (err) {
-    return new Response(
-      JSON.stringify({ error: "unhandled", detail: err instanceof Error ? err.message : String(err) }),
-      { status: 500, headers: { "Content-Type": "application/json; charset=utf-8" } },
-    );
-  }
-});
+// ⚠️ אותה שורת יומן כמו ב-Node וב-Netlify (tim/log.ts), ובה נתפסת חריגה — הדפדפן
+// מקבל מזהה בקשה, לא את הודעת החריגה.
+Deno.serve((req) => logged(req, { platform: "supabase", route: "/tim" }, (r, host) => handle(r, Deno.env.toObject(), host)));

@@ -15,9 +15,11 @@ export interface NetlifyContext {
    * Optional in the type: Netlify has it for functions deployed since 20.03.2025.
    */
   waitUntil?: (p: Promise<unknown>) => void;
+  /** Netlify's id for the request — the one its log viewer filters on. */
+  requestId?: string;
 }
 
-type Bindings = { ip: string; waitUntil?: NetlifyContext["waitUntil"] };
+type Bindings = { ip: string; waitUntil?: NetlifyContext["waitUntil"]; requestId?: string };
 
 /**
  * The server on Netlify: the same app as on Node, mounted under `/api`.
@@ -32,6 +34,8 @@ export function createNetlifyHandler(env: Env) {
     env,
     remoteAddress: (c) => (c.env as Bindings | undefined)?.ip,
     waitUntil: (c) => (c.env as Bindings | undefined)?.waitUntil,
+    platform: "netlify",
+    requestId: (c) => (c.env as Bindings | undefined)?.requestId,
   });
   const app = new Hono().route("/api", inner);
   return (req: Request, context: NetlifyContext) =>
@@ -39,5 +43,6 @@ export function createNetlifyHandler(env: Env) {
       ip: context.ip,
       // Bound: a method taken off its object must not lose it.
       waitUntil: context.waitUntil?.bind(context),
+      requestId: context.requestId,
     } satisfies Bindings);
 }

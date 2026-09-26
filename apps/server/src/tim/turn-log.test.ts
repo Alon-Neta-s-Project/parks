@@ -17,7 +17,7 @@ afterEach(() => {
 test("הכתיבה נמסרת ל-waitUntil שהמארח נתן", async () => {
   const s = stub(() => new Response(null, { status: 204 }));
   const held: Promise<unknown>[] = [];
-  logTurn("http://db", "k", turn, (p) => held.push(p));
+  logTurn("http://db", "k", turn, { waitUntil: (p) => held.push(p) });
   assertEquals(held.length, 1);
   await held[0];
   assertEquals(s.calls.filter((c) => c.url.endsWith("/rpc/log_turn")).length, 1);
@@ -37,7 +37,7 @@ test("המארח גובר על EdgeRuntime — הכתיבה נמסרת פעם א
   const s = stub(() => new Response(null, { status: 204 }));
   const host: Promise<unknown>[] = [], edge: Promise<unknown>[] = [];
   (globalThis as { EdgeRuntime?: unknown }).EdgeRuntime = { waitUntil: (p: Promise<unknown>) => edge.push(p) };
-  logTurn("http://db", "k", turn, (p) => host.push(p));
+  logTurn("http://db", "k", turn, { waitUntil: (p) => host.push(p) });
   assertEquals([host.length, edge.length], [1, 0]);
   s.restore();
 });

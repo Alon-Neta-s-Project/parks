@@ -1,8 +1,16 @@
+import type { TimEvent } from "./log";
 /**
  * מה שהמארח נותן כדי להחזיק משימה חיה אחרי שהתשובה יצאה.
  * Netlify: `context.waitUntil` · Supabase: `EdgeRuntime.waitUntil` · Node: אין צורך.
  */
 export type WaitUntil = (p: Promise<unknown>) => void;
+
+/** מה שהיומן צריך מהמארח. */
+export interface TurnLogHost {
+  waitUntil?: WaitUntil;
+  /** 🔴 כתיבה שנכשלה אינה משנה את התשובה — אבל היא נראית ביומן היישומי. */
+  report?: (e: TimEvent) => void;
+}
 
 /**
  * כתיבה ליומן התשובות. **נכשלת בשקט, בכוונה.**
@@ -26,7 +34,7 @@ export function logTurn(
     model: string;
     usage: { input?: number; output?: number } | null;
   },
-  waitUntil?: WaitUntil,
+  host: TurnLogHost = {},
 ): void {
   const write = fetch(`${url}/rest/v1/rpc/log_turn`, {
     method: "POST",
@@ -44,9 +52,13 @@ export function logTurn(
       p_output_tokens: t.usage?.output ?? null,
     }),
     signal: AbortSignal.timeout(1000),
-  }).catch(() => {});
+  }).then(
+    (r) => { if (!r.ok) host.report?.({ event: "turn_log_failed", status: r.status }); },
+    // ⚠️ שם השגיאה בלבד: הודעת רשת יכולה לשאת כתובת, וכאן אין ממה להסתיר אותה.
+    (e) => host.report?.({ event: "turn_log_failed", error: e instanceof Error ? e.name : "unknown" }),
+  ).catch(() => {});
 
-  if (waitUntil) return waitUntil(write);
+  if (host.waitUntil) return host.waitUntil(write);
   const rt = (globalThis as { EdgeRuntime?: { waitUntil?: WaitUntil } }).EdgeRuntime;
   if (typeof rt?.waitUntil === "function") rt.waitUntil(write);
 }

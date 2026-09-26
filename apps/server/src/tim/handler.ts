@@ -7,6 +7,7 @@ import { findCandidates, findRides, retrieveKnowledge } from "./lookup";
 import { SYSTEM } from "./prompt";
 import { checkRateLimit, dbAccess } from "./rate-limit";
 import { scrubAnswer } from "./safety";
+import { timed, type TimEvent, type Trace } from "./log";
 import { logTurn, wasAnswered, type WaitUntil } from "./turn-log";
 import { extractRideName, readHistory } from "./understand";
 
@@ -22,6 +23,10 @@ import { extractRideName, readHistory } from "./understand";
 /** What the host gives Tim beyond the request and the env. Every field is optional. */
 export interface Host {
   waitUntil?: WaitUntil;
+  /** Filled in as the request runs, for the log line (log.ts). Tim never prints. */
+  trace?: Trace;
+  /** For what happens after the response — the turn log's write. */
+  report?: (e: TimEvent) => void;
 }
 
 export async function handle(
@@ -48,6 +53,7 @@ export async function handle(
   }
 
   // {"diagnose": true} — לפני כל בדיקה אחרת, כדי שיעבוד גם כשמשהו שבור.
+  if (body.diagnose) host.trace && (host.trace.outcome = "diagnose");
   if (body.diagnose === true) return json(diagnose(env));
   if (body.diagnose === "models") {
     const m = await listModels(env);
@@ -67,7 +73,7 @@ export async function handle(
   const db = dbAccess(env);
   if (isFail(db)) return reply(db);
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-  const limited = await checkRateLimit(db, ip, env.RATE_LIMIT_SALT);
+  const limited = await timed(host.trace, "rate_limit", () => checkRateLimit(db, ip, env.RATE_LIMIT_SALT));
   if (limited) return reply(limited);
 
   // ⚠️ **שני המקורות שלמטה נופלים רכה, בכוונה, ובניגוד לגדר הקצב.** גדר
@@ -96,18 +102,20 @@ export async function handle(
    * שגיאות שיוסר מאחת מהן ישבור את השורה הזו בשקט.
    */
   const [rides, candidates, { chunks, retrieval }] =
-    await Promise.all([
+    await timed(host.trace, "retrieval", () => Promise.all([
       findRides(db, asked, question),
       findCandidates(db, asked, question),
       retrieveKnowledge(db, key!, question),
-    ]);
+    ]));
+  if (host.trace) host.trace.candidates = candidates.length;
 
   // ── הקריאה למודל (gemini.ts) ─────────────────────────────────────────
   const model = env.GEMINI_MODEL?.trim() || DEFAULT_MODEL;
-  const gemini = await askGemini({
+  const gemini = await timed(host.trace, "gemini", () => askGemini({
     key: key!, model, env, system: SYSTEM, history,
     userText: composeContext({ rides, candidates, chunks, question }),
-  });
+    trace: host.trace,
+  }));
   if (isFail(gemini)) return reply(gemini);
   const { data } = gemini;
   const { raw, finishReason, candidates: hadCandidates } = readAnswer(data);
@@ -144,13 +152,14 @@ export async function handle(
   // חסר; תשובה שנתקעה היא מוצר שבור.
   //
   const answered = wasAnswered({ rides, chunks, candidates, answer });
+  if (host.trace) host.trace.answered = answered;
   logTurn(db.url, db.dbKey, {
     question,
     answered,
     reason: answered ? null : (retrieval === "failed" ? "unverified" : "no_data"),
     model,
     usage,
-  }, host.waitUntil);
+  }, host);
 
   return json({
     answer, model, usage, retrieval,

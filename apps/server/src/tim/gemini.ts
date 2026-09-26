@@ -1,5 +1,6 @@
 import { thinkingConfig } from "./config";
 import { failWith, type Fail } from "./http";
+import type { Trace } from "./log";
 import type { Turn } from "./understand";
 /**
  * `*` נכון כל עוד אין דומיין. ברגע שיהיה — להגדיר את הסוד ALLOWED_ORIGIN
@@ -54,6 +55,7 @@ const transient = (code: number) => code === 503 || code === 429 || code >= 500;
 
 export async function askGemini(p: {
   key: string; model: string; env: Record<string, string | undefined>; system: string; history: Turn[]; userText: string;
+  trace?: Trace;
 }): Promise<Fail | { data: any }> {
   const thinking = thinkingConfig(p.env);
   const endpoint =
@@ -88,13 +90,20 @@ export async function askGemini(p: {
       }),
     });
 
+  // ⚠️ הניסיונות נרשמים ליומן: ניסיון שני שהצליח אינו נראה בתשובה, והוא
+  // בדיוק האיתות שגוגל לא יציבה — לפני שהמשפחה מרגישה בזה.
+  const tr = p.trace?.gemini;
   try {
     res = await call();
+    if (tr) tr.attempts = 1;
     if (transient(res.status)) {
+      if (tr) tr.first_status = res.status;
       await new Promise((r) => setTimeout(r, 700));
       res = await call();
+      if (tr) tr.attempts = 2;
     }
   } catch {
+    if (tr) tr.unreachable = true;
     return failWith(502, { error: "upstream_unreachable" });
   }
 
