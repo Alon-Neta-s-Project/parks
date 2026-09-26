@@ -1,45 +1,7 @@
-// בלי תלויות, מאותה סיבה שהפונקציה עצמה בלי תלויות: הכול נבדק מקומית.
-function assertEquals<T>(actual: T, expected: T, msg?: string) {
-  const a = JSON.stringify(actual), b = JSON.stringify(expected);
-  if (a !== b) throw new Error(`${msg ?? "לא זהה"}\n  התקבל : ${a}\n  ציפינו: ${b}`);
-}
 import { test } from "vitest";
-import {
-  handle, thinkingConfig, formatChunks, formatExperiences, scrubAnswer,
-  extractHeight, extractRideName, looksLikeGeminiKey, bucketKey,
-} from "./index.ts";
-import type { KnowledgeChunk } from "./index.ts";
+import { handle, thinkingConfig } from "./index";
+import { assertEquals, KEY, ask, stub, geminiOk, geminiMultiPart, FULL, dbSays, sentToGemini, withChunks, withRides } from "./test-helpers";
 
-const KEY = "AIza" + "x".repeat(35);
-const ask = (body: unknown, method = "POST") =>
-  // GET אינו יכול לשאת גוף — Request זורק. הבדיקה על 405 שולחת GET ריק.
-  new Request("http://x/tim", method === "GET" ? { method } : { method, body: JSON.stringify(body) });
-
-/** מחליף את fetch הגלובלי, ומחזיר את מה שנשלח כדי שאפשר יהיה לבדוק אותו. */
-function stub(handler: (url: string, init?: RequestInit) => Response) {
-  const calls: { url: string; init?: RequestInit }[] = [];
-  const real = globalThis.fetch;
-  globalThis.fetch = ((u: string | URL | Request, i?: RequestInit) => {
-    const url = String(u);
-    calls.push({ url, init: i });
-    return Promise.resolve(handler(url, i));
-  }) as typeof fetch;
-  return { calls, restore: () => (globalThis.fetch = real) };
-}
-
-const geminiOk = () =>
-  new Response(JSON.stringify({
-    candidates: [{ content: { parts: [{ text: "שלום, אני מחובר." }] } }],
-  }), { status: 200 });
-
-/** מודל חדש מחזיר כמה חלקים, והראשון אינו בהכרח הטקסט. */
-const geminiMultiPart = () =>
-  new Response(JSON.stringify({
-    candidates: [{
-      content: { parts: [{ thought: true }, { text: "חלק" }, { text: "שני" }] },
-      finishReason: "STOP",
-    }],
-  }), { status: 200 });
 
 test("סוד חסר וסוד פגום הם שתי שגיאות שונות", async () => {
   const missing = await handle(ask({ question: "היי" }), {});
@@ -58,16 +20,6 @@ test("סוד חסר וסוד פגום הם שתי שגיאות שונות", asyn
   assertEquals(b.detail.includes("AIzaSy"), false, "אבל לא הערך עצמו");
 });
 
-test("בדיקת השפיות תופסת הדבקה חלקית, ולא מניחה פורמט של ספק", () => {
-  assertEquals(looksLikeGeminiKey(undefined), false);
-  assertEquals(looksLikeGeminiKey("AIzaSy"), false, "קצר מדי — הדבקה חלקית");
-  assertEquals(looksLikeGeminiKey("AIza with a space in it xxxxxxxxxxxxxxx"), false, "רווח");
-  assertEquals(looksLikeGeminiKey(KEY), true);
-  // ⚠️ העיקר: מפתח באורך תקין שאינו מתחיל ב-AIza **אינו** נחסם. גוגל היא
-  //    הסמכות על הפורמט, ולא ניחוש מקומי שחוסם מפתח תקין.
-  assertEquals(looksLikeGeminiKey("x".repeat(39)), true);
-});
-
 test("שאלה ריקה, ארוכה מדי, ו-JSON פגום — כל אחת עם קוד משלה", async () => {
   assertEquals((await handle(ask({ question: "" }), { GEMINI_API_KEY: KEY })).status, 400);
   assertEquals((await handle(ask({}), { GEMINI_API_KEY: KEY })).status, 400);
@@ -80,14 +32,6 @@ test("GET נדחה, OPTIONS מקבל CORS", async () => {
   const o = await handle(new Request("http://x", { method: "OPTIONS" }), {});
   assertEquals(o.headers.get("Access-Control-Allow-Origin"), "*");
 });
-
-const FULL = { GEMINI_API_KEY: KEY, SUPABASE_URL: "http://db", SUPABASE_ANON_KEY: "anon-key-value" };
-/** מסד שמאפשר לעבור: ספירה נמוכה, ורישום שמצליח. */
-/** check_rate_limit מחזירה 'ok' | 'user' | 'global' — הגדר שנגע, לא רק אם. */
-const dbSays = (verdict: "ok" | "user" | "global") => (url: string) =>
-  url.includes("/rpc/check_rate_limit")
-    ? new Response(JSON.stringify(verdict), { status: 200 })
-    : geminiOk();
 
 test("מסלול תקין — המפתח נשלח לגוגל ואינו חוזר לדפדפן", async () => {
   const s = stub(dbSays("ok"));
@@ -280,15 +224,6 @@ test("האבחון סופר מקורות מנורמלים, לא תווים", asy
   assertEquals(await ask({ GEMINI_API_KEY: KEY, ALLOWED_ORIGIN: "/" }), 0);
   assertEquals(await ask({ GEMINI_API_KEY: KEY, ALLOWED_ORIGIN: "https://a/" }), 1);
   assertEquals(await ask({ GEMINI_API_KEY: KEY, ALLOWED_ORIGIN: "https://a, https://b" }), 2);
-});
-
-test("הדלי הוא גיבוב — כתובת ה-IP עצמה אינה נשמרת", async () => {
-  const a = await bucketKey("203.0.113.9", "salt");
-  const b = await bucketKey("203.0.113.9", "salt");
-  const c = await bucketKey("203.0.113.10", "salt");
-  assertEquals(a, b);                        // יציב
-  assertEquals(a === c, false);              // מפריד בין כתובות
-  assertEquals(a.includes("203.0.113"), false);  // ולא ניתן לקרוא ממנו את הכתובת
 });
 
 
@@ -488,15 +423,6 @@ test("בלי usageMetadata התשובה עדיין נמסרת, והמדידה nu
   assertEquals(b.usage, null);
 });
 
-// ── תקציב החשיבה ─────────────────────────────────────────────────────
-// נמדד: חשיבה 505 מול תשובה 154 — 72% מעלות ההודעה. הידית היקרה ביותר.
-// היא opt-in כדי שפריסה לא תשנה התנהגות שכבר עובדת.
-
-/** הגוף שנשלח לגוגל, כאובייקט. */
-const sentToGemini = (calls: { url: string; init?: RequestInit }[]) =>
-  // deno-lint-ignore no-explicit-any
-  JSON.parse(calls.find((c) => c.url.includes("generateContent"))!.init!.body as any);
-
 test("בלי הסוד — לא נשלח thinkingConfig כלל", async () => {
   const s = stub(dbSays("ok"));
   await handle(ask({ question: "היי" }), FULL);
@@ -669,49 +595,6 @@ test("404 מהמסד מפנה למיגרציה 026, לא לחתימה הישנה
   assertEquals((await r.json()).detail.includes("026"), true);
 });
 
-// ── השליפה ────────────────────────────────────────────────────────────
-// ⚠️ הסימון בכל קטע מגיע מ-volatility ולא מהטקסט. פסקת סייג בגוף כל
-// מסמך הייתה מקרבת את כולם זה לזה במרחב ה-embedding וכופלת שדה קיים.
-
-test("כל קטע מסומן לפי volatility, ולא לפי הטקסט שלו", () => {
-  const out = formatChunks([
-    { content: "אלף", volatility: "volatile", last_verified: "2026-09-01" , authority_tier: "T1" },
-    { content: "בית", volatility: "seasonal", last_verified: null , authority_tier: "T1" },
-    { content: "גימל", volatility: "static", last_verified: "2026-08-01" , authority_tier: "T1" },
-  ]);
-  assertEquals(out.includes("· משתנה · נבדק 2026-09-01"), true);
-  assertEquals(out.includes("· עונתי]"), true);
-  assertEquals(out.includes("· יציב · נבדק 2026-08-01"), true);
-});
-
-// ⚠️ ברירת המחדל היא לכיוון הבטוח. קטע בלי סימון נאמר בזהירות, לא
-// בביטחון — "לא ידוע" אינו "יציב".
-test("volatility חסר נקרא כמשתנה ולא כיציב", () => {
-  const out = formatChunks([{ content: "x", volatility: null, last_verified: null , authority_tier: "T1" }]);
-  assertEquals(out.includes("משתנה"), true);
-  assertEquals(out.includes("יציב"), false);
-});
-
-test("ערך שאינו באוצר המילים אינו הופך ליציב", () => {
-  const out = formatChunks([{ content: "x", volatility: "unknown-value", last_verified: null , authority_tier: "T1" }]);
-  assertEquals(out.includes("משתנה"), true);
-});
-
-/** מסד שמחזיר קטעים, וגוגל שמחזירה גם embedding וגם תשובה. */
-const withChunks = (rows: unknown[]) => (url: string) => {
-  if (url.includes(":embedContent")) {
-    return new Response(
-      JSON.stringify({ embedding: { values: Array.from({ length: 1536 }, () => 0.01) } }),
-      { status: 200 },
-    );
-  }
-  if (url.includes("/rpc/match_knowledge")) {
-    return new Response(JSON.stringify(rows), { status: 200 });
-  }
-  if (url.includes("/rpc/check_rate_limit")) return new Response('"ok"', { status: 200 });
-  return geminiOk();
-};
-
 test("הקטעים נכנסים להקשר, לפני השאלה", async () => {
   const s = stub(withChunks([
     { content: "Multi Pass עולה כך וכך", volatility: "volatile", last_verified: "2026-09-01" , authority_tier: "T1" },
@@ -794,280 +677,6 @@ test("דרגת המקור אינה נכנסת להקשר של המודל", async
   const call = s.calls.find((c) => c.url.includes("generateContent"))!;
   assertEquals(String(call.init!.body).includes("T1"), false, "הדרגה דלפה להקשר");
 });
-
-// ── המתקנים ───────────────────────────────────────────────────────────
-// ⚠️ עובדה על מתקן נשלפת מהטבלה ולא מחיפוש סמנטי. "מה גובה המינימום"
-// צריכה את המספר מהשורה, לא את הקטע שנשמע דומה.
-
-test("גובה נשלף מהשאלה רק כשהוא באמת גובה", () => {
-  assertEquals(extractHeight("הילדה בגובה 105"), 105);
-  assertEquals(extractHeight('היא 112 ס"מ'), 112);
-  // ⚠️ מספר בלי הקשר אינו גובה.
-  assertEquals(extractHeight("אנחנו 3 ימים בפארק"), null);
-  assertEquals(extractHeight("בן 7"), null);
-  // ⚠️ מחוץ לטווח שהמסד אוכף על העמודה.
-  assertEquals(extractHeight('היא 300 ס"מ'), null);
-  assertEquals(extractHeight('הוא 20 ס"מ'), null);
-});
-
-// ⚠️ מילות ברכה ושיחה אינן שם מתקן. "היי" עבר קודם, ופנה לטבלה על כל
-// ברכה — קריאה מיותרת בכל שיחה.
-test("ברכה אינה שם מתקן", () => {
-  assertEquals(extractRideName("היי"), null);
-  assertEquals(extractRideName("שלום, מה שלומך?"), null);
-  assertEquals(extractRideName("מה זה"), null);
-});
-
-// 🔴 **הבדיקה שהייתה חסרה, והבאג שהיא הייתה תופסת.**
-//
-// הבדיקות כאן אימתו ש-extractRideName מחזירה מחרוזת שמכילה "אוורסט",
-// וזה היה נכון. **אף בדיקה לא שאלה מה המסד עושה עם המחרוזת הזו.**
-// 029 התאימה `name ilike '%' || p_name || '%'` — כלומר את כל הביטוי
-// כמחרוזת רציפה — ושאלה אמיתית של נטע החזירה אפס שורות בשדה.
-//
-// המסקנה נשמרת כאן כבדיקה ולא כהערה: הפונקציה מחזירה **צירוף מילים**,
-// ולכן צד המסד **חייב** להתאים לפי מילים. מיגרציה 030 עושה זאת.
-test("מה שנשלף הוא צירוף מילים, ולכן ההתאמה במסד חייבת להיות לפי מילה", () => {
-  const asked = extractRideName("הבת שלי בגובה 112 סנטימטר, היא יכולה לעלות על אקספדישן אוורסט?");
-  assertEquals(asked !== null, true);
-  // ⚠️ יותר ממילה אחת — וזה בדיוק מה שהתאמת-ביטוי אינה יכולה למצוא.
-  assertEquals(asked!.split(" ").length > 1, true, "אילו הייתה מילה אחת, הבאג לא היה מתגלה");
-  // ⚠️ ושם המתקן הוא **אחת** מהמילים, לא הביטוי כולו.
-  assertEquals(asked!.split(" ").includes("אוורסט"), true);
-  assertEquals(asked === "אוורסט", false, "אין לצפות ששם נקי ייצא מכאן");
-});
-
-// 🔴 **נמדד בשדה, אחרי שהמודל ייצר "מתקן אווטאר" כמועמד לנרדף.**
-// עם האליאס הזה במסד, השאלה "איזה מתקן הכי מפחיד" החזירה את
-// Avatar Flight of Passage — עובדה על מתקן אקראי נכנסה להקשר של טים
-// כתשובה לשאלה שלא עסקה בו כלל.
-//
-// ⚠️ והתיקון הוא כאן ולא בסינון המועמדים, כי מילה גנרית מופיעה גם
-// בנרדף לגיטימי ("מופע היפה והחיה"). מה שחייב ליפול הוא הצד של
-// **השאלה**, ואז שום נרדף מאושר אינו יכול לייצר את הכשל הזה.
-test("מילה גנרית אינה מגיעה למסד כמילת חיפוש", () => {
-  // ⚠️ הכלל אינו "מחזיר null" — מילה שנשארת ואינה מתאימה לאף מתקן
-  // עולה קריאה אחת מיותרת וזה מחיר מקובל (ראה ההערה בפונקציה).
-  // הכלל הוא ש**המילה הגנרית עצמה** לא נשלחת, כי היא זו שמתאימה
-  // לנרדף של מתקן אקראי.
-  for (const [q, generic] of [
-    ["איזה מתקן הכי מפחיד", "מתקן"],
-    ["יש מופע בערב", "מופע"],
-    ["כמה זמן התור", "תור"],
-    ["באיזה פארק זה", "פארק"],
-  ] as const) {
-    const out = extractRideName(q) ?? "";
-    assertEquals(out.split(" ").includes(generic), false, `"${generic}" נשלח למסד מתוך "${q}"`);
-  }
-  // ⚠️ ושם אמיתי לצד מילה גנרית שורד.
-  assertEquals(extractRideName("איזה מתקן זה אוורסט")?.includes("אוורסט"), true);
-});
-
-test("שם המתקן נשלף גם כשהוא עטוף במילות שאלה", () => {
-  assertEquals(extractRideName("מה גובה המינימום באקספדישן אוורסט?")?.includes("אוורסט"), true);
-  // ⚠️ שאלת מחיר על מתקן ספציפי — ולכן הזיהוי אינו לפי רשימת מילות מפתח.
-  assertEquals(extractRideName("כמה עולה אוורסט")?.includes("אוורסט"), true);
-});
-
-// ⚠️ שלושת מצבי הגובה, במילים שונות. מודל שמקבל 0 עלול לכתוב
-// "גובה מינימום 0 ס\"מ", וזה בדיוק מה שהכלל אוסר.
-test("שלושת מצבי הגובה נכתבים כשלוש אמירות שונות", () => {
-  const base = {
-    name: "X", name_he: null, park: "P", land: null, status: "open",
-    status_note: null, intensity: 3, gets_wet: null, skip_line: null,
-    last_verified: "2026-09-01", fits: null,
-  };
-  const limit = formatExperiences([{ ...base, height_cm: 112 }]);
-  const none = formatExperiences([{ ...base, height_cm: 0 }]);
-  const unchecked = formatExperiences([{ ...base, height_cm: null }]);
-
-  assertEquals(limit.includes('גובה מינימום: 112 ס"מ'), true);
-  assertEquals(none.includes("אין מגבלת גובה"), true);
-  // ⚠️ הבדיקה מכוונת לכלל עצמו ולא לתו "0": בשורה יש גם "עוצמה 3" וגם
-  // תאריך אימות, ושניהם מכילים 0 בלי שום קשר לגובה.
-  assertEquals(none.includes('0 ס"מ'), false, '0 ס"מ אסור שיגיע למסך');
-  assertEquals(none.includes("גובה מינימום"), false, "0 אינו מגבלת גובה");
-  assertEquals(unchecked.includes("לא ידוע אם קיימת"), true);
-  // 🔴 ולא "לא ידוע" לבדו — הוא נקרא כ"לא ידוע על מגבלה", כלומר היתר.
-  assertEquals(/לא ידוע(?! אם קיימת)/.test(unchecked), false);
-  // ⚠️ ובצעד הבא. "לא בדקנו" לבדו עוצר את הקוראת בלי לומר מה לעשות.
-  assertEquals(unchecked.includes("שילוט בכניסה"), true);
-  // ⚠️ ובלי דיווח על עצמנו.
-  assertEquals(unchecked.includes("בדקנו"), false, "אל תדווח על העבודה שלנו");
-  assertEquals(unchecked.includes("אין מגבלת גובה"), false);
-});
-
-// ⚠️ fits === null אינו נאמר כ"מתאים". הוא פשוט לא נאמר.
-test("התאמה לא ידועה אינה נאמרת כהתאמה", () => {
-  const base = {
-    name: "X", name_he: null, park: "P", land: null, status: "open",
-    status_note: null, intensity: 3, gets_wet: null, skip_line: null,
-    last_verified: null, height_cm: null,
-  };
-  assertEquals(formatExperiences([{ ...base, fits: null }]).includes("מתאים"), false);
-  assertEquals(formatExperiences([{ ...base, fits: true }]).includes("מתאים לגובה"), true);
-  assertEquals(formatExperiences([{ ...base, fits: false }]).includes("לא מתאים"), true);
-});
-
-// 🔴 **הבדיקה הזו טענה סטטוס שאינו קיים.**
-//
-// היא הריצה את Slush Gusher עם `temporarily_closed` — ערך שהייבוא אינו
-// פולט לעולם (אוצר המילים הוא open · closed · check) — וציפתה לניסוח
-// "אינו פתוח כרגע" שכבר הוחלף בהכרעת פולה. כלומר היא אימתה מצב מדומיין
-// מול ניסוח מת. בפועל Slush Gusher נושא `check`.
-//
-// ⚠️ וזה נחשף רק כשהבדיקות התחילו לרוץ. הן לא רצו כלל: `Deno.serve`
-// נקרא בטעינת המודול ו-`deno test` נפל על הרשאת רשת לפני בדיקה אחת.
-test("מתקן שדורש אימות מסומן בניסוח פולה, עם המשפט שלו", () => {
-  const out = formatExperiences([{
-    name: "Slush Gusher", name_he: null, park: "P", land: null,
-    status: "check",
-    status_note: "Check current Disney calendar before visit; refurbishment",
-    intensity: 4, height_cm: 122, gets_wet: null, skip_line: null,
-    last_verified: null, fits: null,
-  }]);
-  assertEquals(out.includes("יש לוודא לפני ההגעה"), true);
-  assertEquals(out.includes("Check current Disney calendar"), true);
-});
-
-// ⚠️ שלושת הערכים שהייבוא באמת פולט חייבים תג עברי. ערך שנופל לברירת
-// המחדל מגיע למסך כמילה באנגלית — וזה כבר קרה ל-`check`.
-test("שלושת הסטטוסים של הסכמה מקבלים תג עברי, בלי ברירת מחדל", () => {
-  const base = {
-    name: "X", name_he: null, park: "P", land: null, status_note: null,
-    intensity: 3, height_cm: null, gets_wet: null, skip_line: null,
-    last_verified: null, fits: null,
-  };
-  for (const state of ["closed", "check"]) {
-    const out = formatExperiences([{ ...base, status: state }]);
-    assertEquals(out.includes(`סטטוס: ${state}`), false, `${state} נפל לברירת מחדל`);
-  }
-});
-
-// 🔴 **ארבעת המצבים של דגל רגישות, וכולם נאמרים.**
-//
-// `"false"` שתק, וטים ענה "אין לי את הנתון לגבי רגישות לחושך במתקן
-// Buzz Lightyear" על עמודה שכתוב בה `false`. הבדיקה הזו לא הייתה קיימת.
-test("כל אחד מארבעת מצבי הרגישות נאמר במפורש", () => {
-  const base = {
-    name: "X", name_he: null, park: "P", land: null, status: "open",
-    status_note: null, intensity: 3, height_cm: null, gets_wet: null,
-    skip_line: null, last_verified: null, fits: null,
-    sens_heights: null, sens_loud: null, sens_strobe: null,
-  };
-  const said = (v: string | null) =>
-    formatExperiences([{ ...base, sens_dark: v }]);
-
-  // ⚠️ הליבה: נבדק־ואין אינו שתיקה. הוא הנתון הכי שימושי שיש לנו.
-  assertEquals(said("false").includes("חושך או מקומות סגורים: נבדק — אין"), true);
-  assertEquals(said("true").includes("חושך או מקומות סגורים: כן"), true);
-  assertEquals(said(null).includes("חושך או מקומות סגורים: לא נבדק"), true);
-  assertEquals(said("na").includes("חושך או מקומות סגורים: לא רלוונטי"), true);
-
-  // ⚠️ ארבעת הדגלים תמיד, גם כשמצבם שונה זה מזה.
-  const mixed = formatExperiences([{
-    ...base, sens_dark: "false", sens_heights: "true",
-    sens_loud: "na", sens_strobe: null,
-  }]);
-  for (const flag of ["חושך או מקומות סגורים", "גבהים", "רעש חזק או פתאומי", "הבזקי אור"]) {
-    assertEquals(mixed.includes(flag), true, `${flag} לא נאמר`);
-  }
-});
-
-// ⚠️ `undefined` אינו "לא נבדק". מסד בלי 039 אינו מייצר אמירה כלל.
-test("דגל שלא הגיע מהמסד אינו נאמר כלא-נבדק", () => {
-  const out = formatExperiences([{
-    name: "X", name_he: null, park: "P", land: null, status: "open",
-    status_note: null, intensity: 3, height_cm: null, gets_wet: null,
-    skip_line: null, last_verified: null, fits: null,
-  }]);
-  assertEquals(out.includes("רגישויות"), false);
-});
-
-// 🔴 **מה שידוע נאמר לפני מה שחסר.**
-//
-// Bay Slides נושא תקרה מדודה של 152 ורצפה שלא נבדקה. טים פתח ב"לא
-// נבדקה", ומשפחה שקוראת משפט שנפתח בחסר לא מגיעה לנתון שכן יש.
-test("תקרת הגובה נאמרת לפני הרצפה החסרה", () => {
-  const out = formatExperiences([{
-    name: "Bay Slides", name_he: null, park: "P", land: null, status: "open",
-    status_note: null, intensity: 1, height_cm: null, max_height_cm: 152,
-    gets_wet: null, skip_line: null, last_verified: null, fits: null,
-  }]);
-  assertEquals(out.indexOf("152") < out.indexOf("לא ידוע"), true, "החסר נאמר ראשון");
-  assertEquals(out.includes("עד 152"), true);
-});
-
-// ⚠️ עוצמה שלא דורגה אינה "עוצמה 0". מתקן בלי דירוג לעולם אינו נכנס
-// לתוצאות של פילטר עוצמה, וגם כאן הוא נאמר כלא-מדורג.
-// 🔴 **אזור ריק הוא "משתנה", ולא שתיקה.**
-//
-// נטע שאלה על JAMMitors, וטים ענה "המידע לגבי האזור אינו מופיע אצלי"
-// על נתון שנבדק ונכתב במאסטר כ-`N/A` — שמונה אמנים נודדים בלי מקום קבוע.
-test("אזור ריק נאמר כמשתנה, ואינו נשמט", () => {
-  const base = {
-    name: "JAMMitors", name_he: null, park: "EPCOT", status: "open",
-    status_note: null, intensity: 1, height_cm: 0, gets_wet: null,
-    skip_line: null, last_verified: null, fits: null,
-  };
-  for (const land of [null, "N/A"]) {
-    const out = formatExperiences([{ ...base, land }]);
-    assertEquals(out.includes("אינו משויך לאזור מוגדר"), true, `${land}`);
-    assertEquals(out.includes("N/A"), false, "N/A אינו מגיע למסך");
-  }
-  // ⚠️ ואזור אמיתי נשאר כפי שהוא, בלי התג.
-  const real = formatExperiences([{ ...base, land: "World Nature" }]);
-  assertEquals(real.includes("World Nature"), true);
-  assertEquals(real.includes("אינו משויך"), false);
-});
-
-/**
- * 🔴 **מה שאסור לצאת נחסם בקוד, ולא בהוראה.**
- *
- * ההוראות מבקשות מטים לא לחשוף קישורים ומפתחות. הוראה היא בקשה, ומודל
- * יכול לא לציית לה — וזו בדיוק המטרה של prompt injection. לכן הפלט
- * נבדק אחרי שהמודל סיים.
- */
-test("קישור ומפתח אינם יוצאים בתשובה", () => {
-  const a = scrubAnswer("הפרטים באתר https://disneyworld.disney.go.com/tickets/ וכדאי לבדוק");
-  assertEquals(a.clean.includes("http"), false);
-  assertEquals(a.clean.includes("באתר הרשמי"), true);
-  assertEquals(a.hits.includes("url"), true);
-
-  const b = scrubAnswer("המפתח הוא AIzaSyTESTKEY0000000000000000000000000000");
-  assertEquals(/AIza/.test(b.clean), false);
-  assertEquals(b.hits.includes("key"), true);
-
-  // ⚠️ ותשובה רגילה אינה נפגעת. מסנן שמשנה טקסט תקין גרוע מאין מסנן.
-  const c = scrubAnswer("כדאי לוודא באתר הרשמי ביום הביקור.");
-  assertEquals(c.clean, "כדאי לוודא באתר הרשמי ביום הביקור.");
-  assertEquals(c.hits.length, 0);
-});
-
-test("עוצמה שלא דורגה נאמרת ככזו", () => {
-  const out = formatExperiences([{
-    name: "X", name_he: null, park: "P", land: null, status: "open",
-    status_note: null, intensity: null, height_cm: 0, gets_wet: null,
-    skip_line: null, last_verified: null, fits: null,
-  }]);
-  assertEquals(out.includes("לא דורגה"), true);
-});
-
-/** מסד שמחזיר מתקנים, קטעים, ותשובה. */
-const withRides = (rows: unknown[]) => (url: string) => {
-  if (url.includes(":embedContent")) {
-    return new Response(
-      JSON.stringify({ embedding: { values: Array.from({ length: 1536 }, () => 0.01) } }),
-      { status: 200 },
-    );
-  }
-  if (url.includes("/rpc/find_experiences")) {
-    return new Response(JSON.stringify(rows), { status: 200 });
-  }
-  if (url.includes("/rpc/match_knowledge")) return new Response("[]", { status: 200 });
-  if (url.includes("/rpc/check_rate_limit")) return new Response('"ok"', { status: 200 });
-  return geminiOk();
-};
 
 test("שאלה על מתקן פונה לטבלה, והמתקנים לפני המסמכים", async () => {
   const s = stub(withRides([{
@@ -1169,70 +778,4 @@ test("שאלה שאינה על מתקן מחזירה אפס שורות ואינ�
     s.calls.find((c) => c.url.includes("generateContent"))!.init!.body as any,
   ).contents.at(-1).parts[0].text;
   assertEquals(prompt.includes("[מתקן:"), false, "אסור ששורת מתקן תיכנס להקשר");
-});
-
-// ── שכבות ההקשר ───────────────────────────────────────────────────────
-// 🔴 **הכלל "T1/T2 לעולם לא נסתרים על ידי T3-T5" לא היה ניתן לקיום.**
-// הוא היה כתוב בהוראות, והמידע להפעיל אותו עליו לא הגיע למודל: כל
-// הקטעים נכנסו כערימה אחת, וקטע מרדיט נראה זהה למגבלה רשמית.
-//
-// ⚠️ **ושתי הדרישות אינן סותרות, וזה מה שאיפשר את התיקון:** מה שאסור
-// לדלוף הוא **שם הדרגה** (`T1`), ומה שחייב להגיע הוא **הסדר**. התוויות
-// הן מילים בעברית, ולכן הבדיקה על דליפת הדרגה ממשיכה לעבור.
-
-const chunk = (tier: string | null, content: string): KnowledgeChunk => ({
-  content,
-  volatility: "static",
-  last_verified: null,
-  authority_tier: tier,
-});
-
-test("ההקשר מגיע בשכבות, והרשמי ראשון", () => {
-  const out = formatChunks([
-    chunk("T4", "שמעתי שפותחים מוקדם"),
-    chunk("T1", "הפארק נפתח ב-9:00"),
-    chunk("T3", "הטיפ שלנו"),
-  ]);
-
-  assertEquals(out.includes("[עובדות רשמיות]"), true, "אין שכבה רשמית");
-  assertEquals(out.includes("[מניסיון מבקרים — לא מאומת]"), true, "אין שכבה קהילתית");
-
-  const official = out.indexOf("[עובדות רשמיות]");
-  const ours = out.indexOf("[מהתוכן שלנו]");
-  const community = out.indexOf("[מניסיון מבקרים — לא מאומת]");
-  assertEquals(official < ours && ours < community, true, "הסדר אינו לפי סמכות");
-
-  // ⚠️ והתוכן נשאר בשכבה שלו, לא רק הכותרת.
-  assertEquals(out.indexOf("הפארק נפתח") < out.indexOf("שמעתי שפותחים"), true);
-});
-
-test("שם הדרגה אינו נכנס להקשר גם אחרי השכבות", () => {
-  const out = formatChunks([chunk("T1", "רשמי"), chunk("T5", "קהילתי")]);
-  for (const code of ["T1", "T2", "T3", "T4", "T5"]) {
-    assertEquals(out.includes(code), false, `${code} דלף להקשר`);
-  }
-});
-
-test("שכבה ריקה אינה מופיעה ככותרת בלי תוכן", () => {
-  const out = formatChunks([chunk("T1", "רשמי בלבד")]);
-  assertEquals(out.includes("[מניסיון מבקרים — לא מאומת]"), false);
-  assertEquals(out.includes("[מהתוכן שלנו]"), false);
-});
-
-// 🔴 המספור הוא מה שמאפשר כבילת ציטוט (סעיף 3 שלב 6). אם הוא מתאפס
-// בכל שכבה, "קטע 1" מצביע על שלושה דברים שונים.
-test("המספור רץ על פני השכבות ואינו מתאפס", () => {
-  const out = formatChunks([chunk("T1", "א"), chunk("T4", "ב"), chunk("T3", "ג")]);
-  assertEquals(out.includes("[קטע 1 ·"), true);
-  assertEquals(out.includes("[קטע 2 ·"), true);
-  assertEquals(out.includes("[קטע 3 ·"), true);
-});
-
-// ⚠️ הסכמה אומרת not null, אבל ברירת מחדל שקטה היא בדיוק מה שנשבר כאן
-// שוב ושוב. קטע בלי דרגה יורד, ולא עולה ולא נעלם.
-test("קטע בלי דרגה אינו נעלם ואינו מוצג כמאומת", () => {
-  const out = formatChunks([chunk("T1", "רשמי"), chunk(null, "בלי דרגה")]);
-  assertEquals(out.includes("בלי דרגה"), true, "הקטע נעלם");
-  assertEquals(out.indexOf("רשמי") < out.indexOf("בלי דרגה"), true, "לא מאומת הוצג לפני רשמי");
-  assertEquals(out.includes("לא מסווג"), true);
 });

@@ -30,8 +30,10 @@ BLANK = 'export const DEPLOY_STAMP = "";'
 
 def files() -> list:
     """מה שנפרס: המודולים של טים (בלי בדיקות וכלי דיבוג) וכניסת Supabase."""
+    # ⚠️ בלי בדיקות, בלי העזרים שלהן (test-helpers.ts) ובלי כלי דיבוג — אלה אינם
+    # נפרסים, ושינוי בהם אינו אמור להזיז את החותם של מה שחי.
     mods = [f for f in sorted(P.TIM_DIR.glob("*.ts"))
-            if not f.name.endswith(".test.ts") and f.name != "probe.ts"]
+            if not f.name.endswith(".test.ts") and not f.name.startswith("test-") and f.name != "probe.ts"]
     return mods + [P.TIM_EDGE]
 
 

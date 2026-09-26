@@ -279,6 +279,29 @@ Alon: "the embedding should be a separate server and pipeline, not the same BFF.
 - Tests: the runner (5: until nothing remains, the secret on every call, waiting on 429, giving up after 6, stopping on any other error, no infinite loop) and the pipeline bundles (4). **Seen failing:** removing the wait on a 429.
 - ⚠️ **What hasn't changed yet:** CI (`ci-content.sh`) keeps calling embed **on Supabase**. Switching it to the pipeline requires giving GitHub the Gemini key (a secret), which is a separate decision. The rest of O9 (the content, import, seeds, team 1) stays open.
 
+### 4d ✅ Tim split into modules (26.09.2026)
+Alon: "I can't see the prompt and the business logic." Tim was one file of 1,516 lines, and `handle()` inside it was a single function of about 500 lines, with the database calls and the model call written inline.
+```
+apps/server/src/tim/
+  index.ts       public API (importers didn't change)
+  handler.ts     the flow, 158 lines: validate → limit → fetch → model → filter → log → answer
+  prompt.ts      Tim's instructions + the fit rules from he.json
+  context.ts     what the model sees: formatExperiences/Candidates/Chunks, composeContext
+  understand.ts  extractHeight, extractRideName, wantsRecommendation, readHistory
+  lookup.ts      findRides, findCandidates, retrieveKnowledge (+ the row types)
+  gemini.ts      askGemini (retries), readAnswer, readUsage
+  rate-limit.ts  dbAccess, checkRateLimit, bucketKey
+  safety.ts      scrubAnswer · turn-log.ts logTurn, wasAnswered
+  config.ts · diagnose.ts · http.ts (Fail, CORS) · stamp.ts
+```
+- **4d-1, a move only:** a script on the TypeScript compiler (symbol resolution, not text search). A coverage check confirmed every one of the original's 65,483 characters landed in exactly one module, with no circular dependency. The 75 tests passed unchanged.
+- **4d-2, `handle()` as a flow:** each inline block became a function in its module, **with its comments carried verbatim** by line range, not rewritten. A step that can't continue returns `Fail`, exactly the response that was once written inside `handle`. The 75 tests passed, and the test file wasn't touched. The extraction script stopped three times on its own checks (indentation, a check that was too broad, a block boundary), and each time the folder was reset to the committed state before retrying.
+- **4d-3, the tests by module:** 75 → handler 50 (the flow through `handle`), context 17, understand 5, config/rate-limit/safety 1 each. Shared helpers in `test-helpers.ts`.
+- **The stamp:** it now covers **the whole folder** (every deployed module plus Supabase's entry, including file names), not one file. Otherwise a change in `gemini.ts` would have left it the same, repeating `FIT_STAMP`'s mistake. **Seen failing** when only `gemini.ts` changed. Test helpers are excluded (they aren't deployed), which was also checked. `d3ece6b34e7c`.
+- `build-tim-prompt` writes into `prompt.ts`. paths: `TIM_DIR/PROMPT/STAMP/EDGE`.
+- **Checked:** the Supabase bundle under Deno (`diagnose`, `empty_question`, 405, missing database). A real question to the local server went through validation, the rate limit and retrieval, and stopped at a 503 from Google.
+- **Tests:** `npm run qa` passes · web 307 · server 85 · pipeline 38.
+
 ### O6 — ✅ Closed 26.09 (the baseline, Stage 2b) · The migrations can't build a database from scratch · found 25.09 on a local database
 While setting up a local database (`supabase start`, config in `apps/server/db/supabase-local/`), the setup file stopped **at migration 038**. That's the practical check O5 left open, and it failed.
 
