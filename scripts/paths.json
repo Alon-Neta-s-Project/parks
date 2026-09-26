@@ -20,6 +20,7 @@
   "DEPLOY": "data/deploy",
   "DB": "apps/server/db",
   "MIGRATIONS": "apps/server/db/migrations",
+  "MIGRATIONS_HISTORY": "apps/server/db/migrations-history",
   "DB_SEED": "apps/server/db/seed",
   "DB_LOCAL": "apps/server/db/local",
   "CONTENT_SEED": "apps/server/db/content-seed",

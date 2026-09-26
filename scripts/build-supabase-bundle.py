@@ -26,7 +26,7 @@ import sys
 from paths import P, ROOT  # noqa: E402 — המקור: scripts/paths.json
 OUT = P.DB / "supabase-bundle.sql"
 
-migrations = sorted((P.MIGRATIONS).glob("*.sql"))
+migrations = sorted((P.MIGRATIONS_HISTORY).glob("*.sql"))
 seeds = sorted((P.DB_SEED).glob("*.sql"))
 verify = P.DB / "verify.sql"
 

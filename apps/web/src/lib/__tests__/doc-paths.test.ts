@@ -84,7 +84,7 @@ const FROZEN = [
   "supabase/functions/tim/index.ts",
   "apps/server/db/supabase-bundle.sql",
 ];
-const SIGNED = /^apps\/server\/db\/migrations\/[^/]+\.sql$/;
+const SIGNED = /^apps\/server\/db\/migrations-history\/[^/]+\.sql$/;
 const isFrozen = (file: string) => FROZEN.includes(file) || SIGNED.test(file);
 
 /** פיצול הרפו (docs/refactor-server-split.md): המיקום הישן → החדש. */

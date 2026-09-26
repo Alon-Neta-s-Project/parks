@@ -27,7 +27,9 @@ import pathlib
 import sys
 
 from paths import P, ROOT  # noqa: E402 — המקור: scripts/paths.json
-MIG = P.MIGRATIONS
+# ⚠️ ההיסטוריה בלבד: 48 המיגרציות החתומות. מאז המעבר ל-dbmate מיגרציות חדשות
+# נרשמות ב-dbmate_migrations ואינן נחתמות כאן — שני יומנים היו שני מקורות אמת.
+MIG = P.MIGRATIONS_HISTORY
 DEPLOY = P.DEPLOY
 
 OPEN, CLOSE = "-- <migration-log>", "-- </migration-log>"

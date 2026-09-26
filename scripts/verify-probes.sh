@@ -19,7 +19,7 @@ cd "$(dirname "$0")/.."
 # הנתיבים מ-scripts/paths.json — המקום היחיד שבו כתוב איפה דברים יושבים.
 DB_LOCAL=$(python3 scripts/paths.py DB_LOCAL)
 DB_SEED=$(python3 scripts/paths.py DB_SEED)
-MIGRATIONS=$(python3 scripts/paths.py MIGRATIONS)
+MIGRATIONS=$(python3 scripts/paths.py MIGRATIONS_HISTORY)
 
 PORT="${PGPORT:-55432}"
 # ⚠️ שגיאת ניתוח ("הטבלה אינה קיימת") היא תשובה, לא תקלה: ההשפעה

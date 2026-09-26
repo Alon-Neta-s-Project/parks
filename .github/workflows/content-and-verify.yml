@@ -15,7 +15,7 @@ on:
     branches: [release]
     paths:
       - "apps/server/content/knowledge/**"
-      - "apps/server/db/migrations/**"
+      - "apps/server/db/migrations-history/**"
       - "scripts/build-knowledge-seed.py"
       - "scripts/build-park-intro.py"
       - "scripts/migration-log.py"

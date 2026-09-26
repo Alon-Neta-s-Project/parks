@@ -16,8 +16,11 @@ import { P } from "../../../../../scripts/paths";
  * ⚠️ והבדיקה כאן היא מה שהופך את זה לכלל ולא לכוונה. כלל שכתוב רק
  * בהערה תלוי בזיכרון של מי שכותב, וזו החולשה שהוא נועד לסלק.
  */
-const MIGRATIONS = P.MIGRATIONS;
-const PENDING = join(MIGRATIONS, "pending");
+// ⚠️ **שתי תיקיות, שני כללים.** ההיסטוריה (48 המיגרציות שרצו ביד עד 25.09)
+// ממוספרת בשלוש ספרות ונעולה. מיגרציות חדשות הולכות ל-dbmate, בחותמת זמן.
+const MIGRATIONS = P.MIGRATIONS_HISTORY;
+const DBMATE = P.MIGRATIONS;
+const PENDING = join(DBMATE, "pending");
 const NUMBERED = /^\d{3}_/;
 
 describe("מספור מיגרציות", () => {
@@ -72,5 +75,32 @@ describe("מספור מיגרציות", () => {
       .map(([n, files]) => `${n}: ${[...files].sort().join(" · ")}`)
       .filter((c) => c !== knownClash);
     expect(clashes).toEqual([]);
+  });
+});
+
+/**
+ * 🔴 **ההיסטוריה נעולה ב-48.** קובץ 047 שנוסף לשם לא היה רץ אף פעם: dbmate
+ * קורא רק את apps/server/db/migrations. הוא היה נראה כמו מיגרציה, ממוספר
+ * ובסדר, ונשאר בחוץ — בדיוק "שאילתה שמורה אינה הרצה שהצליחה".
+ */
+describe("ההיסטוריה סגורה, והחדשות של dbmate", () => {
+  it("ההיסטוריה היא 48 הקבצים, עד 046", () => {
+    const files = readdirSync(MIGRATIONS).filter((f) => f.endsWith(".sql")).sort();
+    expect(files).toHaveLength(48);
+    expect(files.at(-1)).toBe("046_tester_note.sql");
+  });
+
+  it("מיגרציה של dbmate נושאת חותמת זמן ובלוק migrate:up", async () => {
+    const { readFileSync } = await import("node:fs");
+    const bad = readdirSync(DBMATE)
+      .filter((f) => f.endsWith(".sql"))
+      .filter((f) => !/^\d{14}_[a-z0-9_]+\.sql$/.test(f) || !readFileSync(join(DBMATE, f), "utf8").includes("-- migrate:up"));
+    expect(bad).toEqual([]);
+  });
+
+  it("ממתין לאישור אינו נושא חותמת זמן", () => {
+    if (!existsSync(PENDING)) return;
+    const stamped = readdirSync(PENDING).filter((f) => /^\d{14}_/.test(f));
+    expect(stamped).toEqual([]);
   });
 });

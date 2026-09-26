@@ -1,5 +1,5 @@
 {
-  "ranAt": "2026-09-25",
+  "ranAt": "2026-09-26",
   "source": "apps/server/content/source/product_export.csv",
   "mode": "dry-run",
   "rows": {
