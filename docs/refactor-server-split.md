@@ -387,3 +387,25 @@ While generating the baseline's permissions from production's catalog: `anon` an
 
 ### O12 — A Gemini quota error is described as temporary load · found 26.09
 On a 429 "You exceeded your current quota", Tim's `hint` says Google is busy and it is temporary. A quota does not reset by waiting a minute, so whoever reads the hint waits for something that won't fix itself. **Proposal:** tell quota from overload by the upstream message. Changes the stamp.
+
+### O13 — Tim as an agent with tools · decided by Alon (26.09): **four tools** · not started
+**Why:** today the question is understood by regex (`understand.ts`). It misses Hebrew prefixes, spelling, and follow-ups — retrieval ignores the history entirely. Seen on "מה גובה המינימום ב-Space Mountain לילד בגובה 110?": the extracted "name" was `ב-Space Mountain לילד`, and the database returned Big Thunder Mountain and Expedition Everest alongside Space Mountain.
+
+**The four tools** (read-only, typed parameters, no free SQL):
+| Tool | Answers |
+|---|---|
+| `find_ride(name, height_cm?)` | a named ride — a closed one is returned with its status |
+| `query_rides(filters)` — **new** | set questions: park, land, kind, max intensity, height, sensitivities to avoid, open only, `per_park`, capped rows. A database function, like `find_experiences`, so the fit and the NULL rules stay in one place. 🔴 A filter never turns an unknown into a match. |
+| `park_candidates(preferences?)` | "which park suits us" — kept (Alon) |
+| `search_knowledge(query)` | prose; the model may rephrase, e.g. from the history |
+
+**Why not a generic SQL tool:** raw rows skip `formatExperiences`, where every state gets a word — and NULL read as "no limit" is the pattern CLAUDE.md counts seven times. Also a second source of truth for "fits", source columns reachable, and arbitrary queries (Guy).
+
+**Guardrails:** knowledge is still fetched up front, in parallel with the first call · at most 2 tool rounds · a ride or height in the answer with no `find_ride`/`query_rides` row behind it is flagged in the log (measure first, don't block) · `rides`/`chunks` counted from tool results so the golden set keeps working.
+
+**How it is decided with data:** behind `TIM_MODE=agent|classic`; the golden set in both modes (pass rate, p95, "answered from memory"), plus new follow-up and misspelling cases. Cost to expect: 2+ Gemini calls, ~6–9s instead of ~4.5s.
+
+**Open:**
+- `query_rides` "avoid" on a sensitivity that was never checked: excluded (proposed) or shown with "לא ידוע" — **Paula**.
+- New golden cases, and the change in Tim's behaviour — **Paula**. A tool that reads the database — **Guy (O2)**.
+- `park_candidates` as it is today: up to 3 rides **per park and per intensity level** (up to 84 rows), picked **alphabetically** within each level. The comment in `lookup.ts` says "3 per park". Recorded, not changed.
