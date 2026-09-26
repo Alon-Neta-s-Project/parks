@@ -96,7 +96,7 @@ const RETRY_AFTER_MINUTES = 60;
  *
  * ⚠️ **נוצר בידי `scripts/build-deploy-stamp.py`. אין לערוך ידנית.**
  */
-const DEPLOY_STAMP = "20ef834558c1";
+const DEPLOY_STAMP = "f54fca2f7688";
 
 // <fit-rules>
 const FIT_STAMP = "73db7652fca2";
@@ -125,6 +125,26 @@ const SYSTEM = `אתה טים, עוזר לתכנון יום בפארקים בא�
 · תשובה שכבר קיבלת אינה נשאלת שוב. אם ענו "זוג בני 30" — יש לך את
   מי נוסע.
 · אל תמספר את השאלות למשתמשת ואל תאמר כמה נשארו. זו שיחה, לא טופס.
+
+רכיבים בתוך ההודעה — שורת בקרה בסוף, ולא בתוך הטקסט:
+· 🔴 כששאלה מקבלת רכיב, **סיים את ההודעה בשורה נפרדת** בצורה הזו,
+  ואל תכתוב עליה דבר:
+    [[ui:group]]                          — בורר מבוגרים וילדים (שאלה 2)
+    [[ui:heights:N]]                      — N שדות גובה, לפי מספר הילדים
+    [[ui:choice:אפשרות|אפשרות|אפשרות]]    — כפתורים, בחירה אחת
+    [[ui:chips:אפשרות|אפשרות]]            — צ'יפים, בחירה מרובה
+· השורה נמחקת לפני שהמשתמשת רואה אותה. אל תזכיר אותה, אל תסביר
+  אותה, ואל תכתוב "בחר/י מהכפתורים".
+· ⚠️ **שאלה אחת — שורת בקרה אחת.** שתיים באותה הודעה נמחקות שתיהן.
+· מתי כל אחת:
+    שאלה 2  → [[ui:group]] · ואחריה, כשידוע כמה ילדים → [[ui:heights:N]]
+    שאלה 3  → [[ui:chips:אטרקציות קיצוניות|רכבות ומתקנים משפחתיים|מופעים ופגישות דמויות]]
+    רגישויות → [[ui:chips:מחלת ים|מקום סגור וחשוך|גבהים|רעש פתאומי|הבזקי אור|נגישות]]
+    שאלה 4  → [[ui:chips:נסיכות|נבלים|מדע בדיוני|חיות|הרפתקאות|פנטזיה|סרטים]]
+    שאלה 5  → [[ui:choice:המספר קבוע|המספר גמיש]]
+    שאלה 6  → [[ui:choice:מקסימליסטים|מינימליסטים|נזרמים עם הזרימה]]
+    שאלה 7  → [[ui:choice:יש לנו תאריכים|טווח גמיש|עזרו לנו לבחור]]
+· שאלה 1 (שם) ושאלת מספר הימים בשאלה 5 — טקסט חופשי, בלי שורת בקרה.
 
 הסדר, והניסוח:
 1. איך לקרוא לך? — ומרגע שיש לך שם, פנה אליו בשמו. לא בכל משפט;
@@ -1056,6 +1076,69 @@ function allowedOrigins(env: Record<string, string | undefined>): string[] {
     .filter((o) => o !== "");
 }
 
+/**
+ * 🔴 **איך המסך יודע איזה רכיב להציג — בלי לנחש מהטקסט.**
+ *
+ * דרישת פולה (26.09): הבוררים והכפתורים מוטבעים בתוך הבועה של טים,
+ * באותה הודעה ששואלת. התשובה של טים היא טקסט חופשי ממודל, ולכן משהו
+ * חייב לומר למסך "זו שאלה 2".
+ *
+ * ⚠️ **ולא לפי הטקסט.** "אם כתוב 'כמה מבוגרים' — הצג בורר" נשבר בשקט
+ * ברגע שפולה משנה ניסוח, וזה בדיוק סוג הקשר שאיש לא יזכור.
+ *
+ * המודל מסיים בשורת בקרה, הפונקציה קוראת אותה, **מסירה אותה מהטקסט**,
+ * ומחזירה אותה כשדה. המשתמשת אינה רואה אותה לעולם.
+ *
+ * ⚠️ **וזה אינו Markdown.** פולה אסרה סימון **בטקסט שמוצג**; זו הודעה
+ * אחת לתוכנה שנמחקת לפני התצוגה. ההבדל נבדק: `ui-hint.test.ts` מוודאת
+ * שהשורה לעולם אינה נשארת בתשובה.
+ */
+const UI_LINE = /\n?\s*\[\[ui:([a-z]+)(?::([^\]]*))?\]\]\s*$/;
+
+/** אוצר מילים סגור. ערך שאינו כאן **אינו** נופל לברירת מחדל. */
+const UI_KINDS = ["group", "heights", "choice", "chips"] as const;
+export type UiKind = (typeof UI_KINDS)[number];
+
+export interface UiHint {
+  kind: UiKind;
+  /** לכפתורים ולצ'יפים — האפשרויות. ל-heights — מספר הילדים. */
+  options?: string[];
+  count?: number;
+}
+
+/**
+ * מפריד את שורת הבקרה מהטקסט.
+ *
+ * ⚠️ **מחזיר תמיד טקסט נקי**, גם כשהשורה שגויה או חסרה. שורה שלא
+ * הובנה נמחקת ואינה מוצגת — מוטב בועה בלי בורר מאשר בועה עם
+ * "[[ui:whatever]]" בתוכה.
+ */
+export function splitUiHint(text: string): { answer: string; ui?: UiHint } {
+  const m = text.match(UI_LINE);
+  if (!m) return { answer: text };
+
+  const answer = text.replace(UI_LINE, "").trimEnd();
+  const kind = m[1] as UiKind;
+  if (!UI_KINDS.includes(kind)) return { answer };
+
+  const raw = (m[2] ?? "").trim();
+
+  if (kind === "heights") {
+    // ⚠️ מספר שאינו מספר, או שלילי, אינו "אפס ילדים" — הוא שורה שבורה.
+    const n = Number(raw);
+    if (!Number.isInteger(n) || n < 1 || n > 10) return { answer };
+    return { answer, ui: { kind, count: n } };
+  }
+
+  if (kind === "choice" || kind === "chips") {
+    const options = raw.split("|").map((o) => o.trim()).filter((o) => o !== "");
+    if (options.length < 2) return { answer };
+    return { answer, ui: { kind, options } };
+  }
+
+  return { answer, ui: { kind } };
+}
+
 function corsFor(req: Request, env: Record<string, string | undefined>) {
   const allowed = allowedOrigins(env);
   const origin = req.headers.get("origin");
@@ -1563,8 +1646,12 @@ export async function handle(req: Request, env: Record<string, string | undefine
     usage,
   });
 
+  // ⚠️ השורה מוסרת כאן, ולא במסך. טקסט שיוצא מהפונקציה הוא מה
+  // שהמשתמשת רואה, ואין מקום שני שמנקה אותו.
+  const split = splitUiHint(answer ?? "");
+
   return json({
-    answer, model, usage, retrieval,
+    answer: split.answer, ui: split.ui ?? null, model, usage, retrieval,
     chunks: chunks.length, rides: rides.length, tiers,
     // 🔴 **האיתות של ניסיון שהצליח.** ריק כמעט תמיד. לא ריק פירושו
     // שהמודל ייצר משהו שאסור היה לצאת, והמסנן תפס — כלומר מישהו ניסה,

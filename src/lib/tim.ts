@@ -12,8 +12,15 @@ import { isConfigured } from "./supabase";
  * ובלי מודל. טים נשאל רק את מה שהנתונים אינם עונים עליו. מסלול הפוך היה
  * שולח שאלה על גובה למודל, משלם עליה, ומחזיר תשובה פחות אמינה מהטבלה.
  */
+import type { UiHint } from "../tim/AskWidgets";
+
 export type TimReply =
-  | { status: "ok"; answer: string }
+  /**
+   * ⚠️ `ui` הוא הרכיב שמוטבע בבועה — בורר, כפתורים או צ'יפים.
+   * הוא מגיע מהפונקציה כשדה, ולא נגזר מהטקסט: ניסוח משתנה, וזיהוי
+   * לפי טקסט היה נשבר בשקט ברגע שפולה מעדכנת שאלה.
+   */
+  | { status: "ok"; answer: string; ui?: UiHint }
   /** ⚠️ לכל כישלון יש טקסט משלו. "משהו השתבש" אינו אומר למשתמש מה לעשות. */
   | { status: "failed"; reason: TimFailure; detail?: string };
 
@@ -103,6 +110,8 @@ export async function askTim(
   const body = (await res.json().catch(() => null)) as
     | {
         answer?: string;
+        /** הרכיב שמוטבע בבועה. `null` מהשרת כשאין — ולא שדה חסר. */
+        ui?: UiHint | null;
         error?: string;
         scope?: string;
         status?: number;
@@ -116,7 +125,9 @@ export async function askTim(
     | null;
 
   if (res.ok && typeof body?.answer === "string" && body.answer.trim()) {
-    return { status: "ok", answer: body.answer };
+    // ⚠️ `null` מהשרת פירושו "אין רכיב", ו-undefined פירושו "שרת ישן".
+    // שניהם מובילים לבועה בלי רכיב, וזו הנפילה הרכה שתכננתי.
+    return { status: "ok", answer: body.answer, ui: body.ui ?? undefined };
   }
 
   // ⚠️ שני הגדרות אינם אותה הודעה. "נסי בעוד שעה" למי שהמכסה היומית
