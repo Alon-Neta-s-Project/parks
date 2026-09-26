@@ -26,6 +26,7 @@
   "include": [
     "apps/web/src",
     "apps/server/src",
+    "apps/server/netlify",
     "apps/server/vitest.config.ts",
     "apps/pipeline/src",
     "apps/pipeline/vitest.config.ts",

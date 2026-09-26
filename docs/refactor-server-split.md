@@ -155,8 +155,19 @@ Starting point → end: vitest 287 → 299 (+12 guards and self-checks, none rem
 
 ## Open items
 
-### O1 — Where the server is hosted · waiting on: Neta
-Fly.io / Render / Railway / Cloud Run. A new account, a monthly cost, and new secrets (DB connection string, Gemini key). Blocks the Stage 3 deployment. Stages 1 and 2 aren't blocked.
+### O1 — Where the server is hosted · **decided by Alon (26.09): Netlify, on the same site as the web app** · remaining: Neta (secrets), Guy (O2)
+**The decision:** the server runs as a Netlify Function under `/api/*` on the site that already serves the web app, not on Fly/Render/Railway/Cloud Run. No new account or vendor, one deploy, and same origin, so no CORS.
+
+**Why it fits (measured 26.09):** Netlify's synchronous limit is **60s and cannot be raised** on any plan. `npm run golden`, 28 cases, locally: median 6.2s · p95 9.0s · **max 9.3s**. Even a Gemini retry (2 × 9.3s + 0.7s) is far below. The real risk is a *hang*: no outgoing call in `tim/` has a timeout, so a stuck Gemini call is cut by Netlify at 60s with Netlify's error page, not Tim's JSON. That is step 3 below.
+
+**Steps** (on this branch, qa after each):
+1. ✅ `apps/server/netlify/functions/api.ts` + `apps/server/src/netlify.ts`: `createApp` mounted under `/api`; the rate-limit IP is `context.ip`, not a header (spoofed `x-forwarded-for` and `x-nf-client-connection-ip` are both ignored — tested, seen failing). Bundled with esbuild and called under Node: a real answer through `/api/tim`.
+2. `turn-log.ts` keeps its write alive only through Supabase's `EdgeRuntime.waitUntil`. On Netlify the write would be dropped silently after the response. → pass Netlify's `context.waitUntil`. Changes the stamp.
+3. `AbortSignal.timeout` on every outgoing call, so the whole request stays under ~50s. Changes the stamp.
+4. `[functions]` in `netlify.toml`. ⚠️ **Last, and only after O11:** without it Netlify deploys no function, so steps 1–3 are safe to merge; with it `/api/tim` is public.
+5. The web app: `VITE_TIM_URL=/api/tim`, and the silent fallback to the Edge Function removed.
+
+**Remaining outside the code:** Neta sets `GEMINI_API_KEY`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `RATE_LIMIT_SALT` in Netlify's UI (they don't come to me). Guy: O2 now includes a public `/api` on the web app's site. The Dockerfile stays, so a container host is still open if the numbers change.
 
 ### O2 — Security review · waiting on: Guy
 A new public endpoint, CORS, the DB role the server connects with, a DDL role for dbmate, an approval gate (GitHub Environment) for migrations, and revoking the anon grants on the RPCs and on `experience`. Category 1. Blocks Stages 2 through 4.
@@ -362,3 +373,9 @@ The system catalog of production compared object by object with the local databa
 
 ### O10 — `anon` has `TRUNCATE` on the tables in production · found 26.09 · for Guy
 While generating the baseline's permissions from production's catalog: `anon` and `authenticated` have `TRUNCATE, TRIGGER, REFERENCES, MAINTAIN` on the content tables (e.g. `experience`, `knowledge_doc`), and **row-level security doesn't apply to `TRUNCATE`.** Practical risk is low: `anon` can't log in directly, and PostgREST doesn't expose `TRUNCATE`. But it's a permission nobody needs. The baseline reproduces it **as it is**, because its job is to describe production, not fix it. **Proposal:** a dbmate migration that revokes `TRUNCATE, TRIGGER, REFERENCES, MAINTAIN` from `anon, authenticated`. That's the first migration dbmate would run, once O2 is approved.
+
+### O11 — `diagnose` lists the host's environment variable names · found 26.09 · for Guy · **blocks O1 step 4**
+`{"diagnose": true}` returns `other_names`: the name of every environment variable in the process. On Supabase that is the function's own secrets. On Node, and on Netlify (AWS Lambda), it is **the whole process environment** — seen locally: dozens of names that have nothing to do with Tim. Names only, no values, but it maps the host for anyone who calls it. **Proposal:** return only the names Tim knows (`known`), and drop `other_names`. Changes the stamp.
+
+### O12 — A Gemini quota error is described as temporary load · found 26.09
+On a 429 "You exceeded your current quota", Tim's `hint` says Google is busy and it is temporary. A quota does not reset by waiting a minute, so whoever reads the hint waits for something that won't fix itself. **Proposal:** tell quota from overload by the upstream message. Changes the stamp.
