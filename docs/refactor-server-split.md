@@ -395,9 +395,16 @@ On a 429 "You exceeded your current quota", Tim's `hint` says Google is busy and
 | Tool | Answers |
 |---|---|
 | `find_ride(name, height_cm?)` | a named ride — a closed one is returned with its status |
-| `query_rides(filters)` — **new** | set questions: park, land, kind, max intensity, height, sensitivities to avoid, open only, `per_park`, capped rows. A database function, like `find_experiences`, so the fit and the NULL rules stay in one place. 🔴 A filter never turns an unknown into a match. |
+| `query_rides(filters)` — **new** | set questions: park, land, kind, max intensity, height, sensitivities to avoid, open only, `per_park`, capped rows. **Server code, not a database function** (Alon, 26.09 — see below): a plain filtered query, with the fit computed by the shared TypeScript function. 🔴 A filter never turns an unknown into a match. |
 | `park_candidates(preferences?)` | "which park suits us" — kept (Alon) |
 | `search_knowledge(query, resort?, park?)` | prose; the model may rephrase, e.g. from the history. `resort` (`wdw`/`uor`) uses the `p_resort` filter `match_knowledge` already has and Tim never passes; `park` needs a small migration (a `scope_park` filter — the column exists on every chunk and the search ignores it). |
+
+**Where the logic lives — decided by Alon (26.09): product logic in TypeScript, integrity in the database.**
+The database holds logic today because there was no server: the browser talked to it with a public key, so a rule outside the database could be bypassed. Once the server is the only path (stage 4) that reason is gone, and logic in SQL costs what it always costs — hard to test (one SQL test today), deployed by a migration someone has to run, invisible to the log.
+- **Stays in the database:** constraints and invariants (the `CHECK`s on `turn_log`), atomic operations (`check_rate_limit`), set queries next to their index (`match_knowledge`), the embedding-invalidation trigger.
+- **Belongs in TypeScript:** product decisions that change — the fit computation, the candidate-selection policy.
+- 🔴 **The fit is already computed twice:** `fitFor` in `apps/web/src/lib/group.ts`, and a `CASE` inside `find_experiences`. Two sources of truth for one rule. So **`query_rides` depends on moving `fitFor` into `packages/shared`** (part of stage 5) with its NULL rules and tests, and both the web app and the server use it. Building `query_rides` as another SQL function would have deepened the duplication.
+- **Existing functions are not rewritten.** Each moves when it is touched anyway: `find_experiences`'s fit with `packages/shared`; `ingest_*` / `alias_*` when the pipeline gets its own role instead of a secret argument; `save_tester_note` through the server.
 
 **Why not a generic SQL tool:** raw rows skip `formatExperiences`, where every state gets a word — and NULL read as "no limit" is the pattern CLAUDE.md counts seven times. Also a second source of truth for "fits", source columns reachable, and arbitrary queries (Guy).
 
