@@ -21,7 +21,7 @@ on:
     # ⚠️ רק כשהפונקציה עצמה השתנתה. דחיפה שנוגעת באתר בלבד אינה אמורה
     # לפרוס מחדש את טים — פריסה מיותרת היא הזדמנות לתקלה מיותרת.
     paths:
-      - "supabase/functions/tim/**"
+      - "apps/server/src/tim/**"
       - ".github/workflows/deploy-tim.yml"
   workflow_dispatch:      # ⚠️ וגם ידנית, לכשצריך לפרוס בלי שינוי קוד.
 
@@ -58,9 +58,8 @@ jobs:
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: |
-          cp supabase/functions/tim/index.ts supabase/functions/quick-worker-index.ts
           mkdir -p supabase/functions/quick-worker
-          mv supabase/functions/quick-worker-index.ts supabase/functions/quick-worker/index.ts
+          cp apps/server/src/tim/index.ts supabase/functions/quick-worker/index.ts
           supabase functions deploy quick-worker \
             --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}" \
             --no-verify-jwt

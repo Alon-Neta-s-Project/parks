@@ -77,7 +77,7 @@ const RETRY_AFTER_MINUTES = 60;
  * שהפרויקט הזה אוסר על עצמו במקום אחר (`skip_line_extra_cost`).
  *
  * ⚠️ **הבלוק הזה נוצר, ואינו נכתב.** `scripts/build-tim-prompt.py` בונה
- * אותו מ-`src/i18n/he.json`, ובדיקה נופלת אם הוא אינו מעודכן. עריכה
+ * אותו מ-`apps/web/src/i18n/he.json`, ובדיקה נופלת אם הוא אינו מעודכן. עריכה
  * ידנית כאן תימחק בבנייה הבאה — וזו הכוונה.
  *
  * ⚠️ **ו-`FIT_STAMP` הוא איך שרואים שזה קרה בפועל.** הפונקציה נדבקת
@@ -96,7 +96,7 @@ const RETRY_AFTER_MINUTES = 60;
  *
  * ⚠️ **נוצר בידי `scripts/build-deploy-stamp.py`. אין לערוך ידנית.**
  */
-const DEPLOY_STAMP = "bfd501af7bd8";
+const DEPLOY_STAMP = "ec19a9c84648";
 
 // <fit-rules>
 const FIT_STAMP = "73db7652fca2";
@@ -512,7 +512,7 @@ export interface ParkCandidate {
 /**
  * האם השאלה מבקשת שנבחר עבור מי ששואל.
  *
- * ⚠️ **אותו אוצר מילים כמו `src/lib/ask-intent.ts`, ובכוונה.** שתי
+ * ⚠️ **אותו אוצר מילים כמו `apps/web/src/lib/ask-intent.ts`, ובכוונה.** שתי
  * רשימות מילים בשני צדדים היו נעשות שונות תוך שבוע, ואז אותה שאלה
  * הייתה מסווגת אחרת בדפדפן ובשרת — בלי שאיש ישים לב.
  *

@@ -21,7 +21,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { parse } from "yaml";
-import { extractHeight, extractRideName } from "../supabase/functions/tim/index";
+import { extractHeight, extractRideName } from "../apps/server/src/tim/index";
 import { ROOT } from "./paths";
 
 type Expect = {

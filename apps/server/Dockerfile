@@ -1,7 +1,6 @@
 # The Park Day Companion server.
 #
-# Build from the REPO ROOT — the server imports the functions in supabase/functions,
-# which live outside apps/server:
+# Build from the REPO ROOT (the workspace lockfile lives there):
 #
 #   docker build -f apps/server/Dockerfile -t park-server .
 #   docker run --rm -p 8787:8787 --env-file .env.server park-server
@@ -18,7 +17,6 @@ COPY apps/web/package.json apps/web/
 COPY apps/server/package.json apps/server/
 RUN npm ci --workspace apps/server --include-workspace-root=false --ignore-scripts
 COPY apps/server apps/server
-COPY supabase/functions supabase/functions
 RUN npm -w apps/server run build
 
 FROM node:22-slim

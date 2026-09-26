@@ -3,9 +3,9 @@ import { Hono, type Context } from "hono";
 // Edge Function run the *same file*. A copy here would be a second Tim that drifts
 // from the one that is live, and the file is stamped (DEPLOY_STAMP), so it is not
 // edited to move it either. In stage 4 it moves into apps/server for real.
-import { handle as tim } from "../../../supabase/functions/tim/index";
-import { handle as embed } from "../../../supabase/functions/embed/index";
-import { handle as aliases } from "../../../supabase/functions/aliases/index";
+import { handle as tim } from "./tim/index";
+import { handle as embed } from "./embed/index";
+import { handle as aliases } from "./aliases/index";
 
 export type Env = Record<string, string | undefined>;
 

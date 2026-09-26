@@ -68,9 +68,6 @@ const KNOWN_STALE = [
  * רק מה שאסור לגעת בו נכנס לכאן:
  * - הבריף כפי שהתקבל, ותשובת ההתאמה שנכתבה מולו — תיעוד היסטורי.
  * - הודעות סנכרון ומדידות מתוארכות — מה שנכתב אז, ולא מה שנכון היום.
- * - `supabase/functions/tim/index.ts` — **עד שלב 3 בלבד.** הקובץ חתום
- *   (`DEPLOY_STAMP`), ועריכת הערה בו מחייבת חותם חדש ופריסה מחדש בדחיפה
- *   ל-release. בשלב 3 הוא עובר לשרת ונערך בכל מקרה — ואז יוצא מכאן.
  * - `supabase-bundle.sql` — מעתיק את טקסט המיגרציות כלשונו.
  * - המיגרציות עצמן (`SIGNED`) — חתומות. עריכה משנה את החתימה ונופלת
  *   באימות מול המסד החי.
@@ -81,7 +78,6 @@ const FROZEN = [
   "docs/spec/stage-0-schema-gap.md",
   "docs/park-day-companion-claude-code-sync-2.md",
   "docs/product/sync-3-onboarding.md",
-  "supabase/functions/tim/index.ts",
   "apps/server/db/supabase-bundle.sql",
 ];
 const SIGNED = /^apps\/server\/db\/migrations-history\/[^/]+\.sql$/;

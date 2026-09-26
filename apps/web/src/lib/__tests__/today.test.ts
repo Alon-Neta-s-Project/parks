@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { todayLine } from "../../../../../supabase/functions/tim/index";
+import { todayLine } from "../../../../server/src/tim/index";
 
 /**
  * 🔴 נולדה מכשל אמיתי במסך חי, 08.09.

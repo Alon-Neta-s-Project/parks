@@ -86,7 +86,7 @@ These are the numbers every step in Stage 1 is compared against.
 - `package.json`: the scripts point to `--config apps/web/...`. `tsconfig.json`: `include` covers `apps/web/src` and all three configs. Two of those configs weren't type-checked before.
 - `netlify.toml`: `publish = "apps/web/dist-tim"` / `"apps/web/dist-tim-test"`. The test that checks this now takes the value from `paths.json` rather than a hard-coded string.
 - Relative imports: 23 files in `apps/web/src` (mostly `scripts/paths`) and 2 scripts (`../apps/web/src/...`).
-- `doc-paths`: `src/` → `apps/web/src/` in the moves map. **Frozen:** the signed migrations (`SIGNED`, a pattern rather than a list), `supabase-bundle.sql`, three dated sync records and measurements, and **`supabase/functions/tim/index.ts` until Stage 3** (it's stamped, and a comment edit would force a new stamp and a redeploy). Live references updated in CLAUDE.md, README.md, the team 1 agent, `docs/README.md`, 3 architecture docs and more.
+- `doc-paths`: `src/` → `apps/web/src/` in the moves map. **Frozen:** the signed migrations (`SIGNED`, a pattern rather than a list), `supabase-bundle.sql`, three dated sync records and measurements, and **`apps/server/src/tim/index.ts` until Stage 3** (it's stamped, and a comment edit would force a new stamp and a redeploy). Live references updated in CLAUDE.md, README.md, the team 1 agent, `docs/README.md`, 3 architecture docs and more.
 - `content-seed`: the header line (`נוצר ... מתוך ...`) is now derived from `paths.json`, and was rebuilt. One line changed in each file.
 - **Tests:** `npm run qa` passes · vitest **298** + 1 skipped (+6 self-checks) · deno 75 · `build` 253 pages · `build:tim` · `build:tim-test` · **the dev server**: the page, `main.tsx` and the report outside `apps/web` all return 200.
 
@@ -118,7 +118,7 @@ Starting point → end: vitest 287 → 299 (+12 guards and self-checks, none rem
 
 ### 3b ✅ The server, and Tim in it (25.09.2026)
 - **`apps/server/src/app.ts`:** a Hono app with `GET /health` and `/tim`. `index.ts` runs it on Node (`PORT`, default 8787). `npm run dev:server` runs it in development.
-- 🔴 **The server runs the same Tim file as the Edge Function** (`supabase/functions/tim/index.ts`), through an import, not a copy. Until the cut-over there's no second Tim that could drift from the live one, and the stamped file isn't touched. **Checked on a running server:** `diagnose` returns `deploy_stamp` `bfd501af7bd8` and `fit_stamp` `73db7652fca2`, identical to the repo.
+- 🔴 **The server runs the same Tim file as the Edge Function** (`apps/server/src/tim/index.ts`), through an import, not a copy. Until the cut-over there's no second Tim that could drift from the live one, and the stamped file isn't touched. **Checked on a running server:** `diagnose` returns `deploy_stamp` `bfd501af7bd8` and `fit_stamp` `73db7652fca2`, identical to the repo.
 - 🔴 **Client IP:** Tim builds the rate-limit bucket from the first entry of `x-forwarded-for`. On Supabase their edge sets it, but on our server anyone can send it, and a different value per request would mean a new bucket per request, i.e. no limit. So the server **overwrites** the header with an IP it trusts: from the header the host sets (`CLIENT_IP_HEADER`, e.g. `fly-client-ip`) or from the socket. The tests check that the bucket reaching the database is built from the real IP. **Seen failing:** with the protection disabled, both spoofing tests fail.
 - **Tests:** 7 new server tests (`apps/server/src/__tests__/app.test.ts`) in `npm test`, so also in the QA gate. `/health`, routing with the env, OPTIONS, the body passing through, and the three IP checks.
 - `doc-paths`: in a workspace's `package.json`, a path can also resolve relative to the package (the server's entry file). Only there. And the test caught its own explanatory comment, which quoted the example, on the first try.
@@ -168,7 +168,7 @@ A new public endpoint, CORS, the DB role the server connects with, a DDL role fo
 
 <details><summary>Background</summary>
 
-**What the stamp is:** [tim/index.ts:99](../supabase/functions/tim/index.ts) holds `DEPLOY_STAMP`, a fingerprint of the file's own content. The deployed function returns it from `diagnose`, and `tim-live-check.yml` compares it with the repo, to answer one question: "is what's live the same as what's in the repo?" Every edit to the file requires running `python3 scripts/build-deploy-stamp.py` to update the fingerprint, and `deploy-stamp.test.ts` fails if someone forgot.
+**What the stamp is:** [tim/index.ts:99](../apps/server/src/tim/index.ts) holds `DEPLOY_STAMP`, a fingerprint of the file's own content. The deployed function returns it from `diagnose`, and `tim-live-check.yml` compares it with the repo, to answer one question: "is what's live the same as what's in the repo?" Every edit to the file requires running `python3 scripts/build-deploy-stamp.py` to update the fingerprint, and `deploy-stamp.test.ts` fails if someone forgot.
 
 **What happened:** in the last commit (`307c648`) the file holds `bfd501af7bd8`, but its actual content gives `8e89d07a8678`. So the file changed after it was stamped, and the stamp wasn't refreshed.
 
@@ -253,7 +253,7 @@ From then on, new migrations: `npm run db:new <name>`, and CI with approval.
 
 ### 4a ✅ Deno out of development and testing (26.09.2026)
 Alon asked to retire Deno. **Stage 1 of 2: development and testing only.** The functions themselves still deploy to Supabase until the cut-over, because production Tim is served from there.
-- **104 tests moved from `deno test` to vitest** (`supabase/functions/vitest.config.ts`): tim 75, embed 14, aliases 15. The conversion is `Deno.test(` → `test(` and nothing else. **104 = 104.** **Seen failing:** breaking `extractHeight` fails two of them.
+- **104 tests moved from `deno test` to vitest** (a vitest config next to the functions, removed when they moved into the server): tim 75, embed 14, aliases 15. The conversion is `Deno.test(` → `test(` and nothing else. **104 = 104.** **Seen failing:** breaking `extractHeight` fails two of them.
 - **Type checking:** the tests joined `tsconfig` (with `allowImportingTsExtensions`). The project is stricter than Deno (`noUncheckedIndexedAccess`), and it found 4 index accesses in `aliases` that were fixed.
 - `setup-deno` was removed from 3 workflows (deploy-tim, content-and-verify, team1-publish), and the QA gate label and CLAUDE.md were updated.
 - **Proof:** `npm run qa` passes **on a PATH with no Deno at all**.

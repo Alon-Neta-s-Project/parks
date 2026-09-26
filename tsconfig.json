@@ -27,7 +27,6 @@
     "apps/web/src",
     "apps/server/src",
     "apps/server/vitest.config.ts",
-    "supabase/functions",
     "scripts",
     "apps/web/vite.config.ts",
     "apps/web/vite.tim.config.ts",

@@ -25,6 +25,6 @@
   "DB_LOCAL": "apps/server/db/local",
   "CONTENT_SEED": "apps/server/db/content-seed",
   "KNOWLEDGE_SEED": "apps/server/db/knowledge-seed",
-  "TIM_FN": "supabase/functions/tim/index.ts",
+  "TIM_FN": "apps/server/src/tim/index.ts",
   "SCRIPTS": "scripts"
 }

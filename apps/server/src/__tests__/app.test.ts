@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { bucketKey } from "../../../../supabase/functions/tim/index";
+import { bucketKey } from "../tim/index";
 import { clientIp, createApp, type Env } from "../app";
 
 const KEY = "k".repeat(39);
