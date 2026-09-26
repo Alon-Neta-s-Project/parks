@@ -27,13 +27,18 @@ import { ROOT } from "./paths";
 type Expect = {
   ride?: string; rides?: number; rides_gt?: number; chunks_gt?: number;
   height_cm?: number; fits?: boolean; tiers?: string[];
-  must_contain?: string[]; must_not_contain?: string[]; must_not_match?: string[];
+  must_contain?: string[]; must_not_contain?: string[];
+  /** One pattern or a list. ⚠️ golden.yaml writes a single string; looping over it
+   *  as a list tested each character as its own pattern. */
+  must_not_match?: string | string[];
   must_ask_clarifying?: boolean; max_words?: number; should_refuse?: boolean;
 };
 type Case = { id: string; kind: string; ask: string; expect: Expect; status?: string };
 type TimReply = {
   answer?: string; error?: string; status?: number; rides?: number; chunks?: number;
   tiers?: string[]; retrieval?: string;
+  /** Wall-clock time of the `/tim` call, measured here. Netlify cuts a function at 60s. */
+  ms: number;
 };
 // ⚠️ The function's names, not the table's: `height_cm`, not `height_requirement_cm`.
 // The first version read the table name, got undefined, and failed a correct row.
@@ -50,12 +55,14 @@ const golden = parse(readFileSync(join(ROOT, "evals", "golden.yaml"), "utf8")) a
 const cases = golden.cases.filter((c) => !ONLY || c.id.startsWith(ONLY));
 
 async function ask(question: string): Promise<TimReply> {
+  const t0 = performance.now();
   const res = await fetch(`${SERVER}/tim`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ question }),
   });
-  return { ...(await res.json()), status: res.status } as TimReply;
+  const body = await res.json();
+  return { ...body, status: res.status, ms: Math.round(performance.now() - t0) } as TimReply;
 }
 
 async function lookup(question: string): Promise<Row[]> {
@@ -71,7 +78,7 @@ async function lookup(question: string): Promise<Row[]> {
   return res.ok ? ((await res.json()) as Row[]) : [];
 }
 
-type Verdict = { result: "pass" | "fail" | "not run"; why: string[] };
+type Verdict = { result: "pass" | "fail" | "not run"; why: string[]; ms: number };
 
 async function run(c: Case): Promise<Verdict> {
   const e = c.expect ?? {};
@@ -92,7 +99,7 @@ async function run(c: Case): Promise<Verdict> {
   const reply = await ask(c.ask);
   if (typeof reply.answer !== "string") {
     // The table checks above are real; the answer checks were never made.
-    return { result: "not run", why: [...why, `no answer: ${reply.error ?? "?"} ${reply.status ?? ""}`.trim()] };
+    return { result: "not run", why: [...why, `no answer: ${reply.error ?? "?"} ${reply.status ?? ""}`.trim()], ms: reply.ms };
   }
   const a = reply.answer;
   if (e.rides !== undefined && reply.rides !== e.rides) why.push(`rides ${reply.rides} ≠ ${e.rides}`);
@@ -101,7 +108,7 @@ async function run(c: Case): Promise<Verdict> {
   for (const t of e.tiers ?? []) if (!reply.tiers?.includes(t)) why.push(`tier ${t} missing`);
   for (const s of e.must_contain ?? []) if (!a.includes(s)) why.push(`missing "${s}"`);
   for (const s of e.must_not_contain ?? []) if (a.includes(s)) why.push(`contains "${s}"`);
-  for (const p of e.must_not_match ?? []) if (new RegExp(p).test(a)) why.push(`matches /${p}/`);
+  for (const p of [e.must_not_match ?? []].flat()) if (new RegExp(p).test(a)) why.push(`matches /${p}/`);
   if (e.max_words !== undefined) {
     const n = a.trim().split(/\s+/).length;
     if (n > e.max_words) why.push(`${n} words > ${e.max_words}`);
@@ -110,15 +117,24 @@ async function run(c: Case): Promise<Verdict> {
     if (!a.trim().endsWith("?")) why.push("does not end with a question");
     if (reply.rides !== 0 || reply.chunks !== 0) why.push(`clarifying, yet rides ${reply.rides} / chunks ${reply.chunks}`);
   }
-  return { result: why.length ? "fail" : "pass", why };
+  return { result: why.length ? "fail" : "pass", why, ms: reply.ms };
 }
 
 const tally = { pass: 0, fail: 0, "not run": 0 };
+const times: number[] = [];
 for (const c of cases) {
   const v = await run(c);
   tally[v.result]++;
+  times.push(v.ms);
   const mark = v.result === "pass" ? "✅" : v.result === "fail" ? "❌" : "⏸️";
   const was = c.status ? ` (file: ${c.status})` : "";
-  console.log(`${mark} ${c.id}${was}${v.why.length ? "\n     " + v.why.join("\n     ") : ""}`);
+  console.log(`${mark} ${c.id}${was} · ${(v.ms / 1000).toFixed(1)}s${v.why.length ? "\n     " + v.why.join("\n     ") : ""}`);
 }
 console.log(`\n${tally.pass} pass · ${tally.fail} fail · ${tally["not run"]} not run · of ${cases.length}`);
+// ⚠️ Every call is timed, answered or not: a slow 503 is still time the host waits.
+if (times.length) {
+  const sorted = [...times].sort((a, b) => a - b);
+  const at = (q: number) => sorted[Math.min(sorted.length - 1, Math.ceil(q * sorted.length) - 1)]!;
+  const s = (ms: number) => `${(ms / 1000).toFixed(1)}s`;
+  console.log(`time · median ${s(at(0.5))} · p95 ${s(at(0.95))} · max ${s(sorted[sorted.length - 1]!)}`);
+}
