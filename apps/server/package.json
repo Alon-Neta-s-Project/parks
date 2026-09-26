@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "start": "tsx src/index.ts",
-    "build": "esbuild src/index.ts --bundle --platform=node --format=esm --target=node22 --outfile=dist/server.mjs"
+    "build": "esbuild src/index.ts --bundle --platform=node --format=esm --target=node22 --outfile=dist/server.mjs",
+    "build:edge": "esbuild src/edge/tim.ts src/edge/embed.ts src/edge/aliases.ts --bundle --format=esm --platform=neutral --target=es2022 --outdir=dist/edge --entry-names=[name]/index --out-extension:.js=.ts '--banner:js=// @ts-nocheck — נבנה מ-apps/server/src (npm run build:edge). הטיפוסים נבדקים שם, ב-tsc; כאן JavaScript בלבד.'"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.1",

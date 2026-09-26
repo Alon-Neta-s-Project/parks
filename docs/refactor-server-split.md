@@ -261,6 +261,17 @@ Alon asked to retire Deno. **Stage 1 of 2: development and testing only.** The f
 
 **Stage 2 (the cut-over, once the server is hosted, O1):** the files move into `apps/server/src/`, the `Deno.serve` wrappers are removed, and `supabase/functions/` and `deploy-tim.yml` are deleted.
 
+### 4b ✅ The Edge Function logic in the server (26.09.2026)
+Alon: "I can't see the Tim endpoint in the server, the prompt and the business logic." Until now the server imported them from `supabase/functions/`.
+- **4b-1:** `supabase/functions/{tim,embed,aliases}` → `apps/server/src/{tim,embed,aliases}/` with `git mv`, no logic change. The tests came with them (server 115 = 11 + 104). `supabase/functions/` was deleted.
+- **4b-2: only one source for the server and production.** The Deno wrapper came out of the logic into `apps/server/src/edge/<name>.ts`, **the only files that know Deno**. `npm run build:edge` combines entry plus logic into one file per function (`apps/server/dist/edge/<name>/index.ts`), with no imports. `deploy-tim.yml` builds and deploys it instead of copying the source.
+  - `// @ts-nocheck` at the top of the bundle: esbuild outputs JavaScript without types, and `deno check` failed on it. The types are checked on the source (`tsc`). With the line, `deno check` passes on all three, so the deploy doesn't depend on whether Supabase type-checks.
+  - **Checked under Deno, the way Supabase runs it:** Tim → `diagnose` returns the stamps, `empty_question`, 405. embed/aliases → `not_configured` without a secret.
+  - `edge-bundle.test.ts` (5): one file with no imports per function; `Deno.serve`; Tim's stamp in the bundle matches the source; the logic doesn't touch Deno. **Seen failing:** an `import "node:crypto"` in the entry survived into the bundle and was caught.
+  - `DEPLOY_STAMP`: the move and the wrapper removal changed Tim's file, `ec19a9c84648` → `f08adffa5669`. Production will show the old stamp until the next deploy.
+- `docs/architecture/edge-functions-slugs.md`: for a manual deploy of embed/aliases, **paste the file from `dist/edge/`**, not the source (the source alone has no entry and wouldn't answer).
+- **Tests:** `npm run qa` passes · web 307 · server **120**.
+
 ### O6 — ✅ Closed 26.09 (the baseline, Stage 2b) · The migrations can't build a database from scratch · found 25.09 on a local database
 While setting up a local database (`supabase start`, config in `apps/server/db/supabase-local/`), the setup file stopped **at migration 038**. That's the practical check O5 left open, and it failed.
 

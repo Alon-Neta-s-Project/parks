@@ -22,6 +22,8 @@ on:
     # לפרוס מחדש את טים — פריסה מיותרת היא הזדמנות לתקלה מיותרת.
     paths:
       - "apps/server/src/tim/**"
+      - "apps/server/src/edge/tim.ts"
+      - "apps/server/package.json"
       - ".github/workflows/deploy-tim.yml"
   workflow_dispatch:      # ⚠️ וגם ידנית, לכשצריך לפרוס בלי שינוי קוד.
 
@@ -58,8 +60,12 @@ jobs:
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: |
+          # ⚠️ **נבנה, ולא מועתק.** הלוגיקה חיה בשרת (apps/server/src/tim), והכניסה
+          # של Supabase ב-apps/server/src/edge/tim.ts. esbuild מאחד אותן לקובץ אחד
+          # בלי ייבואים — מקור אחד לשרת ולייצור.
+          npm run build:edge
           mkdir -p supabase/functions/quick-worker
-          cp apps/server/src/tim/index.ts supabase/functions/quick-worker/index.ts
+          cp apps/server/dist/edge/tim/index.ts supabase/functions/quick-worker/index.ts
           supabase functions deploy quick-worker \
             --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}" \
             --no-verify-jwt

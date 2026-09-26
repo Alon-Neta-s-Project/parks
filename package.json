@@ -12,6 +12,7 @@
     "dev:local": "bash scripts/dev-local.sh",
     "dev:server": "npm -w apps/server run dev",
     "build:server": "npm -w apps/server run build",
+    "build:edge": "npm -w apps/server run build:edge",
     "docker:server": "docker build -f apps/server/Dockerfile -t park-server .",
     "golden": "tsx --env-file=.env.server scripts/run-golden.ts",
     "db:local-pg": "bash scripts/db-local-pg.sh",

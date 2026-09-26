@@ -96,7 +96,7 @@ const RETRY_AFTER_MINUTES = 60;
  *
  * ⚠️ **נוצר בידי `scripts/build-deploy-stamp.py`. אין לערוך ידנית.**
  */
-const DEPLOY_STAMP = "ec19a9c84648";
+const DEPLOY_STAMP = "f08adffa5669";
 
 // <fit-rules>
 const FIT_STAMP = "73db7652fca2";
@@ -1514,54 +1514,3 @@ export async function handle(req: Request, env: Record<string, string | undefine
     scrubbed,
   });
 }
-
-/**
- * ⚠️ העטיפה הזו היא מה שהיה חסר.
- *
- * בניתי טיפול שגיאות בכל שכבה פנימית, והשארתי את החיצונית פתוחה: חריגה
- * לא-מטופלת ברחה ל-runtime, סופאבייס החזירה 500 גולמי בלי גוף, ולוח
- * הבדיקה נפל בניסיון לפרסר אותו — "Cannot read properties of undefined".
- * שגיאה בלי גוף אינה ניתנת לאבחון, וזו בדיוק הנפילה השקטה בגרסתה הרועשת.
- *
- * ההודעה שמוחזרת היא של הקוד שלנו. מפתחות אינם מופיעים בהודעות חריגה של
- * JavaScript, ולכן זה בטוח — ומה שנחסך הוא סבב ניחושים נוסף.
- *
- * ⚠️ **והתנאי אינו קישוט.** בלעדיו הקובץ מרים שרת ברגע שמייבאים אותו, ולכן
- * אי אפשר היה לבדוק ממנו שום פונקציה — הבדיקה נפלה על "Deno is not defined"
- * עוד לפני שהריצה שורה אחת. שלושת הכשלים שנטע מצאה היום במסך חי יושבים
- * כולם בפונקציות טהורות בקובץ הזה, וכולם היו ניתנים לתפיסה בבדיקה.
- * ב-Deno התנאי מתקיים והשרת עולה בדיוק כמו קודם.
- *
- * ⚠️ וההצהרה למטה היא המינימום שמאפשר ל-tsc של הפרויקט (שאינו מכיר Deno)
- * לקמפל את הקובץ. היא מתארת רק את מה שנקרא כאן, ובכוונה — הצהרה רחבה
- * הייתה מסתירה שימוש ב-API שאינו קיים בפועל בסביבת ההרצה.
- */
-declare const Deno:
-  | {
-      serve: (handler: (req: Request) => Promise<Response>) => void;
-      env: { toObject(): Record<string, string | undefined> };
-    }
-  | undefined;
-
-// 🔴 **`import.meta.main` ולא רק `typeof Deno`.**
-//
-// הקובץ הזה נטען פעמיים: כפונקציה שסופהבייס מריצה, וכמודול שקובץ
-// הבדיקות מייבא. עד כה הוא פתח שרת בשני המקרים — ולכן `deno test`
-// נפל על "Requires net access" לפני שרצה ולו בדיקה אחת. 915 שורות
-// בדיקות שלא רצו, וזו הסיבה ש-`"false"` נשבר בלי שאיש ראה.
-//
-// ⚠️ `import.meta.main` אמת רק כשזה קובץ הכניסה — כלומר בסופהבייס.
-// בייבוא מהבדיקות הוא שקר, ולא נפתח שרת.
-if (typeof Deno !== "undefined" && import.meta.main) Deno.serve(async (req) => {
-  try {
-    return await handle(req, Deno.env.toObject());
-  } catch (err) {
-    return new Response(
-      JSON.stringify({
-        error: "unhandled",
-        detail: err instanceof Error ? err.message : String(err),
-      }),
-      { status: 500, headers: { "Content-Type": "application/json; charset=utf-8" } },
-    );
-  }
-});

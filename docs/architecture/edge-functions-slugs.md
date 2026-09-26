@@ -23,6 +23,26 @@ CORS, והדפדפן הציג "לא נגיש" במקום "לא נמצא".
 - `embed` ו-`aliases-function` אינן נקראות מהאתר, ולכן ה-slug שלהן אינו
   בקוד. הוא נדרש רק כשקוראים להן ידנית מבחוץ.
 
+## ⚠️ מה מדביקים בפריסה ידנית (מ-26.09)
+
+**הקוד כבר אינו ב-`supabase/functions/`.** הלוגיקה עברה לשרת
+(`apps/server/src/<שם>/`), והקובץ ל-Supabase **נבנה**:
+
+```sh
+npm run build:edge
+```
+
+ואז מדביקים ל-Code בדשבורד את הקובץ המתאים, **כולו**:
+
+| פונקציה | הקובץ להדבקה |
+|---|---|
+| `embed` | `apps/server/dist/edge/embed/index.ts` |
+| `aliases-function` | `apps/server/dist/edge/aliases/index.ts` |
+| טים (`quick-worker`) | לא ידנית — `deploy-tim.yml` בונה ופורס |
+
+⛔ **לא להדביק את `apps/server/src/<שם>/index.ts`.** הוא הלוגיקה בלבד, בלי
+הכניסה של Supabase — הפונקציה תעלה ולא תענה לשום בקשה.
+
 ## איך מריצים את `embed` מהדשבורד
 
 בדשבורד לוחצים על השורה **לפי השם** (`embed`) — ה-slug לא נדרש שם.
