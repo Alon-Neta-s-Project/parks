@@ -25,6 +25,24 @@ scripts/         repo tooling
 | 4 | Point the frontend at the server, retire the Edge Functions, revoke the anon grants | Not started |
 | 5 | Shared logic in `packages/shared`, a browse API, close direct table reads | Not started |
 
+## Target: no logic in the database · decided by Alon (26.09)
+**The database holds schema only** — tables, constraints, indexes, RLS, and the one integrity trigger. **All logic lives in the server**, and what must run next to the data (atomic updates, vector search) is a SQL statement the server sends, not a function stored in the database. Why: logic in SQL is hard to test, is deployed by a migration someone has to run, is invisible to the log, and already duplicates the web app (the fit is computed in `fitFor` and in `find_experiences`).
+
+| Today | Target |
+|---|---|
+| `find_experiences`, `park_candidates` | a query from the server; the fit and the candidate policy in `packages/shared` |
+| `match_knowledge` | a query from the server (`ORDER BY embedding <=> $1`); the pgvector index stays |
+| `check_rate_limit` | 🔴 **one atomic statement** (`INSERT … ON CONFLICT … DO UPDATE … RETURNING`), never read-check-write in code — two parallel requests would both pass |
+| `log_turn` | an `INSERT`; **the privacy `CHECK` stays** as a constraint; the 90-day cleanup becomes a scheduled job |
+| `ingest_*`, `alias_*` | pipeline code with its own role — no secret in the arguments |
+| `save_tester_note`, `tester_notes`, `unanswered_sample` | server / CI endpoints |
+| `record_migration`, `is_admin`, `rate_limit_*` constants | removed, or config |
+| trigger `knowledge_chunk_content_changed` | **stays** — integrity that must hold whoever writes |
+
+**Prerequisites:** the server connects to Postgres directly with its own role — on Netlify through **Supabase's connection pooler (transaction mode)**, or every invocation opens a connection · a query layer (Kysely / Drizzle / plain `postgres.js` — to decide) · query tests against a real database (`npm run db:local-pg`) · Guy (O2): the connection string is a stronger secret than the anon key.
+
+**Order — each function moves when it is touched anyway, never all at once:** the fit with `packages/shared` → `query_rides` born in the server (O13) → Tim's functions at stage 4 (with the anon grants revoked) → the pipeline when it gets its own role. **New code never adds a function to the database.**
+
 ## Rule: tests after every step
 After every step (a separate commit): `npm run qa`, plus `npm run build` if the build is touched. Compare the test count with the previous step. **A drop in the count is a failure**, even if everything is green. Nothing moves on until it's green.
 
