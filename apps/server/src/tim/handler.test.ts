@@ -11,7 +11,7 @@ test("סוד חסר וסוד פגום הם שתי שגיאות שונות", asyn
   const blank = await handle(ask({ question: "היי" }), { GEMINI_API_KEY: "   " });
   assertEquals((await blank.json()).error, "missing_api_key");
 
-  // הדבקה חלקית — הסוג הנפוץ ביותר של תקלה, ושונה לגמרי מ"לא הוגדר"
+  // A partial paste — the most common kind of fault, and entirely different from "not set"
   const partial = await handle(ask({ question: "היי" }), { GEMINI_API_KEY: "AIzaSy" });
   assertEquals(partial.status, 500);
   const b = await partial.json();
@@ -39,7 +39,7 @@ test("מסלול תקין — המפתח נשלח לגוגל ואינו חוזר
   s.restore();
   assertEquals(r.status, 200);
   const body = await r.text();
-  assertEquals(body.includes(KEY), false);          // המפתח לא בגוף התשובה
+  assertEquals(body.includes(KEY), false);          // the key is not in the response body
   assertEquals(JSON.parse(body).answer, "שלום, אני מחובר.");
   const gemini = s.calls.find((c) => c.url.includes("generateContent"))!;
   assertEquals((gemini.init?.headers as Record<string, string>)["x-goog-api-key"], KEY);
@@ -70,8 +70,8 @@ test("הגבלת קצב חוסמת מעל הגג ולא מתחתיו", async () 
   assertEquals(blocked.status, 429);
 });
 
-// שני הגדרות אינם אותה הודעה. מבקרת שנשלחה לחכות שעה בזמן שהמכסה
-// היומית נגמרה תגלה את זה רק בעוד שעה — וזה כשל שקט.
+// The two limits are not the same message. A visitor told to wait an hour when the
+// daily quota ran out finds out only an hour later — and that is a silent failure.
 test("הגדר האישי והגלובלי נבדלים בתשובה, לא רק בקוד", async () => {
   const u = stub(dbSays("user"));
   const user = await handle(ask({ question: "היי" }), FULL);
@@ -89,8 +89,8 @@ test("הגדר האישי והגלובלי נבדלים בתשובה, לא רק 
   assertEquals(gb.retry_after_minutes, 60 * 24);
 });
 
-// מסד שנשאר על 020 מחזיר true. אם true ייקרא כ"מותר", הגדר היומי נעלם
-// בלי שאיש יראה — ולכן בוליאני הוא כישלון מפורש, לא היתר.
+// A database still on 020 returns true. If true were read as "allowed", the daily limit
+// would vanish without anyone seeing — so a boolean is an explicit failure, not a pass.
 test("בוליאני מ-020 אינו נחשב היתר", async () => {
   const s = stub((url) =>
     url.includes("/rpc/") ? new Response("true", { status: 200 }) : geminiOk()
@@ -105,9 +105,9 @@ test("בוליאני מ-020 אינו נחשב היתר", async () => {
   assertEquals(outbound, 0);
 });
 
-// ── כישלון סגור ──────────────────────────────────────────────────────
-// הגרסה הראשונה דילגה על ההגבלה כשלא ניתן היה לאכוף אותה, והמשיכה למודל.
-// זו הייתה נקודת קצה פתוחה בשקט, בדיוק כשאימות הטוקן כבוי.
+// ── Failing closed ────────────────────────────────────────────────────
+// The first version skipped the limit when it couldn't be enforced, and went on to the
+// model. That was a silently open endpoint, exactly when token verification was off.
 
 test("בלי הגדרות מסד — נעצר, ולא ממשיך למודל", async () => {
   const s = stub(() => geminiOk());
@@ -120,11 +120,11 @@ test("בלי הגדרות מסד — נעצר, ולא ממשיך למודל", as
 
 test("תשובה שאינה 'ok'/'user'/'global' נחשבת ככישלון, לא כהיתר", async () => {
   for (const bad of [
-    new Response("", { status: 500 }),                    // המסד שגה
-    new Response("", { status: 404 }),                    // המיגרציה לא רצה
-    new Response("not json", { status: 200 }),            // גוף שאינו JSON
-    new Response(JSON.stringify({ ok: 1 }), { status: 200 }), // JSON, אבל לא הפסק
-    new Response('"maybe"', { status: 200 }),             // טקסט שאינו במילון
+    new Response("", { status: 500 }),                    // the database errored
+    new Response("", { status: 404 }),                    // the migration didn't run
+    new Response("not json", { status: 200 }),            // a body that isn't JSON
+    new Response(JSON.stringify({ ok: 1 }), { status: 200 }), // JSON, but not the verdict
+    new Response('"maybe"', { status: 200 }),             // text not in the vocabulary
   ]) {
     const s = stub((url) => (url.includes("/rpc/") ? bad.clone() : geminiOk()));
     const r = await handle(ask({ question: "היי" }), FULL);
@@ -139,12 +139,13 @@ test("תשובה שאינה 'ok'/'user'/'global' נחשבת ככישלון, לא
 test("הספירה וההכנסה אטומיות — קריאה אחת למסד, לא שתיים", async () => {
   const s = stub(dbSays("ok"));
   await handle(ask({ question: "היי" }), FULL);
-  // ⚠️ הבדיקה על **גדר הקצב** בלבד. מאז השליפה יש עוד קריאות למסד,
-  // וספירה של "כל מה שהולך למסד" הפכה למדידה של משהו אחר.
+  // ⚠️ The check is on the **rate limit** only. Since retrieval there are more database
+  // calls, and counting "everything that goes to the database" became a measure of
+  // something else.
   const gate = s.calls.filter((c) => c.url.includes("/rpc/check_rate_limit")).length;
   s.restore();
-  // בגרסה הקודמת היו שתי בקשות — ספירה ואז הכנסה — ושתי קריאות במקביל
-  // יכלו לעבור את הגג יחד.
+  // The previous version made two requests — count, then insert — and two concurrent
+  // calls could pass the cap together.
   assertEquals(gate, 1);
 });
 
@@ -164,11 +165,12 @@ test("CORS מצטמצם לדומיין ברגע ש-ALLOWED_ORIGIN מוגדר", a
 });
 
 /**
- * 🔴 **גיא, 23.09 — לפני שהקישור יוצא לטסטרים.**
+ * 🔴 **Guy, 23.09 — before the link goes out to testers.**
  *
- * כותרת `Origin` שדפדפן שולח לעולם אינה כוללת סלאש בסוף. ערך עם סלאש
- * היה חוסם כל בקשה אמיתית, והתסמין — CORS — נראה כמו תקלת רשת ולא כמו
- * הגדרה שגויה. זו בדיוק צורת הכשל שחוזרת כאן: ערך שנראה נכון לחלוטין.
+ * The `Origin` header a browser sends never has a trailing slash. A value with a slash
+ * would block every real request, and the symptom — CORS — looks like a network fault,
+ * not a misconfiguration. That's exactly the failure shape that keeps coming back here:
+ * a value that looks entirely right.
  */
 test("סלאש בסוף אינו חוסם, ומקור זר עדיין נחסם", async () => {
   const withOrigin = (o: string) =>
@@ -183,8 +185,8 @@ test("סלאש בסוף אינו חוסם, ומקור זר עדיין נחסם",
 });
 
 /**
- * ⚠️ **גרסת הבדיקה היא מקור אחר.** `tim-test--<אתר>.netlify.app` אינו
- * האתר הציבורי, וערך יחיד פירושו שאחד מהשניים חסום תמיד.
+ * ⚠️ **The test deploy is a different origin.** `tim-test--<site>.netlify.app` is not
+ * the public site, and a single value means one of the two is always blocked.
  */
 test("שני מקורות מופרדים בפסיק — ושניהם עוברים", async () => {
   const withOrigin = (o: string) =>
@@ -198,8 +200,8 @@ test("שני מקורות מופרדים בפסיק — ושניהם עוברי�
     assertEquals(r.headers.get("Access-Control-Allow-Origin"), o);
   }
 
-  // 🔴 **ואין prefix ואין תת־דומיין.** ההרחבה מרחיבה את מה שמותר, ולכן
-  // זו הבדיקה שמונעת ממנה להרחיב יותר ממה שנאמר.
+  // 🔴 **And no prefix, no subdomain.** The extension widens what's allowed, so this is
+  // the check that stops it from widening more than was said.
   for (const o of ["https://parkday.example.evil.com", "https://tim-test--parkday.example.x"]) {
     const r = await handle(withOrigin(o), env);
     assertEquals(r.headers.get("Access-Control-Allow-Origin"), null);
@@ -207,8 +209,9 @@ test("שני מקורות מופרדים בפסיק — ושניהם עוברי�
 });
 
 /**
- * 🔴 **ערך שמתנרמל לריק נפתח, ולא נסגר** — `*` לכולם, ונראה מוגדר.
- * `diagnose` מחזיר את המספר כדי שההבדל ייראה מהסביבה החיה.
+ * 🔴 **A value that normalizes to empty opens, not closes** — `*` for everyone, and it
+ * looks configured. `diagnose` returns the count so the difference is visible from the
+ * live environment.
  */
 test("האבחון סופר מקורות מנורמלים, לא תווים", async () => {
   const ask = async (env: Record<string, string | undefined>) => {
@@ -219,7 +222,7 @@ test("האבחון סופר מקורות מנורמלים, לא תווים", asy
     return (await r.json()).allowed_origins;
   };
 
-  // ⚠️ המפתח נדרש כי בדיקת קיומו רצה לפני האבחון.
+  // ⚠️ The key is required because the check that it exists runs before diagnose.
   assertEquals(await ask({ GEMINI_API_KEY: KEY }), 0);
   assertEquals(await ask({ GEMINI_API_KEY: KEY, ALLOWED_ORIGIN: "/" }), 0);
   assertEquals(await ask({ GEMINI_API_KEY: KEY, ALLOWED_ORIGIN: "https://a/" }), 1);
@@ -235,7 +238,7 @@ test("האבחון מחזיר נוכחות ואורך, ולעולם לא ערך"
   );
   assertEquals(r.status, 200);
   const text = await r.text();
-  // ⚠️ העיקר בבדיקה הזו: שום ערך אינו חוזר, גם לא של סוד שאיני מכיר בשמו.
+  // ⚠️ The point of this test: no value comes back, not even of a secret I don't know by name.
   assertEquals(text.includes(KEY), false);
   assertEquals(text.includes("hunter2"), false);
   assertEquals(text.includes("http://db"), false);
@@ -265,7 +268,7 @@ test("אבחון מודלים מחזיר שמות בלבד, ומסנן לפי ge
   assertEquals(r.status, 200);
   assertEquals(text.includes(KEY), false, "המפתח לא חוזר");
   const b = JSON.parse(text);
-  assertEquals(b.usable, ["gemini-x-flash"]);   // רק מה שיודע generateContent
+  assertEquals(b.usable, ["gemini-x-flash"]);   // only what supports generateContent
 });
 
 test("404 מגוגל מסביר שהשם אינו קיים, ומצביע על האבחון", async () => {
@@ -288,8 +291,8 @@ test("תשובה בכמה חלקים נאספת, ולא רק parts[0]", async ()
   const r = await handle(ask({ question: "היי" }), FULL);
   s.restore();
   assertEquals(r.status, 200);
-  // parts[0] הוא "מחשבה" בלי טקסט. הגרסה הקודמת הייתה מחזירה empty_answer
-  // על תשובה תקינה לחלוטין.
+  // parts[0] is a "thought" with no text. The previous version returned empty_answer
+  // on a perfectly valid answer.
   assertEquals((await r.json()).answer, "חלק\nשני");
 });
 
@@ -313,8 +316,8 @@ test("גוף שאינו JSON מגוגל אינו מפיל את הפונקציה"
   );
   const r = await handle(ask({ question: "היי" }), FULL);
   s.restore();
-  // הפרסור הזה היה היחיד שנשאר בלי catch, וחריגה ממנו הייתה יוצאת כ-500
-  // גולמי בלי גוף — שגיאה שאי אפשר לאבחן.
+  // This parse was the only one left without a catch, and an exception from it went out
+  // as a raw 500 with no body — an error that can't be diagnosed.
   assertEquals(r.status, 502);
   assertEquals((await r.json()).error, "empty_answer");
 });
@@ -365,9 +368,9 @@ test("404 אינו זמני, ולכן אינו מנוסה שוב", async () => {
   assertEquals(geminiCalls, 1, "שם מודל שגוי לא מתקן את עצמו בניסיון חוזר");
 });
 
-// ── מדידת שימוש ──────────────────────────────────────────────────────
-// ההערכה שלי לעלות הודעה שגתה פעם אחת בפי עשרים. המספרים של גוגל
-// חוזרים ב-usageMetadata, ומכאן ההחלטות נשענות עליהם ולא על טבלה.
+// ── Usage measurement ─────────────────────────────────────────────────
+// My estimate of a message's cost was once off by a factor of twenty. Google's numbers
+// come back in usageMetadata, and from here on decisions lean on them, not on a table.
 
 test("usageMetadata מוחזר, כולל אסימוני חשיבה וקאש", async () => {
   const s = stub((url) =>
@@ -392,9 +395,9 @@ test("usageMetadata מוחזר, כולל אסימוני חשיבה וקאש", as
   assertEquals(b.usage, { input: 180, output: 90, thinking: 40, cached_input: 128 });
 });
 
-// ⚠️ גוגל אינה מחזירה cachedContentTokenCount כשהקאש לא נגע. אם החֶסֶר
-// היה חוזר כ-null, "לא ידוע" היה נקרא כ"אולי כן" — ואנחנו שוקלים על סמך
-// המספר הזה אם קאשינג שווה משהו. חסר = 0, במפורש.
+// ⚠️ Google doesn't return cachedContentTokenCount when the cache wasn't touched. If the
+// absence came back as null, "unknown" would read as "maybe yes" — and we weigh whether
+// caching is worth anything on this number. Missing = 0, explicitly.
 test("קאש שלא נגע נספר כאפס, לא כלא-ידוע", async () => {
   const s = stub((url) =>
     url.includes("/rpc/")
@@ -446,8 +449,8 @@ test("אפס הוא תקציב, לא 'לא הוגדר'", async () => {
   assertEquals(sentToGemini(s.calls).generationConfig.thinkingConfig, { thinkingBudget: 0 });
 });
 
-// סוד עם שגיאת הקלדה שמפיל את טים לגמרי הוא מחיר גבוה מדי על ידית
-// אופציונלית. ערך שאינו מספר מתעלמים ממנו, ולא שולחים אותו הלאה.
+// A secret with a typo that takes Tim down entirely is too high a price for an optional
+// knob. A value that isn't a number is ignored, and not passed on.
 test("ערך פגום בסוד אינו נשלח, וטים ממשיך לעבוד", async () => {
   for (const bad of ["", "   ", "הרבה", "NaN"]) {
     const s = stub(dbSays("ok"));
@@ -458,7 +461,7 @@ test("ערך פגום בסוד אינו נשלח, וטים ממשיך לעבוד
   }
 });
 
-// המודל יושב בסוד ולא בקוד, כדי שמעבר ל-3.6 לא ידרוש פריסת קוד.
+// The model lives in a secret, not in code, so moving to 3.6 doesn't need a code deploy.
 test("שם המודל מגיע מהסוד, ומוחזר בתשובה", async () => {
   const s = stub(dbSays("ok"));
   const r = await handle(ask({ question: "היי" }), { ...FULL, GEMINI_MODEL: "gemini-3.6-flash" });
@@ -486,9 +489,9 @@ test("GEMINI_THINKING_LEVEL נשלח כשהוא מוגדר, ולצד budget", as
   });
 });
 
-// ⚠️ סוד שלא הגיע לפונקציה, וסוד שהגיע והמודל התעלם ממנו, נראים זהים
-// מבחוץ. האבחון חייב להראות את מה שנשלח בפועל — ומאותו חישוב, אחרת הוא
-// לוח בקרה שמראה מתג במצב שאינו המצב.
+// ⚠️ A secret that never reached the function, and one that did and the model ignored,
+// look the same from outside. Diagnose must show what was actually sent — and from the
+// same computation, or it's a control panel showing a switch in a state it isn't in.
 test("האבחון מראה את מה שנשלח בפועל, ומאותו מקור", async () => {
   const env = { ...FULL, GEMINI_THINKING_LEVEL: "low" };
   const r = await handle(
@@ -518,9 +521,9 @@ test("בלי שום סוד חשיבה — האבחון מראה ריק, לא נ�
   assertEquals((await r.json()).sent_to_model, {});
 });
 
-// ── סיבת השגיאה מגוגל ────────────────────────────────────────────────
-// "400" בלי סיבה עלה לנו סבב שלם: לא ידענו איזה שדה נדחה. מוחזר
-// error.message בלבד — משפט על הבקשה, לא תוכן שלה.
+// ── Google's error reason ─────────────────────────────────────────────
+// A "400" with no reason cost us a whole round: we didn't know which field was rejected.
+// Only error.message is returned — a sentence about the request, not its content.
 
 test("סיבת 400 מוחזרת, והמפתח לא נוסע איתה", async () => {
   const s = stub((url) =>
@@ -555,7 +558,7 @@ test("גוף שאינו JSON, או בלי error.message — לא ממציאים 
   }
 });
 
-// הודעה ארוכה עלולה לגרור איתה חלקים מהבקשה. נחתכת.
+// A long message may drag parts of the request along with it. It's truncated.
 test("סיבה ארוכה נחתכת ל-300 תווים", async () => {
   const s = stub((url) =>
     url.includes("/rpc/") ? new Response('"ok"', { status: 200 }) : new Response(
@@ -568,13 +571,13 @@ test("סיבה ארוכה נחתכת ל-300 תווים", async () => {
   assertEquals((await r.json()).upstream_detail.length, 300);
 });
 
-// ── 🔴 הפרצה שגיא מצא ────────────────────────────────────────────────
-// הגגות נשלחו כארגומנטים לפונקציה שמוענקת ל-anon — מפתח ציבורי בהגדרה.
-// כל מי שפתחה את כלי המפתחים יכלה לקרוא ישירות ל-RPC עם p_max: 999999
-// ולעבור את שני הגגות, בלי לגעת בפונקציה הזו בכלל.
+// ── 🔴 The hole Guy found ─────────────────────────────────────────────
+// The caps were sent as arguments to a function granted to anon — a public key by
+// definition. Anyone who opened dev tools could call the RPC directly with p_max: 999999
+// and get past both caps, without touching this function at all.
 //
-// הבדיקה נועלת את התיקון: **דלי בלבד נשלח.** כל שדה נוסף כאן הוא גג
-// שהקוראת בוחרת לעצמה, וזה בדיוק מה שהיה.
+// The test locks the fix: **only the bucket is sent.** Any extra field here is a cap the
+// caller picks for herself, and that is exactly what it was.
 
 test("נשלח דלי בלבד — שום גג אינו נשלח מהקוד למסד", async () => {
   const s = stub(dbSays("ok"));
@@ -609,8 +612,8 @@ test("הקטעים נכנסים להקשר, לפני השאלה", async () => {
   assertEquals((await r.json()).retrieval, "ok");
 });
 
-// ⚠️ השאלה מקודדת בתפקיד אחר מהמסמכים. קידוד בתפקיד הלא נכון עובד
-// ומחזיר תוצאות גרועות יותר בלי שום שגיאה.
+// ⚠️ The question is embedded with a different task type than the documents. Embedding
+// with the wrong task type works, and returns worse results with no error at all.
 test("השאלה מקודדת כ-RETRIEVAL_QUERY", async () => {
   const s = stub(withChunks([]));
   await handle(ask({ question: "היי" }), FULL);
@@ -622,9 +625,9 @@ test("השאלה מקודדת כ-RETRIEVAL_QUERY", async () => {
   assertEquals(sent.outputDimensionality, 1536);
 });
 
-// ⚠️ שליפה שנכשלת אינה עוצרת את התשובה — בניגוד לגדר הקצב. גדר שנופלת
-// משאירה נקודת קצה פתוחה; שליפה שנופלת רק משאירה את טים בלי ידע,
-// וההוראות שלו כבר אוסרות עליו להמציא.
+// ⚠️ A failed retrieval doesn't stop the answer — unlike the rate limit. A limit that
+// fails leaves an open endpoint; a retrieval that fails only leaves Tim without
+// knowledge, and his instructions already forbid him to make things up.
 test("שליפה שנכשלה מדווחת, ואינה מונעת תשובה", async () => {
   const s = stub((url) => {
     if (url.includes("/rpc/check_rate_limit")) return new Response('"ok"', { status: 200 });
@@ -639,8 +642,8 @@ test("שליפה שנכשלה מדווחת, ואינה מונעת תשובה", a
   assertEquals(body.answer, "שלום, אני מחובר.");
 });
 
-// ⚠️ "אין קטעים מתאימים" ו"השליפה נפלה" נראים זהים על המסך, והראשון הוא
-// תשובה בעוד השני הוא תקלה.
+// ⚠️ "No matching passages" and "retrieval failed" look the same on screen, and the first
+// is an answer while the second is a fault.
 test("אין קטעים ותקלת שליפה הם שתי סיבות שונות", async () => {
   const s = stub(withChunks([]));
   const r = await handle(ask({ question: "היי" }), FULL);
@@ -650,10 +653,10 @@ test("אין קטעים ותקלת שליפה הם שתי סיבות שונות"
   assertEquals(body.chunks, 0);
 });
 
-// ⚠️ **דרגת המקור יוצאת בתשובה, ואינה נכנסת להקשר.**
-// match_knowledge מחזירה authority_tier מאז 028, והוא נבלע בדרך — כלומר
-// שישה ממקרי סט הזהב שדורשים must_cite_tier לא היו ניתנים לבדיקה כלל.
-// הוא יוצא כדי שבדיקה תדע על מה התשובה נשענה, ולא כדי שהמודל יראה אותו.
+// ⚠️ **The source tier goes out in the response, and doesn't go into the context.**
+// match_knowledge has returned authority_tier since 028, and it was swallowed on the way —
+// i.e. six golden-set cases that require must_cite_tier couldn't be tested at all.
+// It goes out so a test knows what the answer leaned on, not so the model sees it.
 test("דרגת המקור מדווחת בתשובה, בלי כפילויות", async () => {
   const s = stub(withChunks([
     { content: "א", volatility: "stable", last_verified: null, authority_tier: "T1" },
@@ -666,8 +669,9 @@ test("דרגת המקור מדווחת בתשובה, בלי כפילויות", a
   assertEquals(body.tiers.sort(), ["T1", "T2"]);
 });
 
-// ⚠️ ודרגת המקור **אינה** מגיעה למודל. היא נועדה לבדיקה, ואילו הייתה
-// בהקשר, המודל היה מצטט אותה למשתמש — וזה ייחוס למקור, שאסור.
+// ⚠️ And the source tier does **not** reach the model. It's meant for tests; if it were
+// in the context, the model would quote it to the user — and that's source attribution,
+// which is forbidden.
 test("דרגת המקור אינה נכנסת להקשר של המודל", async () => {
   const s = stub(withChunks([
     { content: "א", volatility: "stable", last_verified: null, authority_tier: "T1" },
@@ -701,19 +705,19 @@ test("שאלה על מתקן פונה לטבלה, והמתקנים לפני המ
   assertEquals(prompt.includes("לא מתאים לגובה"), true);
 });
 
-// ⚠️ שאלה שאינה על מתקן **כן** פונה לטבלה, ומקבלת אפס שורות. זו בחירה:
-// המסד מכריע, לא היוריסטיקה. המחיר הוא קריאה מיותרת; החלופה — לנחש
-// בעצמנו — הייתה מדלגת יום אחד על שאלה אמיתית.
+// ⚠️ A question that isn't about a ride **does** go to the table, and gets zero rows.
+// That's a choice: the database decides, not a heuristic. The cost is a wasted call; the
+// alternative — guessing ourselves — would one day skip a real question.
 /**
- * 🔴 **טים שאל את אותה שאלה שלוש פעמים ברצף, כי הוא לא זכר דבר.**
+ * 🔴 **Tim asked the same question three times in a row, because he remembered nothing.**
  *
- * נטע ענתה "זוג בני 30 ואין העדפות", והוא שאל שוב "איזה גילים
- * המטיילים?". כל הודעה הגיעה אליו לבדה, ולכן כל תשובה שלה נראתה לו
- * כשאלה חדשה.
+ * Neta answered "זוג בני 30 ואין העדפות" ("a couple aged 30, no preferences"), and he
+ * asked again "איזה גילים המטיילים?" ("what ages are the travellers?"). Each message
+ * reached him alone, so each of her answers looked to him like a new question.
  *
- * ⚠️ **וזו הפרה של כלל הברזל החמישי** — שאלה שדולגה נשאלת פעם נוספת
- * אחת, ואז ממשיכים. הכלל היה כתוב בהוראות; המנגנון שמאפשר לקיים אותו
- * לא היה קיים. **הוראה בלי דרך לקיים אותה אינה כלל.**
+ * ⚠️ **And that breaks the fifth iron rule** — a skipped question is asked one more time,
+ * and then we move on. The rule was written in the instructions; the mechanism that lets
+ * him keep it didn't exist. **An instruction with no way to keep it is not a rule.**
  */
 test("ההיסטוריה מגיעה למודל כתורות, לפני השאלה", async () => {
   const s = stub(withRides([]));
@@ -735,14 +739,14 @@ test("ההיסטוריה מגיעה למודל כתורות, לפני השאלה
   assertEquals(sent[0].role, "user");
   assertEquals(sent[1].role, "model");
   assertEquals(sent[2].parts[0].text.includes("זוג בני 30"), true);
-  // ⚠️ השאלה נשארת אחרונה, אחרי ההקשר ואחרי ההיסטוריה.
+  // ⚠️ The question stays last, after the context and after the history.
   assertEquals(sent[3].parts[0].text.includes("מתקנים עם תפאורות מגניבות"), true);
 });
 
 /**
- * ⚠️ **ההיסטוריה היא קלט חיצוני, ולכן היא חסומה בהיקף.** היא נוסעת
- * לספק חיצוני ונספרת לתוך אותה גדר קצב; "כל השיחה" הוא וקטור עלות
- * ודליפה, לא שיפור תשובה.
+ * ⚠️ **The history is external input, so it is bounded in size.** It travels to an
+ * external provider and counts against the same rate limit; "the whole conversation" is
+ * a cost and leak vector, not a better answer.
  */
 test("היסטוריה חריגה נחתכת ואינה מפילה", async () => {
   const s = stub(withRides([]));
@@ -762,7 +766,7 @@ test("היסטוריה חריגה נחתכת ואינה מפילה", async () =>
     s.calls.find((c) => c.url.includes("generateContent"))!.init!.body as any,
   ).contents;
 
-  // 🔴 תפקיד שאינו user/model נזרק, ולא "מתוקן" לאחד מהם.
+  // 🔴 A role that isn't user/model is dropped, not "fixed" into one of them.
   assertEquals(sent.every((c: { role: string }) => c.role === "user" || c.role === "model"), true);
   assertEquals(sent.length <= 9, true, `תורות: ${sent.length}`);
   for (const c of sent) assertEquals(c.parts[0].text.length <= 2000, true);

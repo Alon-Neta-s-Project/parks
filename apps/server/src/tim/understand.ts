@@ -1,10 +1,11 @@
 import { MAX_HISTORY_CHARS, MAX_HISTORY_TURNS } from "./config";
 /**
- * הגובה שנמסר בשאלה, בסנטימטרים.
+ * The height given in the question, in centimeters.
  *
- * ⚠️ **מספר בלי הקשר אינו גובה.** "אקספדישן אוורסט" מכיל ספרות בשמות
- * אחרים, ו"3 ימים" הוא לא 3 ס"מ. נדרשת מילה שמסמנת גובה, והטווח מוגבל
- * ל-50–200 — אותו טווח שהמסד אוכף על העמודה.
+ * ⚠️ **A number without context isn't a height.** "Expedition Everest" contains
+ * digits in other names, and "3 ימים" ("3 days") isn't 3 cm. A word that marks
+ * height is required, and the range is limited to 50–200 — the same range the
+ * database enforces on the column.
  */
 export function extractHeight(q: string): number | null {
   const m = q.match(/(\d{2,3})\s*(?:ס"מ|סמ|ס״מ|cm)/i) ??
@@ -14,31 +15,35 @@ export function extractHeight(q: string): number | null {
 }
 
 /**
- * שם המתקן שהשאלה עוסקת בו, אם היא עוסקת במתקן.
+ * The name of the ride the question is about, if it's about a ride.
  *
- * ⚠️ **מילים גנריות ("מתקן", "מופע", "פארק") חייבות ליפול כאן.** הן אינן
- * שם, והן מופיעות בשם נרדף לגיטימי — "מופע היפה והחיה". התאמה לפי מילים
- * מצליבה את שתי העובדות האלה: השאלה "איזה **מתקן** הכי מפחיד" הייתה
- * מחזירה את המתקן שלמישהו יש עליו נרדף "מתקן אווטאר", ועובדה על מתקן
- * אקראי הייתה נכנסת להקשר של טים כתשובה. **נמדד, לא נצפה.**
+ * ⚠️ **Generic words — "מתקן" ("ride"), "מופע" ("show"), "פארק" ("park") —
+ * must drop out here.** They aren't a name, and they appear in legitimate aliases —
+ * "מופע היפה והחיה" ("the Beauty and the Beast show"). Word matching crosses
+ * these two facts: the question "איזה **מתקן** הכי מפחיד" ("which **ride** is
+ * scariest") would return the ride that someone has the alias "מתקן אווטאר"
+ * ("Avatar ride") for, and a fact about a random ride would enter Tim's context
+ * as the answer. **Measured, not observed.**
  *
- * ⚠️ **זו הסרה של מילות שאלה, ולא זיהוי כוונה.** ניסיתי לזהות "האם
- * השאלה על מתקן" לפי מילות מפתח, וזה נכשל על "כמה עולה אוורסט" — שאלת
- * מחיר על מתקן ספציפי. מה שנשאר הוא הפוך: מסירים את מה שבוודאות אינו
- * שם, **ונותנים למסד להכריע.**
+ * ⚠️ **This is stripping question words, not intent detection.** I tried
+ * detecting "is the question about a ride" by keywords, and it failed on
+ * "כמה עולה אוורסט" ("how much is Everest") — a price question about a specific
+ * ride. What remains is the reverse: strip what is certainly not a name, **and
+ * let the database decide.**
  *
- * ⚠️ **`\b` אינו עובד כאן, ולכן הוא אינו בשימוש.** ב-JavaScript `\b`
- * הוא הגבול בין `\w` לבין מה שאינו — ו-`\w` הוא `[A-Za-z0-9_]` בלבד.
- * אות עברית אינה `\w`, ולכן `\b(מה)\b` **לעולם אינו מתאים**, ורשימת
- * מילות השאלה כולה לא עשתה דבר: הביטוי רץ, לא זרק שגיאה, ולא סינן כלום.
- * זה בדיוק הכשל השקט — קוד שנראה כאילו הוא עובד. הגבולות נכתבים כאן
- * במפורש כרווח או קצה מחרוזת.
+ * ⚠️ **`\b` doesn't work here, so it isn't used.** In JavaScript `\b` is the
+ * boundary between `\w` and what isn't — and `\w` is only `[A-Za-z0-9_]`. A
+ * Hebrew letter isn't `\w`, so `\b(מה)\b` **never matches**, and the whole
+ * question-word list did nothing: the expression ran, didn't throw, and filtered
+ * nothing. That's exactly the silent failure — code that looks like it works.
+ * The boundaries here are written explicitly as whitespace or string edge.
  *
- * ⚠️ והיא מחזירה מחרוזת גם על "קורה אם יורד גשם", ו**זה בסדר**:
- * `ilike '%קורה אם יורד גשם%'` אינו מתאים לאף מתקן, המסד מחזיר אפס
- * שורות, ולהקשר לא נכנס דבר. המחיר הוא קריאה אחת מיותרת למסד; החלופה —
- * היוריסטיקה שמחליטה בעצמה — הייתה מדלגת יום אחד על שאלה אמיתית, וזה
- * כשל יקר בהרבה. **עדיף לשאול לחינם מאשר להחמיץ.**
+ * ⚠️ And it also returns a string for "קורה אם יורד גשם" ("happens if it
+ * rains"), and **that's fine**: `ilike '%קורה אם יורד גשם%'` matches no ride,
+ * the database returns zero rows, and nothing enters the context. The cost is
+ * one unnecessary database call; the alternative — a heuristic that decides on
+ * its own — would one day skip a real question, and that's a far more expensive
+ * failure. **Better to ask for nothing than to miss.**
  */
 export function extractRideName(q: string): string | null {
   const stripped = q
@@ -50,20 +55,22 @@ export function extractRideName(q: string): string | null {
     .replace(/\d+/g, " ")
     .replace(/\s+/g, " ")
     .trim();
-  // ⚠️ שתי אותיות אינן שם מתקן. הן שאריות של מילת קישור שלא הוסרה,
-  // וחיפוש עליהן מחזיר חצי מהטבלה.
+  // ⚠️ Two letters aren't a ride name. They're leftovers of a connecting word
+  // that wasn't stripped, and searching on them returns half the table.
   return stripped.length >= 3 ? stripped : null;
 }
 
 /**
- * האם השאלה מבקשת שנבחר עבור מי ששואל.
+ * Whether the question asks us to choose for the person asking.
  *
- * ⚠️ **אותו אוצר מילים כמו `apps/web/src/lib/ask-intent.ts`, ובכוונה.** שתי
- * רשימות מילים בשני צדדים היו נעשות שונות תוך שבוע, ואז אותה שאלה
- * הייתה מסווגת אחרת בדפדפן ובשרת — בלי שאיש ישים לב.
+ * ⚠️ **The same vocabulary as `apps/web/src/lib/ask-intent.ts`, on purpose.** Two
+ * word lists on two sides would drift apart within a week, and then the same
+ * question would be classified differently in the browser and on the server —
+ * without anyone noticing.
  *
- * ⚠️ ומילת עובדה גוברת: "כמה זמן כדאי לתכנן ל-Everest" היא שאלה שיש לה
- * תשובה בטבלה, ושורות מועמדים עליה הן רעש.
+ * ⚠️ And a fact word wins: "כמה זמן כדאי לתכנן ל-Everest" ("how much time should
+ * we plan for Everest") is a question with an answer in the table, and candidate
+ * rows on it are noise.
  */
 export function wantsRecommendation(q: string): boolean {
   const t = q.trim().toLowerCase();
@@ -75,19 +82,23 @@ export function wantsRecommendation(q: string): boolean {
     && /(פארק|פארקים|מתקנים|אטרקציות|רכבות|מופעים|חופשה|טיול)/.test(t);
 }
 
-// 🔴 **טים לא זכר דבר, ולכן שאל את אותה שאלה שלוש פעמים ברצף.**
+// 🔴 **Tim remembered nothing, so he asked the same question three times in a
+// row.**
 //
-// נטע ענתה "זוג בני 30 ואין העדפות", והוא שאל שוב "איזה גילים
-// המטיילים?". כל הודעה הגיעה אליו לבדה — `askTim` שלח `{ question }`
-// וזהו — ולכן כל תשובה שלה נראתה לו כשאלה חדשה בלי הקשר.
+// Neta answered "a couple aged 30, no preferences", and he asked again "what ages
+// are the travelers?". Every message reached him alone — `askTim` sent
+// `{ question }` and that was it — so each of her answers looked to him like a
+// new question with no context.
 //
-// ⚠️ **וזו הפרה של כלל הברזל החמישי**, שאומר שאלה שדולגה נשאלת פעם
-// נוספת אחת ואז ממשיכים עם מה שיש. הכלל היה בהוראות; המנגנון שמאפשר
-// לקיים אותו לא היה קיים. הוראה בלי דרך לקיים אותה אינה כלל.
+// ⚠️ **And that violates the fifth iron rule**, which says a skipped question is
+// asked one more time and then we continue with what we have. The rule was in the
+// instructions; the mechanism that makes it possible to keep did not exist. An
+// instruction with no way to keep it is not a rule.
 //
-// ⚠️ **חסום בהיקף בכוונה.** ההיסטוריה היא טקסט של משתמשת שנוסע לספק
-// חיצוני ונספר לתוך אותה גדר קצב. שמונה תורות אחרונות, וכל אחת
-// חתוכה — יותר מזה אינו משפר תשובה והוא כן מגדיל עלות ודליפה.
+// ⚠️ **Bounded in scope on purpose.** The history is a user's text that travels to
+// an external vendor and counts against the same rate limit. The last eight
+// turns, each one truncated — more than that doesn't improve an answer and does
+// increase cost and leakage.
 export type Turn = { role: "user" | "model"; text: string };
 export function readHistory(raw: unknown): Turn[] {
   const rawHistory = Array.isArray(raw) ? raw : [];

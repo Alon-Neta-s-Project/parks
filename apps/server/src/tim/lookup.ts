@@ -1,6 +1,6 @@
 import type { Db } from "./rate-limit";
 import { extractHeight, wantsRecommendation } from "./understand";
-/** מתקן כפי שהוא חוזר מ-find_experiences. */
+/** A ride as it comes back from find_experiences. */
 export interface ExperienceRow {
   name: string;
   name_he: string | null;
@@ -11,29 +11,30 @@ export interface ExperienceRow {
   intensity: number | null;
   height_cm: number | null;
   /**
-   * ⚠️ ההפך מ-`height_cm`: עד כמה מותר להיות גבוה.
+   * ⚠️ The opposite of `height_cm`: how tall you are allowed to be.
    *
-   * `undefined` ולא רק `null` בכוונה — מסד שעדיין לא קיבל את מיגרציה 038
-   * אינו מחזיר את השדה כלל, והפונקציה אמורה להמשיך לעבוד ולא לומר דבר,
-   * במקום להדפיס "undefined ס״מ" בתשובה למשפחה.
+   * `undefined` and not only `null`, on purpose — a database that has not yet
+   * received migration 038 does not return the field at all, and the function
+   * should keep working and say nothing, rather than print "undefined ס״מ" ("cm")
+   * in an answer to a family.
    */
   max_height_cm?: number | null;
   /**
-   * ארבעת דגלי הרגישות. ⚠️ שלושה מצבים כל אחד, ו-`null` הוא "לא נבדק"
-   * ולעולם לא "אין רגישות" — זה כל ההבדל בשביל המשפחה ששואלת.
+   * The four sensitivity flags. ⚠️ Three states each, and `null` is "not checked"
+   * and never "no sensitivity" — that is the whole difference for the family asking.
    *
-   * אופציונליים, כמו התקרה: מסד בלי מיגרציה 039 אינו מחזיר אותם.
+   * Optional, like the ceiling: a database without migration 039 does not return them.
    */
   /**
-   * 🔴 **טקסט ולא בוליאני, מאז מיגרציה 040 — וזה היה באג חי.**
+   * 🔴 **Text, not boolean, since migration 040 — and this was a live bug.**
    *
-   * הטיפוס כאן נכתב כ-`boolean | null` כשהעמודות היו בוליאניות, ו-040
-   * העבירה אותן ל-`"true" | "false" | "na" | null`. הקוד שקורא אותן
-   * השווה ל-`true` — השוואה שלעולם אינה מתקיימת על מחרוזת — ולכן **אף
-   * רגישות מסומנת לא הייתה מגיעה לטים.**
+   * The type here was written as `boolean | null` when the columns were boolean,
+   * and 040 moved them to `"true" | "false" | "na" | null`. The code reading them
+   * compared against `true` — a comparison that never holds for a string — so
+   * **no flagged sensitivity ever reached Tim.**
    *
-   * ⚠️ ו-TypeScript לא תפס את זה: הטיפוס מתאר מה שאני **מצהיר** שמגיע
-   * מהרשת, לא מה שבאמת מגיע. הצהרה שגויה עוברת קומפילציה בשקט.
+   * ⚠️ And TypeScript did not catch it: the type describes what I **declare** comes
+   * over the network, not what actually comes. A wrong declaration compiles silently.
    */
   sens_dark?: string | null;
   sens_heights?: string | null;
@@ -46,14 +47,14 @@ export interface ExperienceRow {
 }
 
 /**
- * מתקנים, כפי שהם נכנסים להקשר.
+ * Rides, as they enter the context.
  *
- * ⚠️ **שלושת מצבי הגובה נשמרים עד המסך** (CLAUDE.md): מספר הוא מגבלה,
- * `0` הוא "נבדק ואין מגבלה", ו-NULL הוא "לא נבדק". שלושתם נכתבים במילים
- * שונות, כי מודל שמקבל `0` עלול לכתוב "גובה מינימום 0 ס\"מ" — וזה בדיוק
- * מה שהכלל אוסר.
+ * ⚠️ **The three height states are kept all the way to the screen** (CLAUDE.md):
+ * a number is a limit, `0` is "checked, no limit", and NULL is "not checked". All
+ * three are written in different words, because a model that receives `0` may write
+ * "גובה מינימום 0 ס\"מ" ("minimum height 0 cm") — which is exactly what the rule forbids.
  */
-/** שורת מועמד לפארק. ראה `park_candidates` במיגרציה 043. */
+/** A candidate row for a park. See `park_candidates` in migration 043. */
 export interface ParkCandidate {
   park: string;
   name: string;
@@ -66,34 +67,35 @@ export interface ParkCandidate {
   gets_wet: string | null;
 }
 
-/** קטע כפי שהוא חוזר מ-match_knowledge. */
+/** A chunk as it comes back from match_knowledge. */
 export interface KnowledgeChunk {
   content: string;
   volatility: string | null;
   last_verified: string | null;
   /**
-   * ⚠️ **נשלף ולא נזרק.** `match_knowledge` מחזירה אותו מאז 028, והוא
-   * נבלע כאן — כלומר שישה ממקרי סט הזהב שדורשים `must_cite_tier: [T1]`
-   * לא היו ניתנים לבדיקה כלל: אין במה להסתכל.
+   * ⚠️ **Retrieved, not thrown away.** `match_knowledge` has returned it since 028,
+   * and it was swallowed here — meaning six of the golden-set cases that require
+   * `must_cite_tier: [T1]` could not be checked at all: there was nothing to look at.
    *
-   * הוא **אינו** נכנס להקשר של המודל. הוא יוצא בתשובה כדי שבדיקה תוכל
-   * לוודא מאיזו דרגת מקור נשענה התשובה — קטע T1 הוא מקור רשמי, ותשובה
-   * שנשענת רק על דרגה נמוכה יותר היא ממצא ולא תקלה.
+   * It does **not** enter the model's context. It goes out in the response so a test
+   * can verify which source tier the answer leaned on — a T1 chunk is an official
+   * source, and an answer that leans only on a lower tier is a finding, not a fault.
    */
   authority_tier: string | null;
 }
 
 /**
- * 🔴 **על שאלת המלצה טים לא קיבל ולו מתקן אחד.**
+ * 🔴 **On a recommendation question Tim did not get a single ride.**
  *
- * `ridesTask` רצה רק כששולפים שם מתקן מהשאלה, ו"מעדיפים פארקים עם
- * תפאורה יפה" אינה מכילה שם. לכן חזרו אפס שורות, וכל מה שהיה לו
- * לענות ממנו היה מדריכי האופי — פרוזה. הוא ענה בפסקאות אווירה בלי
- * ולו מתקן אחד בשם, וזה מה שפולה תפסה.
+ * `ridesTask` ran only when a ride name was extracted from the question, and
+ * "מעדיפים פארקים עם תפאורה יפה" ("we prefer parks with beautiful scenery") contains
+ * no name. So zero rows came back, and all he had to answer from was the park
+ * character guides — prose. He answered in paragraphs of atmosphere without a single
+ * ride by name, and that is what Paula caught.
  *
- * ⚠️ **ורק כששאלו אותנו לבחור.** שליפה כזו על כל שאלה הייתה מזריקה
- * עשרים שורות מתקנים להקשר של "מה קורה אם יורד גשם", ויש בדיקה
- * שאוסרת בדיוק את זה.
+ * ⚠️ **And only when we were asked to choose.** Retrieval like this on every question
+ * would inject twenty ride rows into the context of "what happens if it rains", and
+ * there is a test that forbids exactly that.
  */
 export async function findCandidates({ url, dbKey }: Db, asked: string | null, question: string): Promise<ParkCandidate[]> {
   if (asked || !wantsRecommendation(question)) return [];
@@ -109,7 +111,7 @@ export async function findCandidates({ url, dbKey }: Db, asked: string | null, q
     });
     const rows = res.ok ? await res.json() : null;
     return Array.isArray(rows) ? rows : [];
-  } catch { /* נפילה רכה, כמו השאר */ }
+  } catch { /* soft failure, like the rest */ }
   return [];
 }
 
@@ -131,11 +133,11 @@ export async function findRides({ url, dbKey }: Db, asked: string | null, questi
     });
     const rows = res.ok ? await res.json() : null;
     return Array.isArray(rows) ? rows : [];
-  } catch { /* נפילה רכה, כמו השליפה */ }
+  } catch { /* soft failure, like retrieval */ }
   return [];
 }
 
-// ── השליפה ───────────────────────────────────────────────────────────
+// ── Retrieval ────────────────────────────────────────────────────────
 export async function retrieveKnowledge({ url, dbKey }: Db, key: string, question: string): Promise<{
   chunks: KnowledgeChunk[];
   retrieval: "ok" | "empty" | "failed";
@@ -143,9 +145,9 @@ export async function retrieveKnowledge({ url, dbKey }: Db, key: string, questio
   let chunks: KnowledgeChunk[] = [];
   let retrieval: "ok" | "empty" | "failed" = "empty";
   try {
-    // ⚠️ השאלה מקודדת כ-RETRIEVAL_QUERY ולא כ-RETRIEVAL_DOCUMENT. שני
-    // התפקידים אינם סימטריים, וקידוד בתפקיד הלא נכון **עובד** ומחזיר
-    // תוצאות גרועות יותר בלי שום שגיאה — אותה מלכודת כמו בצד הטעינה.
+    // ⚠️ The question is embedded as RETRIEVAL_QUERY, not RETRIEVAL_DOCUMENT. The
+    // two roles are not symmetric, and embedding in the wrong role **works** and
+    // returns worse results with no error at all — the same trap as on the load side.
     const emb = await fetch(
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent",
       {

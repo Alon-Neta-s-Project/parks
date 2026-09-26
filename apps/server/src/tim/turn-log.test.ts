@@ -10,9 +10,9 @@ afterEach(() => {
 });
 
 /**
- * 🔴 **הכתיבה אינה ממתינה, ולכן מישהו צריך להחזיק אותה חיה.** ב-Netlify
- * הפונקציה מוקפאת אחרי שהתשובה יצאה, וכתיבה שלא נמסרה ל-waitUntil
- * נעלמת — בשקט, כי היומן נכשל בשקט בכוונה.
+ * 🔴 **The write isn't awaited, so something has to keep it alive.** On Netlify the
+ * function is frozen after the response goes out, and a write not handed to waitUntil
+ * vanishes — silently, because the log fails silently on purpose.
  */
 test("הכתיבה נמסרת ל-waitUntil שהמארח נתן", async () => {
   const s = stub(() => new Response(null, { status: 204 }));

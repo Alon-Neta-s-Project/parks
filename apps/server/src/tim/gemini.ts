@@ -3,22 +3,24 @@ import { failWith, type Fail } from "./http";
 import type { Trace } from "./log";
 import type { Turn } from "./understand";
 /**
- * `*` נכון כל עוד אין דומיין. ברגע שיהיה — להגדיר את הסוד ALLOWED_ORIGIN
- * לדומיין שלנו, וזה מצטמצם מעצמו בלי שינוי קוד. מקור שאינו תואם לא מקבל
- * כותרת CORS כלל, והדפדפן חוסם אותו.
+ * `*` is right as long as there is no domain. Once there is — set the
+ * ALLOWED_ORIGIN secret to our domain, and this narrows by itself with no code
+ * change. An origin that doesn't match gets no CORS header at all, and the
+ * browser blocks it.
  */
 /**
- * הסיבה שגוגל נתנה, בלי מה ששלחנו אליה.
+ * The reason Google gave, without what we sent it.
  *
- * ⚠️ מחרוזות ארוכות שנראות כמו מפתח נמחקות לפני ההחזרה. הן אינן אמורות
- * להופיע בהודעת שגיאה, אבל "אמור" אינו אכיפה, וזו הודעה שנוסעת לדפדפן.
+ * ⚠️ Long strings that look like a key are scrubbed before returning. They aren't
+ * supposed to appear in an error message, but "supposed to" is not enforcement,
+ * and this message travels to the browser.
  */
 export async function upstreamReason(res: Response): Promise<string | null> {
   const body = await res.text().catch(() => "");
   let message: unknown = null;
   try {
     message = JSON.parse(body)?.error?.message;
-  } catch { /* גוף שאינו JSON — אין ממה לגזור סיבה */ }
+  } catch { /* Body isn't JSON — nothing to derive a reason from */ }
   if (typeof message !== "string" || !message) return null;
   return message
     .replace(/AIza[\w-]{10,}/g, "‹מפתח›")
@@ -27,29 +29,31 @@ export async function upstreamReason(res: Response): Promise<string | null> {
 }
 
 /**
- * תקציב החשיבה — הידית היקרה ביותר שיש לנו, וזה נמדד ולא הוערך.
+ * The thinking budget — the most expensive knob we have, and that was measured,
+ * not estimated.
  *
- * במדידה אמיתית: קלט 275 · תשובה 154 · **חשיבה 505**. אסימוני חשיבה
- * מחויבים כפלט, כלומר הם היו **72% מעלות ההודעה** — פי שלושה מהתשובה
- * עצמה, בשביל לומר "אין לי עדיין נתונים". לשם השוואה: מעבר ל-3.6
- * חוסך 16%, וקאשינג של כל הקלט חוסך 5%.
+ * In a real measurement: input 275 · answer 154 · **thinking 505**. Thinking
+ * tokens are billed as output, so they were **72% of the message's cost** — three
+ * times the answer itself, to say "I don't have data yet". For comparison: moving
+ * to 3.6 saves 16%, and caching the whole input saves 5%.
  *
- * ⚠️ **opt-in בכוונה.** בלי הסוד נשלח בדיוק מה שנשלח היום, כלומר
- * ההתנהגות שכבר עובדת אינה משתנה מעצם הפריסה. השדה אינו מתועד אחיד
- * בין דורות המודלים, וסיכון של 400 על שדה לא מוכר אינו סיכון שלוקחים
- * בשקט על נתיב שעובד. מגדירים סוד, מודדים, ואם נשבר — מוחקים אותו
- * וחוזרים אחורה בלי לגעת בקוד.
+ * ⚠️ **Opt-in on purpose.** Without the secret, exactly what is sent today is
+ * sent, so behavior that already works doesn't change just by deploying. The
+ * field isn't documented consistently across model generations, and risking a 400
+ * on an unknown field is not a risk taken quietly on a path that works. Set the
+ * secret, measure, and if it breaks — delete it and roll back without touching
+ * code.
  *
- * ערך לא-מספרי מתעלמים ממנו במקום לשלוח אותו: סוד עם שגיאת הקלדה
- * שמפיל את טים לגמרי הוא מחיר גבוה מדי על ידית אופציונלית.
+ * A non-numeric value is ignored rather than sent: a secret with a typo that takes
+ * Tim down entirely is too high a price for an optional knob.
  */
 /**
- * 503 ו-429 מגוגל הם זמניים בהגדרה — "עמוס", לא "שגוי". ניסיון חוזר
- * אחד עם המתנה קצרה פותר את רובם.
+ * 503 and 429 from Google are transient by definition — "busy", not "wrong". One
+ * retry after a short wait solves most of them.
  *
- * ⚠️ אחד בלבד, ובכוונה: אנחנו כבר בתוך נקודת קצה מוגבלת-קצב, וההמתנה
- * היא זמן שהמשתמש מחכה מול מסך. עדיף להחזיר שגיאה מפורשת מלנסות שוב
- * ושוב ולהיראות תקוע.
+ * ⚠️ Only one, on purpose: we're already inside a rate-limited endpoint, and the
+ * wait is time the user spends staring at a screen. Better to return an explicit
+ * error than to retry again and again and look stuck.
  */
 const transient = (code: number) => code === 503 || code === 429 || code >= 500;
 
@@ -67,31 +71,35 @@ export async function askGemini(p: {
       headers: { "Content-Type": "application/json", "x-goog-api-key": p.key },
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: p.system }] },
-        // ⚠️ הקטעים לפני השאלה. מודל שמקבל קודם שאלה ואז מקור נוטה לענות
-        // מתוך מה שהוא כבר "יודע" ולהשתמש במקור כאישור; הסדר ההפוך מייצר
-        // תשובה שנשענת על המקור.
-        // ⚠️ ההיסטוריה לפני ההקשר והשאלה, וכתורות אמיתיות ולא כטקסט
-        // מודבק. מודל שמקבל שיחה כפסקה אחת מתייחס אליה כציטוט; תורות
-        // נפרדות הן מה שגורם לו לזכור מה כבר נשאל.
+        // ⚠️ The passages before the question. A model that gets the question
+        // first and then a source tends to answer from what it already "knows"
+        // and use the source as confirmation; the reverse order produces an
+        // answer that leans on the source.
+        // ⚠️ The history before the context and the question, and as real turns,
+        // not pasted text. A model that gets a conversation as one paragraph
+        // treats it as a quote; separate turns are what make it remember what
+        // was already asked.
         contents: [
           ...p.history.map((t) => ({ role: t.role, parts: [{ text: t.text }] })),
           { role: "user", parts: [{ text: p.userText }] },
         ],
         generationConfig: {
           temperature: 0.3,
-          // ⚠️ 2048 ולא פחות. אסימוני החשיבה נספרים לתוך התקציב הזה,
-          // ובמדידה אמיתית הם היו 505 מול תשובה של 154. הצעתי קודם
-          // להוריד ל-1000 — זה היה מקצץ את התשובה באמצע ומחזיר
-          // MAX_TOKENS ריק, כלומר שובר במקום לחסוך. הידית הנכונה היא
-          // תקציב החשיבה למטה, לא הגג.
+          // ⚠️ 2048 and no less. Thinking tokens count toward this budget,
+          // and in a real measurement they were 505 against a 154-token
+          // answer. I earlier proposed lowering it to 1000 — that would have
+          // cut the answer mid-way and returned an empty MAX_TOKENS, i.e.
+          // broken things instead of saving. The right knob is the thinking
+          // budget below, not the ceiling.
           maxOutputTokens: 2048,
           ...thinking,
         },
       }),
     });
 
-  // ⚠️ הניסיונות נרשמים ליומן: ניסיון שני שהצליח אינו נראה בתשובה, והוא
-  // בדיוק האיתות שגוגל לא יציבה — לפני שהמשפחה מרגישה בזה.
+  // ⚠️ Attempts go into the log: a second attempt that succeeded isn't visible
+  // in the response, and it is exactly the signal that Google is unstable —
+  // before the family feels it.
   const tr = p.trace?.gemini;
   try {
     res = await call();
@@ -108,13 +116,15 @@ export async function askGemini(p: {
   }
 
   if (!res.ok) {
-  // גוף התשובה של גוגל עלול לשקף בחזרה חלקים מהבקשה, ולכן לא הוחזר
-  // כלל — אבל "400" בלי סיבה אינו ניתן לאבחון, וזו הייתה נפילה שקטה
-  // בפני עצמה: העברנו סבב שלם בלי לדעת איזה שדה נדחה.
+  // Google's response body may echo back parts of the request, so it wasn't
+  // returned at all — but a "400" with no reason can't be diagnosed, and that
+  // was a silent failure of its own: we spent a whole round without knowing
+  // which field was rejected.
   //
-  // מוחזר **רק** error.message מהמבנה של גוגל — משפט על הבקשה, לא
-  // תוכן שלה — חתוך ל-300 תווים, ואחרי סינון של כל מה שנראה כמו
-  // מפתח. אם המבנה אינו כצפוי, לא מוחזר דבר.
+  // **Only** error.message from Google's structure is returned — a sentence
+  // about the request, not its content — cut to 300 characters, and after
+  // scrubbing anything that looks like a key. If the structure isn't as
+  // expected, nothing is returned.
     return failWith(502, {
       error: "upstream_error",
       status: res.status,
@@ -130,8 +140,8 @@ export async function askGemini(p: {
   return { data: await res.json().catch(() => null) };
 }
 
-// מודלים חדשים מחזירים כמה חלקים, וחלקם אינם טקסט (למשל "מחשבה").
-// לקיחת parts[0] בלבד החזירה ריק על תשובה תקינה לחלוטין.
+// Newer models return several parts, and some aren't text (e.g. a "thought").
+// Taking only parts[0] returned empty on a perfectly valid answer.
 export function readAnswer(data: any): { raw: string; finishReason: string | null; candidates: number } {
   const candidate = data?.candidates?.[0];
   const raw = (candidate?.content?.parts ?? [])
@@ -146,31 +156,35 @@ export function readAnswer(data: any): { raw: string; finishReason: string | nul
   };
 }
 
-// ── מדידה, כדי להפסיק לנחש ────────────────────────────────────────
+// ── Measurement, to stop guessing ───────────────────────────────────
 //
-// עלות ההודעה, יחס קלט/פלט, וכמה מהקלט הגיע מקאש — כל אלה היו עד כה
-// הערכה שלי מתוך שתי מחרוזות שמדדתי. גוגל מחזירה את המספרים האמיתיים
-// ב-usageMetadata, וההערכה עלתה לנו כבר פעם אחת בפי עשרים.
+// The message's cost, the input/output ratio, and how much of the input came
+// from cache — until now all of these were my estimate from two strings I
+// measured. Google returns the real numbers in usageMetadata, and the estimate
+// has already been off by a factor of twenty once.
 //
-// ⚠️ **עודכן 10.09: נשמר במסד, ובאישור גיא.** ההערה כאן אמרה קודם
-// "לא נשמר", והנימוק היה נכון: לוג שימוש לכל שיחה הוא מסלול קצר
-// לדליפת תוכן.
+// ⚠️ **Updated 10.09: stored in the database, with Guy's approval.** This
+// comment used to say "not stored", and the reasoning was right: a usage log
+// per conversation is a short path to leaking content.
 //
-// מה שהשתנה הוא **המבנה, לא הרצון**. ב-044 נשמרות ספירות בלבד; טקסט
-// השאלה נשמר רק כשטים לא ידע לענות, ואין מזהה שיחה כלל. כלומר אין
-// דרך לקשר ספירה לתוכן או לאדם — וזה מה שהפך את זה למותר.
+// What changed is **the structure, not the intent**. In 044 only counts are
+// stored; the question text is stored only when Tim couldn't answer, and there
+// is no conversation id at all. So there is no way to link a count to content
+// or to a person — and that is what made it permissible.
 //
-// ⚠️ ולעולם לא מוצג למבקרת.
+// ⚠️ And it is never shown to the visitor.
 export function readUsage(data: any) {
   const u = data?.usageMetadata;
   return u && typeof u === "object"
     ? {
       input: u.promptTokenCount ?? null,
       output: u.candidatesTokenCount ?? null,
-      // הפלט מחויב כולל אסימוני חשיבה, ולכן הם נספרים בנפרד ולא נבלעים.
+      // Output is billed including thinking tokens, so they're counted
+      // separately rather than swallowed.
       thinking: u.thoughtsTokenCount ?? 0,
-      // 0 או null פירושו שהקאש לא נגע. זה מה שמכריע אם קאשינג הקשר שווה
-      // משהו כאן, במקום להסיק את זה מטבלת מחירים.
+      // 0 or null means the cache wasn't touched. This is what decides whether
+      // context caching is worth anything here, instead of inferring it from a
+      // price table.
       cached_input: u.cachedContentTokenCount ?? 0,
     }
     : null;

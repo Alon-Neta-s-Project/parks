@@ -1,12 +1,13 @@
 /**
- * כניסת Supabase ל-tim — הקובץ היחיד כאן שמכיר את Deno.
+ * Supabase entry for tim — the only file here that knows about Deno.
  *
- * ⚠️ **הלוגיקה חיה ב-apps/server/src/tim/, והשרת מריץ אותה ישירות.**
- * Supabase מקבל קובץ אחד שנבנה מהכניסה הזו ומהלוגיקה יחד (npm run build:edge →
- * apps/server/dist/edge/tim/index.ts), כך שיש מקור אחד לשניהם — ולא עותק
- * שנשכח לעדכן. ב-Supabase: quick-worker.
+ * ⚠️ **The logic lives in apps/server/src/tim/, and the server runs it directly.**
+ * Supabase gets a single file built from this entry and the logic together
+ * (npm run build:edge → apps/server/dist/edge/tim/index.ts), so there's one
+ * source for both — not a copy someone forgets to update. In Supabase: quick-worker.
  *
- * ⚠️ עד המעבר (שלב 4 במסמך הרפקטור) הייצור עונה מכאן. אחריו הקובץ נמחק.
+ * ⚠️ Until the cutover (step 4 in the refactor doc) production answers from
+ * here. After it, this file is deleted.
  */
 import { handle, logged } from "../tim/index";
 
@@ -15,6 +16,6 @@ declare const Deno: {
   env: { toObject(): Record<string, string | undefined> };
 };
 
-// ⚠️ אותה שורת יומן כמו ב-Node וב-Netlify (tim/log.ts), ובה נתפסת חריגה — הדפדפן
-// מקבל מזהה בקשה, לא את הודעת החריגה.
+// ⚠️ The same log line as in Node and Netlify (tim/log.ts), and it catches
+// exceptions — the browser gets a request ID, not the exception message.
 Deno.serve((req) => logged(req, { platform: "supabase", route: "/tim" }, (r, host) => handle(r, Deno.env.toObject(), host)));

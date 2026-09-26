@@ -1,11 +1,11 @@
--- where-are-we.sql — "איפה אנחנו?" בשאילתה אחת.
+-- where-are-we.sql — "איפה אנחנו?" ("where are we?") in one query.
 --
--- להדביק ל-Supabase SQL Editor ולהריץ. קוראת בלבד — לא משנה כלום, אפשר
--- להריץ שוב ושוב.
+-- Paste into the Supabase SQL Editor and run. Read-only — changes nothing, can
+-- be run again and again.
 --
--- שום דבר כאן לא מניח שהטבלאות קיימות: הספירות עוברות דרך query_to_xml,
--- כי "from experience" על טבלה חסרה מפיל את השאילתה כולה בזמן ניתוח —
--- כלומר בדיוק במצב שהיא נועדה לאבחן.
+-- Nothing here assumes the tables exist: the counts go through query_to_xml,
+-- because "from experience" on a missing table fails the whole query at parse time —
+-- that is, in exactly the state it is meant to diagnose.
 
 with
 c(name, n) as (
@@ -17,9 +17,9 @@ c(name, n) as (
   from (values ('experience'), ('park'), ('land'), ('profile'), ('trip'),
                ('conversation'), ('message'), ('knowledge_doc'), ('trip_member')) v(name)
 ),
--- ⚠️ שם הטבלה הוא חלק מהשורה ולא קבוע. קודם כל הספירות היו על
--- experience, וספירת קטעי ידע דרשה CTE שני שמעתיק את אותה הגנה של
--- query_to_xml — שתי הגנות זהות נפרדות זו הצורה שבה אחת מהן נשכחת.
+-- ⚠️ The table name is part of the row and not a constant. Previously all counts were on
+-- experience, and counting knowledge chunks needed a second CTE copying the same
+-- query_to_xml guard — two separate identical guards is how one of them gets forgotten.
 x(k, n) as (
   select v.k,
          case when to_regclass('public.' || v.tbl) is null then null
@@ -47,15 +47,15 @@ mig(n, ok) as (values
   ( 3, to_regclass('public.knowledge_doc') is not null),
   ( 4, to_regclass('public.profile') is not null),
   ( 5, to_regclass('public.conversation') is not null),
-  -- ⚠️ **ספירה הוחלפה בכלל.** כאן היה `count(*) >= 29`, ומיגרציה 035
-  -- הורידה מדיניות אחת בכוונה — ולכן הגלאי דיווח ❌ על מסד תקין. זו
-  -- הפעם העשירית שציפייה קפואה נקראת ככשל בפרויקט הזה, והפעם היא גם
-  -- הענישה על **תיקון אבטחה**.
+  -- ⚠️ **The count was replaced entirely.** This used to be `count(*) >= 29`, and migration 035
+  -- dropped one policy on purpose — so the detector reported ❌ on a healthy database. That is
+  -- the tenth time a frozen expectation is read as a failure in this project, and this time it also
+  -- punished **a security fix**.
   --
-  -- שני הכללים שבאמת חשובים, ושניהם עומדים בעצמם:
-  --   א. RLS פעילה על כל טבלה ב-public. טבלה בלעדיה פתוחה לגמרי.
-  --   ב. הטבלאות הפרטיות אינן נגישות בלי זהות — כל מדיניות עליהן
-  --      חייבת להיות מותנית ב-auth.uid() או ב-is_admin().
+  -- The two rules that actually matter, and both stand on their own:
+  --   a. RLS enabled on every table in public. A table without it is fully open.
+  --   b. The private tables are not reachable without an identity — every policy on them
+  --      must be conditioned on auth.uid() or is_admin().
   ( 6, (select count(*) = 0 from pg_class c
           join pg_namespace n on n.oid = c.relnamespace
          where n.nspname = 'public' and c.relkind = 'r'
@@ -83,9 +83,9 @@ mig(n, ok) as (values
         and pg_get_constraintdef(oid) like '%na%'))),
   (15, (select exists (select 1 from information_schema.columns
         where table_schema='public' and table_name='trip' and column_name='park_days'))),
-  -- לא לפי המחרוזת 'express': היא מוכלת גם ב-'express_pass' של אוצר המילים
-  -- הישן, וזה החזיר ✅ על מסד שלא הריץ את המיגרציה. הסימן החד-משמעי הוא
-  -- שהעמודה הפכה ל-nullable.
+  -- Not by the string 'express': it is also contained in 'express_pass' of the old
+  -- vocabulary, and that returned ✅ on a database that had not run the migration. The unambiguous sign is
+  -- that the column became nullable.
   (16, (select exists (select 1 from information_schema.columns
         where table_schema='public' and table_name='experience'
           and column_name='skip_line_system' and is_nullable='YES'))),
@@ -95,49 +95,49 @@ mig(n, ok) as (values
   (18, to_regclass('public.api_call') is not null),
   (19, (select exists (select 1 from information_schema.columns
         where table_schema='public' and table_name='experience' and column_name='status_note'))),
-  -- 020 ו-021 שתיהן יוצרות check_rate_limit. ההבדל אינו בשם אלא בחתימה:
-  -- 020 מחזירה בוליאני משלושה ארגומנטים, 021 טקסט מארבעה. בדיקה לפי שם
-  -- בלבד הייתה מדווחת ✅ על מסד שאין בו גדר יומי כלל.
+  -- 020 and 021 both create check_rate_limit. The difference is not in the name but in the signature:
+  -- 020 returns a boolean from three arguments, 021 text from four. A check by name
+  -- alone would report ✅ on a database with no daily limit at all.
   (20, (select exists (select 1 from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
         where ns.nspname='public' and p.proname='check_rate_limit'))),
-  -- ⚠️ 021 נזהתה קודם לפי חתימה של ארבעה ארגומנטים — וזו בדיוק החתימה
-  -- ש-026 מסירה כדי לסגור את הפרצה. כלומר הגלאי היה מדווח שמיגרציה
-  -- **חסרה** אחרי שסגרנו את החור, ומי שהיה מריץ אותה שוב היה פותח אותו
-  -- מחדש. גלאי חייב למדוד את מה שהמיגרציה **הביאה**, לא את הצורה שהיא
-  -- לבשה: מה ש-021 הביאה הוא הגדר היומי הגלובלי.
+  -- ⚠️ 021 was previously identified by a four-argument signature — and that is exactly the signature
+  -- 026 removes to close the loophole. That is, the detector would report the migration as
+  -- **missing** after we closed the hole, and whoever ran it again would reopen
+  -- it. A detector must measure what the migration **brought**, not the shape it
+  -- took: what 021 brought is the global daily limit.
   (21, (select exists (select 1 from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
         where ns.nspname='public' and p.proname='rate_limit_daily_cap'))),
   (22, (select exists (select 1 from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
         where ns.nspname='public' and p.proname='estimated_cost_per_message'))),
-  -- לא לפי קיום העמודות החדשות בלבד: 023 גם מורידה את השק, וזה החלק
-  -- שאפשר לשכוח. שני התנאים יחד הם המיגרציה.
+  -- Not by the existence of the new columns alone: 023 also drops the bag, and that is the part
+  -- that can be forgotten. The two conditions together are the migration.
   (23, (select exists (select 1 from information_schema.columns
           where table_schema='public' and table_name='experience'
             and column_name='max_speed_kmh')
         and not exists (select 1 from information_schema.columns
           where table_schema='public' and table_name='experience'
             and column_name='intensity_factors'))),
-  -- ⚠️ לא לפי format_type. הפלט שלו תלוי ב-search_path: אצלנו הוא
-  -- 'extensions.vector(1536)' ובסופאבייס, ששמה את extensions בנתיב,
-  -- הוא 'vector(1536)'. הגלאי דיווח ❌ על מסד שהמיגרציה רצה בו בהצלחה.
-  -- זה הגלאי השלישי שלי שנשבר על אותו דבר. atttypmod הוא הממד עצמו,
-  -- והוא אינו תלוי בשום נתיב.
+  -- ⚠️ Not by format_type. Its output depends on search_path: here it is
+  -- 'extensions.vector(1536)' and on Supabase, which puts extensions on the path,
+  -- it is 'vector(1536)'. The detector reported ❌ on a database where the migration ran successfully.
+  -- This is the third detector of mine that broke on the same thing. atttypmod is the dimension itself,
+  -- and it does not depend on any path.
   (24, (select t.typname = 'vector' and a.atttypmod = 1536
         from pg_attribute a join pg_type t on t.oid = a.atttypid
         where a.attrelid = to_regclass('public.knowledge_chunk')
           and a.attname = 'embedding')),
-  -- ⚠️ שני תנאים, לא אחד: 025 גם מוסיפה טקסונומיה וגם משחררת את
-  -- embedding_model מ-NOT NULL. בלי השני הטעינה נעצרת, ובדיקה שרואה רק
-  -- את הראשון הייתה מדווחת ✅ על מסד שלא ניתן לטעון אליו.
+  -- ⚠️ Two conditions, not one: 025 both adds taxonomy and releases
+  -- embedding_model from NOT NULL. Without the second, loading stops, and a check that sees only
+  -- the first would report ✅ on a database that cannot be loaded into.
   (25, (select exists (select 1 from information_schema.columns
           where table_schema='public' and table_name='knowledge_doc'
             and column_name='source_urls')
         and exists (select 1 from information_schema.columns
           where table_schema='public' and table_name='knowledge_chunk'
             and column_name='embedding_model' and is_nullable='YES'))),
-  -- 🔴 026 סוגרת פרצה, ולכן היא נבדקת כהיעדר ולא כנוכחות: **אסור** שתהיה
-  -- גרסה של check_rate_limit עם יותר מארגומנט אחד. גרסה כזו מוענקת
-  -- ל-anon ומאפשרת לשלוח גג משלך — כלומר הפרצה חוזרת בשקט.
+  -- 🔴 026 closes a loophole, so it is checked as an absence and not a presence: there must **never** be
+  -- a version of check_rate_limit with more than one argument. Such a version is granted
+  -- to anon and lets the caller send their own cap — that is, the loophole silently returns.
   (26, (select exists (select 1 from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
           where ns.nspname='public' and p.proname='check_rate_limit' and p.pronargs = 1)
         and not exists (select 1 from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
@@ -146,47 +146,47 @@ mig(n, ok) as (values
           where ns.nspname='public' and p.proname='ingest_set_embedding'))),
   (28, (select exists (select 1 from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
           where ns.nspname='public' and p.proname='match_knowledge'))),
-  -- ⚠️ הכלי של טים. בלעדיו הוא עונה על מתקנים מהאימון שלו — נתונים
-  -- שעשויים להיות ישנים בשנתיים ואין להם תאריך אימות.
+  -- ⚠️ Tim's tool. Without it he answers about rides from his training — data
+  -- that may be two years old and has no verification date.
   (29, (select exists (select 1 from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
           where ns.nspname='public' and p.proname='find_experiences'))),
-  -- ⚠️ 030 מתקנת באג בגוף הפונקציה, ולא מוסיפה אובייקט חדש — ולכן
-  -- הנוכחות של find_experiences אינה מבדילה בין 029 ל-030. הגלאי קורא
-  -- את הגוף עצמו ומחפש את המילה שקיימת רק בגרסה המתוקנת.
+  -- ⚠️ 030 fixes a bug in the function body and does not add a new object — so
+  -- the presence of find_experiences does not distinguish 029 from 030. The detector reads
+  -- the body itself and looks for the word that exists only in the fixed version.
   (30, (select pg_get_functiondef(p.oid) like '%regexp_split_to_table%'
         from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
         where ns.nspname='public' and p.proname='find_experiences')),
   (31, (select to_regclass('public.alias_candidate') is not null)),
-  -- ⚠️ 032 מחליפה את גוף alias_add ואינה מוסיפה אובייקט, ולכן הגלאי
-  -- קורא את הגוף — כמו 030. נוכחות הפונקציה אינה מבדילה בין הגרסאות.
+  -- ⚠️ 032 replaces the body of alias_add and adds no object, so the detector
+  -- reads the body — like 030. The presence of the function does not distinguish between the versions.
   (32, (select pg_get_functiondef(p.oid) like '%from park p%'
         from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
         where ns.nspname='public' and p.proname='alias_add')),
-  -- ⚠️ הטריגר עצמו ולא הפונקציה שלו. פונקציה שקיימת ואינה מחוברת
-  -- לטבלה נראית זהה לטריגר שעובד — וזו בדיוק ההבחנה שהמיגרציה הזו
-  -- קיימת בשבילה.
+  -- ⚠️ The trigger itself, not its function. A function that exists and is not attached
+  -- to the table looks identical to a trigger that works — and that is exactly the distinction this migration
+  -- exists for.
   (33, (select exists (select 1 from pg_trigger
           where tgrelid = to_regclass('public.knowledge_chunk')
             and tgname = 'knowledge_chunk_content_changed'
             and not tgisinternal))),
-  -- ⚠️ האילוץ **וגם** היעדר ה-NOT NULL. אילוץ שהותקן על עמודה שעדיין
-  -- NOT NULL DEFAULT '{}' נראה מותקן ואינו פותר כלום — ההבחנה בין
-  -- "לא נשאל" ל"אין" נמחקת לפני שהאילוץ בכלל נבדק.
+  -- ⚠️ The constraint **and also** the absence of NOT NULL. A constraint installed on a column that is still
+  -- NOT NULL DEFAULT '{}' looks installed and solves nothing — the distinction between
+  -- "not asked" and "none" is erased before the constraint is even checked.
   (34, (select exists (select 1 from pg_constraint
           where conname = 'trip_member_sensitivities_vocab')
         and not (select attnotnull from pg_attribute
                   where attrelid = to_regclass('public.trip_member')
                     and attname = 'sensitivities'))),
-  -- ⚠️ היעדר מדיניות פתוחה **וגם** RLS פעילה. טבלה בלי RLS פתוחה
-  -- לגמרי, ומחיקת המדיניות האחרונה ממנה אינה סוגרת דבר.
+  -- ⚠️ The absence of an open policy **and also** RLS enabled. A table without RLS is fully
+  -- open, and deleting its last policy closes nothing.
   (35, (select not exists (select 1 from pg_policies
           where schemaname='public' and tablename='experience_source'
             and cmd in ('SELECT','ALL')
             and coalesce(qual,'') not like '%is_admin%')
         and (select relrowsecurity from pg_class
               where oid = to_regclass('public.experience_source')))),
-  -- ⚠️ אותה תבנית, מקום שני. טבלאות הידע נשאו source_url, submitted_by
-  -- ו-embedding, וכולן היו קריאות לאנונימי.
+  -- ⚠️ Same pattern, second place. The knowledge tables carried source_url, submitted_by
+  -- and embedding, and all of them were readable by anonymous users.
   (36, (select not exists (select 1 from pg_policies
           where schemaname='public'
             and tablename in ('knowledge_doc','knowledge_chunk')
@@ -195,19 +195,19 @@ mig(n, ok) as (values
         and (select bool_and(relrowsecurity) from pg_class
               where oid in (to_regclass('public.knowledge_doc'),
                             to_regclass('public.knowledge_chunk'))))),
-  -- ⚠️ קיום הפונקציה **וגם** שהגוף באמת קורא לה. פונקציית גג שקיימת
-  -- ואינה נקראת נראית מותקנת ואינה מגינה על דבר — וזה בדיוק מה שקרה
-  -- ב-021.
+  -- ⚠️ The function exists **and also** the body actually calls it. A cap function that exists
+  -- and is not called looks installed and protects nothing — and that is exactly what happened
+  -- in 021.
   (37, (select exists (select 1 from pg_proc p join pg_namespace ns on ns.oid=p.pronamespace
           where ns.nspname='public' and p.proname='rate_limit_bucket_daily_cap')
         and (select pg_get_functiondef(p.oid) like '%rate_limit_bucket_daily_cap%'
                from pg_proc p join pg_namespace ns on ns.oid=p.pronamespace
               where ns.nspname='public' and p.proname='check_rate_limit')))
 ),
--- ⚠️ הסה"כ נספר מרשימת הגלאים ואינו נכתב כמספר. "32" היה כתוב כאן
--- ביד, ולכן הוספת הגלאי ה-33 הדליקה ❌ על מסד תקין לגמרי — הפעם
--- השביעית שציפייה קפואה מדווחת ככשל. עכשיו הוספת גלאי מעדכנת את
--- הסה"כ מעצמה.
+-- ⚠️ The total is counted from the list of detectors and is not written as a number. "32" was written here
+-- by hand, so adding the 33rd detector lit ❌ on a perfectly healthy database — the
+-- seventh time a frozen expectation reports as a failure. Now adding a detector updates
+-- the total by itself.
 g(passed, total, missing) as (
   select count(*) filter (where ok),
          count(*),
@@ -247,9 +247,9 @@ report(ord, "מה", "מצב") as (
               else passed || ' מתוך ' || total || ' ❌  — חסרות: ' || missing end from n
   union all
   select 2, 'מבנה',
-         -- ⚠️ 20 ולא 19: מיגרציה 027 הוסיפה את ingest_key. גלאי שנשאר על
-              -- המספר הישן מדווח ❌ על מסד תקין, וזה בדיוק סוג הדיווח שגורם
-              -- לחפש תקלה שלא קיימת.
+         -- ⚠️ 20, not 19: migration 027 added ingest_key. A detector that stayed on
+              -- the old number reports ❌ on a healthy database, and that is exactly the kind of report that sends you
+              -- looking for a fault that does not exist.
               case when tables = 21 then '21 טבלאות ✅'
               when tables = 20 then '20 טבלאות — חסרה alias_candidate, לא הורץ קובץ 031 ❌'
               when tables = 19 then '19 טבלאות — חסרה ingest_key, לא הורץ קובץ 027 ❌'
@@ -258,17 +258,17 @@ report(ord, "מה", "מצב") as (
               else tables || ' טבלאות מתוך 21 ❌' end from n
   union all
   select 3, 'הרשאות (RLS)',
-         -- ⚠️ נמדד כ"כמה טבלאות **בלי** RLS", ולא כמה מדיניות יש.
-         -- מספר מדיניות עולה ויורד עם כל תיקון; טבלה בלי RLS היא
-         -- תמיד באג.
+         -- ⚠️ Measured as "how many tables **without** RLS", not how many policies there are.
+         -- The number of policies goes up and down with every fix; a table without RLS is
+         -- always a bug.
          case when policies = 0 then 'כל הטבלאות עם RLS ✅'
               else policies || ' טבלאות בלי RLS ❌' end from n
   union all
   select 4, 'התוכן — מתקנים',
-         -- ⚠️ **מדווח, לא משווה למספר קפוא.** מספר השורות משתנה בכל מנת
-              -- תוכן, וגלאי שנשאר על הישן מדווח ⚠️ על מסד תקין ושולח לחפש
-              -- תקלה שאינה קיימת. זה קרה כאן חמש פעמים. הבדיקה שהטעינה
-              -- הושלמה יושבת בקובץ התוכן עצמו, שם יש עם מה להשוות.
+         -- ⚠️ **Reported, not compared to a frozen number.** The row count changes with every content
+              -- batch, and a detector left on the old one reports ⚠️ on a healthy database and sends you looking for
+              -- a fault that does not exist. This happened here five times. The check that the load
+              -- completed sits in the content file itself, where there is something to compare against.
               case when experience is null then 'הטבלה לא קיימת ❌'
               when experience = 0 then 'ריק ❌ — לא הורץ קובץ התוכן'
               else experience || ' מתקנים' end from n
@@ -282,25 +282,25 @@ report(ord, "מה", "מצב") as (
   select 6, 'שם עברי לכל מתקן',
          case when experience is null or experience = 0 then 'אין תוכן עדיין'
               when he_bad = 0 then 'לכולם יש ✅'
-              -- ⚠️ פער תוכן אמיתי, לא גלאי ישן: מפגשי הדמויות שנוספו
-              -- ב-v7_10 הגיעו בלי שם עברי.
+              -- ⚠️ A real content gap, not a stale detector: the character meet-and-greets added
+              -- in v7_10 arrived without a Hebrew name.
               else he_bad || ' בלי שם עברי ❌ — פער תוכן' end from n
   union all
   select 7, 'גובה — שלושת המצבים',
          case when experience is null or experience = 0 then 'אין תוכן עדיין'
-              -- ⚠️ **הכלל הוא h_null = 0, לא הפילוח.** כמה מתקנים יש
-              -- מגבלה וכמה אין זה תיאור שמשתנה עם התוכן; מה שאסור הוא
-              -- מתקן שגובהו לא נבדק, כי NULL אינו "מתאים לכל המשפחה".
+              -- ⚠️ **The rule is h_null = 0, not the breakdown.** How many rides have a
+              -- restriction and how many do not is a description that changes with the content; what is forbidden is
+              -- a ride whose height was not checked, because NULL is not "suitable for the whole family".
               when h_null = 0
                 then h_pos || ' עם מגבלה · ' || h_zero || ' בלי · 0 לא נבדקו ✅'
               else h_null || ' מתקנים שגובהם לא נבדק ❌' end from n
   union all
   select 8, 'gets_wet',
          case when experience is null or experience = 0 then 'אין תוכן עדיין'
-              -- ⚠️ **הכלל הוא שאין NULL.** 'na' הוא מופע — השאלה אינה
-              -- חלה, וזו תשובה. NULL הוא "לא נבדק". הגלאי הישן ציפה
-              -- ל-66 בדיוק ותיאר את הפער כ"הייצוא כותב תא ריק" — וזה
-              -- התברר כלא נכון: המאסטר כתב N/A והייבוא שלנו זרק אותו.
+              -- ⚠️ **The rule is no NULL.** 'na' is a value — the question does not
+              -- apply, and that is an answer. NULL is "not checked". The old detector expected
+              -- exactly 66 and described the gap as "the export writes an empty cell" — and that
+              -- turned out to be wrong: the master wrote N/A and our import threw it away.
               when wet_null = 0 then wet_na || ' na · 0 לא נבדקו ✅'
               else wet_null || ' מתקנים שלא נבדקו ❌' end from n
   union all
@@ -311,18 +311,18 @@ report(ord, "מה", "מצב") as (
   union all
   select 9.5, 'מוצר דילוג בתור',
          case when experience is null or experience = 0 then 'אין תוכן עדיין'
-              -- ⚠️ מדווח. הכשל האמיתי הוא כיווץ: אם אף שורה אינה NULL,
-              -- מישהו הפך "לא נבדק" ל-'none' בשקט.
+              -- ⚠️ Reported. The real failure is collapse: if no row is NULL,
+              -- someone silently turned "not checked" into 'none'.
               when skip_null = 0 and skip_none = experience
                 then 'כל השורות מסומנות "אין" ❌ — הכיווץ חזר'
               else skip_null || ' לא נבדקו · ' || skip_none || ' נבדקו ואין' end from n
   union all
   select 10, 'אזורים בפארקים (land)',
          case when land is null then 'הטבלה לא קיימת ❌'
-              -- ⚠️ 79 ולא 77. "Park-wide" מופיע בשלושה פארקים, ונספר פעם
-              -- אחת ברשימת השמות הייחודיים. הציפייה כאן אמרה 77 והשתילה
-              -- הצליחה — כלומר הבדיקה דיווחה ⚠️ על מסד תקין לחלוטין.
-              -- ⚠️ מדווח. מספר האזורים משתנה עם התוכן.
+              -- ⚠️ 79, not 77. "Park-wide" appears in three parks, and was counted once
+              -- in the list of unique names. The expectation here said 77 and the seeding
+              -- succeeded — that is, the check reported ⚠️ on a perfectly healthy database.
+              -- ⚠️ Reported. The number of lands changes with the content.
               when land = 0 then 'ריק — האזורים עוד לא נשתלו ⏳'
               else land || ' אזורים ✅' end from n
   union all

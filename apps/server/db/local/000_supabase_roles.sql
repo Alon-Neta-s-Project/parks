@@ -1,11 +1,11 @@
--- 000_supabase_roles — התפקידים ש-Supabase מביאה מראש, ל-Postgres רגיל
+-- 000_supabase_roles — the roles Supabase ships with, for plain Postgres
 -- ────────────────────────────────────────────────────────────────────
--- 📍 מקומית בלבד, לפני ה-baseline, על Postgres שאינו Supabase
--- (npm run db:local-pg). ב-Supabase התפקידים האלה קיימים, והקובץ מיותר.
+-- 📍 Local only, before the baseline, on a Postgres that is not Supabase
+-- (npm run db:local-pg). On Supabase these roles exist, and the file is redundant.
 --
--- ⚠️ **ה-baseline מפנה אליהם בהרשאות ובמדיניות.** בלעדיהם הוא נופל על
--- הראשון שבהם — וזו בדיוק ההוכחה שהוא תלוי ב-Supabase רק בשלושה שמות
--- ובפונקציה אחת (auth.uid(), ב-000_auth_shim.sql).
+-- ⚠️ **The baseline references them in grants and policies.** Without them it fails on
+-- the first of them — and that is exactly the proof that it depends on Supabase only for three names
+-- and one function (auth.uid(), in 000_auth_shim.sql).
 do $$
 begin
   if not exists (select 1 from pg_roles where rolname = 'anon')          then create role anon          nologin; end if;

@@ -1,19 +1,20 @@
 /**
- * המקורות המותרים, מנורמלים.
+ * The allowed origins, normalized.
  *
- * 🔴 **גיא תפס שתי דרכים שבהן השוואה מדויקת נכשלת על ערך שנראה נכון.**
+ * 🔴 **Guy caught two ways an exact comparison fails on a value that looks right.**
  *
- * 1. **סלאש בסוף.** כותרת `Origin` שדפדפן שולח לעולם אינה כוללת אותו.
- *    `ALLOWED_ORIGIN=https://x/` היה חוסם **כל** בקשה אמיתית — והתסמין
- *    הוא CORS, כלומר נראה כמו תקלת רשת ולא כמו הגדרה שגויה.
- * 2. **מקור אחד בלבד.** גרסת הבדיקה יושבת על
- *    `tim-test--<אתר>.netlify.app` — מקור **שונה** מהאתר הציבורי. ערך
- *    יחיד פירושו שאחד מהשניים חסום תמיד.
+ * 1. **Trailing slash.** The `Origin` header a browser sends never includes
+ *    one. `ALLOWED_ORIGIN=https://x/` would have blocked **every** real
+ *    request — and the symptom is CORS, so it looks like a network problem,
+ *    not a misconfiguration.
+ * 2. **Only one origin.** The test build lives on
+ *    `tim-test--<site>.netlify.app` — a **different** origin from the public
+ *    site. A single value means one of the two is always blocked.
  *
- * ⚠️ **וההרחבה הזו מרחיבה את מה שמותר, ולכן היא מצומצמת בכוונה:**
- * פיצול לפי פסיק והשוואה מדויקת לכל אחד. **אין כאן prefix ואין תת־דומיין
- * בכוכבית** — `https://x` שמתאים ל-`https://x.evil.com` הוא בדיוק הכשל
- * שהצמצום הזה קיים כדי למנוע.
+ * ⚠️ **And this change widens what's allowed, so it is deliberately narrow:**
+ * split on commas and compare each one exactly. **No prefix match and no
+ * wildcard subdomain** — `https://x` matching `https://x.evil.com` is exactly
+ * the failure this narrowness exists to prevent.
  */
 export function allowedOrigins(env: Record<string, string | undefined>): string[] {
   return (env.ALLOWED_ORIGIN ?? "")
@@ -25,20 +26,23 @@ export function allowedOrigins(env: Record<string, string | undefined>): string[
 export function corsFor(req: Request, env: Record<string, string | undefined>) {
   const allowed = allowedOrigins(env);
   const origin = req.headers.get("origin");
-  // ⚠️ רשימה ריקה = הסוד לא הוגדר, וזה עדיין `*`. ערך שהוא סלאש בלבד,
-  // או פסיקים בלבד, מתנרמל לרשימה ריקה — כלומר **נפתח**, ולא נסגר.
-  // לכן `diagnose` אומר כמה מקורות נספרו, ולא רק שהסוד קיים.
+  // ⚠️ Empty list = the secret isn't set, and that's still `*`. A value that
+  // is only a slash, or only commas, normalizes to an empty list — i.e. it
+  // **opens**, not closes. That's why `diagnose` reports how many origins
+  // were counted, not just that the secret exists.
   const value = allowed.length === 0 ? "*" : origin && allowed.includes(origin) ? origin : "";
   const h: Record<string, string> = {
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
-    // ⚠️ בלי השורה הזו הדפדפן שולח בקשת בדיקה מקדימה **לפני כל שאלה**,
-    // ומחכה לתשובה לפני שהוא שולח את השאלה עצמה. זה נראה בלוג: לכל POST
-    // יש OPTIONS צמוד. יממה של זיכרון מוחקת את הסבב הזה מכל שאלה שנייה
-    // ואילך.
+    // ⚠️ Without this line the browser sends a preflight request **before
+    // every question**, and waits for the answer before sending the question
+    // itself. It shows in the log: every POST has an OPTIONS right next to
+    // it. A day of caching removes that round trip from the second question
+    // onward.
     //
-    // ⚠️ ומה שזה **אינו**: הרשאה. הדפדפן זוכר את התשובה, לא מדלג על
-    // הבדיקה — שינוי במדיניות ייכנס לתוקף אצל מבקרת קיימת תוך יממה.
+    // ⚠️ And what this **isn't**: a permission. The browser remembers the
+    // answer, it doesn't skip the check — a policy change takes effect for an
+    // existing visitor within a day.
     "Access-Control-Max-Age": "86400",
   };
   if (value) h["Access-Control-Allow-Origin"] = value;
@@ -46,8 +50,9 @@ export function corsFor(req: Request, env: Record<string, string | undefined>) {
 }
 
 /**
- * צעד שאינו יכול להמשיך — והתשובה שהוא היה נותן. `handle` מחזיר אותה כמות
- * שהיא, ולכן הקודים והגופים זהים לאלה שנכתבו פעם בתוך `handle` עצמו.
+ * A step that can't continue — and the response it would have given. `handle`
+ * returns it as is, so the status codes and bodies are identical to the ones
+ * once written inside `handle` itself.
  */
 export type Fail = { fail: { status: number; body: Record<string, unknown> } };
 export const failWith = (status: number, body: Record<string, unknown>): Fail => ({ fail: { status, body } });

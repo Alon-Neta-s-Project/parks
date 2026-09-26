@@ -1,8 +1,8 @@
-# מסד הנתונים של Park Day Companion
+# The Park Day Companion database
 
-מיגרציות מוכנות להרצה. **נבדקו בפועל מול PostgreSQL 16 עם pgvector** — לא רק נכתבו.
+Migrations ready to run. **Actually tested against PostgreSQL 16 with pgvector** — not just written.
 
-## סדר הרצה
+## Run order
 
 ```bash
 psql -v ON_ERROR_STOP=1 -f migrations/001_extensions_and_taxonomy.sql
@@ -11,52 +11,52 @@ psql -v ON_ERROR_STOP=1 -f migrations/003_knowledge.sql
 psql -v ON_ERROR_STOP=1 -f migrations/004_users_trips.sql
 psql -v ON_ERROR_STOP=1 -f migrations/005_conversations.sql
 psql -v ON_ERROR_STOP=1 -f migrations/006_rls.sql
-psql -v ON_ERROR_STOP=1 -f seed/010_reference.sql      # אידמפוטנטי
+psql -v ON_ERROR_STOP=1 -f seed/010_reference.sql      # idempotent
 ```
 
-ב-Supabase: להעתיק לתיקיית `supabase/migrations/` ולהריץ `supabase db push`. `auth.users` ו-`auth.uid()` קיימים שם מראש.
+On Supabase: copy into the `supabase/migrations/` folder and run `supabase db push`. `auth.users` and `auth.uid()` already exist there.
 
-## מה יש כאן
+## What is here
 
-| קובץ | תוכן |
+| File | Contents |
 |---|---|
-| 001 | הרחבות (pgvector, pg_trgm, pgcrypto) + דומיינים משותפים |
-| 002 | שכבת התוכן: destination → resort → park → land → experience + editorial/media/sources |
-| 003 | מאגר הידע הלא-מובנה + `verification_queue` |
+| 001 | Extensions (pgvector, pg_trgm, pgcrypto) + shared domains |
+| 002 | The content layer: destination → resort → park → land → experience + editorial/media/sources |
+| 003 | The unstructured knowledge store + `verification_queue` |
 | 004 | profile, profile_fact, trip, trip_day, plan_item |
 | 005 | conversation, message + `unanswered_questions` |
-| 006 | Row Level Security לכל הטבלאות |
-| seed/010 | יעד, 2 ריזורטים, 7 פארקים |
+| 006 | Row Level Security for all tables |
+| seed/010 | Destination, 2 resorts, 7 parks |
 
-## חמש החלטות עיצוב שכדאי להכיר לפני שנוגעים
+## Five design decisions worth knowing before you touch anything
 
-**1. עמודות למה שמסננים, JSONB למה שרק מציגים.**
-כל שדה ש-`search_experiences` מסננת לפיו הוא עמודה אמיתית עם אינדקס. פילטור על JSONB עובד אבל לא מקבל אינדקס טוב — ובדיוק השדות האלה (אינטנסיביות, גובה, רגישויות) הם מה שמייצר את הערך של המוצר.
+**1. Columns for what we filter on, JSONB for what we only display.**
+Every field `search_experiences` filters on is a real column with an index. Filtering on JSONB works but does not get a good index — and exactly these fields (intensity, height, sensitivities) are what creates the product's value.
 
-**2. `sens_*` נפרדות מ-`intensity`.**
-מתקן יכול להיות `intensity = 1` ובכל זאת בלתי נסבל — סימולטור מבחיל גם בלי מהירות. שאילתת הבדיקה מוכיחה את זה: מסננים למי שרגיש לבחילה, והמתקן בעצימות 1 נפסל בעוד רכבת ההרים בעצימות 4 עוברת. שדות בטיחות ⇒ T1 בלבד.
+**2. `sens_*` are separate from `intensity`.**
+A ride can be `intensity = 1` and still be unbearable — a simulator is nauseating even without speed. The test query proves it: filter for someone sensitive to motion sickness, and the intensity-1 ride is excluded while the intensity-4 roller coaster passes. Safety fields ⇒ T1 only.
 
-**3. `profile_fact` היא שורה לעובדה, לא עמודה לשדה.**
-כל עובדה נושאת `source` (`stated` לעולם לא נדרס על ידי `inferred`), `confidence`, ו-`updated_at`. ה-scope מתבטא **מבנית**: `trip_id` ריק = עובדה על האדם, `trip_id` מלא = עובדה על הנסיעה הזו. בלי ההפרדה הזו הטיול הבא יורש את התאריכים של הקודם. הטבלה קטנה וחסומה, ולכן נטענת במלואה בכל תור — **אין כאן שליפה סמנטית של עובדות על המשתמש.**
+**3. `profile_fact` is a row per fact, not a column per field.**
+Every fact carries `source` (`stated` is never overwritten by `inferred`), `confidence`, and `updated_at`. Scope is expressed **structurally**: empty `trip_id` = a fact about the person, filled `trip_id` = a fact about this trip. Without this separation the next trip inherits the dates of the previous one. The table is small and bounded, so it is loaded in full on every turn — **there is no semantic retrieval of facts about the user here.**
 
-**4. `plan_item.trip_day_id` הוא nullable, ו-`trip_day.park_ids` הוא מערך.**
-הראשון יוצר את מאגר המשאלות ומפריד בין "מה מעניין אותי" ל"מתי אעשה את זה". השני מאפשר park-hopper. `plan_item` לעולם לא מעתיק עובדה מ-`experience` — הכל נקרא דרך המפתח, למעט `overrides` מפורש.
+**4. `plan_item.trip_day_id` is nullable, and `trip_day.park_ids` is an array.**
+The first creates the wishlist and separates "what interests me" from "when I will do it". The second allows park-hopper. `plan_item` never copies a fact from `experience` — everything is read through the key, except an explicit `overrides`.
 
-**5. אין אינדקס ANN על `knowledge_chunk`, בכוונה.**
-מתחת ל-10,000 שורות סריקה מדויקת מהירה יותר מ-HNSW וגם לא מאבדת recall. להוסיף רק לפי התנאים בנספח 6א של מסמך השליפה. `embedding_model` הוא עמודה חובה — **אסור לערבב מודלים באותו אינדקס**, שאילתה שקודדה במודל אחד מול מסמכים באחר מחזירה רעש בלי שום שגיאה שתתריע.
+**5. No ANN index on `knowledge_chunk`, on purpose.**
+Below 10,000 rows an exact scan is faster than HNSW and also loses no recall. Add one only under the conditions in appendix 6a of the retrieval document. `embedding_model` is a required column — **never mix models in the same index**: a query encoded with one model against documents encoded with another returns noise without any error to warn you.
 
-## מה **אין** כאן, ולמה
+## What is **not** here, and why
 
-**אזורים (lands) ומתקנים לא נשתלו.** זה תוכן, וכלל העבודה בפרויקט הוא שתוכן מגיע מנטע ומאומת מול המקורות הרשמיים. שתילת רשימת מתקנים מהידע הכללי של מודל שפה הייתה מכניסה למסד בדיוק את סוג המידע הלא-מאומת שהמוצר קיים כדי לפתור — ובלי `source_url` ובלי `last_verified`, אף אחד לא היה יודע לאתר אותו אחר כך.
+**Lands and rides were not seeded.** That is content, and the working rule in the project is that content comes from Neta and is verified against the official sources. Seeding a ride list from the general knowledge of a language model would put into the database exactly the kind of unverified information the product exists to solve — and without `source_url` and without `last_verified`, no one would be able to track it down later.
 
-הפארקים כן נשתלו כי מבנה הריזורטים הוא עובדה יציבה, לא תוכן משתנה.
+The parks were seeded, because the resort structure is a stable fact, not changing content.
 
-## איך מכניסים תוכן
+## How content gets in
 
-התבנית עברה זמנה. **אין צורך באקסל** — הזרימה היא:
+The template is outdated. **No Excel is needed** — the flow is:
 
-1. **טופס האדמין** (מסך 14 במלאי המסכים) כותב ישירות ל-`experience` ולטבלאות הנלוות. זו הדרך הראשית.
-2. **`apps/server/content/knowledge/*.md`** עם frontmatter → `scripts/ingest.ts` → `knowledge_doc` + `knowledge_chunk`. אידמפוטנטי לפי `id`.
-3. כל רשומה חדשה נכנסת עם `last_verified = null`, ולכן מופיעה מיד ב-`verification_queue` עד שמישהו מאשר אותה.
+1. **The admin form** (screen 14 in the screen inventory) writes directly to `experience` and the related tables. This is the main path.
+2. **`apps/server/content/knowledge/*.md`** with frontmatter → `scripts/ingest.ts` → `knowledge_doc` + `knowledge_chunk`. Idempotent by `id`.
+3. Every new record enters with `last_verified = null`, and therefore appears immediately in `verification_queue` until someone approves it.
 
-`park-day-companion-tim-content-intake-1.md` הוא הקלט הראשון לשני המסלולים האלה. כל שורה שמסומנת שם `[לבדוק]` נכנסת כ-`review_status = 'pending_review'` ואינה מגיעה לאינדקס עד לאישור.
+`park-day-companion-tim-content-intake-1.md` is the first input for both of these paths. Every line marked there `[לבדוק]` ("to check") enters as `review_status = 'pending_review'` and does not reach the index until approved.

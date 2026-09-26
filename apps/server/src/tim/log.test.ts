@@ -4,7 +4,7 @@ import { logged, redact } from "./log";
 import { DEPLOY_STAMP } from "./stamp";
 import { assertEquals, stub, geminiOk, FULL, KEY } from "./test-helpers";
 
-// ── מה שנכתב ליומן, כאובייקטים ──────────────────────────────────────
+// ── What was written to the log, as objects ──────────────────────────
 type Line = Record<string, any>;
 let lines: Line[] = [];
 let raw: string[] = [];
@@ -34,7 +34,7 @@ const run = (body: unknown, env: Record<string, string | undefined> = FULL, ctx 
     (req, host) => handle(req, env, host)).then(async (res) => { await Promise.all(held); return res; });
 };
 
-/** מסד וגוגל שעונים; `gemini` מחליט מה גוגל מחזירה בכל קריאה. */
+/** A database and Google that answer; `gemini` decides what Google returns on each call. */
 const world = (gemini: () => Response, logTurn = () => new Response(null, { status: 204 })) => (url: string) =>
   url.includes("/rpc/check_rate_limit") ? new Response(JSON.stringify("ok"), { status: 200 })
   : url.includes("/rpc/log_turn") ? logTurn()
@@ -43,7 +43,7 @@ const world = (gemini: () => Response, logTurn = () => new Response(null, { stat
     ? new Response(JSON.stringify({ embedding: { values: Array.from({ length: 1536 }, () => 0.01) } }), { status: 200 })
   : new Response("[]", { status: 200 });
 
-// ── שורה אחת לבקשה ───────────────────────────────────────────────────
+// ── One line per request ──────────────────────────────────────────────
 
 test("שורה אחת לבקשה, עם הזמן, השלבים והמודל", async () => {
   const s = stub(world(geminiOk));
@@ -76,7 +76,7 @@ test("מזהה שהמארח נתן (Netlify: context.requestId) הוא המזה�
   assertEquals(lines[0]!.req, "01NETLIFYREQ");
 });
 
-// ── 🔴 פרטיות: אף שורה אינה נושאת תוכן, כתובת או מפתח ────────────────
+// ── 🔴 Privacy: no line carries content, an address or a key ─────────
 
 test("השאלה, התשובה, ה-IP והמפתח — אינם באף שורה", async () => {
   const s = stub(world(geminiOk));
@@ -88,7 +88,7 @@ test("השאלה, התשובה, ה-IP והמפתח — אינם באף שורה"
   }
 });
 
-// ── רמות ─────────────────────────────────────────────────────────────
+// ── Levels ────────────────────────────────────────────────────────────
 
 test("4xx הוא warn, עם הקוד של טים כ-outcome", async () => {
   await run({ question: "" });
@@ -131,7 +131,7 @@ test("גוגל שאינה עונה כלל — error, unreachable", async () => {
   assertEquals([lines[0]!.level, lines[0]!.outcome, lines[0]!.gemini.unreachable], ["error", "upstream_unreachable", true]);
 });
 
-// ── חריגות ───────────────────────────────────────────────────────────
+// ── Exceptions ────────────────────────────────────────────────────────
 
 test("חריגה: error עם שם ומחסנית, והדפדפן מקבל מזהה — לא את ההודעה", async () => {
   const res = await logged(request({ question: "היי" }), { platform: "test", route: "/tim" }, () => {
@@ -159,7 +159,7 @@ test("redact: מפתחות נמחקים, והודעה ארוכה נחתכת ל-2
   assertEquals(redact("plain failure", ["שאלה אחרת לגמרי"]), "plain failure");
 });
 
-// ── יומן התשובות שנכשל — שורה נפרדת, אותו מזהה ──────────────────────
+// ── A failed turn log — a separate line, the same id ─────────────────
 
 test("כתיבה ליומן שנכשלה — שורת warn נפרדת עם אותו req", async () => {
   const s = stub(world(geminiOk, () => new Response("{}", { status: 500 })));
@@ -171,7 +171,7 @@ test("כתיבה ליומן שנכשלה — שורת warn נפרדת עם או�
 });
 
 test("כתיבה ליומן שזרקה — אותה שורה, עם שם השגיאה בלבד", async () => {
-  // ⚠️ fetch אמיתי אינו זורק — הוא מחזיר Promise שנדחה. כך גם כאן.
+  // ⚠️ A real fetch doesn't throw — it returns a rejected Promise. So does this one.
   const real = globalThis.fetch;
   globalThis.fetch = ((u: string | URL | Request) => String(u).includes("/rpc/log_turn")
     ? Promise.reject(new TypeError(`network ${MARKER}`))

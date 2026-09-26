@@ -1,46 +1,46 @@
-# ממתין לאישור — ואין לו מספר
+# Awaiting approval — and it has no number
 
-כל מה שיושב כאן **טרם אושר**, ולכן **אין להריץ אותו**.
+Everything sitting here **has not been approved yet**, and therefore **must not be run**.
 
-## הכלל
+## The rule
 
-> קובץ שממתין לאישור אינו מקבל מספר מיגרציה.
-> **המספר ניתן לו ברגע האישור, והוא סימן האישור.**
+> A file awaiting approval does not get a migration number.
+> **The number is given at the moment of approval, and it is the mark of approval.**
 
-הוצע על ידי קודי, אושר על ידי גיא, 08.09.
+Proposed by Kody, approved by Guy, 08.09.
 
-## למה זה חזק יותר מאצווה מסודרת
+## Why this is stronger than an orderly batch
 
-ההצעה המקורית של גיא הייתה שמה שממתין לאישור לא ייכנס לאותה אצווה עם
-מה שמאושר. זה נכון — **אבל זו הבטחה של מי שמרכיב את האצווה.** היא
-נשענת על כך שלא טעיתי.
+Guy's original proposal was that what awaits approval would not go into the same batch as
+what is approved. That is correct — **but it is a promise by whoever assembles the batch.** It
+relies on my not having made a mistake.
 
-**מספר הוא עובדה שנטע רואה.** קובץ בלי מספר אומר "לא לריצה" בלי שהיא
-צריכה לזכור דבר, ובלי שהיא צריכה לסמוך עליי.
+**A number is a fact Neta sees.** A file without a number says "not for running" without her
+having to remember anything, and without her having to trust me.
 
-🔴 **וזה בדיוק מה שהיה מונע את מה שקרה ב-036:** היא הריצה אותו לפני
-האישור הסופי של גיא **כי הוא נראה מוכן — היה לו מספר.**
+🔴 **And that is exactly what would have prevented what happened with 036:** she ran it before
+Guy's final approval **because it looked ready — it had a number.**
 
-## למה תיקייה ולא סיומת
+## Why a folder and not a suffix
 
-`_pending` בשם הקובץ משאיר אותו באותה תיקייה, ממוין בין הקבצים
-הממוספרים. הוא נראה כמו אחד מהם, וסיומת היא בדיוק סוג הפרט שנעלם
-בהעתקה, בשינוי שם, או במבט מהיר על רשימה ארוכה.
+`_pending` in the file name leaves it in the same folder, sorted among the numbered
+files. It looks like one of them, and a suffix is exactly the kind of detail that disappears
+in a copy, in a rename, or at a quick glance over a long list.
 
-**תיקייה נפרדת מוציאה את הקובץ מהרשימה.** אי אפשר לפספס אותה בטעות.
+**A separate folder takes the file out of the list.** You cannot miss it by accident.
 
-## המעבר
+## The move
 
-באישור: `git mv` לתיקיית `db/migrations/` **עם מספר**, באותו commit
-שמפנה לאישור עצמו. כך רגע האישור ורגע מתן המספר הם אותו רגע בהיסטוריה.
+On approval: `git mv` to the `db/migrations/` folder **with a number**, in the same commit
+that refers to the approval itself. That way the moment of approval and the moment the number is given are the same moment in history.
 
-## נאכף בבדיקה, לא בזיכרון
+## Enforced by a test, not by memory
 
-`apps/web/src/lib/__tests__/migration-numbering.test.ts` מפיל את הבנייה על:
+`apps/web/src/lib/__tests__/migration-numbering.test.ts` fails the build on:
 
-- קובץ `.sql` ב-`db/migrations/` בלי מספר בתחילתו
-- קובץ ב-`pending/` **עם** מספר — כלומר אחד שכבר קיבל את סימן האישור
-  ונשאר כאן
+- a `.sql` file in `db/migrations/` without a number at its start
+- a file in `pending/` **with** a number — that is, one that already received the mark of approval
+  and stayed here
 
-⚠️ כלל שנאכף רק בהערה הוא כלל שתלוי בזיכרון של מי שכותב, וזו בדיוק
-החולשה שההצעה הזו נועדה לסלק.
+⚠️ A rule enforced only in a comment is a rule that depends on the memory of whoever writes, and that is exactly
+the weakness this proposal is meant to remove.

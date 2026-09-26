@@ -155,19 +155,22 @@ export const SYSTEM = `אתה טים, עוזר לתכנון יום בפארקי�
 ${FIT_RULES}`;
 
 /**
- * התאריך של היום, בפארקים.
+ * Today's date, at the parks.
  *
- * 🔴 **נמצא על ידי נטע במסך חי, 08.09.** טים אמר שמתקן "ייפתח ב-24 באוגוסט
- * 2026" — תאריך שכבר עבר. הוא לא טעה בקריאה; **הוא פשוט לא ידע מה היום.**
- * שום מקום בפונקציה לא מסר לו את זה, ולכן כל תאריך שהוא ראה נראה לו עתידי.
+ * 🔴 **Found by Neta on a live screen, 08.09.** Tim said a ride "ייפתח ב-24 באוגוסט
+ * 2026" ("will open on August 24, 2026") — a date already past. He didn't misread
+ * anything; **he simply didn't know what day it was.** Nothing in the function told
+ * him, so every date he saw looked like the future.
  *
- * ⚠️ **שעון אורלנדו ולא UTC.** השרת רץ ב-UTC, והשאלה היא תמיד על פארק
- * בפלורידה. משפחה ששואלת ב-02:00 בלילה שעון ישראל שואלת על אתמול שם, ותשובה
- * לפי UTC הייתה מזיזה את היום קדימה — יום שלם של הבדל על שאלת "פתוח היום".
+ * ⚠️ **Orlando time, not UTC.** The server runs in UTC, and the question is always
+ * about a park in Florida. A family asking at 02:00 Israel time is asking about
+ * yesterday there, and a UTC answer would move the day forward — a whole day off on
+ * an "is it open today" question.
  *
- * 🔴 **ומחושב בכל קריאה, לא פעם אחת.** קבוע ברמת המודול נקבע בהתעוררות
- * הפונקציה ונשאר תקוע שם כל עוד היא חיה. זו בדיוק תבנית "התוכן השתנה
- * וההצהרה נשארה" — רק שהפעם ההצהרה היא התאריך עצמו.
+ * 🔴 **And computed on every call, not once.** A module-level constant is fixed when
+ * the function wakes up and stays stuck there for as long as it lives. That is exactly
+ * the "the content changed and the declaration stayed" pattern — only this time the
+ * declaration is the date itself.
  */
 export function todayLine(now: Date = new Date()): string {
   const today = new Intl.DateTimeFormat("en-CA", {

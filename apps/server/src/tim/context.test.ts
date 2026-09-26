@@ -3,9 +3,10 @@ import { formatChunks, formatExperiences } from "./index";
 import { assertEquals, chunk } from "./test-helpers";
 
 
-// ── השליפה ────────────────────────────────────────────────────────────
-// ⚠️ הסימון בכל קטע מגיע מ-volatility ולא מהטקסט. פסקת סייג בגוף כל
-// מסמך הייתה מקרבת את כולם זה לזה במרחב ה-embedding וכופלת שדה קיים.
+// ── Retrieval ─────────────────────────────────────────────────────────
+// ⚠️ The mark on each chunk comes from volatility, not from the text. A caveat
+// paragraph in the body of every document would pull them all closer together in
+// embedding space and duplicate an existing field.
 
 test("כל קטע מסומן לפי volatility, ולא לפי הטקסט שלו", () => {
   const out = formatChunks([
@@ -18,8 +19,8 @@ test("כל קטע מסומן לפי volatility, ולא לפי הטקסט שלו"
   assertEquals(out.includes("· יציב · נבדק 2026-08-01"), true);
 });
 
-// ⚠️ ברירת המחדל היא לכיוון הבטוח. קטע בלי סימון נאמר בזהירות, לא
-// בביטחון — "לא ידוע" אינו "יציב".
+// ⚠️ The default leans to the safe side. An unmarked chunk is said with caution, not
+// confidence — "unknown" is not "stable".
 test("volatility חסר נקרא כמשתנה ולא כיציב", () => {
   const out = formatChunks([{ content: "x", volatility: null, last_verified: null , authority_tier: "T1" }]);
   assertEquals(out.includes("משתנה"), true);
@@ -31,8 +32,8 @@ test("ערך שאינו באוצר המילים אינו הופך ליציב", (
   assertEquals(out.includes("משתנה"), true);
 });
 
-// ⚠️ שלושת מצבי הגובה, במילים שונות. מודל שמקבל 0 עלול לכתוב
-// "גובה מינימום 0 ס\"מ", וזה בדיוק מה שהכלל אוסר.
+// ⚠️ The three height states, in different words. A model that receives 0 may write
+// "גובה מינימום 0 ס\"מ" ("minimum height 0 cm"), which is exactly what the rule forbids.
 test("שלושת מצבי הגובה נכתבים כשלוש אמירות שונות", () => {
   const base = {
     name: "X", name_he: null, park: "P", land: null, status: "open",
@@ -45,21 +46,23 @@ test("שלושת מצבי הגובה נכתבים כשלוש אמירות שונ
 
   assertEquals(limit.includes('גובה מינימום: 112 ס"מ'), true);
   assertEquals(none.includes("אין מגבלת גובה"), true);
-  // ⚠️ הבדיקה מכוונת לכלל עצמו ולא לתו "0": בשורה יש גם "עוצמה 3" וגם
-  // תאריך אימות, ושניהם מכילים 0 בלי שום קשר לגובה.
+  // ⚠️ The check targets the rule itself, not the character "0": the line also has
+  // "עוצמה 3" ("intensity 3") and a verification date, and both contain 0 with no
+  // connection to height.
   assertEquals(none.includes('0 ס"מ'), false, '0 ס"מ אסור שיגיע למסך');
   assertEquals(none.includes("גובה מינימום"), false, "0 אינו מגבלת גובה");
   assertEquals(unchecked.includes("לא ידוע אם קיימת"), true);
-  // 🔴 ולא "לא ידוע" לבדו — הוא נקרא כ"לא ידוע על מגבלה", כלומר היתר.
+  // 🔴 And not "לא ידוע" ("unknown") alone — it reads as "no known limit", i.e. permission.
   assertEquals(/לא ידוע(?! אם קיימת)/.test(unchecked), false);
-  // ⚠️ ובצעד הבא. "לא בדקנו" לבדו עוצר את הקוראת בלי לומר מה לעשות.
+  // ⚠️ And with a next step. "לא בדקנו" ("we didn't check") alone stops the reader
+  // without saying what to do.
   assertEquals(unchecked.includes("שילוט בכניסה"), true);
-  // ⚠️ ובלי דיווח על עצמנו.
+  // ⚠️ And no report about ourselves.
   assertEquals(unchecked.includes("בדקנו"), false, "אל תדווח על העבודה שלנו");
   assertEquals(unchecked.includes("אין מגבלת גובה"), false);
 });
 
-// ⚠️ fits === null אינו נאמר כ"מתאים". הוא פשוט לא נאמר.
+// ⚠️ fits === null is not said as "מתאים" ("fits"). It is simply not said.
 test("התאמה לא ידועה אינה נאמרת כהתאמה", () => {
   const base = {
     name: "X", name_he: null, park: "P", land: null, status: "open",
@@ -71,15 +74,16 @@ test("התאמה לא ידועה אינה נאמרת כהתאמה", () => {
   assertEquals(formatExperiences([{ ...base, fits: false }]).includes("לא מתאים"), true);
 });
 
-// 🔴 **הבדיקה הזו טענה סטטוס שאינו קיים.**
+// 🔴 **This test asserted a status that doesn't exist.**
 //
-// היא הריצה את Slush Gusher עם `temporarily_closed` — ערך שהייבוא אינו
-// פולט לעולם (אוצר המילים הוא open · closed · check) — וציפתה לניסוח
-// "אינו פתוח כרגע" שכבר הוחלף בהכרעת פולה. כלומר היא אימתה מצב מדומיין
-// מול ניסוח מת. בפועל Slush Gusher נושא `check`.
+// It ran Slush Gusher with `temporarily_closed` — a value the import never emits (the
+// vocabulary is open · closed · check) — and expected the wording "אינו פתוח כרגע"
+// ("not open right now"), which Paula's call had already replaced. So it verified an
+// imaginary state against dead wording. In reality Slush Gusher carries `check`.
 //
-// ⚠️ וזה נחשף רק כשהבדיקות התחילו לרוץ. הן לא רצו כלל: `Deno.serve`
-// נקרא בטעינת המודול ו-`deno test` נפל על הרשאת רשת לפני בדיקה אחת.
+// ⚠️ And this surfaced only when the tests started running. They hadn't run at all:
+// `Deno.serve` was called at module load and `deno test` failed on network permission
+// before a single test.
 test("מתקן שדורש אימות מסומן בניסוח פולה, עם המשפט שלו", () => {
   const out = formatExperiences([{
     name: "Slush Gusher", name_he: null, park: "P", land: null,
@@ -92,8 +96,9 @@ test("מתקן שדורש אימות מסומן בניסוח פולה, עם המ
   assertEquals(out.includes("Check current Disney calendar"), true);
 });
 
-// ⚠️ שלושת הערכים שהייבוא באמת פולט חייבים תג עברי. ערך שנופל לברירת
-// המחדל מגיע למסך כמילה באנגלית — וזה כבר קרה ל-`check`.
+// ⚠️ The three values the import actually emits must have a Hebrew tag. A value that
+// falls to the default reaches the screen as an English word — and that already
+// happened to `check`.
 test("שלושת הסטטוסים של הסכמה מקבלים תג עברי, בלי ברירת מחדל", () => {
   const base = {
     name: "X", name_he: null, park: "P", land: null, status_note: null,
@@ -106,10 +111,10 @@ test("שלושת הסטטוסים של הסכמה מקבלים תג עברי, ב
   }
 });
 
-// 🔴 **ארבעת המצבים של דגל רגישות, וכולם נאמרים.**
+// 🔴 **The four states of a sensitivity flag, and all of them are said.**
 //
-// `"false"` שתק, וטים ענה "אין לי את הנתון לגבי רגישות לחושך במתקן
-// Buzz Lightyear" על עמודה שכתוב בה `false`. הבדיקה הזו לא הייתה קיימת.
+// `"false"` was silent, and Tim answered "I don't have data on darkness sensitivity
+// for Buzz Lightyear" about a column that says `false`. This test didn't exist.
 test("כל אחד מארבעת מצבי הרגישות נאמר במפורש", () => {
   const base = {
     name: "X", name_he: null, park: "P", land: null, status: "open",
@@ -120,13 +125,13 @@ test("כל אחד מארבעת מצבי הרגישות נאמר במפורש", (
   const said = (v: string | null) =>
     formatExperiences([{ ...base, sens_dark: v }]);
 
-  // ⚠️ הליבה: נבדק־ואין אינו שתיקה. הוא הנתון הכי שימושי שיש לנו.
+  // ⚠️ The core: checked-and-none is not silence. It is the most useful data we have.
   assertEquals(said("false").includes("חושך או מקומות סגורים: נבדק — אין"), true);
   assertEquals(said("true").includes("חושך או מקומות סגורים: כן"), true);
   assertEquals(said(null).includes("חושך או מקומות סגורים: לא נבדק"), true);
   assertEquals(said("na").includes("חושך או מקומות סגורים: לא רלוונטי"), true);
 
-  // ⚠️ ארבעת הדגלים תמיד, גם כשמצבם שונה זה מזה.
+  // ⚠️ All four flags, always, even when their states differ from each other.
   const mixed = formatExperiences([{
     ...base, sens_dark: "false", sens_heights: "true",
     sens_loud: "na", sens_strobe: null,
@@ -136,7 +141,7 @@ test("כל אחד מארבעת מצבי הרגישות נאמר במפורש", (
   }
 });
 
-// ⚠️ `undefined` אינו "לא נבדק". מסד בלי 039 אינו מייצר אמירה כלל.
+// ⚠️ `undefined` is not "not checked". A database without 039 produces no statement at all.
 test("דגל שלא הגיע מהמסד אינו נאמר כלא-נבדק", () => {
   const out = formatExperiences([{
     name: "X", name_he: null, park: "P", land: null, status: "open",
@@ -146,10 +151,11 @@ test("דגל שלא הגיע מהמסד אינו נאמר כלא-נבדק", () =
   assertEquals(out.includes("רגישויות"), false);
 });
 
-// 🔴 **מה שידוע נאמר לפני מה שחסר.**
+// 🔴 **What is known is said before what is missing.**
 //
-// Bay Slides נושא תקרה מדודה של 152 ורצפה שלא נבדקה. טים פתח ב"לא
-// נבדקה", ומשפחה שקוראת משפט שנפתח בחסר לא מגיעה לנתון שכן יש.
+// Bay Slides carries a measured ceiling of 152 and a floor that wasn't checked. Tim
+// opened with "לא נבדקה" ("not checked"), and a family reading a sentence that opens
+// with what's missing never reaches the data we do have.
 test("תקרת הגובה נאמרת לפני הרצפה החסרה", () => {
   const out = formatExperiences([{
     name: "Bay Slides", name_he: null, park: "P", land: null, status: "open",
@@ -160,12 +166,13 @@ test("תקרת הגובה נאמרת לפני הרצפה החסרה", () => {
   assertEquals(out.includes("עד 152"), true);
 });
 
-// ⚠️ עוצמה שלא דורגה אינה "עוצמה 0". מתקן בלי דירוג לעולם אינו נכנס
-// לתוצאות של פילטר עוצמה, וגם כאן הוא נאמר כלא-מדורג.
-// 🔴 **אזור ריק הוא "משתנה", ולא שתיקה.**
+// ⚠️ An unrated intensity is not "intensity 0". A ride without a rating never enters
+// the results of an intensity filter, and here too it is said as unrated.
+// 🔴 **An empty land is "varies", not silence.**
 //
-// נטע שאלה על JAMMitors, וטים ענה "המידע לגבי האזור אינו מופיע אצלי"
-// על נתון שנבדק ונכתב במאסטר כ-`N/A` — שמונה אמנים נודדים בלי מקום קבוע.
+// Neta asked about JAMMitors, and Tim answered "the information about the land doesn't
+// appear in what I have" about data that was checked and written in the master as
+// `N/A` — eight roaming performers with no fixed spot.
 test("אזור ריק נאמר כמשתנה, ואינו נשמט", () => {
   const base = {
     name: "JAMMitors", name_he: null, park: "EPCOT", status: "open",
@@ -177,7 +184,7 @@ test("אזור ריק נאמר כמשתנה, ואינו נשמט", () => {
     assertEquals(out.includes("אינו משויך לאזור מוגדר"), true, `${land}`);
     assertEquals(out.includes("N/A"), false, "N/A אינו מגיע למסך");
   }
-  // ⚠️ ואזור אמיתי נשאר כפי שהוא, בלי התג.
+  // ⚠️ And a real land stays as it is, without the tag.
   const real = formatExperiences([{ ...base, land: "World Nature" }]);
   assertEquals(real.includes("World Nature"), true);
   assertEquals(real.includes("אינו משויך"), false);
@@ -207,7 +214,7 @@ test("ההקשר מגיע בשכבות, והרשמי ראשון", () => {
   const community = out.indexOf("[מניסיון מבקרים — לא מאומת]");
   assertEquals(official < ours && ours < community, true, "הסדר אינו לפי סמכות");
 
-  // ⚠️ והתוכן נשאר בשכבה שלו, לא רק הכותרת.
+  // ⚠️ And the content stays in its layer, not just the heading.
   assertEquals(out.indexOf("הפארק נפתח") < out.indexOf("שמעתי שפותחים"), true);
 });
 
@@ -224,8 +231,8 @@ test("שכבה ריקה אינה מופיעה ככותרת בלי תוכן", () 
   assertEquals(out.includes("[מהתוכן שלנו]"), false);
 });
 
-// 🔴 המספור הוא מה שמאפשר כבילת ציטוט (סעיף 3 שלב 6). אם הוא מתאפס
-// בכל שכבה, "קטע 1" מצביע על שלושה דברים שונים.
+// 🔴 The numbering is what makes citation binding possible (section 3, step 6). If it
+// resets per layer, "קטע 1" ("chunk 1") points at three different things.
 test("המספור רץ על פני השכבות ואינו מתאפס", () => {
   const out = formatChunks([chunk("T1", "א"), chunk("T4", "ב"), chunk("T3", "ג")]);
   assertEquals(out.includes("[קטע 1 ·"), true);
@@ -233,8 +240,8 @@ test("המספור רץ על פני השכבות ואינו מתאפס", () => {
   assertEquals(out.includes("[קטע 3 ·"), true);
 });
 
-// ⚠️ הסכמה אומרת not null, אבל ברירת מחדל שקטה היא בדיוק מה שנשבר כאן
-// שוב ושוב. קטע בלי דרגה יורד, ולא עולה ולא נעלם.
+// ⚠️ The schema says not null, but a silent default is exactly what has broken here
+// again and again. A chunk with no tier goes down — it neither rises nor vanishes.
 test("קטע בלי דרגה אינו נעלם ואינו מוצג כמאומת", () => {
   const out = formatChunks([chunk("T1", "רשמי"), chunk(null, "בלי דרגה")]);
   assertEquals(out.includes("בלי דרגה"), true, "הקטע נעלם");

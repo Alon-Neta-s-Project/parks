@@ -26,39 +26,43 @@ export function diagnose(env: Record<string, string | undefined>) {
       ? `קיים · ${v.trim().length} תווים`
       : "חסר";
   }
-  // גם כל שם אחר שהוזרק ושאיני מכיר — שמות בלבד.
+  // Also every other injected name I don't know — names only.
   const others = Object.keys(env).filter((k) => !watched.includes(k)).sort();
-  // ⚠️ מה שבאמת נשלח, ולא מה שהוגדר. אלה שתי שאלות שונות: סוד שלא הגיע
-  // לפונקציה וסוד שהגיע והמודל התעלם ממנו נראים זהים מבחוץ, ורק זה
-  // מפריד ביניהם.
-  // 🔴 **החותם, וזו התשובה ל"איך אדע שזה קרה בכל דיפלוי".**
+  // ⚠️ What is actually sent, not what was configured. Those are two different
+  // questions: a secret that never reached the function and a secret that
+  // arrived and the model ignored look identical from outside, and only this
+  // tells them apart.
+  // 🔴 **The stamp, and this is the answer to "how will I know it happened on
+  // every deploy".**
   //
-  // הפונקציה הזו נדבקת ידנית בסופהבייס. בדיקה בזמן בנייה מאמתת את הרפו
-  // ולא את מה שחי — והפער בין השניים הוא בדיוק הסיכון: הדבקה של קובץ
-  // ישן נראית בדיוק כמו הדבקה של חדש.
+  // This function is pasted by hand into Supabase. A build-time check verifies
+  // the repo, not what is live — and the gap between the two is exactly the
+  // risk: pasting an old file looks exactly like pasting a new one.
   //
-  // ⚠️ החותם נגזר מהניסוח עצמו, ולכן הוא **משתנה כשהניסוח משתנה**.
-  // השוואה בין מה שחוזר מכאן לבין מה שהבנייה מדפיסה עונה על השאלה
-  // בלי לנחש.
+  // ⚠️ The stamp is derived from the wording itself, so it **changes when the
+  // wording changes**. Comparing what comes back from here with what the build
+  // prints answers the question without guessing.
   return {
     known,
     other_names: others,
     sent_to_model: thinkingConfig(env),
-    // 🔴 **"קיים · 32 תווים" אינו אומר שהוא תופס.** `https://x/` קיים
-    // ובאורך תקין, ומנורמל לרשימה של אחד שאף דפדפן לא יתאים לו; `/`
-    // לבדו מתנרמל ל**ריק**, כלומר `*` — פתוח לכול, ונראה מוגדר.
-    // המספר הזה הוא ההבדל בין השניים, והוא נבדק מהסביבה החיה.
+    // 🔴 **"קיים · 32 תווים" ("present · 32 chars") doesn't mean it takes
+    // effect.** `https://x/` is present and of valid length, and normalizes to a
+    // list of one that no browser will match; `/` alone normalizes to
+    // **empty**, i.e. `*` — open to all, while looking configured. This number
+    // is the difference between the two, and it's checked from the live
+    // environment.
     allowed_origins: allowedOrigins(env).length,
     fit_stamp: FIT_STAMP,
-    // ⚠️ **זה החותם שעונה על "האם מה שחי הוא מה שברפו".** `fit_stamp`
-    // עונה רק על "האם בלוק הניסוח נבנה מחדש", וב-25.09 הוא אמר "זהה"
-    // על פונקציה ישנה.
+    // ⚠️ **This is the stamp that answers "is what's live what's in the
+    // repo".** `fit_stamp` only answers "was the wording block rebuilt", and
+    // on 25.09 it said "identical" about an old function.
     deploy_stamp: DEPLOY_STAMP,
   };
 }
 
-// {"diagnose":"models"} — שואל את גוגל אילו מודלים זמינים למפתח הזה.
-// שמות מודלים אינם סוד, והמפתח אינו חוזר בתשובה.
+// {"diagnose":"models"} — asks Google which models are available to this key.
+// Model names aren't secret, and the key doesn't come back in the response.
 export async function listModels(env: Record<string, string | undefined>): Promise<Fail | { current: string; usable: string[] }> {
   const k = env.GEMINI_API_KEY;
   if (!k) return failWith(500, { error: "missing_api_key" });

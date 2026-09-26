@@ -12,13 +12,14 @@ import { logTurn, wasAnswered, type WaitUntil } from "./turn-log";
 import { extractRideName, readHistory } from "./understand";
 
 /**
- * טים — הזרימה של שאלה אחת, מקצה לקצה.
+ * Tim — the flow of one question, end to end.
  *
- *   בדיקות  →  גדר קצב  →  שליפה (במקביל)  →  המודל  →  סינון  →  יומן  →  תשובה
+ *   checks  →  rate limit  →  retrieval (in parallel)  →  model  →  scrub  →  log  →  response
  *
- * ⚠️ **כל צעד כאן הוא קריאה לפונקציה במודול שלו**, וההסברים למה הוא בנוי כך
- * יושבים שם, ליד הקוד. צעד שאינו יכול להמשיך מחזיר `Fail` — בדיוק התשובה
- * שנכתבה פעם כאן — ו-`handle` מחזיר אותה כמות שהיא.
+ * ⚠️ **Every step here is a call to a function in its own module**, and the reasons it
+ * is built the way it is live there, next to the code. A step that can't continue
+ * returns a `Fail` — exactly the response that was once written here — and `handle`
+ * returns it as is.
  */
 /** What the host gives Tim beyond the request and the env. Every field is optional. */
 export interface Host {
@@ -52,7 +53,7 @@ export async function handle(
     return json({ error: "bad_json" }, 400);
   }
 
-  // {"diagnose": true} — לפני כל בדיקה אחרת, כדי שיעבוד גם כשמשהו שבור.
+  // {"diagnose": true} — before any other check, so it works even when something is broken.
   if (body.diagnose) host.trace && (host.trace.outcome = "diagnose");
   if (body.diagnose === true) return json(diagnose(env));
   if (body.diagnose === "models") {
@@ -69,37 +70,40 @@ export async function handle(
   }
   const history = readHistory(body.history);
 
-  // ── גדר קצב — נכשלת סגור (rate-limit.ts) ─────────────────────────────
+  // ── Rate limit — fails closed (rate-limit.ts) ─────────────────────────
   const db = dbAccess(env);
   if (isFail(db)) return reply(db);
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
   const limited = await timed(host.trace, "rate_limit", () => checkRateLimit(db, ip, env.RATE_LIMIT_SALT));
   if (limited) return reply(limited);
 
-  // ⚠️ **שני המקורות שלמטה נופלים רכה, בכוונה, ובניגוד לגדר הקצב.** גדר
-  // שנכשלת חייבת לעצור, כי בלעדיה נקודת הקצה פתוחה. מקור ידע שנכשל אינו
-  // פותח דבר — הוא רק מותיר את טים בלי הנתון, וההוראות שלו כבר אוסרות
-  // עליו להמציא. לכן כישלון כאן מדווח בתשובה ואינו מונע ממנה לצאת.
+  // ⚠️ **The two sources below fail soft, on purpose, unlike the rate limit.** A limit
+  // that fails must stop, because without it the endpoint is open. A knowledge source
+  // that fails opens nothing — it only leaves Tim without the data, and his instructions
+  // already forbid him to make it up. So a failure here is reported in the response
+  // and doesn't stop it from going out.
 
-  // ── המתקנים ──────────────────────────────────────────────────────────
+  // ── The rides ─────────────────────────────────────────────────────────
   //
-  // ⚠️ **עובדה על מתקן נשלפת מהטבלה, לא מחיפוש סמנטי** — ההפרדה שהוגדרה
-  // ב-003: "ערבוב השניים הוא בדיוק הטעות שהארכיטקטורה נועדה למנוע".
-  // "מה גובה המינימום" צריכה את המספר מהשורה, לא את הקטע שנשמע דומה.
+  // ⚠️ **A fact about a ride is read from the table, not from semantic search** — the
+  // separation set in 003: "mixing the two is exactly the mistake the architecture is
+  // meant to prevent". "What's the minimum height" needs the number from the row, not
+  // the passage that sounds similar.
   //
-  // ⚠️ וזה גם מה שמונע מטים לענות מהאימון שלו. הוא "יודע" גבהים מהרשת,
-  // והם עשויים להיות ישנים בשנתיים. כאן הוא מקבל את המספר **שלנו**, עם
-  // תאריך בדיקה.
+  // ⚠️ And this is also what stops Tim from answering from his training. He "knows"
+  // heights from the web, and they may be two years old. Here he gets **our** number,
+  // with the date it was checked.
   const asked = extractRideName(question);
 
   /**
-   * ⚠️ **במקביל, ולא בטור.** שורת המתקן נשלפת מהמסד, והשאלה נשלחת לגוגל
-   * להפוך לווקטור — שתי פעולות שאינן תלויות זו בזו, ושחיכו זו לזו רק
-   * מפני שנכתבו זו אחרי זו. נמדד בלוג: 3–4 שניות לשאלה.
+   * ⚠️ **In parallel, not in series.** The ride row is read from the database, and the
+   * question is sent to Google to be turned into a vector — two operations that don't
+   * depend on each other, and that waited for each other only because they were written
+   * one after the other. Measured in the log: 3–4 seconds per question.
    *
-   * ⚠️ ו-`Promise.all` ולא `allSettled`, מפני ששתיהן כבר נופלות רכות
-   * בפנים ואינן זורקות. הבחירה הזו נכונה רק כל עוד זה נכון — טיפול
-   * שגיאות שיוסר מאחת מהן ישבור את השורה הזו בשקט.
+   * ⚠️ And `Promise.all`, not `allSettled`, because both already fail soft inside and
+   * don't throw. The choice is right only as long as that holds — error handling
+   * removed from either one will break this line silently.
    */
   const [rides, candidates, { chunks, retrieval }] =
     await timed(host.trace, "retrieval", () => Promise.all([
@@ -109,7 +113,7 @@ export async function handle(
     ]));
   if (host.trace) host.trace.candidates = candidates.length;
 
-  // ── הקריאה למודל (gemini.ts) ─────────────────────────────────────────
+  // ── The model call (gemini.ts) ────────────────────────────────────────
   const model = env.GEMINI_MODEL?.trim() || DEFAULT_MODEL;
   const gemini = await timed(host.trace, "gemini", () => askGemini({
     key: key!, model, env, system: SYSTEM, history,
@@ -120,14 +124,15 @@ export async function handle(
   const { data } = gemini;
   const { raw, finishReason, candidates: hadCandidates } = readAnswer(data);
 
-  // 🔴 **שכבת האכיפה.** ההוראות מבקשות מטים לא לחשוף קישורים ומפתחות;
-  // כאן זה נבדק על הפלט בפועל. `scrubbed` אינו ריק רק כשמשהו נתפס, וזה
-  // בדיוק האיתות שמעניין — ניסיון שהצליח לייצר משהו שאסור לצאת.
+  // 🔴 **The enforcement layer.** The instructions ask Tim not to reveal links and keys;
+  // here that is checked on the actual output. `scrubbed` is non-empty only when
+  // something was caught, and that is exactly the signal that matters — an attempt
+  // that managed to produce something that must not go out.
   const { clean: answer, hits: scrubbed } = scrubAnswer(raw);
 
   if (!answer) {
-    // finishReason הוא ההסבר: MAX_TOKENS פירושו שהתקציב נגמר לפני הטקסט,
-    // SAFETY פירושו סינון. בלעדיו "ריק" הוא תשובה בלי סיבה.
+    // finishReason is the explanation: MAX_TOKENS means the budget ran out before the
+    // text, SAFETY means filtering. Without it, "empty" is an answer with no reason.
     return json({
       error: "empty_answer",
       model,
@@ -138,18 +143,18 @@ export async function handle(
 
   const usage = readUsage(data);
 
-  // ⚠️ retrieval מוחזר תמיד. בלעדיו "טים לא יודע" ו"השליפה נפלה" נראים
-  // זהים על המסך — והראשון הוא תשובה, השני הוא תקלה.
-  // ⚠️ `tiers` הוא לבדיקות, לא לממשק. הוא אומר על מה התשובה נשענה,
-  // ובלעדיו "must_cite_tier" בסט הזהב אינו ניתן לאכיפה.
+  // ⚠️ retrieval is always returned. Without it, "Tim doesn't know" and "retrieval
+  // failed" look the same on screen — and the first is an answer, the second a fault.
+  // ⚠️ `tiers` is for tests, not for the UI. It says what the answer leaned on, and
+  // without it "must_cite_tier" in the golden set can't be enforced.
   const tiers = [...new Set(chunks.map((c) => c.authority_tier).filter(Boolean))];
 
-  // ── יומן התשובות (044) ───────────────────────────────────────────
+  // ── The turn log (044) ────────────────────────────────────────────
   //
-  // ⚠️ **best-effort, ולעולם לא על חשבון התשובה.** תשובה למשפחה חשובה
-  // מרישום, ולכן כישלון כאן נבלע: אין throw, אין await ללא גבול, ואין
-  // מצב שבו תקלה במסד מעכבת את מה שמופיע על המסך. שורה שאבדה היא נתון
-  // חסר; תשובה שנתקעה היא מוצר שבור.
+  // ⚠️ **Best-effort, and never at the answer's expense.** An answer to a family matters
+  // more than a record, so a failure here is swallowed: no throw, no unbounded await,
+  // and no case where a database fault delays what appears on screen. A lost row is
+  // missing data; a stuck answer is a broken product.
   //
   const answered = wasAnswered({ rides, chunks, candidates, answer });
   if (host.trace) host.trace.answered = answered;
@@ -164,13 +169,13 @@ export async function handle(
   return json({
     answer, model, usage, retrieval,
     chunks: chunks.length, rides: rides.length, tiers,
-    // 🔴 **האיתות של ניסיון שהצליח.** ריק כמעט תמיד. לא ריק פירושו
-    // שהמודל ייצר משהו שאסור היה לצאת, והמסנן תפס — כלומר מישהו ניסה,
-    // ועד כמה זה הצליח.
+    // 🔴 **The signal of an attempt that worked.** Almost always empty. Non-empty means
+    // the model produced something that must not go out, and the filter caught it —
+    // i.e. someone tried, and how far they got.
     //
-    // ⚠️ **מוחזר ואינו נשמר עדיין.** שמירה דורשת ערך חדש ב-refusal_reason,
-    // ואוצר המילים שם נקבע באישור גיא. בלי אישורו זה נשאר גלוי בתשובה
-    // ובבדיקות בלבד — ולא נכתב למסד בשקט.
+    // ⚠️ **Returned, not yet stored.** Storing it needs a new value in refusal_reason,
+    // and the vocabulary there is set with Guy's approval. Without it, this stays visible
+    // in the response and in tests only — and is not written to the database silently.
     scrubbed,
   });
 }

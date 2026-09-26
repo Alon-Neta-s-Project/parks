@@ -1,37 +1,41 @@
 /**
- * הקטעים, כפי שהם נכנסים להקשר של המודל.
+ * The chunks, as they enter the model's context.
  *
- * ⚠️ **הסימון מגיע מ-volatility ולא מהטקסט.** זה כל הרעיון של סעיף 8:
- * פסקת סייג בגוף כל מסמך הייתה מקרבת את כל המסמכים זה לזה במרחב
- * ה-embedding — ככל שהשאלה כללית יותר כך משקלה של הפסקה המשותפת גדל —
- * וגם כופלת מידע שכבר קיים כשדה. כאן הוא נכתב פעם אחת, לכל קטע, מהשדה.
+ * ⚠️ **The marking comes from volatility, not from the text.** That's the
+ * whole idea of section 8: a caveat paragraph in the body of every document
+ * pulled all documents closer together in embedding space — the more general
+ * the question, the more the shared paragraph weighs — and also duplicated
+ * information that already exists as a field. Here it's written once, per
+ * chunk, from the field.
  *
- * ⚠️ ובלי מקורות. match_knowledge אינה מחזירה source_urls, ומה שאינו
- * מגיע לכאן אינו יכול לדלוף לתשובה.
+ * ⚠️ And no sources. match_knowledge doesn't return source_urls, and what
+ * never reaches this point can't leak into the answer.
  */
 /**
- * 🔴 **מה שאסור לצאת — נחסם בקוד, ולא בהוראה.**
+ * 🔴 **What must not go out is blocked in code, not by an instruction.**
  *
- * ההוראות אומרות לטים לא לחשוף קישורים ומפתחות. הוראה היא בקשה: מודל
- * יכול לא לציית לה, ו-prompt injection הוא בדיוק הניסיון לגרום לכך.
- * **מה שחייב להיות ודאי נבדק על הפלט**, אחרי שהמודל סיים.
+ * The instructions tell Tim not to reveal links or keys. An instruction is a
+ * request: a model can ignore it, and prompt injection is exactly the attempt
+ * to make it do so. **What must be certain is checked on the output**, after
+ * the model is done.
  *
- * ⚠️ **וזו שכבה אחרונה ולא ראשונה.** ההגנה האמיתית היא שמה שאסור לחשוף
- * **אינו נמצא בהקשר מלכתחילה**: מפתחות נשלחים ככותרת HTTP ואינם בפרומפט,
- * ו-`match_knowledge` אינה מחזירה `source_url` כלל. אי אפשר לחלץ מה
- * שלא נשלח. הפונקציה הזו תופסת את מה שבכל זאת הצליח להיווצר.
+ * ⚠️ **And this is the last layer, not the first.** The real protection is
+ * that what must not be revealed **isn't in the context to begin with**: keys
+ * are sent as an HTTP header and are not in the prompt, and `match_knowledge`
+ * doesn't return `source_url` at all. You can't extract what was never sent.
+ * This function catches whatever still managed to come out.
  */
 export function scrubAnswer(text: string): { clean: string; hits: string[] } {
   const hits: string[] = [];
   let clean = text;
 
-  // כתובת אתר. טים אמור לומר "באתר הרשמי", ולעולם לא לצטט כתובת.
+  // A web address. Tim should say "באתר הרשמי" ("on the official site"), and never quote a URL.
   clean = clean.replace(/https?:\/\/\S+|\b[a-z0-9-]+\.(com|org|net|co\.il)\/\S*/gi, () => {
     hits.push("url");
     return "באתר הרשמי";
   });
 
-  // חומר שנראה כמו מפתח. אינו אמור להתקיים בהקשר — ואם הופיע, לא יוצא.
+  // Anything that looks like a key. It shouldn't exist in the context — and if it shows up, it doesn't go out.
   clean = clean.replace(
     /AIza[0-9A-Za-z_-]{20,}|eyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}|sb_(secret|publishable)_[A-Za-z0-9]{16,}/g,
     () => {

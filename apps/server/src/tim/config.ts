@@ -1,58 +1,64 @@
 import { failWith, type Fail } from "./http";
 /**
- * שם המודל. ניתן לשינוי בסוד GEMINI_MODEL בלי לגעת בקוד — רשימת המודלים
- * של גוגל משתנה, ושם שהיה תקף נעלם בלי הודעה. 404 מגוגל על נתיב תקין
- * פירושו כמעט תמיד שהשם כאן כבר לא קיים.
+ * The model name. Changeable via the GEMINI_MODEL secret without touching code —
+ * Google's model list changes, and a name that was valid disappears without
+ * notice. A 404 from Google on a valid path almost always means the name here no
+ * longer exists.
  *
- * ⚠️ אין כאן ברירת מחדל "בטוחה". השם הזה הוא ניחוש מושכל בלבד; מה שקובע
- * הוא מה ש-{"diagnose":"models"} מחזיר עבור המפתח בפועל.
+ * ⚠️ There is no "safe" default here. This name is only an educated guess; what
+ * decides is what {"diagnose":"models"} returns for the actual key.
  */
 export const DEFAULT_MODEL = "gemini-3.5-flash";
 //
-// ירדנו מ-3.7 ל-3.5 אחרי 503 חוזר. 503 אינו "המודל לא קיים" — הוא
-// "המודל עמוס כרגע", והמודל החדש ביותר הוא גם העמוס ביותר. 3.5 מיושב
-// יותר. אם גם הוא יחזיר 503 — GEMINI_MODEL מאפשר לרדת ל-gemini-2.5-flash
-// בלי נגיעה בקוד.
+// We dropped from 3.7 to 3.5 after repeated 503s. A 503 isn't "the model
+// doesn't exist" — it's "the model is busy right now", and the newest model is
+// also the busiest. 3.5 is more settled. If it also returns 503 — GEMINI_MODEL
+// allows dropping to gemini-2.5-flash without touching code.
 //
-// ⛔ ובמפורש **לא** `gemini-flash-latest`, אף שהוא נוח יותר.
+// ⛔ And explicitly **not** `gemini-flash-latest`, even though it's more
+// convenient.
 //
-// כינוי מתגלגל משנה את המודל תחת הרגליים בלי שינוי קוד, בלי הודעה, ובלי
-// שנדע מתי. לפרויקט הזה יש סט זהב לבדיקות רגרסיה (שלב 4), וכל ערכו בכך
-// שכשתשובה משתנה — אנחנו יודעים למה. עם כינוי מתגלגל, סט הזהב נשבר יום
-// אחד ואיש לא ידע אם הסיבה היא שינוי שלנו או שדרוג של גוגל.
+// A rolling alias changes the model under our feet with no code change, no
+// notice, and without us knowing when. This project has a golden set for
+// regression tests (stage 4), and its whole value is that when an answer
+// changes — we know why. With a rolling alias, the golden set breaks one day
+// and nobody knows whether the cause is our change or a Google upgrade.
 //
-// זו אותה משפחה של "נפילה שקטה" שכל הפרויקט בנוי נגדה: שינוי אמיתי
-// שנראה כמו כלום. שם מוצמד נשבר **בקול** — 404 — וזה בדיוק מה שקרה כאן
-// ומה שהוביל אותנו לרשימה האמיתית.
-/** ⚠️ שמונה תורות, ולא "כל השיחה". ראה ההערה ליד קליטת ההיסטוריה. */
+// It's the same family of "silent failure" the whole project is built against:
+// a real change that looks like nothing. A pinned name breaks **loudly** — 404 —
+// and that is exactly what happened here and what led us to the real list.
+/** ⚠️ Eight turns, not "the whole conversation". See the comment by the history intake. */
 export const MAX_HISTORY_TURNS = 8;
 export const MAX_HISTORY_CHARS = 1000;
 export const MAX_QUESTION_CHARS = 1000;
 
 /**
- * ⚠️ **הגגות אינם נשלחים למסד יותר.** הם יושבים במסד, ומספר אחד כאן
- * משמש **רק** להודעה למשתמש ("נסי בעוד שעה").
+ * ⚠️ **The caps are no longer sent to the database.** They live in the database,
+ * and the one number here is used **only** for the message to the user
+ * ("נסי בעוד שעה" — "try again in an hour").
  *
- * 🔴 קודם הם נשלחו כארגומנטים ל-check_rate_limit, והפונקציה מוענקת
- * ל-anon — מפתח ציבורי בהגדרה, שנשלח לכל דפדפן. כלומר כל מי שפותחת את
- * כלי המפתחים יכלה לקרוא ישירות ל-RPC עם p_max: 999999 ולעבור את שני
- * הגגות, בלי לגעת בפונקציה הזו בכלל (נמצא על ידי גיא, מיגרציה 026).
+ * 🔴 Previously they were sent as arguments to check_rate_limit, and that
+ * function is granted to anon — a public key by definition, sent to every
+ * browser. So anyone who opened the dev tools could call the RPC directly with
+ * p_max: 999999 and get past both caps, without touching this function at all
+ * (found by Guy, migration 026).
  *
- * הלקח הכללי: ערך שנשלח מהקוראת אינו הגבלה על הקוראת.
+ * The general lesson: a value sent by the caller is not a limit on the caller.
  */
 export const RETRY_AFTER_MINUTES = 60;
 
 /**
- * בדיקת שפיות בלבד, לפני שמנסים לקרוא עם הערך.
+ * A sanity check only, before trying to call with the value.
  *
- * ⚠️ בכוונה **בלי** דרישה לתחילית "AIza". מפתחות גוגל נראים כך היום, אבל
- * זו הנחה על פורמט של ספק חיצוני שאני לא יכול לאמת — והיא הפכה כאן לחסם:
- * מפתח תקין בפורמט אחר היה נדחה על ידי הקוד שלי לפני שגוגל בכלל נשאלה.
- * גוגל היא הסמכות על מה מפתח תקין, לא אני. ערך שגוי יחזור ממנה כשגיאה
- * מפורשת, וזה עדיף על ניחוש מקומי שחוסם.
+ * ⚠️ Deliberately **without** requiring the "AIza" prefix. Google keys look like
+ * that today, but it's an assumption about an external vendor's format that I
+ * can't verify — and here it turned into a blocker: a valid key in a different
+ * format would have been rejected by my code before Google was even asked.
+ * Google is the authority on what a valid key is, not me. A wrong value comes
+ * back from it as an explicit error, and that beats a local guess that blocks.
  *
- * מה שנשאר: רווחים (הדבקה שגררה תו לבן) ואורך שאינו סביר (הדבקה חלקית).
- * שתי אלה אינן תלויות בפורמט של אף ספק.
+ * What remains: whitespace (a paste that dragged in a blank character) and an
+ * implausible length (a partial paste). Neither depends on any vendor's format.
  */
 export function looksLikeGeminiKey(key: string | undefined): boolean {
   if (typeof key !== "string") return false;
@@ -61,26 +67,27 @@ export function looksLikeGeminiKey(key: string | undefined): boolean {
 
 
 /**
- * אבחון. מחזיר אילו משתני סביבה קיימים — **שמות, נוכחות ואורך בלבד,
- * לעולם לא ערכים.**
+ * Diagnostics. Returns which environment variables exist — **names, presence and
+ * length only, never values.**
  *
- * למה זה קבוע ולא זמני: אני חסום ברשת מסופאבייס ואיני יכול לראות אילו
- * משתנים היא מזריקה לפונקציה. בלי זה, כל תקלת הרשאה הופכת לסבב ניחושים
- * שבו נטע מדביקה קוד ומדווחת, שוב ושוב. שם ואורך אינם סוד — הערך הוא.
+ * Why this is permanent and not temporary: I'm network-blocked from Supabase and
+ * can't see which variables it injects into the function. Without this, every
+ * permissions failure turns into a round of guessing in which Neta pastes code and
+ * reports back, again and again. A name and a length aren't secret — the value is.
  */
 /**
- * הגדרות החשיבה, במקום אחד.
+ * The thinking settings, in one place.
  *
- * ⚠️ נגזר פעם אחת ומשמש גם את הקריאה למודל וגם את האבחון. כשהיו שני
- * חישובים, האבחון היה יכול לדווח על מה שאיננו נשלח — כלומר לוח בקרה
- * שמראה מתג במצב שאינו המצב בפועל.
+ * ⚠️ Derived once and used by both the model call and diagnostics. When there
+ * were two computations, diagnostics could report something that isn't being
+ * sent — i.e. a control panel showing a switch in a state that isn't the real one.
  *
- * שני שמות, כי דורות המודלים אינם מסכימים ביניהם:
- *   GEMINI_THINKING_BUDGET — מספר אסימונים (2.5)
+ * Two names, because model generations disagree with each other:
+ *   GEMINI_THINKING_BUDGET — a token count (2.5)
  *   GEMINI_THINKING_LEVEL  — "low" / "high" (3.x)
- * 3.5 קיבל budget=128 **בלי שגיאה ובלי השפעה** — 505 אסימוני חשיבה
- * לפני, 507 אחרי. שדה שמתעלמים ממנו בשקט הוא בדיוק סוג הכשל שאנחנו
- * נמנעים ממנו, ולכן האבחון מראה מה נשלח בפועל.
+ * 3.5 accepted budget=128 **with no error and no effect** — 505 thinking tokens
+ * before, 507 after. A field that is silently ignored is exactly the kind of
+ * failure we avoid, so diagnostics show what is actually sent.
  */
 export function thinkingConfig(env: Record<string, string | undefined>) {
   const raw = env.GEMINI_THINKING_BUDGET?.trim();
@@ -92,9 +99,10 @@ export function thinkingConfig(env: Record<string, string | undefined>) {
   return Object.keys(cfg).length ? { thinkingConfig: cfg } : {};
 }
 
-// שתי תקלות שונות לגמרי, ולכן שתי הודעות שונות. "לא הוגדר או לא מתחיל
-// ב-AIza" שלח את נטע לבדוק את שתי האפשרויות בלי לדעת באיזו היא נמצאת.
-// שום חלק מהמפתח אינו מוחזר — רק אורכו, שמספיק כדי לזהות הדבקה חלקית.
+// Two completely different failures, so two different messages. "Not set or
+// doesn't start with AIza" sent Neta to check both possibilities without knowing
+// which one she was in. No part of the key is returned — only its length, which
+// is enough to spot a partial paste.
 export function keyProblem(key: string | undefined): Fail | null {
   if (key === undefined || key.trim() === "") {
     return failWith(500, {

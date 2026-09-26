@@ -1,6 +1,6 @@
 import { RETRY_AFTER_MINUTES } from "./config";
 import { failWith, type Fail } from "./http";
-/** מזהה יציב לדלי ההגבלה, בלי לאחסן כתובת IP. */
+/** A stable ID for the rate-limit bucket, without storing an IP address. */
 export async function bucketKey(ip: string, salt: string): Promise<string> {
   const bytes = new TextEncoder().encode(`${salt}:${ip}`);
   const digest = await crypto.subtle.digest("SHA-256", bytes);
@@ -9,18 +9,19 @@ export async function bucketKey(ip: string, salt: string): Promise<string> {
 
 export type Db = { url: string; dbKey: string };
 
-// ── הגבלת קצב ────────────────────────────────────────────────────────
+// ── Rate limit ───────────────────────────────────────────────────────
 //
-// ⚠️ נכשלת **סגור**. אם אי אפשר לספור — אין קריאה למודל.
+// ⚠️ Fails **closed**. If we can't count, the model isn't called.
 //
-// הגרסה הראשונה דילגה על ההגבלה כשמשתני הסביבה חסרו, והמשיכה למודל.
-// כלומר: תקלה בהגדרה הייתה הופכת את נקודת הקצה לפתוחה לגמרי, בשקט,
-// בדיוק במצב שבו אימות הטוקן כבוי. עדיף שגיאה שרואים מנקודת קצה פתוחה
-// שאיש לא יודע עליה — זה אותו כלל של "אין נפילה שקטה" ב-CLAUDE.md.
-// ⚠️ מפתח anon ולא service_role, ובכוונה. PostgREST החזיר 403 ולא 401 —
-// כלומר המפתח כן התקבל, והתפקיד שהוא נפתר אליו אינו service_role.
-// check_rate_limit היא security definer ומוענקת ל-anon, ולכן היא עובדת
-// ללא תלות בתפקיד. הטבלה עצמה נשארת סגורה לחלוטין.
+// The first version skipped the limit when the env vars were missing and
+// went on to the model. So a config mistake would have made the endpoint
+// wide open, silently, exactly when token verification is off. A visible
+// error beats an open endpoint nobody knows about — the same "no silent
+// fallback" rule as in CLAUDE.md.
+// ⚠️ The anon key, not service_role, on purpose. PostgREST returned 403, not
+// 401 — i.e. the key was accepted, and the role it resolves to isn't
+// service_role. check_rate_limit is security definer and granted to anon, so
+// it works regardless of role. The table itself stays fully closed.
 export function dbAccess(env: Record<string, string | undefined>): Db | Fail {
   const url = env.SUPABASE_URL;
   const dbKey = env.SUPABASE_ANON_KEY ?? env.SUPABASE_PUBLISHABLE_KEY
@@ -34,7 +35,7 @@ export function dbAccess(env: Record<string, string | undefined>): Db | Fail {
   return { url, dbKey };
 }
 
-/** 'ok' → null (ממשיכים). כל דבר אחר → התשובה שעוצרת. */
+/** 'ok' → null (carry on). Anything else → the response that stops the request. */
 export async function checkRateLimit({ url, dbKey }: Db, ip: string, salt: string | undefined): Promise<Fail | null> {
   const bucket = await bucketKey(ip, salt ?? dbKey.slice(0, 16));
   const auth = {
@@ -48,7 +49,7 @@ export async function checkRateLimit({ url, dbKey }: Db, ip: string, salt: strin
     res = await fetch(`${url}/rest/v1/rpc/check_rate_limit`, {
       method: "POST",
       headers: auth,
-      // ⚠️ דלי בלבד. כל ערך נוסף כאן הוא גג שהקוראת בוחרת לעצמה.
+      // ⚠️ The bucket only. Any extra value here is a cap the caller picks for herself.
       body: JSON.stringify({ p_bucket: bucket }),
     });
   } catch {
@@ -62,10 +63,12 @@ export async function checkRateLimit({ url, dbKey }: Db, ip: string, salt: strin
     });
   }
 
-  // מיגרציה 021 החליפה את הבוליאני בטקסט: 'ok' | 'user' | 'global'.
-  // כל דבר אחר פירושו שלא הבנו את התשובה, וזה כישלון — לא היתר.
-  // ⚠️ בוליאני נחשב כאן **לא מובן**, ובכוונה: מסד שעדיין על 020 יחזיר
-  // true, ו-true שמתפרש כ"מותר" הוא בדיוק גדר שנעלמה בלי שאיש ראה.
+  // Migration 021 replaced the boolean with text: 'ok' | 'user' | 'global'.
+  // Anything else means we didn't understand the answer, and that's a
+  // failure — not a pass.
+  // ⚠️ A boolean counts as **not understood** here, on purpose: a database
+  // still on 020 returns true, and true read as "allowed" is exactly a rate
+  // limit that vanished without anyone noticing.
   const verdict = await res.json().catch(() => null);
   if (verdict !== "ok" && verdict !== "user" && verdict !== "global") {
     return failWith(500, {
@@ -75,8 +78,9 @@ export async function checkRateLimit({ url, dbKey }: Db, ip: string, salt: strin
         : "תשובה לא צפויה מ-check_rate_limit",
     });
   }
-  // ⚠️ שני הגדרות אינם אותה הודעה. "נסי בעוד שעה" כשהמכסה היומית
-  // נגמרה הוא שקר שהמבקרת תגלה רק אחרי שעה של המתנה.
+  // ⚠️ The two limits are not the same message. "Try again in an hour" when
+  // the daily quota is used up is a lie the visitor only discovers after an
+  // hour of waiting.
   if (verdict === "user") {
     return failWith(429, { error: "rate_limited", scope: "user", retry_after_minutes: RETRY_AFTER_MINUTES });
   }

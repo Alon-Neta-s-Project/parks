@@ -1,28 +1,28 @@
 import type { TimEvent } from "./log";
 /**
- * מה שהמארח נותן כדי להחזיק משימה חיה אחרי שהתשובה יצאה.
- * Netlify: `context.waitUntil` · Supabase: `EdgeRuntime.waitUntil` · Node: אין צורך.
+ * What the host gives to keep a task alive after the response has gone out.
+ * Netlify: `context.waitUntil` · Supabase: `EdgeRuntime.waitUntil` · Node: not needed.
  */
 export type WaitUntil = (p: Promise<unknown>) => void;
 
-/** מה שהיומן צריך מהמארח. */
+/** What the log needs from the host. */
 export interface TurnLogHost {
   waitUntil?: WaitUntil;
-  /** 🔴 כתיבה שנכשלה אינה משנה את התשובה — אבל היא נראית ביומן היישומי. */
+  /** 🔴 A failed write doesn't change the response — but it shows in the application log. */
   report?: (e: TimEvent) => void;
 }
 
 /**
- * כתיבה ליומן התשובות. **נכשלת בשקט, בכוונה.**
+ * A write to the turn log. **Fails silently, on purpose.**
  *
- * ⚠️ **הכתיבה אינה ממתינה** — התשובה למשפחה אינה מחכה ליומן. ולכן מישהו
- * צריך להחזיק אותה חיה: `waitUntil` של המארח כשניתן, ואחרת
- * `EdgeRuntime.waitUntil` של Supabase. ב-Node התהליך ממשיך לרוץ ואין צורך.
- * 🔴 **ב-Netlify בלי waitUntil הכתיבה נעלמת** — הפונקציה מוקפאת אחרי
- * התשובה, ובשקט, כי היומן נכשל בשקט.
+ * ⚠️ **The write isn't awaited** — the answer to the family doesn't wait for the log. So
+ * something has to keep it alive: the host's `waitUntil` when given, and otherwise
+ * Supabase's `EdgeRuntime.waitUntil`. On Node the process keeps running, so it's not needed.
+ * 🔴 **On Netlify without waitUntil the write vanishes** — the function is frozen after
+ * the response, and silently, because the log fails silently.
  *
- * ⚠️ השנייה (`AbortSignal.timeout`) חוסמת את הכתיבה עצמה, לא את התשובה —
- * איש אינו ממתין לה. היא מה שמונע ממסד תקוע להחזיק את הפונקציה חיה.
+ * ⚠️ The one second (`AbortSignal.timeout`) bounds the write itself, not the response —
+ * no one waits for it. It's what stops a stuck database from keeping the function alive.
  */
 export function logTurn(
   url: string,
@@ -54,7 +54,7 @@ export function logTurn(
     signal: AbortSignal.timeout(1000),
   }).then(
     (r) => { if (!r.ok) host.report?.({ event: "turn_log_failed", status: r.status }); },
-    // ⚠️ שם השגיאה בלבד: הודעת רשת יכולה לשאת כתובת, וכאן אין ממה להסתיר אותה.
+    // ⚠️ The error's name only: a network message can carry an address, and here there's nothing to hide it with.
     (e) => host.report?.({ event: "turn_log_failed", error: e instanceof Error ? e.name : "unknown" }),
   ).catch(() => {});
 
@@ -63,11 +63,11 @@ export function logTurn(
   if (typeof rt?.waitUntil === "function") rt.waitUntil(write);
 }
 
-// 🔴 **וההערכה כאן משוערת, ואומרת זאת.** `answered` נגזר משילוב של
-// איתותים — אפס מקורות, ולשון סירוב שההוראות שלנו עצמן מכתיבות —
-// ולא מהצהרה של המודל. זו הערכה טובה מספיק כדי לראות מגמה, **ולא
-// מספיק כדי להסיק ממנה על שורה בודדת.** מי שיקרא את היומן צריך לדעת
-// את זה, ולכן זה כתוב כאן ולא רק בראש שלי.
+// 🔴 **And the judgement here is an estimate, and says so.** `answered` is derived from a
+// combination of signals — zero sources, and refusal phrasing that our own instructions
+// dictate — not from a statement by the model. It's good enough to see a trend, **and not
+// good enough to conclude anything about a single row.** Whoever reads the log needs to
+// know that, so it's written here and not only in my head.
 export function wasAnswered(p: { rides: unknown[]; chunks: unknown[]; candidates: unknown[]; answer: string }): boolean {
   const noSources = p.rides.length === 0 && p.chunks.length === 0 && p.candidates.length === 0;
   const refusalPhrasing = /(אין לי את הנתון|אין לנו את הנתון|לא ידוע אם קיימת|לא נבדק)/

@@ -1,13 +1,13 @@
--- verify.sql — בדיקת אימות אחרי הרצת כל המיגרציות.
+-- verify.sql — a verification check after running all the migrations.
 --
--- שאילתה אחת. כל שורה היא בדיקה אחת: מה נמצא בפועל, למה ציפינו, ומצב.
--- אין צורך לדעת SQL כדי לקרוא אותה — אם בעמודה "מצב" כל השורות ✅,
--- ההרצה הצליחה במלואה.
+-- One query. Every row is one check: what was actually found, what we expected, and status.
+-- No SQL knowledge is needed to read it — if every row in the "מצב" (status) column is ✅,
+-- the run succeeded in full.
 --
--- המספרים כאן נמדדו מהרצה אמיתית של הקובץ על מסד ריק, ולא נכתבו מהזיכרון.
--- אם מוסיפים מיגרציה, צריך לעדכן אותם כאן.
+-- The numbers here were measured from a real run of the file on an empty database, not written from memory.
+-- If you add a migration, update them here.
 --
--- אפשר להריץ את השאילתה הזו שוב בכל רגע, לבד, בלי המיגרציות.
+-- This query can be run again at any moment, on its own, without the migrations.
 
 with checks as (
 
@@ -95,9 +95,9 @@ with checks as (
               else '✅ תקין' end
 
   union all
-  -- הספירה עוברת דרך query_to_xml ולא דרך "from park", כי טבלה שאינה קיימת
-  -- מפילה את השאילתה כולה בזמן ניתוח — כלומר בדיוק במצב שהבדיקה נועדה
-  -- לאבחן. ה-CASE נבדק בזמן ריצה, ולכן לא נוגע בטבלה חסרה.
+  -- The count goes through query_to_xml and not through "from park", because a table that does not exist
+  -- fails the whole query at parse time — that is, in exactly the state the check is meant
+  -- to diagnose. The CASE is evaluated at run time, so it does not touch a missing table.
   select 9,
          'פארקים שנשתלו',
          coalesce(park_count::text, 'אין טבלה'),
@@ -158,9 +158,9 @@ with checks as (
               ) then '✅ תקין' else '❌ 012_height_none לא רץ' end
 
   union all
-  -- ⚠️ תת-שאילתה סקלרית, לא "from information_schema.columns" ישירות:
-  --    עמודה חסרה הייתה מחזירה אפס שורות, והבדיקה הייתה נעלמת מהטבלה
-  --    במקום להידלק באדום. ככה תמיד יוצאת בדיוק שורה אחת.
+  -- ⚠️ A scalar subquery, not "from information_schema.columns" directly:
+  --    a missing column would return zero rows, and the check would disappear from the table
+  --    instead of lighting up red. This way exactly one row always comes out.
   select 13,
          'trip.park_days',
          coalesce(state, 'אין עמודה'),

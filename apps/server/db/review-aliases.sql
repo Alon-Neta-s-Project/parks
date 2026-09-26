@@ -1,9 +1,9 @@
--- לפולה: המועמדים לשמות נרדפים, לסקירה.
+-- For Paula: the alias candidates, for review.
 --
--- ⚠️ שאילתת קריאה בלבד. שום דבר לא נכנס למסד מהרצה שלה.
+-- ⚠️ Read-only query. Nothing enters the database from running it.
 --
--- כל שורה היא **הצעה של המודל, לא עובדה.** מועמד מאושר נכנס
--- ל-experience.aliases_i18n בשלב נפרד, ידני ומכוון.
+-- Every row is **a suggestion by the model, not a fact.** An approved candidate goes
+-- into experience.aliases_i18n in a separate step, manual and deliberate.
 
 select
   e.name                            as "מתקן",

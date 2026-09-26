@@ -4,11 +4,11 @@ import { assertEquals } from "./test-helpers";
 
 
 /**
- * 🔴 **מה שאסור לצאת נחסם בקוד, ולא בהוראה.**
+ * 🔴 **What must not go out is blocked in code, not by an instruction.**
  *
- * ההוראות מבקשות מטים לא לחשוף קישורים ומפתחות. הוראה היא בקשה, ומודל
- * יכול לא לציית לה — וזו בדיוק המטרה של prompt injection. לכן הפלט
- * נבדק אחרי שהמודל סיים.
+ * The instructions ask Tim not to reveal links or keys. An instruction is a
+ * request, and a model can ignore it — which is exactly the goal of prompt
+ * injection. So the output is checked after the model is done.
  */
 test("קישור ומפתח אינם יוצאים בתשובה", () => {
   const a = scrubAnswer("הפרטים באתר https://disneyworld.disney.go.com/tickets/ וכדאי לבדוק");
@@ -20,7 +20,7 @@ test("קישור ומפתח אינם יוצאים בתשובה", () => {
   assertEquals(/AIza/.test(b.clean), false);
   assertEquals(b.hits.includes("key"), true);
 
-  // ⚠️ ותשובה רגילה אינה נפגעת. מסנן שמשנה טקסט תקין גרוע מאין מסנן.
+  // ⚠️ And a normal answer is left intact. A filter that alters valid text is worse than no filter.
   const c = scrubAnswer("כדאי לוודא באתר הרשמי ביום הביקור.");
   assertEquals(c.clean, "כדאי לוודא באתר הרשמי ביום הביקור.");
   assertEquals(c.hits.length, 0);
