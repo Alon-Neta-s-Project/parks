@@ -45,6 +45,8 @@ function load(): Record<string, string> {
 function TestHarness() {
   const [notes, setNotes] = useState<Record<string, string>>(load);
   const [copied, setCopied] = useState(false);
+  /** הלוח סגור כברירת מחדל — הוא כלי, לא חלק מהשיחה. */
+  const [panelOpen, setPanelOpen] = useState(false);
   /** מצב שליחה לכל הערה. חסר = עוד לא נשלחה בסשן הזה. */
   const [sent, setSent] = useState<Record<string, SaveState>>({});
   /**
@@ -141,51 +143,84 @@ function TestHarness() {
           ),
           footer:
             entries.length === 0 ? null : (
-              <div className="feedback__export">
-                <div>
-                  {entries.length} הערות בשיחה הזו
-                  {/* ⚠️ מה שלא הגיע למסד נאמר במפורש. שתיקה כאן הייתה
-                      נקראת כ"הכול נשלח". */}
-                  {(() => {
-                    const stuck = entries.filter(([id]) => sent[id] !== "saved").length;
-                    if (stuck === 0) return " · כולן נשלחו ✓";
-                    // 🔴 **הסיבה, ולא רק המספר.** "לא נשלחו" בלי סיבה
-                    // אינו דיווח אלא שאלה — מפתח שגוי, הרשאה חסרה
-                    // ורשת נראים בדיוק אותו דבר.
-                    const why = lastSaveError();
-                    return ` · ${stuck} לא נשלחו${why ? ` — ${why}` : ""}`;
-                  })()}
-                </div>
+              /**
+               * 🔴 **נטע, 25.09: "לא נוח שתיבת ההצעות יושבת לי בצ'אט".**
+               *
+               * הלוח היה פתוח תמיד, עם התצוגה המקדימה של כל ההערות,
+               * ודחף את השיחה מטה. בטלפון הוא תפס חצי מסך.
+               *
+               * עכשיו: כפתור אחד צף, והלוח נפתח מעליו. השיחה נשארת
+               * שיחה.
+               */
+              <>
                 <button
                   type="button"
-                  onClick={() => {
-                    navigator.clipboard?.writeText(text).then(
-                      () => setCopied(true),
-                      () => setCopied(false),
-                    );
-                  }}
+                  className="notes-pill"
+                  onClick={() => setPanelOpen((v) => !v)}
+                  aria-expanded={panelOpen}
                 >
-                  העתקה לשליחה
+                  {/* ⚠️ המספר על הכפתור, כדי שלא צריך לפתוח כדי לדעת. */}
+                  הערות · {entries.length}
+                  {entries.filter(([id]) => sent[id] !== "saved").length > 0 ? " ⚠️" : ""}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (!confirm(`למחוק ${entries.length} הערות?`)) return;
-                    setNotes({});
-                    try {
-                      localStorage.removeItem(KEY);
-                    } catch {
-                      /* אין מה לנקות */
-                    }
-                  }}
-                >
-                  ניקוי
-                </button>
-                {copied ? <span>הועתק ✓</span> : null}
-                {/* ⚠️ הטקסט מוצג ולא רק מועתק. אם ההעתקה נכשלת — וזה
-                    קורה בדפדפנים שחוסמים clipboard — יש מה לסמן ביד. */}
-                <pre className="feedback__preview">{text}</pre>
-              </div>
+
+                {panelOpen ? (
+                  <div className="notes-panel" role="dialog" aria-label="ההערות בשיחה">
+                    <div className="notes-panel__head">
+                      <span>
+                        {entries.length} הערות בשיחה הזו
+                        {/* ⚠️ מה שלא הגיע למסד נאמר במפורש. שתיקה כאן
+                            הייתה נקראת כ"הכול נשלח". */}
+                        {(() => {
+                          const stuck = entries.filter(([id]) => sent[id] !== "saved").length;
+                          if (stuck === 0) return " · כולן נשלחו ✓";
+                          // 🔴 הסיבה, ולא רק המספר.
+                          const why = lastSaveError();
+                          return ` · ${stuck} לא נשלחו${why ? ` — ${why}` : ""}`;
+                        })()}
+                      </span>
+                      <button type="button" onClick={() => setPanelOpen(false)} aria-label="סגירה">
+                        ✕
+                      </button>
+                    </div>
+
+                    <div className="notes-panel__actions">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard?.writeText(text).then(
+                            () => setCopied(true),
+                            () => setCopied(false),
+                          );
+                        }}
+                      >
+                        העתקה לשליחה
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!confirm(`למחוק ${entries.length} הערות?`)) return;
+                          setNotes({});
+                          setPanelOpen(false);
+                          try {
+                            localStorage.removeItem(KEY);
+                          } catch {
+                            /* אין מה לנקות */
+                          }
+                        }}
+                      >
+                        ניקוי
+                      </button>
+                      {copied ? <span>הועתק ✓</span> : null}
+                    </div>
+
+                    {/* ⚠️ הטקסט מוצג ולא רק מועתק. אם ההעתקה נכשלת —
+                        וזה קורה בדפדפנים שחוסמים clipboard — יש מה
+                        לסמן ביד. */}
+                    <pre className="feedback__preview">{text}</pre>
+                  </div>
+                ) : null}
+              </>
             ),
         }}
       />
