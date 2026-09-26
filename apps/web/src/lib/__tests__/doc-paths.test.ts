@@ -147,6 +147,9 @@ describe("כל נתיב שמופיע בטקסט — קיים בפועל", () => 
         if (target === undefined) continue;
         // ⚠️ נתיבים שנוצרים בזמן ריצה ואינם אמורים להיות בריפו.
         if (/^data\/(team1-inbox|deploy\/\d)/.test(target)) continue;
+        // ⚠️ תוצרי בנייה (dist/) אינם ברפו ואינם אמורים להיות בו. הפניה אליהם
+        // נכונה גם כשלא נבנו — ועברה עד היום רק כי במקרה נבנו לפני הבדיקה.
+        if (/(^|\/)dist(-[a-z-]+)?\//.test(target)) continue;
         // ⚠️ נוצר בזמן פריסה על ידי deploy-tim.yml עצמו — ה-slug אינו
         // שם התיקייה, וה-workflow מעתיק לשם לפני ההעלאה.
         if (target.startsWith("supabase/functions/quick-worker")) continue;

@@ -1,14 +1,15 @@
 /**
  * כניסת Supabase ל-aliases — הקובץ היחיד כאן שמכיר את Deno.
  *
- * ⚠️ **הלוגיקה חיה ב-apps/server/src/aliases/, והשרת מריץ אותה ישירות.**
+ * ⚠️ **הלוגיקה חיה ב-apps/pipeline/src/enrich/aliases.ts, והצנרת מריצה אותה ישירות.**
  * Supabase מקבל קובץ אחד שנבנה מהכניסה הזו ומהלוגיקה יחד (npm run build:edge →
- * apps/server/dist/edge/aliases/index.ts), כך שיש מקור אחד לשניהם — ולא עותק
+ * apps/pipeline/dist/edge/aliases/index.ts), כך שיש מקור אחד לשניהם — ולא עותק
  * שנשכח לעדכן. ב-Supabase: (ראו edge-functions-slugs.md).
  *
- * ⚠️ עד המעבר (שלב 4 במסמך הרפקטור) הייצור עונה מכאן. אחריו הקובץ נמחק.
+ * ⚠️ עד ש-CI יריץ את הצנרת ישירות (npm -w apps/pipeline run aliases), הוא קורא
+ * לפונקציה ב-Supabase. אחרי זה הקובץ נמחק.
  */
-import { handle } from "../aliases/index";
+import { handle } from "../enrich/aliases";
 
 declare const Deno: {
   serve: (handler: (req: Request) => Promise<Response>) => void;

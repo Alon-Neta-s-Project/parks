@@ -5,14 +5,15 @@
   "type": "module",
   "workspaces": [
     "apps/web",
-    "apps/server"
+    "apps/server",
+    "apps/pipeline"
   ],
   "scripts": {
     "dev": "vite --config apps/web/vite.config.ts",
     "dev:local": "bash scripts/dev-local.sh",
     "dev:server": "npm -w apps/server run dev",
     "build:server": "npm -w apps/server run build",
-    "build:edge": "npm -w apps/server run build:edge",
+    "build:edge": "npm -w apps/server run build:edge && npm -w apps/pipeline run build:edge",
     "docker:server": "docker build -f apps/server/Dockerfile -t park-server .",
     "golden": "tsx --env-file=.env.server scripts/run-golden.ts",
     "db:local-pg": "bash scripts/db-local-pg.sh",
@@ -20,7 +21,7 @@
     "db:new": "DBMATE_MIGRATIONS_DIR=apps/server/db/migrations dbmate new",
     "build": "tsc -b && vite build --config apps/web/vite.config.ts && tsx scripts/prerender.ts",
     "preview": "vite preview --config apps/web/vite.config.ts",
-    "test": "vitest run --config apps/web/vite.config.ts && vitest run --config apps/server/vitest.config.ts",
+    "test": "vitest run --config apps/web/vite.config.ts && vitest run --config apps/server/vitest.config.ts && vitest run --config apps/pipeline/vitest.config.ts",
     "import": "tsx scripts/import-content.ts",
     "artifact": "npm run build && python3 scripts/build-artifact.py",
     "build:tim": "python3 scripts/build-tim-prompt.py --check && tsc -b && vite build --config apps/web/vite.tim.config.ts && tsx scripts/verify-tim-build.ts",

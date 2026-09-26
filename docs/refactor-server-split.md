@@ -128,7 +128,7 @@ Starting point → end: vitest 287 → 299 (+12 guards and self-checks, none rem
 - 🔴 **Their tests had never run.** `Deno.serve` ran at module load, so `deno test` crashed before a single test ran. **0 of 29.** It's the same bug Tim had and that CLAUDE.md records ("a test that didn't run isn't a test"). **Seen failing:** "FAILED | 0 passed | 1 failed (uncaught error)" before the fix.
 - The fix: the same guard as Tim's (`typeof Deno !== "undefined" && import.meta.main`). On Supabase the server comes up exactly as before. After it: **embed 14, aliases 15, all passing.** `test:edge` now runs all three, so they're in `npm test` and the QA gate.
 - ⚠️ This is a change to two files that are **deployed manually from the dashboard**. It changes nothing in their behavior on Supabase, but whoever redeploys them there will be pasting a new version.
-- The server: `POST /internal/embed` and `POST /internal/aliases`. The secret (`x-ingest-secret`) is checked inside the function itself, exactly as on Supabase, and the route adds and removes nothing. 4 new server tests: 403 without the secret or with a wrong one, `not_configured` without an env value, POST only.
+- (Until 4c.) The server: `POST /internal/embed` and `POST /internal/aliases`. The secret (`x-ingest-secret`) is checked inside the function itself, exactly as on Supabase, and the route adds and removes nothing. 4 new server tests: 403 without the secret or with a wrong one, `not_configured` without an env value, POST only.
 - CLAUDE.md: the test counts updated (they said 221/66, already stale before) plus `npm run dev:server`.
 - **Tests:** `npm run qa` passes · web 299 · server **11** · deno **104** (75 + the 29 that had never run).
 
@@ -271,6 +271,13 @@ Alon: "I can't see the Tim endpoint in the server, the prompt and the business l
   - `DEPLOY_STAMP`: the move and the wrapper removal changed Tim's file, `ec19a9c84648` → `f08adffa5669`. Production will show the old stamp until the next deploy.
 - `docs/architecture/edge-functions-slugs.md`: for a manual deploy of embed/aliases, **paste the file from `dist/edge/`**, not the source (the source alone has no entry and wouldn't answer).
 - **Tests:** `npm run qa` passes · web 307 · server **120**.
+
+### 4c ✅ embed and aliases in the pipeline, not in the server (26.09.2026)
+Alon: "the embedding should be a separate server and pipeline, not the same BFF." Embeddings and aliases are batch data processing, not serving the site.
+- **`apps/pipeline/`**, a third workspace: `src/enrich/{embed,aliases}.ts` (the logic, from the server, with its tests), `src/edge/{embed,aliases}.ts` (the Supabase entries), and **`apps/pipeline/src/cli.ts`, a job runner with no HTTP server in between**: `npm -w apps/pipeline run embed`. It calls the function directly and repeats until `remaining` is 0 (the database is the queue). It waits a minute on a 429 and gives up after 6 in a row. **The first real run against the local database:** one call, `remaining: 0`, `done`.
+- **The server (BFF) keeps only Tim:** the `/internal/embed` and `/internal/aliases` routes were removed, along with their 4 tests. `build:edge` in the server builds only Tim; the pipeline builds embed and aliases. `npm run build:edge` at the root builds both.
+- Tests: the runner (5: until nothing remains, the secret on every call, waiting on 429, giving up after 6, stopping on any other error, no infinite loop) and the pipeline bundles (4). **Seen failing:** removing the wait on a 429.
+- ⚠️ **What hasn't changed yet:** CI (`ci-content.sh`) keeps calling embed **on Supabase**. Switching it to the pipeline requires giving GitHub the Gemini key (a secret), which is a separate decision. The rest of O9 (the content, import, seeds, team 1) stays open.
 
 ### O6 — ✅ Closed 26.09 (the baseline, Stage 2b) · The migrations can't build a database from scratch · found 25.09 on a local database
 While setting up a local database (`supabase start`, config in `apps/server/db/supabase-local/`), the setup file stopped **at migration 038**. That's the practical check O5 left open, and it failed.

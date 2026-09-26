@@ -4,7 +4,7 @@ function assertEquals<T>(actual: T, expected: T, msg?: string) {
 }
 
 import { test } from "vitest";
-import { handle, keepKnown, SYSTEM, type PendingRide } from "./index.ts";
+import { handle, keepKnown, SYSTEM, type PendingRide } from "./aliases.ts";
 
 const SECRET = "ingest-secret-value";
 const FULL = {

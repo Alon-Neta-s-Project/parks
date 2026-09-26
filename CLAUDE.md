@@ -167,6 +167,7 @@ npm run qa         # 🔴 **שער ה-QA — לפני כל דחיפה ל-release
 npm run dev        # פיתוח
 npm test           # הבדיקות — vitest: ממשק (308) · שרת (11) · פונקציות ה-Edge: טים, embed, aliases (104). בלי דנו
 npm run dev:server # השרת (apps/server) על :8787
+npm -w apps/pipeline run embed  # הטמעות לכל קטע שחסר לו (הצנרת, לא השרת)
 npm run test:edge  # רק פונקציות ה-Edge (על Node — הקוד עצמו עדיין נפרס ל-Supabase)
 npm run import     # ייבוא יבש; --write כדי לכתוב
 npm run build      # בנייה + רינדור מוקדם של 243 דפים

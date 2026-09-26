@@ -5,7 +5,7 @@ function assertEquals<T>(actual: T, expected: T, msg?: string) {
 }
 
 import { test } from "vitest";
-import { handle } from "./index.ts";
+import { handle } from "./embed.ts";
 
 const SECRET = "ingest-secret-value";
 const FULL = {

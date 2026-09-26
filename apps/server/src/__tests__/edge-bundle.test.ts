@@ -17,7 +17,7 @@ const bundle = async (name: string) =>
   })).outputFiles[0]!.text;
 
 describe("החבילות ל-Supabase", () => {
-  for (const name of ["tim", "embed", "aliases"]) {
+  for (const name of ["tim"]) {
     it(`${name}: קובץ אחד, בלי ייבואים, ועם Deno.serve`, async () => {
       const code = await bundle(name);
       // ⚠️ ייבוא שנשאר היה נופל ב-Supabase — הקובץ שם עומד לבדו.
@@ -33,7 +33,7 @@ describe("החבילות ל-Supabase", () => {
 
   // ⚠️ השרת עצמו אינו מכיר את Deno. הכניסות הן המקום היחיד.
   it("הלוגיקה אינה נוגעת ב-Deno", () => {
-    for (const name of ["tim", "embed", "aliases"]) {
+    for (const name of ["tim"]) {
       const code = readFileSync(join(SRC, name, "index.ts"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
       expect(code, name).not.toMatch(/\bDeno\./);
     }
