@@ -25,25 +25,7 @@ import { parse } from "yaml";
 import { extractHeight, extractRideName } from "../apps/server/src/tim/index";
 import { ROOT } from "./paths";
 
-type Expect = {
-  ride?: string; rides?: number; rides_gt?: number; chunks_gt?: number;
-  height_cm?: number; fits?: boolean; tiers?: string[];
-  must_contain?: string[]; must_not_contain?: string[];
-  /** One pattern or a list. ⚠️ golden.yaml writes a single string; looping over it
-   *  as a list tested each character as its own pattern. */
-  must_not_match?: string | string[];
-  must_ask_clarifying?: boolean; max_words?: number; should_refuse?: boolean;
-};
-type Case = { id: string; kind: string; ask: string; expect: Expect; status?: string };
-type TimReply = {
-  answer?: string; error?: string; status?: number; rides?: number; chunks?: number;
-  tiers?: string[]; retrieval?: string;
-  /** Wall-clock time of the `/tim` call, measured here. Netlify cuts a function at 60s. */
-  ms: number;
-};
-// ⚠️ The function's names, not the table's: `height_cm`, not `height_requirement_cm`.
-// The first version read the table name, got undefined, and failed a correct row.
-type Row = { name: string; height_cm: number | null; fits: boolean | null };
+import { evaluate, needsRow, type Case, type Row, type TimReply, type Verdict } from "../apps/server/src/eval/checks";
 
 const arg = (name: string) => {
   const i = process.argv.indexOf(name);
@@ -87,46 +69,9 @@ async function lookup(question: string): Promise<Row[]> {
   return res.ok ? ((await res.json()) as Row[]) : [];
 }
 
-type Verdict = { result: "pass" | "fail" | "not run"; why: string[]; ms: number };
-
 async function run(c: Case): Promise<Verdict> {
-  const e = c.expect ?? {};
-  const why: string[] = [];
-  const needsRow = e.ride !== undefined || e.height_cm !== undefined || e.fits !== undefined;
-  const rows = needsRow ? await lookup(c.ask) : [];
-
-  if (e.ride !== undefined) {
-    const hit = rows.find((r) => r.name === e.ride);
-    if (!hit) why.push(`ride "${e.ride}" not found (got: ${rows.map((r) => r.name).join(", ") || "none"})`);
-    else {
-      if (e.height_cm !== undefined && hit.height_cm !== e.height_cm)
-        why.push(`height ${hit.height_cm} ≠ ${e.height_cm}`);
-      if (e.fits !== undefined && hit.fits !== e.fits) why.push(`fits ${hit.fits} ≠ ${e.fits}`);
-    }
-  }
-
-  const reply = await ask(c.ask);
-  if (typeof reply.answer !== "string") {
-    // The table checks above are real; the answer checks were never made.
-    return { result: "not run", why: [...why, `no answer: ${reply.error ?? "?"} ${reply.status ?? ""}`.trim()], ms: reply.ms };
-  }
-  const a = reply.answer;
-  if (e.rides !== undefined && reply.rides !== e.rides) why.push(`rides ${reply.rides} ≠ ${e.rides}`);
-  if (e.rides_gt !== undefined && !((reply.rides ?? 0) > e.rides_gt)) why.push(`rides ${reply.rides} ≯ ${e.rides_gt}`);
-  if (e.chunks_gt !== undefined && !((reply.chunks ?? 0) > e.chunks_gt)) why.push(`chunks ${reply.chunks} ≯ ${e.chunks_gt}`);
-  for (const t of e.tiers ?? []) if (!reply.tiers?.includes(t)) why.push(`tier ${t} missing`);
-  for (const s of e.must_contain ?? []) if (!a.includes(s)) why.push(`missing "${s}"`);
-  for (const s of e.must_not_contain ?? []) if (a.includes(s)) why.push(`contains "${s}"`);
-  for (const p of [e.must_not_match ?? []].flat()) if (new RegExp(p).test(a)) why.push(`matches /${p}/`);
-  if (e.max_words !== undefined) {
-    const n = a.trim().split(/\s+/).length;
-    if (n > e.max_words) why.push(`${n} words > ${e.max_words}`);
-  }
-  if (e.must_ask_clarifying) {
-    if (!a.trim().endsWith("?")) why.push("does not end with a question");
-    if (reply.rides !== 0 || reply.chunks !== 0) why.push(`clarifying, yet rides ${reply.rides} / chunks ${reply.chunks}`);
-  }
-  return { result: why.length ? "fail" : "pass", why, ms: reply.ms };
+  const rows = needsRow(c.expect ?? {}) ? await lookup(c.ask) : [];
+  return evaluate(c, await ask(c.ask), rows);
 }
 
 const tally = { pass: 0, fail: 0, "not run": 0 };

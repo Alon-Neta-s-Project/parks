@@ -1,0 +1,194 @@
+# evals/robustness.yaml — שאלות עמידות: איות, קידומות, המשך שיחה, ושאלות קבוצה
+#
+# ⚠️ **הצעה, לא סט הזהב.** `golden.yaml` הוא של פולה, ואוצר המילים שלו אושר
+# על ידה (07.09). הקובץ הזה נפרד בכוונה: כל מקרה כאן `status: proposed`, ועובר
+# ל-golden.yaml רק באישורה.
+#
+# 🔴 **למה הוא קיים (29.09, אלון):** כדי לראות אם שינוי בקוד או במעבר לסוכן
+# (O13) משפר את טים בדיוק במקומות החלשים: הבנת השאלה מתבצעת היום ב-regex
+# (`understand.ts`), והיא נופלת על קידומות עבריות, שגיאות כתיב ושאלות המשך —
+# השליפה אינה קוראת את ההיסטוריה בכלל. מקרה שנכשל היום ב"production" הוא
+# בדיוק המדד: הוא אמור לעבור אחרי השיפור.
+#
+# ⚠️ **העובדות נשלפו מ-`apps/web/src/data/experiences.json` (29.09), לא מהזיכרון.**
+#
+# אוצר המילים הוא של golden.yaml, ועוד מפתח אחד:
+#   must_contain_any  רשימה של קבוצות. כל קבוצה עוברת אם **אחת** מהמחרוזות בה
+#                     מופיעה — לעובדה שיש לה כמה ניסוחים נכונים.
+#   history           תורות קודמות, שנשלחות לטים כ-`history` — לשאלות המשך.
+#
+# רץ ב-`npm run tim:compare` (ייצור מול staging), **רק כשאלון מבקש.**
+
+version: 1
+cases:
+
+  # ── רגרסיות מ-docs/claude-code/golden-set.md שאינן ב-golden.yaml ─────
+  #
+  # ⚠️ מקרה 3 שם ("מתקן בלי אזור מוגדר") לא נכתב: בדאטה הנוכחית אין שורה
+  # בלי אזור, ולכן אין לו תשובה לבדוק. מקרה 5 (אין URL) נבדק על **כל** תשובה
+  # בדוח ההשוואה, ולא כמקרה נפרד.
+
+  - id: regress.buzz-dark-checked-none
+    kind: tool
+    ask: "האם באזז לייטייר יש קטעים חשוכים?"
+    expect:
+      rides_gt: 0
+      # ארבע הרגישויות **נבדקו** (רעש: כן · השאר: נבדק ואין). "לא נבדק" על
+      # אחת מהן הוא בדיוק הרגרסיה — שתיקה על "false" שנקראה כהעדר.
+      must_not_contain: ["לא נבדק"]
+    tags: [regression, sensitivity]
+    status: proposed
+
+  - id: regress.bay-slides-height
+    kind: tool
+    ask: "מה מגבלת הגובה של Bay Slides?"
+    expect:
+      rides_gt: 0
+      must_contain: ["152"]
+      must_not_contain: ["מתאים לכל המשפחה", "גובה מינימום 0", "0 ס\"מ"]
+    tags: [regression, height, O15]
+    status: proposed
+    note: >-
+      ⚠️ צפוי הבדל בין הסביבות: בייצור height_requirement_cm הוא NULL ("לא
+      נבדק") וברפו 0 ("נבדק, אין מינימום") — O15. התקרה, 152, זהה בשתיהן.
+
+  - id: regress.theming-recommendation
+    kind: retrieval
+    ask: "אנחנו מעדיפים פארקים עם תפאורה יפה, איזה פארק מתאים?"
+    expect: {}
+    tags: [regression, recommendation]
+    status: proposed
+    note: >-
+      נבדק בעין בדוח: 2–3 מתקנים **בשם** לכל פארק שמוצג (הכרעת פולה, 09.09),
+      ולא פסקת אווירה. אין לזה בדיקה דטרמיניסטית עדיין.
+
+  - id: regress.epic-parking-terms
+    kind: retrieval
+    ask: "כשנוסעים ל-Epic Universe, איפה חונים?"
+    expect: {}
+    tags: [regression, terms]
+    status: proposed
+    note: נבדק בעין — "קמפוס" ו"טרם" מוסברים בחצי משפט בפעם הראשונה.
+
+  - id: regress.premier-pass
+    kind: retrieval
+    ask: "מה זה Premier Pass?"
+    expect:
+      chunks_gt: 0
+    tags: [regression, content-freshness]
+    status: proposed
+    note: נבדק בעין — הניסוח שפולה אישרה, לא הישן.
+
+  - id: regress.partner-hotel-perks
+    kind: retrieval
+    ask: "מה מקבלים במלון שותף של יוניברסל?"
+    expect:
+      must_contain_any: [["שותף", "שותפים"]]
+    tags: [regression, hotels]
+    status: proposed
+    note: נבדק בעין — הפרדה בין מלון שותף למלון בבעלות יוניברסל, ובלי ביטחון על מסמך T3.
+
+  # ── שגיאות כתיב וקידומות ─────────────────────────────────────────────
+
+  - id: spell.space-mountain-typo
+    kind: tool
+    ask: "מה גובה המינימום בספייס מאונטן?"
+    expect: { rides_gt: 0, must_contain: ["112"] }
+    tags: [spelling, prefix]
+    status: proposed
+
+  - id: prefix.space-mountain-b
+    kind: tool
+    ask: "בספייס מאונטיין יש מגבלת גובה?"
+    expect: { rides_gt: 0, must_contain: ["112"] }
+    tags: [prefix]
+    status: proposed
+
+  - id: prefix.everest-l
+    kind: tool
+    ask: "גובה מינימום לאוורסט?"
+    expect: { rides_gt: 0, must_contain: ["112"] }
+    tags: [prefix]
+    status: proposed
+
+  - id: spell.velocicoaster-prefix
+    kind: tool
+    ask: "כמה גובה צריך לולוסיקוסטר?"
+    expect: { rides_gt: 0, must_contain: ["130"] }
+    tags: [spelling, prefix]
+    status: proposed
+
+  - id: spell.velocicoaster-english-typo
+    kind: tool
+    ask: "מה הגובה ב-velocicoster?"
+    expect: { rides_gt: 0, must_contain: ["130"] }
+    tags: [spelling, english]
+    status: proposed
+
+  - id: spell.tron-split
+    kind: tool
+    ask: "מה הגובה בטרון לייט סייקל?"
+    expect: { rides_gt: 0, must_contain: ["122"] }
+    tags: [spelling, prefix]
+    status: proposed
+
+  - id: spell.hagrid-hebrew
+    kind: tool
+    ask: "מה הגובה בהגריד?"
+    expect: { rides_gt: 0, must_contain: ["122"] }
+    tags: [spelling, prefix]
+    status: proposed
+    note: הכינוי בדאטה הוא "האגריד"; "הגריד" הוא הכתיב הנפוץ.
+
+  - id: spell.mario-kart
+    kind: tool
+    ask: "מריו קרט מתאים לילד בגובה 100?"
+    expect: { rides_gt: 0, must_contain: ["102"] }
+    tags: [spelling, height]
+    status: proposed
+
+  - id: spell.guardians
+    kind: tool
+    ask: "מגבלת גובה בגרדיאנס אוף דה גלקסי?"
+    expect: { rides_gt: 0, must_contain: ["107"] }
+    tags: [spelling, prefix]
+    status: proposed
+
+  # ── שאלות המשך — השליפה אינה קוראת את ההיסטוריה היום ─────────────────
+
+  - id: followup.second-ride
+    kind: tool
+    history:
+      - { role: user, text: "מה גובה המינימום ב-Space Mountain?" }
+      - { role: model, text: "גובה המינימום ב-Space Mountain הוא 112 ס\"מ." }
+    ask: "ובביג ת'אנדר?"
+    expect: { rides_gt: 0, must_contain: ["97"] }
+    tags: [followup]
+    status: proposed
+
+  - id: followup.child-height
+    kind: tool
+    history:
+      - { role: user, text: "מה מגבלת הגובה באקספדישן אוורסט?" }
+      - { role: model, text: "גובה המינימום באקספדישן אוורסט הוא 112 ס\"מ." }
+    ask: "והבן שלי בגובה 105, הוא יכול לעלות?"
+    expect: { rides_gt: 0, must_contain: ["112"] }
+    tags: [followup, height]
+    status: proposed
+    note: >-
+      ⚠️ השם אינו בשאלה, רק בהיסטוריה. היום השליפה לא תמצא אותו, וטים יענה
+      מההיסטוריה בלבד — rides_gt: 0 הוא מה שאמור להיכשל, ולהשתפר.
+
+  # ── שאלות קבוצה — אין להן שליפה היום (O13, query_rides) ──────────────
+
+  - id: set.epic-under-100
+    kind: tool
+    ask: "אילו מתקנים ב-Epic Universe מתאימים לילד בגובה 100?"
+    expect:
+      must_contain_any: [["Astronomica", "Constellation Carousel", "Yoshi", "Viking Training Camp", "Fyre Drill"]]
+    tags: [set, height]
+    status: proposed
+    note: >-
+      מתקנים ב-Epic Universe שמתאימים ל-100 ס"מ לפי הדאטה: Astronomica,
+      Constellation Carousel, Viking Training Camp, Fyre Drill (אין מגבלה),
+      Yoshi's Adventure (86). **צפוי להיכשל היום** — אין כלי שעונה על שאלת קבוצה.

@@ -18,6 +18,7 @@
     "docker:server": "docker build -f apps/server/Dockerfile -t park-server .",
     "golden": "tsx --env-file=.env.local scripts/run-golden.ts",
     "golden:staging": "tsx --env-file=.env.staging scripts/run-golden.ts --server-from-env",
+    "tim:compare": "tsx scripts/tim-compare.ts",
     "db:local-pg": "bash scripts/db-local-pg.sh",
     "db:status": "DBMATE_MIGRATIONS_DIR=apps/server/db/migrations DBMATE_MIGRATIONS_TABLE=dbmate_migrations dbmate status",
     "db:new": "DBMATE_MIGRATIONS_DIR=apps/server/db/migrations dbmate new",
