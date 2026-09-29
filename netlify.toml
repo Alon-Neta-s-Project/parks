@@ -17,6 +17,20 @@
 [build.environment]
   NODE_VERSION = "22"
 
+# ── השרת: apps/server כ-Netlify Function תחת /api/* (O1, הכרעת אלון 26.09) ──
+#
+# הכניסה היחידה ש-Netlify טוען היא apps/server/netlify/functions/api.ts;
+# esbuild אורז אותה עם apps/server/src. הנתיב /api/* נקבע בקובץ עצמו (config.path).
+#
+# ⚠️ **בענף refactor/server-split בלבד, ולאתר ה-staging.** אתר הייצור בונה
+# את `release`, ולכן הבלוק הזה אינו משנה אותו עד מיזוג.
+# ⚠️ **O11 פתוח בהחלטת אלון:** `diagnose` מחזיר שמות משתני סביבה. הודעה לגיא נכתבה.
+# ⚠️ אחרי הפריסה הראשונה: `curl <אתר>/api/health` חייב להחזיר {"ok":true} ולא את
+# tim.html — התיעוד אינו אומר במפורש שנתיב של פונקציה גובר על ההפניה הגורפת למטה.
+[functions]
+  directory = "apps/server/netlify/functions"
+  node_bundler = "esbuild"
+
 # מסך אחד, ולכן כל כתובת מגיעה אליו.
 # ⚠️ יעד `tim.html` ולא `index.html`. הבנייה הזו אינה מייצרת index.html
 # בכלל, ו-fallback לקובץ שאינו קיים היה מגיש 404 על כל כתובת.
