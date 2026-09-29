@@ -195,6 +195,14 @@ Starting point → end: vitest 287 → 299 (+12 guards and self-checks, none rem
 
 **Remaining outside the code:** Neta sets `GEMINI_API_KEY`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `RATE_LIMIT_SALT` in Netlify's UI (they don't come to me). Guy: O2 now includes a public `/api` on the web app's site. The Dockerfile stays, so a container host is still open if the numbers change.
 
+### Staging — `parks-staging` + a Netlify site on this branch · Alon, 29.09
+- **The branch was pushed** (`origin/refactor/server-split`, no PR) so a separate Netlify staging site can build it. Production (`release`, `quick-worker`, the production database) is untouched.
+- **Supabase `parks-staging`** (`hnqszijewuphhcjiesfl`, **Singapore** — `ap-southeast-1`), built from empty: `dbmate up` (the baseline, 3.2s) → the seeds in `db-local-pg`'s order → `embed` from the pipeline. Result: 10 parks · 242 experiences · 66 documents · 314 chunks, all embedded · 1 dbmate migration. The connection is the **session pooler** (5432) in `.env.staging` (git-ignored).
+- **Checked:** the Netlify bundle, run locally against staging, answered "112 ס"מ" for Space Mountain. ⚠️ **Staging timings are not production's:** Netlify runs in Ohio and the database is in Singapore — the rate limit took 464ms (41ms locally) and retrieval 1013ms (553ms).
+- 🔴 **Found while building — for Guy:** on a fresh database **the first caller of `ingest_set_key` claims the pipeline's secret, and `anon` may call it.** On staging it was claimed straight after the baseline (a random secret, in `.env.staging` as `INGEST_SECRET`). Any new environment built from the baseline has the same window until someone claims it.
+- ⚠️ **`tester_key()` on staging is the baseline's placeholder** (`YOUR-TESTER-KEY-HERE`), which is in the repo — anyone can write tester notes on staging. Harmless on staging; recorded so nobody copies the pattern to a real environment.
+- **O11 is still open** (Alon's decision, 29.09): `diagnose` lists the host's environment variable names. A message to Guy was written.
+
 ### O2 — Security review · waiting on: Guy
 A new public endpoint, CORS, the DB role the server connects with, a DDL role for dbmate, an approval gate (GitHub Environment) for migrations, and revoking the anon grants on the RPCs and on `experience`. ⚠️ **Including `log_turn`** (found 26.09): Tim writes it with the anon key and `anon` may execute it, so anyone can call it directly and write made-up "unanswered questions" — the table stays insert-only and its `CHECK`s hold, but the knowledge-gap list stops being trustworthy. Also in scope: the application log (a new place data leaves the system, O1 step 2b) and, for the agent (O13), tools that read the database. Category 1. Blocks Stages 2 through 4.
 
