@@ -449,3 +449,16 @@ The database holds logic today because there was no server: the browser talked t
 **The fix:** the title in each chunk's label — `[קטע 2 · Child Swap — יוניברסל אורלנדו · יציב · נבדק 2026-09-01]`. One change in `formatChunks`, plus a test seen failing first. Independent of the agent (O13).
 
 ⚠️ It changes what Gemini sees, i.e. Tim's behaviour: `npm run golden` before and after, and the change in the stamp.
+
+### O15 — Production's data differs from the repo's seeds · found 29.09 comparing production with staging (read-only)
+Every row hashed on both sides (timestamps, chunk ids and embeddings excluded):
+| Table | Production | Staging | Identical |
+|---|---|---|---|
+| `park` | 10 | 10 | 10 ✅ |
+| `experience` | 242 | 242 | **240** |
+| `land` | 80 | 78 | 78 — production has 2 more |
+| `knowledge_doc` / `knowledge_chunk` | **not visible** | 66 / 314 | — |
+
+- 🔴 **Two water rides, `height_requirement_cm`: production `NULL`, the repo `0`.** Bay Slides and Ketchakiddee Creek (Typhoon Lagoon). The repo — `experiences.json` and the content seed — says *checked, no minimum* (with a maximum of 152 and 122 cm); production says *not checked*. So production's Tim says "the height limit was not checked" where the repo has an answer: the content fix never reached production. **Which is right is Paula's; production is not touched from here.**
+- **Two lands exist only in production** (`epcot-world-showcase-italy`, `ioa-the-lost-continent`), with **no ride pointing at them**. Orphans outside the seed.
+- **Knowledge could not be compared:** `reviewer_readonly` has no RLS policy on `knowledge_doc`/`knowledge_chunk` (only admin, `ci_content`, `team1_content`), so it sees 0 rows — that is the policy, not an empty table. Comparing needs a role that can read them (Guy).
