@@ -43,6 +43,24 @@ scripts/         repo tooling
 
 **Order — each function moves when it is touched anyway, never all at once:** the fit with `packages/shared` → `query_rides` born in the server (O13) → Tim's functions at stage 4 (with the anon grants revoked) → the pipeline when it gets its own role. **New code never adds a function to the database.**
 
+## The path from staging to no logic in the database · decided by Alon (29.09)
+1. **The Netlify staging site works** (O1).
+2. **The gate — staging vs production, `npm run tim:compare`.** Staging passes only if all of these hold:
+   | Criterion | Threshold |
+   |---|---|
+   | The golden set (28, Paula's) | **0 cases worse** on staging than in production |
+   | Facts that differ (cm, $, times, %) | only known ones — O15's two water rides, and deliberate code changes |
+   | Errors | no 5xx, no timeouts, no URL in any answer |
+   | Time | p95 under 15s (staging's database is in Singapore — a floor, not a production measurement) |
+   | Operations | a log line per request in Netlify, and rows in staging's turn log |
+   `evals/robustness.yaml` does **not** count — some cases are expected to fail today; it is the baseline for improvement.
+3. **Timeouts** (O1 step 3) — they also protect the new database connection.
+4. **The database functions move to the server, one at a time** — each followed by a direct parity check on staging (the old function's output against the new code's) and `tim:compare`:
+   `match_knowledge` → `find_experiences` + the fit (`fitFor` into `packages/shared`) → `park_candidates` → `log_turn` (an `INSERT`; the privacy `CHECK` stays; cleanup becomes a job) → `check_rate_limit` (one atomic statement, with a concurrency test).
+   - **Query layer: `postgres.js`, plain SQL** (Alon, 29.09). The functions being moved are already SQL, so they move as they are and are compared line by line; it does not compete with dbmate for the schema (Drizzle would); Kysely can be added on the same connection later if types are wanted. On Netlify the connection goes through Supabase's pooler in **transaction mode** (6543), so `prepare: false`.
+   - **Before the first move:** a database role for the server instead of the anon key — **Guy (O2)**.
+5. **Then** O14 (chunk titles) and the agent (O13) — `query_rides` born in the server.
+
 ## Rule: tests after every step
 After every step (a separate commit): `npm run qa`, plus `npm run build` if the build is touched. Compare the test count with the previous step. **A drop in the count is a failure**, even if everything is green. Nothing moves on until it's green.
 
