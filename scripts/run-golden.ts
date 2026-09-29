@@ -16,7 +16,8 @@
  * Gemini returning 503 says nothing about Tim. Counting it either way would make
  * the number mean something it does not.
  *
- * Env (from .env.server): SUPABASE_URL, SUPABASE_ANON_KEY — for the lookup only.
+ * Env (from .env.local, or .env.staging for `golden:staging`): SUPABASE_URL, SUPABASE_ANON_KEY — for
+ * the lookup only — and TIM_SERVER_URL with `--server-from-env`.
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -48,7 +49,15 @@ const arg = (name: string) => {
   const i = process.argv.indexOf(name);
   return i > 0 ? process.argv[i + 1] : undefined;
 };
-const SERVER = arg("--server") ?? "http://localhost:8787";
+// ⚠️ `--server-from-env` never falls back to localhost. `golden:staging` looks rows up in the
+// staging database; asking the local server instead would compare two different databases and
+// report it as one — a silent fallback to the wrong source.
+const fromEnv = process.argv.includes("--server-from-env");
+if (fromEnv && !process.env.TIM_SERVER_URL) {
+  console.error("🔴 TIM_SERVER_URL is empty in the env file — set the staging site's address first.");
+  process.exit(1);
+}
+const SERVER = arg("--server") ?? (fromEnv ? process.env.TIM_SERVER_URL!.replace(/\/$/, "") : "http://localhost:8787");
 const ONLY = arg("--only");
 
 const golden = parse(readFileSync(join(ROOT, "evals", "golden.yaml"), "utf8")) as { cases: Case[] };

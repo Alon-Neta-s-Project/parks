@@ -13,7 +13,8 @@
  * run hit it every ~100 vectors. Wait a minute and continue; give up after six
  * in a row, which is a daily quota rather than a minute.
  *
- * Env (from .env.server): GEMINI_API_KEY, SUPABASE_URL, SUPABASE_ANON_KEY, INGEST_SECRET.
+ * Env (from .env.local, or .env.staging via the `:staging` scripts): GEMINI_API_KEY, SUPABASE_URL,
+ * SUPABASE_ANON_KEY, INGEST_SECRET.
  */
 import { handle as aliases } from "./enrich/aliases";
 import { handle as embed } from "./enrich/embed";

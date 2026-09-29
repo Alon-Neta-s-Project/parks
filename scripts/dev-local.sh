@@ -10,8 +10,8 @@
 # Ctrl+C עוצר את השרת ואת הממשק. המסד נשאר עם הנתונים שלו — להפסקה מלאה:
 #   supabase --workdir apps/server/db/supabase-local stop
 #
-# 🔴 **שום דבר כאן לא נוגע בייצור.** השרת קורא את .env.server, שמצביע על
-# המסד המקומי. PROD_DB_URL_READONLY שבאותו קובץ אינו נקרא בידי השרת.
+# 🔴 **שום דבר כאן לא נוגע בייצור.** השרת קורא את .env.local, שמצביע על
+# המסד המקומי. אישור הקריאה לייצור יושב בקובץ נפרד (.env.prod-readonly) ואינו נטען כאן.
 #
 # ⚠️ **מסד ריק אינו "הכול תקין".** אם אין בו מתקנים — הסקריפט אומר את זה
 # ועוצר, ולא מעלה ממשק שנראה עובד ומחזיר תשובות ריקות. הקמת המסד מאפס עדיין
@@ -31,8 +31,8 @@ fail() { echo "🔴 $1" >&2; exit 1; }
 command -v docker   >/dev/null || fail "Docker לא נמצא. להתקין Docker Desktop."
 docker info         >/dev/null 2>&1 || fail "Docker לא רץ. לפתוח את Docker Desktop ולנסות שוב."
 command -v supabase >/dev/null || fail "Supabase CLI לא נמצא: brew install supabase/tap/supabase"
-[ -f .env.server ]            || fail ".env.server חסר — הערכים בסעיף 3e ב-docs/refactor-server-split.md."
-grep -q '^GEMINI_API_KEY=.\+' .env.server || fail "GEMINI_API_KEY ריק ב-.env.server — בלעדיו טים לא עונה."
+[ -f .env.local ]            || fail ".env.local חסר — הערכים בסעיף 3e ב-docs/refactor-server-split.md."
+grep -q '^GEMINI_API_KEY=.\+' .env.local || fail "GEMINI_API_KEY ריק ב-.env.local — בלעדיו טים לא עונה."
 [ -f apps/web/.env.local ]    || fail "apps/web/.env.local חסר — בלעדיו הממשק פונה לייצור ולא למקומי."
 
 # ── מסד ──────────────────────────────────────────────────────────────
@@ -52,7 +52,7 @@ pids=()
 # ⚠️ **לפי שם, ולא לפי $!.** ב-pipeline, $! הוא המזהה של הפקודה האחרונה —
 # ה-sed שמוסיף תווית — ולא של השרת. הריגה שלו השאירה את השרת ואת הממשק
 # רצים ברקע, תופסים את הפורטים, כשהסקריפט נעצר בכל דרך שאינה Ctrl+C.
-SERVER_CMD="tsx watch --env-file=.env.server apps/server/src/index.ts"
+SERVER_CMD="tsx watch --env-file=.env.local apps/server/src/index.ts"
 WEB_CMD="vite --config apps/web/vite.config.ts --port 5173"
 stop() {
   trap - EXIT INT TERM

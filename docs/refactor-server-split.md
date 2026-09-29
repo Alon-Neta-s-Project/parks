@@ -257,7 +257,7 @@ Correct (112 cm, the child is 110). `retrieval: ok` · 5 chunks · 1 attraction 
 
 **The manual steps, for reference:**
 1. `supabase --workdir apps/server/db/supabase-local start -x gotrue,realtime,storage-api,imgproxy,mailpit,postgres-meta,studio,edge-runtime,logflare,vector,supavisor`. The data is kept in a Docker volume between runs.
-2. `npm run build:server && node --env-file=.env.server apps/server/dist/server.mjs`. `.env.server` isn't in the repo: the Gemini key plus local values.
+2. `npm run build:server && node --env-file=.env.local apps/server/dist/server.mjs`. `.env.local` (named `.env.server` until 29.09) isn't in the repo: the Gemini key plus local values.
 3. `npm run golden`.
 4. To stop: `supabase --workdir apps/server/db/supabase-local stop`.
 

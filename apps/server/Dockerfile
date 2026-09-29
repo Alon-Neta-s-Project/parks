@@ -3,7 +3,7 @@
 # Build from the REPO ROOT (the workspace lockfile lives there):
 #
 #   docker build -f apps/server/Dockerfile -t park-server .
-#   docker run --rm -p 8787:8787 --env-file .env.server park-server
+#   docker run --rm -p 8787:8787 --env-file .env.local park-server
 #
 # ⚠️ Two stages, on purpose. The build stage has the whole toolchain; the image
 # that runs has Node and one bundled file (esbuild inlines hono and the functions),

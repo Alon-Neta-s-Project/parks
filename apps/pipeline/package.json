@@ -4,8 +4,10 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "embed": "tsx --env-file=../../.env.server src/cli.ts embed",
-    "aliases": "tsx --env-file=../../.env.server src/cli.ts aliases",
+    "embed": "tsx --env-file=../../.env.local src/cli.ts embed",
+    "embed:staging": "tsx --env-file=../../.env.staging src/cli.ts embed",
+    "aliases": "tsx --env-file=../../.env.local src/cli.ts aliases",
+    "aliases:staging": "tsx --env-file=../../.env.staging src/cli.ts aliases",
     "build:edge": "esbuild src/edge/embed.ts src/edge/aliases.ts --bundle --format=esm --platform=neutral --target=es2022 --outdir=dist/edge --entry-names=[name]/index --out-extension:.js=.ts '--banner:js=// @ts-nocheck — נבנה מ-apps/pipeline/src (npm run build:edge). הטיפוסים נבדקים שם, ב-tsc; כאן JavaScript בלבד.'"
   },
   "devDependencies": {
