@@ -115,8 +115,28 @@ export async function findCandidates({ url, dbKey }: Db, asked: string | null, q
   return [];
 }
 
-export async function findRides({ url, dbKey }: Db, asked: string | null, question: string): Promise<ExperienceRow[]> {
+/**
+ * Queries the host can run directly against the database instead of the database function.
+ * Injected like `waitUntil` — `tim/` never imports a driver, so the Supabase bundle stays free
+ * of one. Implemented in `apps/server/src/db/`.
+ */
+export interface DirectQueries {
+  findExperiences(p: { name: string | null; park: string | null; heightCm: number | null; limit: number }): Promise<ExperienceRow[]>;
+}
+
+export async function findRides(
+  { url, dbKey }: Db, asked: string | null, question: string, direct?: DirectQueries,
+): Promise<ExperienceRow[]> {
   if (!asked) return [];
+  // ⚠️ A direct query that fails is a soft failure, like the RPC's — and never a silent
+  // fallback to the RPC: two sources answering the same question would hide which one broke.
+  if (direct) {
+    try {
+      return await direct.findExperiences({ name: asked, park: null, heightCm: extractHeight(question), limit: 6 });
+    } catch {
+      return [];
+    }
+  }
   try {
     const res = await fetch(`${url}/rest/v1/rpc/find_experiences`, {
       method: "POST",

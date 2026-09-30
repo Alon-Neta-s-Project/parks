@@ -32,7 +32,7 @@ export { looksLikeGeminiKey, thinkingConfig } from "./config";
 export { formatCandidates, formatChunks, formatExperiences } from "./context";
 export { handle, type Host } from "./handler";
 export { emit, logged } from "./log";
-export type { ExperienceRow, KnowledgeChunk, ParkCandidate } from "./lookup";
+export type { DirectQueries, ExperienceRow, KnowledgeChunk, ParkCandidate } from "./lookup";
 export { todayLine } from "./prompt";
 export { bucketKey } from "./rate-limit";
 export { scrubAnswer } from "./safety";

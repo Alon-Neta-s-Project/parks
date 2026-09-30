@@ -3,7 +3,7 @@ import { composeContext } from "./context";
 import { diagnose, listModels } from "./diagnose";
 import { askGemini, readAnswer, readUsage } from "./gemini";
 import { corsFor, isFail, jsonResponder, type Fail } from "./http";
-import { findCandidates, findRides, retrieveKnowledge } from "./lookup";
+import { findCandidates, findRides, retrieveKnowledge, type DirectQueries } from "./lookup";
 import { SYSTEM } from "./prompt";
 import { checkRateLimit, dbAccess } from "./rate-limit";
 import { scrubAnswer } from "./safety";
@@ -28,6 +28,8 @@ export interface Host {
   trace?: Trace;
   /** For what happens after the response — the turn log's write. */
   report?: (e: TimEvent) => void;
+  /** Queries the server runs itself (apps/server/src/db). Absent: the database functions. */
+  direct?: DirectQueries;
 }
 
 export async function handle(
@@ -107,7 +109,7 @@ export async function handle(
    */
   const [rides, candidates, { chunks, retrieval }] =
     await timed(host.trace, "retrieval", () => Promise.all([
-      findRides(db, asked, question),
+      findRides(db, asked, question, host.direct),
       findCandidates(db, asked, question),
       retrieveKnowledge(db, key!, question),
     ]));
