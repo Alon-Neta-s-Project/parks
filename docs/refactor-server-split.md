@@ -476,7 +476,9 @@ The database holds logic today because there was no server: the browser talked t
 
 **Guardrails:** knowledge is still fetched up front, in parallel with the first call · at most 2 tool rounds · a ride or height in the answer with no `find_ride`/`query_rides` row behind it is flagged in the log (measure first, don't block) · `rides`/`chunks` counted from tool results so the golden set keeps working.
 
-**How it is decided with data:** behind `TIM_MODE=agent|classic`; the golden set in both modes (pass rate, p95, "answered from memory"), plus new follow-up and misspelling cases. Cost to expect: 2+ Gemini calls, ~6–9s instead of ~4.5s.
+**No `TIM_MODE` — staging runs the agent only (Alon, 01.10).** The comparison is production (today's Tim, a snapshot) against staging (the agent), through `tim:compare`; a flag would only have kept two Tims alive on one branch.
+🔴 **A trap for the cut-over:** `deploy-tim.yml` builds `tim/` for Supabase Edge on every push to `release`. The agent needs the direct connection (`query_rides` has no RPC path), which Edge does not have — so merging this branch into `release` would deploy a Tim that cannot run its tools. **The Edge deploy is retired in the same step that moves production to Netlify**, not after it.
+**How it is decided with data:** the golden set on both (pass rate, p95, "answered from memory"), plus the follow-up, misspelling and set cases. Cost to expect: 2+ Gemini calls, ~6–9s instead of ~4.5s. (Until 01.10 this said "behind `TIM_MODE=agent|classic`" — superseded above.)
 
 **Open:**
 - `query_rides` "avoid" on a sensitivity that was never checked: excluded (proposed) or shown with "לא ידוע" — **Paula**.
