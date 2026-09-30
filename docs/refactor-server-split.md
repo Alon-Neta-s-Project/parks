@@ -32,7 +32,7 @@ scripts/         repo tooling
 |---|---|
 | `find_experiences`, `park_candidates` | a query from the server; the fit and the candidate policy in `packages/shared` |
 | `match_knowledge` | a query from the server (`ORDER BY embedding <=> $1`); the pgvector index stays |
-| `check_rate_limit` | 🔴 **one atomic statement** (`INSERT … ON CONFLICT … DO UPDATE … RETURNING`), never read-check-write in code — two parallel requests would both pass |
+| `check_rate_limit` | 🔴 **one atomic statement** (`INSERT … ON CONFLICT … DO UPDATE … RETURNING`), never read-check-write in code — two parallel requests would both pass. ⚠️ **Today's function is not atomic either** (O16) — the move is where that gets fixed, not where it starts |
 | `log_turn` | an `INSERT`; **the privacy `CHECK` stays** as a constraint; the 90-day cleanup becomes a scheduled job |
 | `ingest_*`, `alias_*` | pipeline code with its own role — no secret in the arguments |
 | `save_tester_note`, `tester_notes`, `unanswered_sample` | server / CI endpoints |
@@ -484,3 +484,10 @@ Every row hashed on both sides (timestamps, chunk ids and embeddings excluded):
 - 🔴 **Two water rides, `height_requirement_cm`: production `NULL`, the repo `0`.** Bay Slides and Ketchakiddee Creek (Typhoon Lagoon). The repo — `experiences.json` and the content seed — says *checked, no minimum* (with a maximum of 152 and 122 cm); production says *not checked*. So production's Tim says "the height limit was not checked" where the repo has an answer: the content fix never reached production. **Which is right is Paula's; production is not touched from here.**
 - **Two lands exist only in production** (`epcot-world-showcase-italy`, `ioa-the-lost-continent`), with **no ride pointing at them**. Orphans outside the seed.
 - **Knowledge could not be compared:** `reviewer_readonly` has no RLS policy on `knowledge_doc`/`knowledge_chunk` (only admin, `ci_content`, `team1_content`), so it sees 0 rows — that is the policy, not an empty table. Comparing needs a role that can read them (Guy).
+
+### O16 — `check_rate_limit` counts, then inserts — not atomic · found 30.09 reading the function
+The function (`apps/server/db/migrations/20260926000000_baseline.sql`) checks three caps — global 600/24h, per bucket 20/60min and 60/24h — each with `select count(*) from api_call …`, and only then `insert into api_call`. Under `READ COMMITTED` two concurrent requests from the same bucket both count 19, both pass, and the bucket ends at 21. **The race described as a risk of moving it to the server exists today, inside the database.** In practice the overshoot is bounded by how many requests arrive at the same instant, so it is tolerable for a rate limit — but it is not the guarantee it reads like.
+
+**When it moves (the last of the five), it is built atomic from the start:** a counter row per bucket and window updated in one statement (`INSERT … ON CONFLICT (bucket, window_start) DO UPDATE SET n = n + 1 … RETURNING n`), or `pg_advisory_xact_lock(hashtext(bucket))` around the count and the insert — and a **test that fires parallel requests** against a real database (`npm run db:local-pg`) and fails if any bucket passes its cap. Seen failing on today's function first.
+
+Related, for Guy (O10): `anon` has `SELECT` and `TRUNCATE` on `api_call`. Reading exposes only hashes and times; `TRUNCATE` would wipe the rate limit, though PostgREST does not expose it.
