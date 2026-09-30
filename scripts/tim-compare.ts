@@ -20,7 +20,8 @@
  * checks.ts`, shared with `npm run golden`); the answers are compared on their facts — heights,
  * prices, times — never on wording, which an LLM varies from run to run.
  *
- * Env: .env.staging (TIM_SERVER_URL, SUPABASE_URL, SUPABASE_ANON_KEY) ·
+ * Env: .env.staging (TIM_SERVER_URL — the base `/tim` lives under: `https://<site>/api` on Netlify,
+ *      `https://<project>.vercel.app` on Vercel — SUPABASE_URL, SUPABASE_ANON_KEY) ·
  *      .env.prod-tim (PROD_TIM_URL, PROD_SUPABASE_URL, PROD_SUPABASE_ANON_KEY).
  */
 import { appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -69,7 +70,7 @@ function config(target: Target) {
   };
   return target === "prod"
     ? { tim: need("PROD_TIM_URL"), db: need("PROD_SUPABASE_URL"), key: need("PROD_SUPABASE_ANON_KEY") }
-    : { tim: `${need("TIM_SERVER_URL")}/api/tim`, db: need("SUPABASE_URL"), key: need("SUPABASE_ANON_KEY") };
+    : { tim: `${need("TIM_SERVER_URL")}/tim`, db: need("SUPABASE_URL"), key: need("SUPABASE_ANON_KEY") };
 }
 
 type Cfg = ReturnType<typeof config>;
