@@ -4,7 +4,7 @@
  *   npm run tim:compare -- --target prod      # production's answers → a snapshot
  *   npm run tim:compare -- --target staging   # staging's answers
  *   npm run tim:compare -- --report           # side by side: the latest of each
- *   options: --only <id-prefix> · --set golden|robustness|all (default all) · --run <id>
+ *   options: --only <id-prefix>[,<id-prefix>…] · --set golden|robustness|all (default all) · --run <id>
  *
  * 🔴 **Run only when Alon asks (29.09).** A production run writes to production's turn log
  * (an unanswered question is stored with its text) and spends production's rate limit.
@@ -114,7 +114,7 @@ async function runTarget(target: Target) {
   mkdirSync(dir, { recursive: true });
   const file = join(dir, `${runId}.jsonl`);
   const done = new Set(readRun(file).map((r) => r.id));
-  const cases = loadCases(arg("--set") ?? "all").filter((c) => (!arg("--only") || c.id.startsWith(arg("--only")!)) && !done.has(c.id));
+  const cases = loadCases(arg("--set") ?? "all").filter((c) => (!arg("--only") || arg("--only")!.split(",").some((p) => c.id.startsWith(p.trim()))) && !done.has(c.id));
 
   console.log(`▸ ${target} · run ${runId} · ${done.size} already answered · ${cases.length} to ask`);
   console.log(`  started ${new Date().toISOString()} — rows this run writes to ${target}'s turn log fall after this time`);
