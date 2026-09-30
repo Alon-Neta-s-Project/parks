@@ -20,15 +20,15 @@
  * checks.ts`, shared with `npm run golden`); the answers are compared on their facts — heights,
  * prices, times — never on wording, which an LLM varies from run to run.
  *
- * Env: .env.staging (TIM_SERVER_URL — the base `/tim` lives under: `https://<site>/api` on Netlify,
- *      `https://<project>.vercel.app` on Vercel — SUPABASE_URL, SUPABASE_ANON_KEY) ·
+ * Env: .env.staging (TIM_SERVER_URL — the base `/tim` lives under: `https://<site>/api` on Netlify —
+ *      SUPABASE_URL, SUPABASE_ANON_KEY) ·
  *      .env.prod-tim (PROD_TIM_URL, PROD_SUPABASE_URL, PROD_SUPABASE_ANON_KEY).
  */
 import { appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { parse } from "yaml";
-import { answerFacts, diffFacts, evaluate, needsRow, type Case, type Row, type TimReply, type Verdict } from "../apps/server/src/eval/checks";
-import { extractHeight, extractRideName } from "../apps/server/src/tim/index";
+import { answerFacts, diffFacts, evaluate, needsRow, type Case, type TimReply, type Verdict } from "../apps/server/src/eval/checks";
+import { rideLookup } from "./ride-lookup";
 import { ROOT } from "./paths";
 
 type Target = "prod" | "staging";
@@ -70,7 +70,8 @@ function config(target: Target) {
   };
   return target === "prod"
     ? { tim: need("PROD_TIM_URL"), db: need("PROD_SUPABASE_URL"), key: need("PROD_SUPABASE_ANON_KEY") }
-    : { tim: `${need("TIM_SERVER_URL")}/tim`, db: need("SUPABASE_URL"), key: need("SUPABASE_ANON_KEY") };
+    // Staging's Tim runs find_experiences in the server: the lookup does too (scripts/ride-lookup.ts).
+    : { tim: `${need("TIM_SERVER_URL")}/tim`, db: need("SUPABASE_URL"), key: need("SUPABASE_ANON_KEY"), databaseUrl: need("DATABASE_URL") };
 }
 
 type Cfg = ReturnType<typeof config>;
@@ -91,17 +92,6 @@ async function ask(cfg: Cfg, c: Case): Promise<TimReply> {
   }
 }
 
-async function lookup(cfg: Cfg, question: string): Promise<Row[]> {
-  const name = extractRideName(question);
-  if (!name) return [];
-  const res = await fetch(`${cfg.db}/rest/v1/rpc/find_experiences`, {
-    method: "POST",
-    headers: { apikey: cfg.key, Authorization: `Bearer ${cfg.key}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ p_name: name, p_height_cm: extractHeight(question), p_limit: 6 }),
-  });
-  return res.ok ? ((await res.json()) as Row[]) : [];
-}
-
 // ── A run ─────────────────────────────────────────────────────────────
 
 const readRun = (file: string): Result[] =>
@@ -116,10 +106,19 @@ async function runTarget(target: Target) {
   const done = new Set(readRun(file).map((r) => r.id));
   const cases = loadCases(arg("--set") ?? "all").filter((c) => (!arg("--only") || arg("--only")!.split(",").some((p) => c.id.startsWith(p.trim()))) && !done.has(c.id));
 
-  console.log(`▸ ${target} · run ${runId} · ${done.size} already answered · ${cases.length} to ask`);
+  const rides = rideLookup({ url: cfg.db, key: cfg.key, databaseUrl: "databaseUrl" in cfg ? cfg.databaseUrl : undefined });
+  try {
+    await askAll(target, cfg, runId, file, done, cases, rides);
+  } finally {
+    await rides.end();
+  }
+}
+
+async function askAll(target: Target, cfg: Cfg, runId: string, file: string, done: Set<string>, cases: (Case & { set: string })[], rides: ReturnType<typeof rideLookup>) {
+  console.log(`▸ ${target} · run ${runId} · ${done.size} already answered · ${cases.length} to ask · lookup: ${rides.source}`);
   console.log(`  started ${new Date().toISOString()} — rows this run writes to ${target}'s turn log fall after this time`);
   for (const c of cases) {
-    const rows = needsRow(c.expect ?? {}) ? await lookup(cfg, c.ask) : [];
+    const rows = needsRow(c.expect ?? {}) ? await rides.lookup(c.ask) : [];
     const reply = await ask(cfg, c);
     // 🔴 Stop at the rate limit, and don't record the case — the next run asks it again.
     if (reply.status === 429) {

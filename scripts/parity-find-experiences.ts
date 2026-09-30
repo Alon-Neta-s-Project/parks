@@ -13,6 +13,9 @@
  * and every ride by its English name, Hebrew name, aliases, a Hebrew prefix and "ב-" — each
  * with a height from a fixed cycle, including none — plus a whole park by id, and edge cases.
  * Read-only: two SELECTs per input.
+ *
+ * ⚠️ **Only on a database that still has the function.** Staging dropped it (migration
+ * 20260930170000); this runs against a local database, or production read-only.
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";

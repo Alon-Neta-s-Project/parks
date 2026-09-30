@@ -51,10 +51,8 @@ describe("scripts/write-build-info.mjs", () => {
 });
 
 describe("the commit, where it shows", () => {
-  it("is 'dev' locally, and Vercel's runtime variable when there is one", () => {
+  it("is 'dev' locally", () => {
     expect(commit()).toBe("dev");
-    vi.stubEnv("VERCEL_GIT_COMMIT_SHA", SHA);
-    expect(commit()).toBe(SHA);
   });
 
   it("comes back from diagnose, next to the stamp", () => {

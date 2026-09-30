@@ -9,23 +9,23 @@
  *
  * ⚠️ **`ride`, `height_cm` and `fits` are not in Tim's response** — it returns counts,
  * not names. For those the runner does what Tim does, with Tim's own functions
- * (`extractRideName`, `extractHeight`) and the same `find_experiences` call. It is
+ * (`extractRideName`, `extractHeight`) and the same `find_experiences` query. It is
  * not a second implementation of the lookup; it is the lookup, observed.
  *
  * ⚠️ **A case whose answer never arrived is `not run`, not `fail` and not `pass`.**
  * Gemini returning 503 says nothing about Tim. Counting it either way would make
  * the number mean something it does not.
  *
- * Env (from .env.local, or .env.staging for `golden:staging`): SUPABASE_URL, SUPABASE_ANON_KEY — for
- * the lookup only — and TIM_SERVER_URL with `--server-from-env`.
+ * Env (from .env.local, or .env.staging for `golden:staging`): DATABASE_URL, or SUPABASE_URL +
+ * SUPABASE_ANON_KEY — for the lookup only — and TIM_SERVER_URL with `--server-from-env`.
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { parse } from "yaml";
-import { extractHeight, extractRideName } from "../apps/server/src/tim/index";
+import { rideLookup } from "./ride-lookup";
 import { ROOT } from "./paths";
 
-import { evaluate, needsRow, type Case, type Row, type TimReply, type Verdict } from "../apps/server/src/eval/checks";
+import { evaluate, needsRow, type Case, type TimReply, type Verdict } from "../apps/server/src/eval/checks";
 
 const arg = (name: string) => {
   const i = process.argv.indexOf(name);
@@ -56,21 +56,11 @@ async function ask(question: string): Promise<TimReply> {
   return { ...body, status: res.status, ms: Math.round(performance.now() - t0) } as TimReply;
 }
 
-async function lookup(question: string): Promise<Row[]> {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_ANON_KEY;
-  const name = extractRideName(question);
-  if (!url || !key || !name) return [];
-  const res = await fetch(`${url}/rest/v1/rpc/find_experiences`, {
-    method: "POST",
-    headers: { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ p_name: name, p_height_cm: extractHeight(question), p_limit: 6 }),
-  });
-  return res.ok ? ((await res.json()) as Row[]) : [];
-}
+// With DATABASE_URL, the server's query — the path the server under test takes (scripts/ride-lookup.ts).
+const rides = rideLookup({ url: process.env.SUPABASE_URL, key: process.env.SUPABASE_ANON_KEY, databaseUrl: process.env.DATABASE_URL?.trim() || undefined });
 
 async function run(c: Case): Promise<Verdict> {
-  const rows = needsRow(c.expect ?? {}) ? await lookup(c.ask) : [];
+  const rows = needsRow(c.expect ?? {}) ? await rides.lookup(c.ask) : [];
   return evaluate(c, await ask(c.ask), rows);
 }
 
@@ -84,6 +74,7 @@ for (const c of cases) {
   const was = c.status ? ` (file: ${c.status})` : "";
   console.log(`${mark} ${c.id}${was} · ${(v.ms / 1000).toFixed(1)}s${v.why.length ? "\n     " + v.why.join("\n     ") : ""}`);
 }
+await rides.end();
 console.log(`\n${tally.pass} pass · ${tally.fail} fail · ${tally["not run"]} not run · of ${cases.length}`);
 // ⚠️ Every call is timed, answered or not: a slow 503 is still time the host waits.
 if (times.length) {

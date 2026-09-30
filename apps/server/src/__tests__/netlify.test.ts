@@ -120,3 +120,33 @@ describe("the log line on Netlify", () => {
     expect(res.headers.get("x-request-id")).toBe("01NETLIFYREQUEST");
   });
 });
+
+/**
+ * 🔴 **Where the ride lookup runs on Netlify.** With DATABASE_URL, find_experiences runs in the
+ * server (apps/server/src/db) and the database function is never called — staging drops it.
+ * The address here refuses connections: the lookup fails soft, and still does not fall back.
+ */
+describe("find_experiences on Netlify", () => {
+  const rpcCalls = () => {
+    const urls: string[] = [];
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => {
+      urls.push(String(url));
+      if (String(url).endsWith("/rpc/check_rate_limit")) return new Response(JSON.stringify("ok"), { status: 200 });
+      return new Response("[]", { status: 200 });
+    }));
+    return () => urls.filter((u) => u.includes("/rpc/find_experiences")).length;
+  };
+
+  it("without DATABASE_URL — the database function, as before", async () => {
+    const count = rpcCalls();
+    await createNetlifyHandler(baseEnv)(post("/api/tim"), { ip: "9.9.9.9" });
+    expect(count()).toBe(1);
+  });
+
+  it("with DATABASE_URL — the server's query, and the database function is not called", async () => {
+    const count = rpcCalls();
+    const env = { ...baseEnv, DATABASE_URL: "postgresql://u:p@127.0.0.1:1/none" };
+    await createNetlifyHandler(env)(post("/api/tim"), { ip: "9.9.9.9" });
+    expect(count()).toBe(0);
+  });
+});

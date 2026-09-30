@@ -11,9 +11,7 @@
  */
 export const COMMIT = "dev";
 
-/** The baked commit, or Vercel's runtime variable (Vercel exposes it while the function runs). */
+/** The baked commit — `"dev"` when no host wrote one. */
 export function commit(): string {
-  if (COMMIT !== "dev") return COMMIT;
-  const env = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env;
-  return env?.VERCEL_GIT_COMMIT_SHA || "dev";
+  return COMMIT;
 }

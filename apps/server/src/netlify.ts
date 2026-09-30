@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { createApp, type Env } from "./app";
+import { directQueries } from "./db/index";
 
 /**
  * The part of Netlify's function context the server uses.
@@ -36,6 +37,9 @@ export function createNetlifyHandler(env: Env) {
     waitUntil: (c) => (c.env as Bindings | undefined)?.waitUntil,
     platform: "netlify",
     requestId: (c) => (c.env as Bindings | undefined)?.requestId,
+    // find_experiences runs here, not in the database — when the site has DATABASE_URL
+    // (the transaction pooler, :6543). The connection opens on the first query.
+    direct: directQueries(env.DATABASE_URL),
   });
   const app = new Hono().route("/api", inner);
   return (req: Request, context: NetlifyContext) =>
