@@ -45,12 +45,14 @@ const ONLY = arg("--only");
 const golden = parse(readFileSync(join(ROOT, "evals", "golden.yaml"), "utf8")) as { cases: Case[] };
 const cases = golden.cases.filter((c) => !ONLY || c.id.startsWith(ONLY));
 
-async function ask(question: string): Promise<TimReply> {
+async function ask(c: Case): Promise<TimReply> {
   const t0 = performance.now();
   const res = await fetch(`${SERVER}/tim`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ question }),
+    // 🔴 With the history (01.10). Without it a follow-up case is asked with no context, and
+    // its verdict is about a different question — tim:compare always sent it; this did not.
+    body: JSON.stringify({ question: c.ask, history: c.history ?? [] }),
   });
   const body = await res.json();
   return { ...body, status: res.status, ms: Math.round(performance.now() - t0) } as TimReply;
@@ -61,7 +63,7 @@ const rides = rideLookup({ url: process.env.SUPABASE_URL, key: process.env.SUPAB
 
 async function run(c: Case): Promise<Verdict> {
   const rows = needsRow(c.expect ?? {}) ? await rides.lookup(c.ask) : [];
-  return evaluate(c, await ask(c.ask), rows);
+  return evaluate(c, await ask(c), rows);
 }
 
 const tally = { pass: 0, fail: 0, "not run": 0 };

@@ -46,6 +46,15 @@
 #   should_refuse האם סירוב הוא התשובה הנכונה. `false` אומר במפורש
 #                 שטים **אמור** לענות — מקרה ייעוץ ולא מקרה עובדה.
 #
+#   ── שני מפתחות שנוספו ב-01.10 (הכרעת אלון) — **ממתינים לאישור של פולה** ──
+#   must_contain_any  רשימה של קבוצות. כל קבוצה עוברת אם **אחת** מהמחרוזות
+#                 בה מופיעה — לעובדה שיש לה כמה ניסוחים נכונים (שם אנגלי
+#                 ושם עברי). הגיע מ-robustness.yaml, והבדיקה עצמה ב-
+#                 apps/server/src/eval/checks.ts משותפת לשני הקבצים.
+#   history       תורות קודמות, שנשלחות לטים כ-`history` — לשאלות המשך.
+#                 ⚠️ `npm run golden` לא שלח אותן עד 01.10; מקרה המשך היה
+#                 נשאל בלי הקשר, והתוצאה שלו הייתה על שאלה אחרת.
+#
 # ובשדה `tags` — לאיזו משפחה המקרה שייך. לסינון, לא לבדיקה.
 #
 # ⚠️ **למה `rides_gt` ולא `must_call_tool`.** טים אינו בוחר כלים — הקוד
@@ -455,3 +464,72 @@ cases:
       במדידה: 24 טוקנים, משפט אחד. ✅ ואומת ש-112 נכון גם ל-Space
       Mountain וגם לאוורסט — צירוף מקרים, לא שורה שהתחלפה.
       ובמקביל מואנה ירדה מ-289 טוקנים ל-117, והסייג נשאר פעם אחת.
+
+  # ── שאלות שרק סוכן יכול לענות עליהן — נוספו 01.10, הכרעת אלון ───────
+  #
+  # 🔴 **ממתינות לאישור של פולה.** הועברו מ-robustness.yaml לבקשת אלון, לפני
+  # שפולה ראתה אותן. הן משתמשות בשני מפתחות שאינם באוצר המילים שאישרה
+  # (must_contain_any, history — ראו בראש הקובץ).
+  #
+  # ⚠️ **צפויות להיכשל גם בייצור וגם ב-staging עד שיהיה סוכן** (O13). לכן אינן
+  # משנות את שער "0 מקרים גרועים יותר" — הן המדד שהסוכן אמור לשפר.
+  #
+  # ⚠️ התשובות חושבו מ-experiences.json **בכללים המשותפים עצמם**
+  # (packages/shared/src/filters.ts + fit.ts), לא ביד — אותם כללים ש-query_rides
+  # מריץ. היום אין לטים דרך לענות על אף אחת מהן מהדאטה.
+
+  - id: set.mk-multi-constraint
+    kind: tool
+    ask: "אנחנו ב-Magic Kingdom עם ילדה בת 4 בגובה 105 שמפחדת מחושך. על מה היא יכולה לעלות?"
+    expect:
+      must_contain_any: [["Dumbo", "דמבו"], ["Barnstormer", "ברנסטורמר"], ["Jungle Cruise", "ג'ונגל קרוז"], ["Tomorrowland Speedway", "Speedway"]]
+    tags: [set, height, sensitivity, multi-constraint]
+    gap: code
+    status: unmeasured
+    note: >-
+      שלושה סינונים יחד: פארק, גובה 105, ולהימנע מחושך. לפי הדאטה 12 מתקנים:
+      Jungle Cruise, Swiss Family Treehouse, The Magic Carpets of Aladdin,
+      it's a small world, Mad Tea Party, Prince Charming Regal Carrousel,
+      Casey Jr. Splash 'N' Soak Station, Dumbo, The Barnstormer (89),
+      Astro Orbiter, Buzz Lightyear's Space Ranger Spin, Tomorrowland Speedway (81).
+      אף מתקן לא נעצר כ"לא נבדק" לחושך — כולם נבדקו. נבדק בעין: אין בתשובה
+      מתקן שמסומן חשוך (Haunted Mansion, Peter Pan's Flight) **כהמלצה** — אזכור
+      שלו כ"כדאי להימנע" הוא תשובה נכונה, ולכן אין כאן must_not_contain.
+      **צפוי להיכשל היום.** סוכן: query_rides({park, heightCm: 105,
+      avoidSensitivities: ["dark"], kinds: ["attraction"]}).
+
+  - id: set.two-children-coasters
+    kind: tool
+    ask: "יש לנו שני ילדים, אחד בגובה 100 ואחד בגובה 125. על אילו רכבות הרים ב-Islands of Adventure שניהם יכולים לעלות?"
+    expect:
+      must_contain_any: [["Hippogriff", "היפוגריף"]]
+    tags: [set, height, two-heights]
+    gap: code
+    status: unmeasured
+    note: >-
+      🔴 **רק אחת מתאימה לשניהם: Flight of the Hippogriff (91).** המלכודת:
+      Hagrid's (122) מתאימה לגדול בלבד — תשובה שמציגה אותה "לשניהם" נכשלת
+      (נבדק בעין; אזכור שלה כ"רק לגדול" הוא תשובה נכונה ומועילה). סוכן: שתי
+      קריאות ל-query_rides, heightCm 100 ו-125, וחיתוך — או קריאה אחת עם
+      הנמוך, כשהגבוה נבדק מול התקרות.
+
+  - id: followup.narrow-motion-sickness
+    kind: tool
+    history:
+      - { role: user, text: "אילו מתקנים עדינים, עוצמה 1 או 2, יש ב-Universal Studios Florida?" }
+      - { role: model, text: "יש לא מעט: E.T. Adventure, The Simpsons Ride, TRANSFORMERS: The Ride-3D, Despicable Me Minion Mayhem, Harry Potter and the Escape from Gringotts, MEN IN BLACK Alien Attack, Trolls Trollercoaster ועוד." }
+    ask: "ומתוכם, רק כאלה שאין להם אזהרת בחילה?"
+    expect:
+      must_contain_any: [["E.T.", "אי.טי"], ["MEN IN BLACK", "Men in Black", "מן אין בלאק"], ["Trolls", "טרולס"]]
+    tags: [followup, set, motion-sickness]
+    gap: code
+    status: unmeasured
+    note: >-
+      הסינון הקודם (עוצמה עד 2, מתקנים) עובר מההיסטוריה, ומתווסף אליו אחד.
+      לפי הדאטה: 18 מתקנים → 12. **יוצאים 6:** Despicable Me Minion Mayhem,
+      Race Through New York, TRANSFORMERS, Fast & Furious – Supercharged,
+      The Simpsons Ride, Harry Potter and the Escape from Gringotts — ושלושה
+      מהם הוזכרו בתשובה הקודמת בכוונה. נבדק בעין: אף אחד מהשישה אינו מוצג
+      כמתאים. **צפוי להיכשל היום** — השליפה אינה קוראת את ההיסטוריה. סוכן:
+      query_rides({park, intensityMax: 2, kinds: ["attraction"],
+      hasMotionSicknessWarning: false}).
