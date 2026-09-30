@@ -17,7 +17,7 @@
 #                     מופיעה — לעובדה שיש לה כמה ניסוחים נכונים.
 #   history           תורות קודמות, שנשלחות לטים כ-`history` — לשאלות המשך.
 #
-# רץ ב-`npm run tim:compare` (ייצור מול staging), **רק כשאלון מבקש.**
+# 20 מקרים (29–30.09). רץ ב-`npm run tim:compare` (ייצור מול staging), **רק כשאלון מבקש.**
 
 version: 1
 cases:
@@ -178,6 +178,36 @@ cases:
     note: >-
       ⚠️ השם אינו בשאלה, רק בהיסטוריה. היום השליפה לא תמצא אותו, וטים יענה
       מההיסטוריה בלבד — rides_gt: 0 הוא מה שאמור להיכשל, ולהשתפר.
+
+  - id: followup.hagrid-height-from-history
+    kind: tool
+    history:
+      - { role: user, text: "ספר לי על Hagrid's Magical Creatures Motorbike Adventure" }
+      - { role: model, text: "זו רכבת הרים ב-Universal Islands of Adventure, בעוצמה 3 מתוך 4." }
+    ask: "ויש שם מגבלת גובה?"
+    expect: { rides_gt: 0, must_contain: ["122"] }
+    tags: [followup, height]
+    status: proposed
+    note: >-
+      ⚠️ השם רק בהיסטוריה, **והגובה אינו בה בכוונה** — אחרת טים היה יכול לענות
+      מהתורה הקודמת בלי לשלוף. נבדק 30.09: ה-regex מחלץ "ויש שם מגבלת", והמסד
+      מחזיר כלום. צפוי להיכשל היום, ולעבור עם סוכן שבונה את השאילתה מהשיחה.
+
+  # ── השוואה בין שני מתקנים ────────────────────────────────────────────
+
+  - id: compare.tron-vs-space-mountain
+    kind: tool
+    ask: "מה יותר מפחיד, טרון או ספייס מאונטיין?"
+    expect:
+      rides_gt: 1
+      must_contain_any: [["TRON", "טרון"], ["Space Mountain", "ספייס"]]
+    tags: [compare, intensity]
+    status: proposed
+    note: >-
+      לפי הדאטה: TRON Lightcycle / Run — עוצמה 4, 122 ס"מ · Space Mountain —
+      עוצמה 3, 112 ס"מ. נבדק 30.09: ה-regex מחבר הכול ל"שם" אחד ("מפחיד טרון
+      ספייס מאונטיין"), והמסד מחזיר רק את Space Mountain — rides_gt: 1 הוא מה
+      שנכשל היום. סוכן קורא לכלי פעמיים.
 
   # ── שאלות קבוצה — אין להן שליפה היום (O13, query_rides) ──────────────
 
