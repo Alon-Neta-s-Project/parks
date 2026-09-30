@@ -1,4 +1,5 @@
 import type { Host } from "./handler";
+import { commit } from "../build-info";
 import { DEPLOY_STAMP } from "./stamp";
 import type { WaitUntil } from "./turn-log";
 
@@ -145,7 +146,7 @@ export async function logged(
   const t0 = performance.now();
   const trace = newTrace();
   const inputs = await readInputs(request);
-  const base = { req, platform: ctx.platform, stamp: DEPLOY_STAMP, route: ctx.route };
+  const base = { req, platform: ctx.platform, stamp: DEPLOY_STAMP, commit: commit(), route: ctx.route };
   const host: Host = {
     waitUntil: ctx.waitUntil,
     trace,

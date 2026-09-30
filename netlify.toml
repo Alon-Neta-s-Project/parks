@@ -11,7 +11,8 @@
 #
 # למעבר לאתר המלא: `npm run build` ו-`publish = "apps/web/dist"`.
 [build]
-  command = "npm run build:tim"
+  # ⚠️ build-info first: it writes COMMIT_REF into the server before Netlify bundles the function.
+  command = "node scripts/write-build-info.mjs && npm run build:tim"
   publish = "apps/web/dist-tim"
 
 [build.environment]

@@ -63,6 +63,8 @@ jobs:
           # ⚠️ **נבנה, ולא מועתק.** הלוגיקה חיה בשרת (apps/server/src/tim), והכניסה
           # של Supabase ב-apps/server/src/edge/tim.ts. esbuild מאחד אותן לקובץ אחד
           # בלי ייבואים — מקור אחד לשרת ולייצור.
+          # ⚠️ הקומיט נכתב לקוד לפני האריזה (GITHUB_SHA), ו-diagnose ושורות היומן מחזירים אותו.
+          node scripts/write-build-info.mjs
           npm run build:edge
           mkdir -p supabase/functions/quick-worker
           cp apps/server/dist/edge/tim/index.ts supabase/functions/quick-worker/index.ts

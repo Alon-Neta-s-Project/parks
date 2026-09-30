@@ -3,6 +3,7 @@ import { DEFAULT_MODEL } from "./config";
 import { thinkingConfig } from "./config";
 import { allowedOrigins } from "./http";
 import { FIT_STAMP } from "./prompt";
+import { commit } from "../build-info";
 import { DEPLOY_STAMP } from "./stamp";
 
 export function diagnose(env: Record<string, string | undefined>) {
@@ -58,6 +59,8 @@ export function diagnose(env: Record<string, string | undefined>) {
     // repo".** `fit_stamp` only answers "was the wording block rebuilt", and
     // on 25.09 it said "identical" about an old function.
     deploy_stamp: DEPLOY_STAMP,
+    // The commit the build was made from ("dev" locally) — the exact version, for `git show`.
+    commit: commit(),
   };
 }
 
