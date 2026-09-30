@@ -1,8 +1,11 @@
 import { heightFit, heightFitsAsBoolean, type HeightFit } from "../../../../packages/shared/src/fit";
+import type { QueryRidesInput, QueryRidesResult } from "../db/query-rides";
 import type { Db } from "./rate-limit";
 import { extractHeight, wantsRecommendation } from "./understand";
 /** A ride as it comes back from find_experiences. */
 export interface ExperienceRow {
+  /** The ride's id — both find_experiences and query_rides return it; Tim's context does not use it. */
+  id?: string;
   name: string;
   name_he: string | null;
   park: string;
@@ -156,6 +159,11 @@ export interface DirectQueries {
   /** `embedding` is the vector as a JSON array string — what the RPC's `p_embedding` gets. */
   matchKnowledge(p: { embedding: string; limit: number | null; resort: string | null }): Promise<KnowledgeChunk[]>;
   parkCandidates(p: { perPark: number | null }): Promise<ParkCandidate[]>;
+  /**
+   * The agent's set-question tool (O13) — server only, no database function behind it, so no
+   * RPC path either. Optional: today's Tim does not call it; the agent will.
+   */
+  queryRides?(p: QueryRidesInput): Promise<QueryRidesResult>;
 }
 
 export async function findRides(

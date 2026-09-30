@@ -1,11 +1,11 @@
 import { experiences } from "../data";
-import type { Experience, IntensityLevel } from "../data/schema";
+import type { Experience } from "../data/schema";
 import type { Profile } from "./profile";
 import {
-  rideSensitivities,
-  sensitivityStateFor,
-  type Sensitivity,
-} from "./sensitivity";
+  matchesFilters as matchesShared,
+  type SearchFilters as SharedFilters,
+} from "../../../../packages/shared/src/filters";
+import { rideFacts } from "./ride-facts";
 
 /**
  * The recommendation engine, and the only place experiences are selected.
@@ -17,46 +17,12 @@ import {
  * searchExperiences as its tool, not replace it.
  */
 
-export interface SearchFilters {
+/**
+ * The shared filter rules (packages/shared/src/filters.ts), plus the two lookups the web app
+ * matches by its own names: the parks and the land.
+ */
+export interface SearchFilters extends SharedFilters {
   parks?: string[];
-  /**
-   * Replaces the four sensitivity filters and motion_sickness_max.
-   *
-   * Not the operator's own safety notice — that turned out to mark a whole
-   * class of rides at once and said nothing about nausea. This reflects sources
-   * that actually rate it, which are T3/T4, so the field sits outside the
-   * T1-only carve-out that now covers height limits and accessibility alone.
-   *
-   * true  — only rides carrying an official warning
-   * false — only rides explicitly found to carry none
-   * Rides where it is simply unknown are never swept into either answer.
-   */
-  hasMotionSicknessWarning?: boolean;
-  kinds?: ("attraction" | "entertainment")[];
-  intensityMin?: IntensityLevel | null;
-  intensityMax?: IntensityLevel | null;
-  includeUnrated?: boolean;
-  /** Drop rides the workbook flags as temporarily unavailable. */
-  includeClosed?: boolean;
-  /** Explicit opt-in: only rides whose short queue the group's pass covers. */
-  excludeSinglePass?: boolean;
-  /**
-   * Sensitivities someone in the group asked Tim to avoid.
-   *
-   * A ride flagged for any of them is out. So, by default, is a ride nobody
-   * checked — see includeUncheckedSensitivity.
-   */
-  avoidSensitivities?: Sensitivity[];
-  /**
-   * Whether rides nobody checked may still appear while avoiding.
-   *
-   * ⚠️ Default false, and the default is the safety property. A family that
-   * said "she is frightened of the dark" and reads a list is reading it as a
-   * list of rides that are not dark. An unchecked row would be indistinguishable
-   * from a cleared one — the same collapse as an unrated ride answering a
-   * question about intensity, and it is excluded for the same reason.
-   */
-  includeUncheckedSensitivity?: boolean;
   land?: string;
 }
 
@@ -69,60 +35,12 @@ export interface SearchFilters {
  * exactly why the column stays nullable.
  */
 export function matchesFilters(e: Experience, filters: SearchFilters): boolean {
-  const {
-    parks,
-    kinds,
-    intensityMin = null,
-    intensityMax = null,
-    includeUnrated = false,
-    includeClosed = false,
-    excludeSinglePass = false,
-    hasMotionSicknessWarning,
-    avoidSensitivities,
-    includeUncheckedSensitivity = false,
-    land,
-  } = filters;
-
-  {
-    if (parks?.length && !parks.includes(e.park)) return false;
-    if (kinds?.length && !kinds.includes(e.kind)) return false;
-    if (land && e.land !== land) return false;
-    if (!includeClosed && e.status.state === "closed") return false;
-    if (excludeSinglePass && e.fastAccess.singlePassRequired) return false;
-
-    if (avoidSensitivities?.length) {
-      for (const sensitivity of rideSensitivities) {
-        if (!avoidSensitivities.includes(sensitivity)) continue;
-        const state = sensitivityStateFor(e, sensitivity);
-        if (state === "flagged") return false;
-        if (state === "unchecked" && !includeUncheckedSensitivity) return false;
-        // "depends" stays in deliberately. It is a checked row whose answer is
-        // about the person; dropping it would hide most of a park from someone
-        // who can transfer. It is surfaced beside the ride instead.
-      }
-    }
-
-    if (hasMotionSicknessWarning !== undefined) {
-      // "na" and null both mean we cannot answer, so neither counts as a match
-      // in either direction — an unknown must not read as a clean bill.
-      const want = hasMotionSicknessWarning ? "true" : "false";
-      if (e.motionSicknessWarning !== want) return false;
-    }
-
-    if (!e.intensity.rated) {
-      // An unrated ride is never an answer to a question about intensity.
-      // Returning one under "intensity up to 2" would assert something nobody
-      // established — the exact false promise this product exists to avoid — so
-      // an active bound excludes it regardless of includeUnrated. That flag only
-      // governs whether unrated rides are listed when no bound is set at all.
-      if (intensityMin !== null || intensityMax !== null) return false;
-      return includeUnrated;
-    }
-    const value = e.intensity.value as IntensityLevel;
-    if (intensityMin !== null && value < intensityMin) return false;
-    if (intensityMax !== null && value > intensityMax) return false;
-    return true;
-  }
+  const { parks, land, ...rules } = filters;
+  if (parks?.length && !parks.includes(e.park)) return false;
+  if (land && e.land !== land) return false;
+  // The rules themselves — unrated never answers intensity, unchecked sensitivity is out by
+  // default, "na" is an answer — are shared with Tim's query_rides.
+  return matchesShared(rideFacts(e), rules);
 }
 
 /** Mirrors the tool signature in brief §7 so the later model layer calls this. */
