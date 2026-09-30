@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import type { Experience } from "../data/schema";
+import { fitLabel } from "../lib/fit-label";
 import { fitFor, type Member } from "../lib/group";
 
 /**
@@ -7,32 +8,17 @@ import { fitFor, type Member } from "../lib/group";
  *
  * Never stored: a saved tag would go stale the moment a child's height is
  * corrected, and then two sources would disagree about who can ride.
+ * The words are chosen in `fitLabel` (lib/fit-label.ts), where they are tested.
  */
 export function FitTag({ experience, members }: { experience: Experience; members: Member[] }) {
   const { t } = useTranslation();
   if (!members.length) return null;
 
-  const result = fitFor(experience, members);
-
-  if (result.fit === "unknown") {
-    // An unchecked height limit is not a clean bill of health.
-    const why = result.unmeasured.length
-      ? t("fit.unmeasuredWhy", { count: result.unmeasured.length })
-      : t("fit.unknownWhy");
-    return (
-      <span className="chip chip--missing" title={why}>
-        {t("fit.unknown")}
-      </span>
-    );
-  }
-
-  if (result.fit === "everyone") {
-    return <span className="chip chip--open">{t("fit.everyone")}</span>;
-  }
-
+  const label = fitLabel(fitFor(experience, members), members.length, experience.maxHeightRequirementCm);
+  const title = label.why ? t(`fit.${label.why.key}`, label.why.values) : undefined;
   return (
-    <span className="chip chip--warn">
-      {t("fit.some", { count: result.canRide.length, total: members.length })}
+    <span className={`chip chip--${label.tone}`} title={title}>
+      {t(`fit.${label.key}`, label.values)}
     </span>
   );
 }

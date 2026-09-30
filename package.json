@@ -29,7 +29,7 @@
     "db:migrate:staging": "DBMATE_MIGRATIONS_DIR=apps/server/db/migrations DBMATE_MIGRATIONS_TABLE=dbmate_migrations DBMATE_NO_DUMP_SCHEMA=true dbmate --env-file .env.staging up",
     "build": "tsc -b && vite build --config apps/web/vite.config.ts && tsx scripts/prerender.ts",
     "preview": "vite preview --config apps/web/vite.config.ts",
-    "test": "vitest run --config apps/web/vite.config.ts && vitest run --config apps/server/vitest.config.ts && vitest run --config apps/pipeline/vitest.config.ts",
+    "test": "vitest run --config apps/web/vite.config.ts && vitest run --config apps/server/vitest.config.ts && vitest run --config apps/pipeline/vitest.config.ts && vitest run --config packages/shared/vitest.config.ts",
     "import": "tsx scripts/import-content.ts",
     "artifact": "npm run build && python3 scripts/build-artifact.py",
     "build:tim": "python3 scripts/build-tim-prompt.py --check && tsc -b && vite build --config apps/web/vite.tim.config.ts && tsx scripts/verify-tim-build.ts",

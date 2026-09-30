@@ -30,6 +30,8 @@
     "apps/server/vitest.config.ts",
     "apps/pipeline/src",
     "apps/pipeline/vitest.config.ts",
+    "packages/shared/src",
+    "packages/shared/vitest.config.ts",
     "scripts",
     "apps/web/vite.config.ts",
     "apps/web/vite.tim.config.ts",
