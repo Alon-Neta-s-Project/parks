@@ -122,6 +122,8 @@ export async function findCandidates({ url, dbKey }: Db, asked: string | null, q
  */
 export interface DirectQueries {
   findExperiences(p: { name: string | null; park: string | null; heightCm: number | null; limit: number }): Promise<ExperienceRow[]>;
+  /** `embedding` is the vector as a JSON array string — what the RPC's `p_embedding` gets. */
+  matchKnowledge(p: { embedding: string; limit: number | null; resort: string | null }): Promise<KnowledgeChunk[]>;
 }
 
 export async function findRides(
@@ -158,7 +160,7 @@ export async function findRides(
 }
 
 // ── Retrieval ────────────────────────────────────────────────────────
-export async function retrieveKnowledge({ url, dbKey }: Db, key: string, question: string): Promise<{
+export async function retrieveKnowledge({ url, dbKey }: Db, key: string, question: string, direct?: DirectQueries): Promise<{
   chunks: KnowledgeChunk[];
   retrieval: "ok" | "empty" | "failed";
 }> {
@@ -182,7 +184,11 @@ export async function retrieveKnowledge({ url, dbKey }: Db, key: string, questio
       },
     );
     const vector = emb.ok ? (await emb.json())?.embedding?.values : null;
-    if (Array.isArray(vector) && vector.length === 1536) {
+    if (Array.isArray(vector) && vector.length === 1536 && direct) {
+      // ⚠️ Like findRides: a direct query that fails is "failed" — never a fallback to the RPC.
+      chunks = await direct.matchKnowledge({ embedding: JSON.stringify(vector), limit: 5, resort: null });
+      retrieval = chunks.length > 0 ? "ok" : "empty";
+    } else if (Array.isArray(vector) && vector.length === 1536) {
       const res = await fetch(`${url}/rest/v1/rpc/match_knowledge`, {
         method: "POST",
         headers: {

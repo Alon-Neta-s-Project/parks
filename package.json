@@ -20,6 +20,7 @@
     "golden:staging": "tsx --env-file=.env.staging scripts/run-golden.ts --server-from-env",
     "tim:compare": "tsx scripts/tim-compare.ts",
     "parity:find-experiences": "tsx --env-file=.env.staging scripts/parity-find-experiences.ts",
+    "parity:match-knowledge": "tsx --env-file=.env.staging scripts/parity-match-knowledge.ts",
     "db:local-pg": "bash scripts/db-local-pg.sh",
     "db:status": "DBMATE_MIGRATIONS_DIR=apps/server/db/migrations DBMATE_MIGRATIONS_TABLE=dbmate_migrations dbmate status",
     "db:new": "DBMATE_MIGRATIONS_DIR=apps/server/db/migrations dbmate new",

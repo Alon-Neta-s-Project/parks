@@ -2,7 +2,7 @@ import { afterEach, test } from "vitest";
 import { handle } from "./index";
 import type { DirectQueries, ExperienceRow } from "./lookup";
 import { extractRideName } from "./understand";
-import { assertEquals, ask, stub, geminiOk, FULL } from "./test-helpers";
+import { assertEquals, ask, stub, geminiOk, withChunks, FULL } from "./test-helpers";
 
 /**
  * 🔴 **Which path the ride lookup takes.** With a direct connection from the host, the
@@ -32,6 +32,7 @@ test("עם חיבור ישיר — השאילתה בשרת, ו-PostgREST אינ�
   restore = stub(world(calls)).restore;
   const asked: unknown[] = [];
   const direct: DirectQueries = {
+    matchKnowledge: async () => [],
     findExperiences: async (p) => {
       asked.push(p);
       return [{ name: "From direct", name_he: null, park: "P", land: null, status: "open", status_note: null, intensity: 3, height_cm: 112 } as ExperienceRow];
@@ -48,10 +49,53 @@ test("עם חיבור ישיר — השאילתה בשרת, ו-PostgREST אינ�
 test("חיבור ישיר שנכשל — כשל רך כמו השליפה, בלי ליפול בשקט ל-PostgREST", async () => {
   const calls: string[] = [];
   restore = stub(world(calls)).restore;
-  const direct: DirectQueries = { findExperiences: async () => { throw new Error("connection refused"); } };
+  const direct: DirectQueries = { matchKnowledge: async () => [], findExperiences: async () => { throw new Error("connection refused"); } };
   const r = await handle(ask({ question: "מה הגובה ב-Space Mountain?" }), FULL, { direct });
   assertEquals(r.status, 200);
   assertEquals((await r.json()).rides, 0);
   // ⚠️ No silent fallback to the other source (CLAUDE.md).
   assertEquals(calls.some((u) => u.includes("/rpc/find_experiences")), false);
+});
+
+// ── match_knowledge ──────────────────────────────────────────────────
+
+const CHUNK = { content: "From RPC", volatility: "stable", last_verified: "2026-09-01", authority_tier: "T1" };
+
+test("match_knowledge בלי חיבור ישיר — דרך PostgREST, כמו קודם", async () => {
+  const s = stub(withChunks([CHUNK]));
+  restore = s.restore;
+  const r = await (await handle(ask({ question: "מה עושים כשיורד גשם?" }), FULL)).json();
+  assertEquals([r.chunks, r.retrieval], [1, "ok"]);
+  assertEquals(s.calls.some((c) => c.url.includes("/rpc/match_knowledge")), true);
+});
+
+test("match_knowledge עם חיבור ישיר — השאילתה בשרת, עם אותו וקטור ואותו גג", async () => {
+  const s = stub(withChunks([CHUNK]));
+  restore = s.restore;
+  const asked: { embedding: string; limit: number | null; resort: string | null }[] = [];
+  const direct: DirectQueries = {
+    findExperiences: async () => [],
+    matchKnowledge: async (p) => {
+      asked.push(p);
+      return [{ ...CHUNK, content: "From direct" }];
+    },
+  };
+  const r = await (await handle(ask({ question: "מה עושים כשיורד גשם?" }), FULL, { direct })).json();
+  assertEquals([r.chunks, r.retrieval], [1, "ok"]);
+  assertEquals(s.calls.some((c) => c.url.includes("/rpc/match_knowledge")), false);
+  // The same arguments the RPC gets: the embedding as a JSON array string, 5, no resort.
+  assertEquals(asked.length, 1);
+  assertEquals([JSON.parse(asked[0]!.embedding).length, asked[0]!.limit, asked[0]!.resort], [1536, 5, null]);
+});
+
+test("match_knowledge ישיר שנכשל — retrieval failed, בלי ליפול בשקט ל-PostgREST", async () => {
+  const s = stub(withChunks([CHUNK]));
+  restore = s.restore;
+  const direct: DirectQueries = {
+    findExperiences: async () => [],
+    matchKnowledge: async () => { throw new Error("connection refused"); },
+  };
+  const r = await (await handle(ask({ question: "מה עושים כשיורד גשם?" }), FULL, { direct })).json();
+  assertEquals([r.chunks, r.retrieval], [0, "failed"]);
+  assertEquals(s.calls.some((c) => c.url.includes("/rpc/match_knowledge")), false);
 });
