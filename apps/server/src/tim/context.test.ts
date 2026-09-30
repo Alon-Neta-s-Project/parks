@@ -69,9 +69,17 @@ test("התאמה לא ידועה אינה נאמרת כהתאמה", () => {
     status_note: null, intensity: 3, gets_wet: null, skip_line: null,
     last_verified: null, height_cm: null,
   };
-  assertEquals(formatExperiences([{ ...base, fits: null }]).includes("מתאים"), false);
-  assertEquals(formatExperiences([{ ...base, fits: true }]).includes("מתאים לגובה"), true);
-  assertEquals(formatExperiences([{ ...base, fits: false }]).includes("לא מתאים"), true);
+  // The fit comes from the shared rule (`fit`), not the database's `fits` (lookup.ts withFit).
+  assertEquals(formatExperiences([{ ...base, fits: null, fit: "unknown" }]).includes("מתאים"), false);
+  assertEquals(formatExperiences([{ ...base, fits: null, fit: null }]).includes("מתאים"), false);
+  assertEquals(formatExperiences([{ ...base, fits: true, fit: "fits" }]).includes("מתאים לגובה"), true);
+  assertEquals(formatExperiences([{ ...base, fits: false, fit: "too_short" }]).includes("לא מתאים"), true);
+  assertEquals(formatExperiences([{ ...base, fits: false, fit: "too_tall" }]).includes("לא מתאים"), true);
+  // Decision 2, C: below the ceiling is said, and "מתאים לגובה" never is.
+  const under = formatExperiences([{ ...base, fits: null, fit: "under_ceiling_floor_unknown" }]);
+  assertEquals([under.includes("לא גבוה מדי"), under.includes("מתאים לגובה")], [true, false]);
+  // And the database's own `true` is not read: only `fit` speaks.
+  assertEquals(formatExperiences([{ ...base, fits: true, fit: "under_ceiling_floor_unknown" }]).includes("מתאים לגובה"), false);
 });
 
 // 🔴 **This test asserted a status that doesn't exist.**

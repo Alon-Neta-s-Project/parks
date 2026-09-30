@@ -93,9 +93,14 @@ export function formatExperiences(rows: ExperienceRow[]): string {
           ? "אין מגבלת גובה מינימלית"
           : `גובה מינימום: ${r.height_cm} ס"מ`,
       );
-      if (r.fits === true) bits.push("מתאים לגובה שנמסר");
-      if (r.fits === false) bits.push("לא מתאים לגובה שנמסר");
-      // ⚠️ fits === null is not said as "מתאים" ("fits"). It is simply not said.
+      // The fit is the shared rule's (lookup.ts `withFit`), not the database's.
+      if (r.fit === "fits") bits.push("מתאים לגובה שנמסר");
+      if (r.fit === "too_short" || r.fit === "too_tall") bits.push("לא מתאים לגובה שנמסר");
+      // 🔴 Decision 2, C (Alon, 30.09): a ceiling with an unchecked floor. What is known — not
+      // too tall — is said, and it is never "מתאים". The floor's line above already says it is
+      // unknown whether one exists.
+      if (r.fit === "under_ceiling_floor_unknown") bits.push("לא גבוה מדי לגובה שנמסר — אבל לא ידוע אם יש גובה מינימום");
+      // ⚠️ "unknown" and no height are not said as "מתאים" ("fits"). They are simply not said.
       if (r.intensity !== null) bits.push(`עוצמה ${r.intensity} מתוך 4`);
       else bits.push("עוצמה: לא דורגה");
       // ── The four sensitivity flags ──────────────────────────────────

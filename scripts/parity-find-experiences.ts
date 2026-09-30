@@ -5,7 +5,9 @@
  *   PARITY_DATABASE_URL=postgresql://… npx tsx scripts/parity-find-experiences.ts
  *   npm run parity:find-experiences            # reads DATABASE_URL from .env.staging
  *
- * 🔴 **Any difference fails** — which rides, in which order, every field, the fit. The move
+ * 🔴 **Any difference fails** — which rides, in which order, every field. Not the fit: since
+ * 30.09 it is the shared rule's (packages/shared/src/fit.ts, with its own tests), and the
+ * server query no longer computes it. The move
  * is a copy, so a difference is a bug in the copy; a fix (the "ב-" hyphen) comes after
  * parity, as its own step.
  *
@@ -64,7 +66,7 @@ const old = (i: Input) => sql`
   select id, name, name_he, park, land, category, status, status_note, intensity,
          height_cm, max_height_cm, gets_wet, wheelchair, motion_sickness,
          sens_dark, sens_heights, sens_loud, sens_strobe, skip_line,
-         last_verified::text as last_verified, fits
+         last_verified::text as last_verified
   from public.find_experiences(${i.name}::text, ${i.park}::text, ${i.heightCm}::int, ${i.limit}::int)`;
 
 let same = 0;

@@ -43,8 +43,9 @@ test("עם חיבור ישיר — השאילתה בשרת, ו-PostgREST אינ�
   const r = await handle(ask({ question }), FULL, { direct });
   assertEquals((await r.json()).rides, 1);
   assertEquals(calls.some((u) => u.includes("/rpc/find_experiences")), false);
-  // The same arguments the RPC gets: Tim's own extracted name, the height, a limit of 6.
-  assertEquals(asked, [{ name: extractRideName(question), park: null, heightCm: 110, limit: 6 }]);
+  // The same arguments the RPC gets: Tim's own extracted name, a limit of 6. No height — the
+  // fit is the shared rule's, applied after the query (lookup.ts withFit).
+  assertEquals(asked, [{ name: extractRideName(question), park: null, limit: 6 }]);
 });
 
 test("חיבור ישיר שנכשל — כשל רך כמו השליפה, בלי ליפול בשקט ל-PostgREST", async () => {

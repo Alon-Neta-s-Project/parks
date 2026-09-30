@@ -1,3 +1,4 @@
+import { heightFit, heightFitsAsBoolean, type HeightFit } from "../../../../packages/shared/src/fit";
 import type { Db } from "./rate-limit";
 import { extractHeight, wantsRecommendation } from "./understand";
 /** A ride as it comes back from find_experiences. */
@@ -43,7 +44,26 @@ export interface ExperienceRow {
   gets_wet: string | null;
   skip_line: string | null;
   last_verified: string | null;
+  /**
+   * ⚠️ **Not the database's.** The RPC still returns its own `fits`; `withFit` overwrites it
+   * with the shared rule's answer, so Tim and the screen say the same thing.
+   */
   fits: boolean | null;
+  /** The shared rule's answer for the height in the question — every state its own word. */
+  fit?: HeightFit | null;
+}
+
+/**
+ * The fit, from the one rule (packages/shared/src/fit.ts) — never from the database.
+ *
+ * 🔴 Until 30.09 the SQL `CASE` in find_experiences decided it, and said "fits" on a ceiling
+ * with an unchecked floor. Decision 2, C (Alon): that is never "fits".
+ */
+export function withFit(rows: ExperienceRow[], heightCm: number | null): ExperienceRow[] {
+  return rows.map((r) => {
+    const fit = heightFit({ minCm: r.height_cm, maxCm: r.max_height_cm ?? null }, heightCm);
+    return { ...r, fit, fits: heightFitsAsBoolean(fit) };
+  });
 }
 
 /**
@@ -131,7 +151,8 @@ export async function findCandidates(
  * of one. Implemented in `apps/server/src/db/`.
  */
 export interface DirectQueries {
-  findExperiences(p: { name: string | null; park: string | null; heightCm: number | null; limit: number }): Promise<ExperienceRow[]>;
+  /** Rows without a fit — Tim applies the shared rule (`withFit`). */
+  findExperiences(p: { name: string | null; park: string | null; limit: number }): Promise<ExperienceRow[]>;
   /** `embedding` is the vector as a JSON array string — what the RPC's `p_embedding` gets. */
   matchKnowledge(p: { embedding: string; limit: number | null; resort: string | null }): Promise<KnowledgeChunk[]>;
   parkCandidates(p: { perPark: number | null }): Promise<ParkCandidate[]>;
@@ -141,11 +162,12 @@ export async function findRides(
   { url, dbKey }: Db, asked: string | null, question: string, direct?: DirectQueries,
 ): Promise<ExperienceRow[]> {
   if (!asked) return [];
+  const heightCm = extractHeight(question);
   // ⚠️ A direct query that fails is a soft failure, like the RPC's — and never a silent
   // fallback to the RPC: two sources answering the same question would hide which one broke.
   if (direct) {
     try {
-      return await direct.findExperiences({ name: asked, park: null, heightCm: extractHeight(question), limit: 6 });
+      return withFit(await direct.findExperiences({ name: asked, park: null, limit: 6 }), heightCm);
     } catch {
       return [];
     }
@@ -160,12 +182,12 @@ export async function findRides(
       },
       body: JSON.stringify({
         p_name: asked,
-        p_height_cm: extractHeight(question),
+        p_height_cm: heightCm,
         p_limit: 6,
       }),
     });
     const rows = res.ok ? await res.json() : null;
-    return Array.isArray(rows) ? rows : [];
+    return Array.isArray(rows) ? withFit(rows, heightCm) : [];
   } catch { /* soft failure, like retrieval */ }
   return [];
 }

@@ -29,5 +29,6 @@
   "TIM_PROMPT": "apps/server/src/tim/prompt.ts",
   "TIM_STAMP": "apps/server/src/tim/stamp.ts",
   "TIM_EDGE": "apps/server/src/edge/tim.ts",
+  "SHARED_SRC": "packages/shared/src",
   "SCRIPTS": "scripts"
 }

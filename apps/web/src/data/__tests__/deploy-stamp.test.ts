@@ -30,4 +30,15 @@ describe("החותם של הפריסה מכסה את הקובץ כולו", () =>
       });
     expect(run).not.toThrow();
   });
+
+  // 🔴 Tim imports the fit rule from packages/shared (30.09). A change there changes what Tim
+  // says, so it must move the stamp — otherwise the stamp answers "what is live" wrongly.
+  it("וכולל את מה שטים מייבא מ-packages/shared", () => {
+    const out = execFileSync("python3", ["-c",
+      "import sys; sys.path.insert(0, 'scripts'); import importlib.util as u; " +
+      "s = u.spec_from_file_location('s', 'scripts/build-deploy-stamp.py'); m = u.module_from_spec(s); s.loader.exec_module(m); " +
+      "print('\\n'.join(str(f.relative_to(m.ROOT)) for f in m.files()))"], { cwd: ROOT, encoding: "utf8" });
+    expect(out.split("\n")).toContain("packages/shared/src/fit.ts");
+    expect(out).not.toContain("fit.test.ts");
+  });
 });

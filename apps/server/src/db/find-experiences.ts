@@ -2,21 +2,25 @@ import type { ExperienceRow } from "../tim/lookup";
 import type { Sql } from "./client";
 
 /**
- * `find_experiences`, run from the server — items 1–2 of the database function (the word
- * split, the Hebrew prefixes, the scoring) plus, for now, its fit `CASE` (item 3), which
- * moves to `packages/shared` together with the web app's `fitFor`.
+ * `find_experiences`, run from the server — the database function's search (the word split,
+ * the Hebrew prefixes, the scoring).
+ *
+ * ⚠️ **Without the function's fit `CASE`, since 30.09.** The fit is the one rule in
+ * `packages/shared/src/fit.ts`, applied by Tim in `lookup.ts` (`withFit`) — so this query no
+ * longer takes the height.
  *
  * 🔴 **A copy of the function's body, not a rewrite** — `apps/server/db/migrations/
  * 20260926000000_baseline.sql`, `public.find_experiences`. Only the parameters changed.
- * `npm run parity:find-experiences` runs both on the same database and fails on any
- * difference; a fix (the "ב-" hyphen) comes only after parity, as its own step.
+ * `npm run parity:find-experiences` runs both on the same database (every column but the
+ * fit) and fails on any difference; a fix (the "ב-" hyphen) comes only after parity, as its
+ * own step.
  *
  * ⚠️ `last_verified::text` — PostgREST returns a date as "YYYY-MM-DD"; the driver would
  * return a Date object, and Tim formats the string.
  */
 export async function findExperiences(
   sql: Sql,
-  p: { name: string | null; park: string | null; heightCm: number | null; limit: number },
+  p: { name: string | null; park: string | null; limit: number },
 ): Promise<ExperienceRow[]> {
   const rows = await sql`
     with tok as (
@@ -60,15 +64,7 @@ export async function findExperiences(
       s.height_requirement_cm as height_cm, s.max_height_requirement_cm as max_height_cm,
       s.gets_wet, s.wheelchair, s.motion_sickness_warning as motion_sickness,
       s.sens_enclosed_dark as sens_dark, s.sens_heights, s.sens_loud_sudden as sens_loud,
-      s.sens_strobe, s.skip_line_system as skip_line, s.last_verified::text as last_verified,
-      case
-        when ${p.heightCm}::int is null then null
-        when s.max_height_requirement_cm is not null
-             and ${p.heightCm}::int > s.max_height_requirement_cm then false
-        when s.height_requirement_cm is null
-          then case when s.max_height_requirement_cm is null then null else true end
-        else ${p.heightCm}::int >= s.height_requirement_cm
-      end as fits
+      s.sens_strobe, s.skip_line_system as skip_line, s.last_verified::text as last_verified
     from scored s
     where
       (select count(*) from words) = 0

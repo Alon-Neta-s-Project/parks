@@ -12,6 +12,7 @@
 import { connect, type Sql } from "../apps/server/src/db/client";
 import { findExperiences } from "../apps/server/src/db/find-experiences";
 import { extractHeight, extractRideName } from "../apps/server/src/tim/index";
+import { withFit, type ExperienceRow } from "../apps/server/src/tim/lookup";
 import type { Row } from "../apps/server/src/eval/checks";
 
 export function rideLookup(db: { url?: string; key?: string; databaseUrl?: string }) {
@@ -21,16 +22,18 @@ export function rideLookup(db: { url?: string; key?: string; databaseUrl?: strin
     async lookup(question: string): Promise<Row[]> {
       const name = extractRideName(question);
       if (!name) return [];
-      const args = { name, park: null, heightCm: extractHeight(question), limit: 6 };
-      if (db.databaseUrl) return findExperiences((sql ??= connect(db.databaseUrl)), args);
+      const heightCm = extractHeight(question);
+      const args = { name, park: null, limit: 6 };
+      // The fit is judged the way Tim says it: the shared rule (withFit), not the database's.
+      if (db.databaseUrl) return withFit(await findExperiences((sql ??= connect(db.databaseUrl)), args), heightCm);
       if (!db.url || !db.key) throw new Error("ride lookup: neither DATABASE_URL nor SUPABASE_URL + key");
       const res = await fetch(`${db.url}/rest/v1/rpc/find_experiences`, {
         method: "POST",
         headers: { apikey: db.key, Authorization: `Bearer ${db.key}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ p_name: args.name, p_height_cm: args.heightCm, p_limit: args.limit }),
+        body: JSON.stringify({ p_name: args.name, p_height_cm: heightCm, p_limit: args.limit }),
       });
       if (!res.ok) throw new Error(`ride lookup: find_experiences returned ${res.status}`);
-      return (await res.json()) as Row[];
+      return withFit((await res.json()) as ExperienceRow[], heightCm);
     },
     end: () => sql?.end(),
   };

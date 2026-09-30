@@ -29,12 +29,15 @@ BLANK = 'export const DEPLOY_STAMP = "";'
 
 
 def files() -> list:
-    """מה שנפרס: המודולים של טים (בלי בדיקות וכלי דיבוג) וכניסת Supabase."""
+    """מה שנפרס: המודולים של טים (בלי בדיקות וכלי דיבוג), packages/shared, וכניסת Supabase."""
     # ⚠️ בלי בדיקות, בלי העזרים שלהן (test-helpers.ts) ובלי כלי דיבוג — אלה אינם
     # נפרסים, ושינוי בהם אינו אמור להזיז את החותם של מה שחי.
     mods = [f for f in sorted(P.TIM_DIR.glob("*.ts"))
             if not f.name.endswith(".test.ts") and not f.name.startswith("test-") and f.name != "probe.ts"]
-    return mods + [P.TIM_EDGE]
+    # 🔴 ומה שטים מייבא מ-packages/shared (כלל ההתאמה, 30.09). בלעדיו שינוי בכלל
+    # משנה את טים בלי להזיז את החותם — ואז החותם אינו עונה על "מה חי".
+    shared = [f for f in sorted(P.SHARED_SRC.glob("*.ts")) if not f.name.endswith(".test.ts")]
+    return mods + shared + [P.TIM_EDGE]
 
 
 def compute() -> str:

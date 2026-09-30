@@ -22,7 +22,7 @@ HE = P.HE_JSON
 FN = P.TIM_PROMPT
 
 # ⚠️ המפתחות שהם המקור. מפתח שנמחק מ-he.json מפיל כאן, ולא נעלם בשקט.
-KEYS = ["everyone", "unknown", "unknownWhy", "unmeasuredWhy", "childSwap"]
+KEYS = ["everyone", "unknown", "unknownWhy", "unmeasuredWhy", "childSwap", "underCeiling", "underCeilingWhy"]
 
 
 def build() -> tuple[str, str]:
@@ -33,10 +33,14 @@ def build() -> tuple[str, str]:
 
     # ⚠️ הניסוח נלקח מ-he.json כלשונו. הטקסט הוא של פולה, לא שלי.
     rules = (
-        "\n· ⚠️ **שלושת מצבי ההתאמה, ואלה בדיוק אותם שלושה שהמסך מציג:**\n"
+        "\n· ⚠️ **ארבעת מצבי ההתאמה, ואלה בדיוק אותם ארבעה שהמסך מציג:**\n"
         f'  **"{fit["everyone"]}"** · **"{fit["unknown"]}"** '
-        f'({fit["unknownWhy"]}) · **{fit["unmeasuredWhy"]}**.\n'
-        '  שלושה דברים שונים, ואף אחד מהם אינו "לא מתאים".\n'
+        f'({fit["unknownWhy"]}) · **{fit["unmeasuredWhy"]}** · '
+        # ⚠️ הרביעי — הכרעת אלון (30.09, אפשרות C): תקרה ורצפה שלא נבדקה. אומרים
+        # שלא גבוהים מדי, ולעולם לא "מתאים" — איש לא בדק שאין רצפה.
+        f'**"{fit["underCeiling"]}"** ({fit["underCeilingWhy"]}).\n'
+        '  ארבעה דברים שונים, ואף אחד מהם אינו "לא מתאים" — '
+        'והרביעי אינו "מתאים": אל תאמר "מתאים" כשרק התקרה ידועה.\n'
         "· ⚠️ ומתקן שאינו פתוח לילד עדיין שווה להזכיר כשאפשר "
         f'**{fit["childSwap"]}** — המבוגרים מתחלפים והילד אינו נשאר לבד. '
         "זו תשובה שימושית, לא פסילה."
