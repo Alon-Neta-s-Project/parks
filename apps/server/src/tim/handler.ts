@@ -110,7 +110,7 @@ export async function handle(
   const [rides, candidates, { chunks, retrieval }] =
     await timed(host.trace, "retrieval", () => Promise.all([
       findRides(db, asked, question, host.direct),
-      findCandidates(db, asked, question),
+      findCandidates(db, asked, question, host.direct),
       retrieveKnowledge(db, key!, question, host.direct),
     ]));
   if (host.trace) host.trace.candidates = candidates.length;

@@ -1,6 +1,6 @@
 import { afterEach, test } from "vitest";
 import { handle } from "./index";
-import type { DirectQueries, ExperienceRow } from "./lookup";
+import { findCandidates, type DirectQueries, type ExperienceRow } from "./lookup";
 import { extractRideName } from "./understand";
 import { assertEquals, ask, stub, geminiOk, withChunks, FULL } from "./test-helpers";
 
@@ -32,6 +32,7 @@ test("עם חיבור ישיר — השאילתה בשרת, ו-PostgREST אינ�
   restore = stub(world(calls)).restore;
   const asked: unknown[] = [];
   const direct: DirectQueries = {
+    parkCandidates: async () => [],
     matchKnowledge: async () => [],
     findExperiences: async (p) => {
       asked.push(p);
@@ -49,7 +50,7 @@ test("עם חיבור ישיר — השאילתה בשרת, ו-PostgREST אינ�
 test("חיבור ישיר שנכשל — כשל רך כמו השליפה, בלי ליפול בשקט ל-PostgREST", async () => {
   const calls: string[] = [];
   restore = stub(world(calls)).restore;
-  const direct: DirectQueries = { matchKnowledge: async () => [], findExperiences: async () => { throw new Error("connection refused"); } };
+  const direct: DirectQueries = { parkCandidates: async () => [], matchKnowledge: async () => [], findExperiences: async () => { throw new Error("connection refused"); } };
   const r = await handle(ask({ question: "מה הגובה ב-Space Mountain?" }), FULL, { direct });
   assertEquals(r.status, 200);
   assertEquals((await r.json()).rides, 0);
@@ -74,6 +75,7 @@ test("match_knowledge עם חיבור ישיר — השאילתה בשרת, עם
   restore = s.restore;
   const asked: { embedding: string; limit: number | null; resort: string | null }[] = [];
   const direct: DirectQueries = {
+    parkCandidates: async () => [],
     findExperiences: async () => [],
     matchKnowledge: async (p) => {
       asked.push(p);
@@ -92,10 +94,64 @@ test("match_knowledge ישיר שנכשל — retrieval failed, בלי ליפו�
   const s = stub(withChunks([CHUNK]));
   restore = s.restore;
   const direct: DirectQueries = {
+    parkCandidates: async () => [],
     findExperiences: async () => [],
     matchKnowledge: async () => { throw new Error("connection refused"); },
   };
   const r = await (await handle(ask({ question: "מה עושים כשיורד גשם?" }), FULL, { direct })).json();
   assertEquals([r.chunks, r.retrieval], [0, "failed"]);
   assertEquals(s.calls.some((c) => c.url.includes("/rpc/match_knowledge")), false);
+});
+
+// ── park_candidates ──────────────────────────────────────────────────
+// 🔴 Called on findCandidates, not through handle(): no real question reaches it through the
+// handler today — extractRideName leaves a "name" in every recommendation question (O17).
+
+const RECOMMEND = "מה תמליצו לנו לעשות בפארק?";
+const DB = { url: "http://db", dbKey: "anon-key-value" };
+const CANDIDATE = { park: "Magic Kingdom", name: "From RPC", name_he: null, land: null, category: null, intensity: 2, height_cm: null, max_height_cm: null, gets_wet: null };
+const withCandidates = (calls: string[]) => (url: string) => {
+  calls.push(url);
+  if (url.includes("/rpc/park_candidates")) return new Response(JSON.stringify([CANDIDATE]), { status: 200 });
+  return geminiOk();
+};
+const directWith = (parkCandidates: DirectQueries["parkCandidates"]): DirectQueries =>
+  ({ findExperiences: async () => [], matchKnowledge: async () => [], parkCandidates });
+
+test("park_candidates בלי חיבור ישיר — דרך PostgREST, כמו קודם", async () => {
+  const calls: string[] = [];
+  restore = stub(withCandidates(calls)).restore;
+  const rows = await findCandidates(DB, null, RECOMMEND);
+  assertEquals(rows.map((r) => r.name), ["From RPC"]);
+  assertEquals(calls.filter((u) => u.includes("/rpc/park_candidates")).length, 1);
+});
+
+test("park_candidates עם חיבור ישיר — השאילתה בשרת, עם 3 לפארק", async () => {
+  const calls: string[] = [];
+  restore = stub(withCandidates(calls)).restore;
+  const asked: { perPark: number | null }[] = [];
+  const rows = await findCandidates(DB, null, RECOMMEND, directWith(async (p) => {
+    asked.push(p);
+    return [{ ...CANDIDATE, name: "From direct" }];
+  }));
+  assertEquals(rows.map((r) => r.name), ["From direct"]);
+  assertEquals(calls.some((u) => u.includes("/rpc/park_candidates")), false);
+  assertEquals(asked, [{ perPark: 3 }]);
+});
+
+test("park_candidates ישיר — רק כשאין שם מתקן ויש בקשת המלצה, כמו ה-RPC", async () => {
+  restore = stub(withCandidates([])).restore;
+  const asked: unknown[] = [];
+  const direct = directWith(async (p) => { asked.push(p); return []; });
+  await findCandidates(DB, "Space Mountain", RECOMMEND, direct);
+  await findCandidates(DB, null, "מה הגובה ב-Space Mountain?", direct);
+  assertEquals(asked, []);
+});
+
+test("park_candidates ישיר שנכשל — כשל רך, בלי ליפול בשקט ל-PostgREST", async () => {
+  const calls: string[] = [];
+  restore = stub(withCandidates(calls)).restore;
+  const rows = await findCandidates(DB, null, RECOMMEND, directWith(async () => { throw new Error("connection refused"); }));
+  assertEquals(rows, []);
+  assertEquals(calls.some((u) => u.includes("/rpc/park_candidates")), false);
 });

@@ -97,8 +97,18 @@ export interface KnowledgeChunk {
  * would inject twenty ride rows into the context of "what happens if it rains", and
  * there is a test that forbids exactly that.
  */
-export async function findCandidates({ url, dbKey }: Db, asked: string | null, question: string): Promise<ParkCandidate[]> {
+export async function findCandidates(
+  { url, dbKey }: Db, asked: string | null, question: string, direct?: DirectQueries,
+): Promise<ParkCandidate[]> {
   if (asked || !wantsRecommendation(question)) return [];
+  // ⚠️ Like findRides: a direct query that fails is a soft failure — never a fallback to the RPC.
+  if (direct) {
+    try {
+      return await direct.parkCandidates({ perPark: 3 });
+    } catch {
+      return [];
+    }
+  }
   try {
     const res = await fetch(`${url}/rest/v1/rpc/park_candidates`, {
       method: "POST",
@@ -124,6 +134,7 @@ export interface DirectQueries {
   findExperiences(p: { name: string | null; park: string | null; heightCm: number | null; limit: number }): Promise<ExperienceRow[]>;
   /** `embedding` is the vector as a JSON array string — what the RPC's `p_embedding` gets. */
   matchKnowledge(p: { embedding: string; limit: number | null; resort: string | null }): Promise<KnowledgeChunk[]>;
+  parkCandidates(p: { perPark: number | null }): Promise<ParkCandidate[]>;
 }
 
 export async function findRides(
