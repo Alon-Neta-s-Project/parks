@@ -27,7 +27,7 @@
 import { appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { parse } from "yaml";
-import { diffFacts, evaluate, extractFacts, needsRow, type Case, type Row, type TimReply, type Verdict } from "../apps/server/src/eval/checks";
+import { answerFacts, diffFacts, evaluate, needsRow, type Case, type Row, type TimReply, type Verdict } from "../apps/server/src/eval/checks";
 import { extractHeight, extractRideName } from "../apps/server/src/tim/index";
 import { ROOT } from "./paths";
 
@@ -168,11 +168,13 @@ function report() {
   for (const c of cases) {
     const p = prod.results.get(c.id);
     const s = staging.results.get(c.id);
+    // Only the questions that ran on at least one side — a row of dashes says nothing.
+    if (!p && !s) continue;
     const change = !p || !s ? "" : p.verdict === s.verdict ? "" : s.verdict === "pass" ? "⬆️ better" : p.verdict === "pass" ? "🔻 worse" : "";
     if (change.includes("better")) tally.better++;
     else if (change.includes("worse")) tally.worse++;
     else if (p && s) tally.same++;
-    const facts = p?.answer && s?.answer ? diffFacts(extractFacts(p.answer), extractFacts(s.answer)) : [];
+    const facts = p?.answer && s?.answer ? diffFacts(answerFacts(p.answer, c.ask), answerFacts(s.answer, c.ask)) : [];
     if (facts.length) tally.factDiffs++;
     const url = p?.url_in_answer || s?.url_in_answer ? " 🔴URL" : "";
     rows.push(`| \`${c.id}\` | ${cell(p)} | ${cell(s)} | ${change}${url} | ${facts.length ? esc(facts.join("; ")) : ""} | ${p ? (p.ms / 1000).toFixed(1) : "—"} / ${s ? (s.ms / 1000).toFixed(1) : "—"} |`);
@@ -190,7 +192,7 @@ function report() {
   writeFileSync(out, [
     `# Tim: production vs staging`,
     ``,
-    `production run \`${prod.runId}\` · staging run \`${staging.runId}\` · ${cases.length} questions`,
+    `production run \`${prod.runId}\` · staging run \`${staging.runId}\` · ${rows.length} questions`,
     ``,
     `**⬆️ better on staging: ${tally.better} · 🔻 worse: ${tally.worse} · same verdict: ${tally.same} · facts differ: ${tally.factDiffs}**`,
     ``,

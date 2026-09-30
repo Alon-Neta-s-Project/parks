@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { diffFacts, evaluate, extractFacts, type Case } from "./checks";
+import { answerFacts, diffFacts, evaluate, extractFacts, type Case } from "./checks";
 
 const c = (expect: Case["expect"]): Case => ({ id: "t", kind: "tool", ask: "?", expect });
 const reply = (answer?: string, extra = {}) => ({ answer, ms: 1, rides: 1, chunks: 0, ...extra });
@@ -52,3 +52,18 @@ describe("evaluate", () => {
     expect(evaluate(c(e), reply("Stardust Racers"), []).why).toEqual(['missing any of ["Astronomica","Yoshi"]']);
   });
 });
+
+// ⚠️ A height the family gave is not a claim the answer makes. Repeating "100 ס"מ" from
+// the question flagged a fact difference between two answers that disagreed on nothing.
+describe("answerFacts", () => {
+  it("leaves out facts that were already in the question", () => {
+    const q = "אילו מתקנים מתאימים לילד בגובה 100 ס\"מ?";
+    expect(answerFacts('זה מתאים לגובה 100 ס"מ', q).cm).toEqual([]);
+    expect(answerFacts('מגבלת הגובה 112 ס"מ, והילד בגובה 100 ס"מ', q).cm).toEqual([112]);
+  });
+
+  it("also reads a bare height in the question ('בגובה 100') as given", () => {
+    expect(answerFacts('מתאים לגובה 100 ס"מ', "מה מתאים לילד בגובה 100?").cm).toEqual([]);
+  });
+});
+

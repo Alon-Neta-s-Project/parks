@@ -114,6 +114,22 @@ export function extractFacts(answer: string): Facts {
   };
 }
 
+/**
+ * The facts an answer **claims** — without the ones the family gave in the question.
+ *
+ * ⚠️ "Which rides fit a child of 100 cm?" answered with "…fits a height of 100 cm" repeats
+ * the question; it is not a fact about a ride. Counting it flagged two answers that disagreed
+ * on nothing (30.09). A bare "בגובה 100" in the question counts as given too — families
+ * rarely write the unit.
+ */
+export function answerFacts(answer: string, question: string): Facts {
+  const q = extractFacts(question);
+  const bare = [...question.matchAll(/(?:בגובה|גובה|גובהה|גובהו)\s*(?:של\s*)?(\d{2,3})/g)].map((m) => Number(m[1]));
+  const given = new Set<number>([...q.cm, ...bare]);
+  const a = extractFacts(answer);
+  return { ...a, cm: a.cm.filter((x) => !given.has(x)), usd: a.usd.filter((x) => !q.usd.includes(x)) };
+}
+
 /** The facts one answer states and the other doesn't, per kind. Empty when they agree. */
 export function diffFacts(a: Facts, b: Facts): string[] {
   const out: string[] = [];
