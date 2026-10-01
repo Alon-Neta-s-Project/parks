@@ -70,6 +70,64 @@ export interface AgentTrace {
    * tools at all (the results as text). A signal worth watching: the model ignoring `NONE`.
    */
   fallback?: true;
+  /** Text parts with no Hebrew, dropped from a Hebrew answer — reasoning that leaked (`forFamily`). */
+  dropped_parts?: number;
+  /** Reasoning cut from the start of the answer's text — how, and how many characters (`forFamily`). */
+  trimmed?: { by: "marker" | "no-hebrew-lines"; chars: number };
+}
+
+/** Where the answer to the family starts (agent-prompt.ts). Anything before it is reasoning. */
+export const ANSWER_MARKER = "<<<answer>>>";
+
+/**
+ * Reasoning written inside the answer's own text — the part-level check cannot see it.
+ * 🔴 Measured 01.10: three runs of three, at every thinking level, the reasoning came in the same
+ * part as the Hebrew answer. The marker is the boundary the model is asked for; without it, the
+ * opening lines that hold no Hebrew at all are dropped, up to the first line in Hebrew.
+ */
+function trimReasoning(text: string): { text: string; trimmed?: AgentTrace["trimmed"] } {
+  const at = text.lastIndexOf(ANSWER_MARKER);
+  if (at >= 0) {
+    const after = text.slice(at + ANSWER_MARKER.length).trim();
+    // A marker with nothing after it: what came before is the answer — the marker never shows.
+    if (!after) return { text: text.slice(0, at).trim() };
+    return { text: after, trimmed: { by: "marker", chars: at } };
+  }
+  if (!HEBREW.test(text)) return { text };
+  const lines = text.split("\n");
+  const first = lines.findIndex((l) => HEBREW.test(l));
+  if (first <= 0) return { text };
+  const cut = lines.slice(0, first).join("\n");
+  return { text: lines.slice(first).join("\n").trim(), trimmed: { by: "no-hebrew-lines", chars: cut.length } };
+}
+
+const HEBREW = /[\u0590-\u05FF]/;
+
+/**
+ * The answer as the family should see it.
+ *
+ * 🔴 Measured 01.10 on a real question: Gemini wrote its reasoning as a plain text part, in English
+ * ("Let's analyze the results… Structure: …"), before the Hebrew answer — not flagged as a
+ * thought — and the code joined it into the answer. Tim answers in Hebrew, and English names sit
+ * inside Hebrew sentences; so **a text part with no Hebrew at all, next to one with Hebrew, is not
+ * for the family** and is dropped. An answer that is all English is kept — dropping it would leave
+ * nothing, and the language rule is the instructions' to enforce.
+ */
+function forFamily(data: any, at: AgentTrace): any {
+  const parts: any[] = data?.candidates?.[0]?.content?.parts ?? [];
+  const texts = parts.filter((x) => typeof x?.text === "string" && x.text.trim());
+  if (!texts.length) return data;
+  // 1. A whole part with no Hebrew, next to one with Hebrew, is not for the family.
+  const anyHebrew = texts.some((x) => HEBREW.test(x.text));
+  const kept = anyHebrew ? texts.filter((x) => HEBREW.test(x.text)) : texts;
+  if (kept.length < texts.length) at.dropped_parts = (at.dropped_parts ?? 0) + texts.length - kept.length;
+  // 2. Reasoning inside the text itself — cut at the marker, or before the first line in Hebrew.
+  const joined = kept.map((x) => x.text).join("\n").trim();
+  const { text, trimmed } = trimReasoning(joined);
+  if (trimmed) at.trimmed = trimmed;
+  if (text === joined && kept.length === texts.length) return data;
+  const [first, ...rest] = data.candidates;
+  return { ...data, candidates: [{ ...first, content: { ...first.content, parts: [{ text }] } }, ...rest] };
 }
 
 /** The last word to the model when the tools are off. */
@@ -141,12 +199,12 @@ export async function runAgent(p: {
     const content = res.data?.candidates?.[0]?.content;
     const parts: any[] = Array.isArray(content?.parts) ? content.parts : [];
     const calls = parts.filter((part) => part?.functionCall).map((part) => part.functionCall);
-    if (!calls.length) return { data: res.data, ...found, usage };
+    if (!calls.length) return { data: forFamily(res.data, at), ...found, usage };
     if (!tools) {
       // ⚠️ A call made after the tools were turned off is not run. If it came with text, that is
       // the answer. If not — one more call with **no tools declared and no tool turns**: the
       // results as plain text, so there is nothing left to call. Never an empty answer for this.
-      if (readAnswer(res.data).raw) return { data: res.data, ...found, usage };
+      if (readAnswer(res.data).raw) return { data: forFamily(res.data, at), ...found, usage };
       at.fallback = true;
       const plain = await generate({
         key: p.key, model: p.model, env: p.env, system: AGENT_SYSTEM,
@@ -171,7 +229,7 @@ export async function runAgent(p: {
         at.stop = "error";
         return plain;
       }
-      return { data: plain.data, ...found, usage: addUsage(usage, readUsage(plain.data)) };
+      return { data: forFamily(plain.data, at), ...found, usage: addUsage(usage, readUsage(plain.data)) };
     }
 
     at.rounds++;

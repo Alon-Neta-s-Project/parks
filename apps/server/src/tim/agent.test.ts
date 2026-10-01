@@ -196,3 +196,68 @@ it("does not mark a whole answer", async () => {
   const { body } = await run("q");
   expect(body.truncated).toBeUndefined();
 });
+
+// 🔴 Measured 01.10 on a real question: Gemini wrote its reasoning as a plain text part, in English,
+// before the Hebrew answer — not flagged as a thought — and it reached the screen.
+describe("reasoning that leaks into the answer", () => {
+  const reply = (...texts: string[]) =>
+    ({ candidates: [{ content: { role: "model", parts: texts.map((text) => ({ text })) }, finishReason: "STOP" }] });
+
+  it("drops an English-only part next to the Hebrew answer, and logs that it did", async () => {
+    gemini([reply("Let's analyze the results: Magic Kingdom has 17, Islands of Adventure 13. Structure: …", "ב-**Magic Kingdom** יש יותר מתקנים: 17 מול 13.")]);
+    const { body, trace } = await run("q");
+    expect(body.answer).toBe("ב-**Magic Kingdom** יש יותר מתקנים: 17 מול 13.");
+    expect(trace.agent!.dropped_parts).toBe(1);
+  });
+
+  it("keeps an answer that is only in English — dropping it would leave nothing", async () => {
+    gemini([reply("Space Mountain: 112 cm.")]);
+    const { body, trace } = await run("q");
+    expect([body.answer, trace.agent!.dropped_parts]).toEqual(["Space Mountain: 112 cm.", undefined]);
+  });
+
+  it("keeps every Hebrew part, brand names inside them and all", async () => {
+    gemini([reply("רשימה ראשונה: **Dumbo**", "ועוד: **The Barnstormer**")]);
+    const { body } = await run("q");
+    expect(body.answer).toBe("רשימה ראשונה: **Dumbo**\nועוד: **The Barnstormer**");
+  });
+});
+
+// 🔴 Measured again 01.10: the reasoning came **in the same part** as the Hebrew answer, in all three
+// runs, at every thinking level. A part-level guard cannot see it; a boundary inside the text can.
+describe("reasoning inside the same part", () => {
+  const one = (t: string) => ({ candidates: [{ content: { role: "model", parts: [{ text: t }] }, finishReason: "STOP" }] });
+
+  it("keeps only what follows the marker", async () => {
+    gemini([one("Let's count: Magic Kingdom has 17.\nStructure: list both.\n<<<answer>>>\nב-**Magic Kingdom** יש 17 מתקנים.")]);
+    const { body, trace } = await run("q");
+    expect(body.answer).toBe("ב-**Magic Kingdom** יש 17 מתקנים.");
+    expect(trace.agent!.trimmed).toMatchObject({ by: "marker" });
+  });
+
+  it("without the marker, drops the opening lines that hold no Hebrew", async () => {
+    gemini([one("We have:\nMagic Kingdom: 17 rides match.\n- Dumbo\n\nב-**Magic Kingdom** יש 17 מתקנים:\n* **Dumbo**")]);
+    const { body, trace } = await run("q");
+    expect(body.answer).toBe("ב-**Magic Kingdom** יש 17 מתקנים:\n* **Dumbo**");
+    expect(trace.agent!.trimmed).toMatchObject({ by: "no-hebrew-lines" });
+  });
+
+  it("leaves a clean answer alone — English names inside it and all", async () => {
+    gemini([one("ב-**Magic Kingdom** יש 17 מתקנים:\n* **Dumbo**\n* **The Barnstormer**")]);
+    const { body, trace } = await run("q");
+    expect([body.answer, trace.agent!.trimmed]).toEqual(["ב-**Magic Kingdom** יש 17 מתקנים:\n* **Dumbo**\n* **The Barnstormer**", undefined]);
+  });
+
+  it("a marker with nothing after it — the marker never reaches the screen, what came before stays", async () => {
+    gemini([one("שלום\n<<<answer>>>\n")]);
+    const { body } = await run("q");
+    expect(body.answer).toBe("שלום");
+  });
+});
+
+it("tells the model never to write its reasoning in the answer", async () => {
+  const bodies = gemini([text("שלום")]);
+  await run("hi");
+  expect(bodies[0].systemInstruction.parts[0].text).toContain("never your reasoning");
+  expect(bodies[0].systemInstruction.parts[0].text).toContain("<<<answer>>>");
+});
