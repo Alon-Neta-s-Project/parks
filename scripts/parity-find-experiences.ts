@@ -16,7 +16,12 @@
  * with a height from a fixed cycle, including none — plus a whole park by id, and edge cases.
  * Read-only: two SELECTs per input.
  *
- * ⚠️ **Only on a database that still has the function.** Staging dropped it (migration
+ * ⚠️ **Only on a database that still has the function.**
+ *
+ * 🔴 **Retired 01.10 — it did its job.** The move was proven (1312/1312), and then the server's
+ * search was made language-neutral on purpose (no Hebrew prefixes, every language in the data —
+ * find-experiences.ts). From then on it differs from the function on prefixed Hebrew input, by
+ * design. Its successor is `npm run eval:ride-names`: the names the agent actually passes. Staging dropped it (migration
  * 20260930170000); this runs against a local database, or production read-only.
  */
 import { readFileSync } from "node:fs";

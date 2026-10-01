@@ -23,6 +23,7 @@
     "parity:match-knowledge": "tsx --env-file=.env.staging scripts/parity-match-knowledge.ts",
     "parity:park-candidates": "tsx --env-file=.env.staging scripts/parity-park-candidates.ts",
     "parity:query-rides": "tsx --env-file=.env.staging scripts/parity-query-rides.ts",
+    "eval:ride-names": "tsx --env-file=.env.staging scripts/eval-ride-names.ts",
     "db:local-pg": "bash scripts/db-local-pg.sh",
     "db:status": "DBMATE_MIGRATIONS_DIR=apps/server/db/migrations DBMATE_MIGRATIONS_TABLE=dbmate_migrations dbmate status",
     "db:new": "DBMATE_MIGRATIONS_DIR=apps/server/db/migrations dbmate new",
