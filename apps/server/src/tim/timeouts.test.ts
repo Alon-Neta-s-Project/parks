@@ -1,6 +1,5 @@
 import { afterEach, expect, test } from "vitest";
 import { handle } from "./index";
-import type { DirectQueries } from "./lookup";
 import { newTrace } from "./log";
 import { ask, stub, geminiOk, FULL } from "./test-helpers";
 
@@ -91,19 +90,7 @@ test("503 כשיש זמן — ניסיון שני, כמו קודם", { timeout: 
   expect(trace.gemini.attempts).toBe(2);
 });
 
-test("שאילתה ישירה שנתקעה — מבוטלת, וכשל רך", { timeout: 2000 }, async () => {
-  restore = stub(world("none")).restore;
-  let cancelled = false;
-  const direct: DirectQueries = {
-    findExperiences: (_p, signal) =>
-      new Promise((_, reject) => signal?.addEventListener("abort", () => { cancelled = true; reject(signal.reason); }, { once: true })),
-    matchKnowledge: async () => [],
-    parkCandidates: async () => [],
-  };
-  const { res, body, trace } = await timedAsk("מה הגובה ב-Space Mountain?", { direct });
-  expect([res.status, body.rides, cancelled]).toEqual([200, 0, true]);
-  expect(trace.timed_out).toEqual(["rides"]);
-});
+// A direct query that hangs is the agent's now — a tool's timeout is tested in tools.test.ts.
 
 // 🔴 One deadline, not a sum of caps: a slow stage leaves less for the next.
 test("המועד אחד לכל הבקשה — הטמעה איטית משאירה פחות זמן ל-Gemini", { timeout: 2000 }, async () => {

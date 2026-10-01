@@ -1,6 +1,6 @@
 import { afterEach, test } from "vitest";
 import { handle } from "./index";
-import type { DirectQueries, ExperienceRow } from "./lookup";
+import type { ExperienceRow } from "./lookup";
 import { assertEquals, ask, stub, sentToGemini, withRides, FULL } from "./test-helpers";
 
 /**
@@ -34,19 +34,7 @@ test("תקרה ורצפה שלא נבדקה, דרך ה-RPC — לא 'מתאים'
   assertEquals(p.includes("לא גבוה מדי לגובה שנמסר"), true);
 });
 
-test("תקרה ורצפה שלא נבדקה, בחיבור ישיר — אותו כלל", async () => {
-  const s = stub(withRides([]));
-  restore = s.restore;
-  const direct: DirectQueries = {
-    findExperiences: async () => [{ ...TOT_TIKI, fits: null }],
-    matchKnowledge: async () => [],
-    parkCandidates: async () => [],
-  };
-  await handle(ask({ question: QUESTION }), FULL, { direct });
-  const p = prompt(s.calls);
-  assertEquals(p.includes("מתאים לגובה שנמסר"), false);
-  assertEquals(p.includes("לא גבוה מדי לגובה שנמסר"), true);
-});
+// The direct path is the agent's now: find_ride applies the same rule (tools.test.ts).
 
 test("מעל התקרה — 'לא מתאים', גם כשהמסד אומר אחרת", async () => {
   const s = stub(withRides([TOT_TIKI]));

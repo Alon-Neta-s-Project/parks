@@ -194,3 +194,29 @@ test("Gemini שנתקע — שורת error עם upstream_timeout, ו-timed_out �
   const l = lines[0]!;
   assertEquals([l.level, l.status, l.outcome, l.timed_out], ["error", 504, "upstream_timeout", ["gemini"]]);
 });
+
+// The agent's run is in the line — enough to debug a wrong answer from the log alone — and the
+// family's words are not: the ride name the model passed is a length, the child's height "given".
+test("סוכן — השורה מחזיקה את הסבבים והקריאות, בלי מילות המשפחה", async () => {
+  const replies = [
+    { candidates: [{ content: { role: "model", parts: [{ functionCall: { name: "find_ride", args: { name: MARKER, height_cm: 104 }, id: "1" } }] } }] },
+    { candidates: [{ content: { role: "model", parts: [{ text: "תשובה" }] }, finishReason: "STOP" }] },
+  ];
+  const s = stub((url: string) => url.includes("generateContent")
+    ? new Response(JSON.stringify(replies.shift()), { status: 200 })
+    : world(geminiOk)(url));
+  const direct = {
+    findExperiences: async () => [{ name: "X", name_he: null, park: "P", land: null, status: "open", status_note: null, intensity: 2, height_cm: 0, gets_wet: null, skip_line: null, last_verified: null, fits: null }],
+    matchKnowledge: async () => [],
+    parkCandidates: async () => [],
+  };
+  await logged(request({ question: `שאלה עם ${MARKER}` }), { platform: "test", route: "/tim" }, (req, host) => handle(req, FULL, { ...host, direct }));
+  s.restore();
+  const l = lines[0]!;
+  assertEquals([l.outcome, l.agent.rounds, l.agent.model_calls, l.agent.stop], ["answered", 1, 2, "answered"]);
+  assertEquals(l.agent.calls[0].tool, "find_ride");
+  assertEquals(l.agent.calls[0].args, { name: `‹${MARKER.length} chars›`, height_cm: "‹given›" });
+  assertEquals([l.agent.calls[0].rows, l.agent.calls[0].ok], [1, true]);
+  // The height is checked above as "‹given›" — not as a number in the whole line, which a duration could match.
+  assertEquals(raw[0]!.includes(MARKER), false);
+});

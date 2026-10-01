@@ -58,10 +58,48 @@ export async function upstreamReason(res: Response): Promise<string | null> {
  */
 const transient = (code: number) => code === 503 || code === 429 || code >= 500;
 
-export async function askGemini(p: {
+/** One turn as Gemini takes it — text, or a tool call and its result (agent.ts). */
+export interface Content {
+  role: "user" | "model";
+  // deno-lint-ignore no-explicit-any
+  parts: any[];
+}
+
+/** A tool as Gemini is told about it (tools.ts). */
+export interface FunctionDeclaration {
+  name: string;
+  description: string;
+  parameters: Record<string, unknown>;
+}
+
+/** The classic call: the history, then one user turn with the context and the question. */
+export function askGemini(p: {
   key: string; model: string; env: Record<string, string | undefined>; system: string; history: Turn[]; userText: string;
   trace?: Trace;
   /** The request's deadline (deadline.ts). Without it, uncapped as before 01.10. */
+  limit?: Limit;
+}): Promise<Fail | { data: any }> {
+  return generate({
+    ...p,
+    contents: [
+      ...p.history.map((t) => ({ role: t.role, parts: [{ text: t.text }] })),
+      { role: "user", parts: [{ text: p.userText }] },
+    ],
+  });
+}
+
+/**
+ * One call to Gemini — with tools when the agent passes them.
+ *
+ * ⚠️ `toolMode: "NONE"` with the tools still declared, not the tools left out: once the turns
+ * hold a tool call, the request has to keep declaring the tools it refers to. NONE is how the
+ * agent says "answer with what you have" (agent.ts).
+ */
+export async function generate(p: {
+  key: string; model: string; env: Record<string, string | undefined>; system: string; contents: Content[];
+  tools?: FunctionDeclaration[];
+  toolMode?: "AUTO" | "NONE";
+  trace?: Trace;
   limit?: Limit;
 }): Promise<Fail | { data: any }> {
   const thinking = thinkingConfig(p.env);
@@ -84,10 +122,13 @@ export async function askGemini(p: {
         // not pasted text. A model that gets a conversation as one paragraph
         // treats it as a quote; separate turns are what make it remember what
         // was already asked.
-        contents: [
-          ...p.history.map((t) => ({ role: t.role, parts: [{ text: t.text }] })),
-          { role: "user", parts: [{ text: p.userText }] },
-        ],
+        contents: p.contents,
+        ...(p.tools?.length
+          ? {
+            tools: [{ functionDeclarations: p.tools }],
+            toolConfig: { functionCallingConfig: { mode: p.toolMode ?? "AUTO" } },
+          }
+          : {}),
         generationConfig: {
           temperature: 0.3,
           // ⚠️ 2048 and no less. Thinking tokens count toward this budget,

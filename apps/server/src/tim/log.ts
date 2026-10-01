@@ -1,3 +1,4 @@
+import type { AgentTrace } from "./agent";
 import type { Host } from "./handler";
 import { commit } from "../build-info";
 import { DEPLOY_STAMP } from "./stamp";
@@ -34,6 +35,12 @@ export interface Trace {
    * "candidates", "embed", "knowledge", "gemini". A name, never what was being asked.
    */
   timed_out?: string[];
+  /**
+   * The agent's run (agent.ts): rounds, model calls, why it stopped, and every tool call —
+   * the tool, its arguments **without the family's words** (tools.ts `argsForLog`), the time,
+   * the rows it returned. What is needed to debug a wrong answer from the log alone.
+   */
+  agent?: AgentTrace;
 }
 
 export const newTrace = (): Trace => ({ stages_ms: {}, gemini: {} });
@@ -206,6 +213,7 @@ export async function logged(
     candidates: trace.candidates,
     answered: trace.answered,
     timed_out: trace.timed_out?.length ? trace.timed_out : undefined,
+    agent: trace.agent,
     // The names of the categories caught ("url"), not what was caught.
     scrubbed: Array.isArray(b.scrubbed) && b.scrubbed.length ? b.scrubbed : undefined,
     error,

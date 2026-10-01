@@ -122,18 +122,11 @@ export interface KnowledgeChunk {
  * there is a test that forbids exactly that.
  */
 export async function findCandidates(
-  { url, dbKey }: Db, asked: string | null, question: string, direct?: DirectQueries, limit?: Limit,
+  { url, dbKey }: Db, asked: string | null, question: string, limit?: Limit,
 ): Promise<ParkCandidate[]> {
   if (asked || !wantsRecommendation(question)) return [];
-  // ⚠️ Like findRides: a direct query that fails is a soft failure — never a fallback to the RPC.
-  if (direct) {
-    try {
-      return await direct.parkCandidates({ perPark: 3 }, signalFor(limit, "dbMs"));
-    } catch (e) {
-      noteTimeout(limit, "candidates", e);
-      return [];
-    }
-  }
+  // The classic flow's RPC only. With a direct connection the agent runs instead (agent.ts),
+  // and calls park_candidates itself (tools.ts).
   try {
     const res = await fetch(`${url}/rest/v1/rpc/park_candidates`, {
       method: "POST",
@@ -171,20 +164,11 @@ export interface DirectQueries {
 }
 
 export async function findRides(
-  { url, dbKey }: Db, asked: string | null, question: string, direct?: DirectQueries, limit?: Limit,
+  { url, dbKey }: Db, asked: string | null, question: string, limit?: Limit,
 ): Promise<ExperienceRow[]> {
   if (!asked) return [];
   const heightCm = extractHeight(question);
-  // ⚠️ A direct query that fails is a soft failure, like the RPC's — and never a silent
-  // fallback to the RPC: two sources answering the same question would hide which one broke.
-  if (direct) {
-    try {
-      return withFit(await direct.findExperiences({ name: asked, park: null, limit: 6 }, signalFor(limit, "dbMs")), heightCm);
-    } catch (e) {
-      noteTimeout(limit, "rides", e);
-      return [];
-    }
-  }
+  // The classic flow's RPC only — with a direct connection the agent runs instead (agent.ts).
   try {
     const res = await fetch(`${url}/rest/v1/rpc/find_experiences`, {
       method: "POST",
@@ -207,6 +191,33 @@ export async function findRides(
 }
 
 // ── Retrieval ────────────────────────────────────────────────────────
+/**
+ * A text as a vector for the knowledge search — or null when Google gave none. Throws only on
+ * a network failure or the deadline (the caller decides what that means).
+ *
+ * ⚠️ RETRIEVAL_QUERY, not RETRIEVAL_DOCUMENT. The two roles are not symmetric, and embedding in
+ * the wrong role **works** and returns worse results with no error at all — the same trap as on
+ * the load side.
+ */
+export async function embedQuery(key: string, text: string, limit?: Limit): Promise<number[] | null> {
+  const emb = await fetch(
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent",
+    {
+      method: "POST",
+      signal: signalFor(limit, "embedMs"),
+      headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+      body: JSON.stringify({
+        model: "models/gemini-embedding-001",
+        content: { parts: [{ text }] },
+        taskType: "RETRIEVAL_QUERY",
+        outputDimensionality: 1536,
+      }),
+    },
+  );
+  const vector = emb.ok ? (await emb.json())?.embedding?.values : null;
+  return Array.isArray(vector) && vector.length === 1536 ? vector : null;
+}
+
 export async function retrieveKnowledge(
   { url, dbKey }: Db, key: string, question: string, direct?: DirectQueries, limit?: Limit,
 ): Promise<{
@@ -218,30 +229,13 @@ export async function retrieveKnowledge(
   // Which call a timeout hit — the embedding (Google) or the search (the database).
   let stage = "embed";
   try {
-    // ⚠️ The question is embedded as RETRIEVAL_QUERY, not RETRIEVAL_DOCUMENT. The
-    // two roles are not symmetric, and embedding in the wrong role **works** and
-    // returns worse results with no error at all — the same trap as on the load side.
-    const emb = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent",
-      {
-        method: "POST",
-        signal: signalFor(limit, "embedMs"),
-        headers: { "Content-Type": "application/json", "x-goog-api-key": key },
-        body: JSON.stringify({
-          model: "models/gemini-embedding-001",
-          content: { parts: [{ text: question }] },
-          taskType: "RETRIEVAL_QUERY",
-          outputDimensionality: 1536,
-        }),
-      },
-    );
-    const vector = emb.ok ? (await emb.json())?.embedding?.values : null;
+    const vector = await embedQuery(key, question, limit);
     stage = "knowledge";
-    if (Array.isArray(vector) && vector.length === 1536 && direct) {
+    if (vector && direct) {
       // ⚠️ Like findRides: a direct query that fails is "failed" — never a fallback to the RPC.
       chunks = await direct.matchKnowledge({ embedding: JSON.stringify(vector), limit: 5, resort: null }, signalFor(limit, "dbMs"));
       retrieval = chunks.length > 0 ? "ok" : "empty";
-    } else if (Array.isArray(vector) && vector.length === 1536) {
+    } else if (vector) {
       const res = await fetch(`${url}/rest/v1/rpc/match_knowledge`, {
         method: "POST",
         signal: signalFor(limit, "dbMs"),

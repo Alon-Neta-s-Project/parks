@@ -4,7 +4,11 @@ import { composeContext } from "./context";
 import { diagnose, listModels } from "./diagnose";
 import { askGemini, readAnswer, readUsage } from "./gemini";
 import { corsFor, isFail, jsonResponder, type Fail } from "./http";
-import { findCandidates, findRides, retrieveKnowledge, type DirectQueries } from "./lookup";
+import { runAgent } from "./agent";
+import {
+  findCandidates, findRides, retrieveKnowledge,
+  type DirectQueries, type ExperienceRow, type KnowledgeChunk, type ParkCandidate,
+} from "./lookup";
 import { SYSTEM } from "./prompt";
 import { checkRateLimit, dbAccess } from "./rate-limit";
 import { scrubAnswer } from "./safety";
@@ -91,46 +95,75 @@ export async function handle(
   // already forbid him to make it up. So a failure here is reported in the response
   // and doesn't stop it from going out.
 
-  // ── The rides ─────────────────────────────────────────────────────────
+  // ── Two flows (O13) ───────────────────────────────────────────────────
   //
-  // ⚠️ **A fact about a ride is read from the table, not from semantic search** — the
-  // separation set in 003: "mixing the two is exactly the mistake the architecture is
-  // meant to prevent". "What's the minimum height" needs the number from the row, not
-  // the passage that sounds similar.
-  //
-  // ⚠️ And this is also what stops Tim from answering from his training. He "knows"
-  // heights from the web, and they may be two years old. Here he gets **our** number,
-  // with the date it was checked.
-  const asked = extractRideName(question);
-
-  /**
-   * ⚠️ **In parallel, not in series.** The ride row is read from the database, and the
-   * question is sent to Google to be turned into a vector — two operations that don't
-   * depend on each other, and that waited for each other only because they were written
-   * one after the other. Measured in the log: 3–4 seconds per question.
-   *
-   * ⚠️ And `Promise.all`, not `allSettled`, because both already fail soft inside and
-   * don't throw. The choice is right only as long as that holds — error handling
-   * removed from either one will break this line silently.
-   */
-  const [rides, candidates, { chunks, retrieval }] =
-    await timed(host.trace, "retrieval", () => Promise.all([
-      findRides(db, asked, question, host.direct, limit),
-      findCandidates(db, asked, question, host.direct, limit),
-      retrieveKnowledge(db, key!, question, host.direct, limit),
-    ]));
-  if (host.trace) host.trace.candidates = candidates.length;
-
-  // ── The model call (gemini.ts) ────────────────────────────────────────
+  // **The agent where the server has its own database connection** (staging: Netlify with
+  // DATABASE_URL) — Gemini chooses the tools (agent.ts). **The classic flow where it does not**
+  // (production on Supabase Edge, until the cut-over): a regex finds the ride, the code fetches,
+  // Gemini writes. No flag (Alon, 01.10): the host decides by what it has.
   const model = env.GEMINI_MODEL?.trim() || DEFAULT_MODEL;
-  const gemini = await timed(host.trace, "gemini", () => askGemini({
-    key: key!, model, env, system: SYSTEM, history,
-    userText: composeContext({ rides, candidates, chunks, question }),
-    trace: host.trace,
-    limit,
-  }));
-  if (isFail(gemini)) return reply(gemini);
-  const { data } = gemini;
+  let rides: ExperienceRow[];
+  let candidates: ParkCandidate[];
+  let chunks: KnowledgeChunk[];
+  let retrieval: "ok" | "empty" | "failed";
+  // deno-lint-ignore no-explicit-any
+  let data: any;
+  let usage: ReturnType<typeof readUsage>;
+
+  if (host.direct) {
+    // The knowledge up front — most questions need it, and it costs the agent no round.
+    const pre = await timed(host.trace, "retrieval", () => retrieveKnowledge(db, key!, question, host.direct, limit));
+    retrieval = pre.retrieval;
+    const agent = await timed(host.trace, "agent", () => runAgent({
+      key: key!, model, env, history, question, chunks: pre.chunks, direct: host.direct!, limit, trace: host.trace,
+    }));
+    if (isFail(agent)) return reply(agent);
+    ({ data, rides, candidates, usage } = agent);
+    // The same chunk found twice (up front and by a search) counts once.
+    chunks = [...new Map([...pre.chunks, ...agent.chunks].map((c) => [c.content, c])).values()];
+  } else {
+    // ── The rides ─────────────────────────────────────────────────────────
+    //
+    // ⚠️ **A fact about a ride is read from the table, not from semantic search** — the
+    // separation set in 003: "mixing the two is exactly the mistake the architecture is
+    // meant to prevent". "What's the minimum height" needs the number from the row, not
+    // the passage that sounds similar.
+    //
+    // ⚠️ And this is also what stops Tim from answering from his training. He "knows"
+    // heights from the web, and they may be two years old. Here he gets **our** number,
+    // with the date it was checked.
+    const asked = extractRideName(question);
+
+    /**
+     * ⚠️ **In parallel, not in series.** The ride row is read from the database, and the
+     * question is sent to Google to be turned into a vector — two operations that don't
+     * depend on each other, and that waited for each other only because they were written
+     * one after the other. Measured in the log: 3–4 seconds per question.
+     *
+     * ⚠️ And `Promise.all`, not `allSettled`, because both already fail soft inside and
+     * don't throw. The choice is right only as long as that holds — error handling
+     * removed from either one will break this line silently.
+     */
+    const classic =
+      await timed(host.trace, "retrieval", () => Promise.all([
+        findRides(db, asked, question, limit),
+        findCandidates(db, asked, question, limit),
+        retrieveKnowledge(db, key!, question, undefined, limit),
+      ]));
+    [rides, candidates, { chunks, retrieval }] = classic;
+
+    // ── The model call (gemini.ts) ────────────────────────────────────────
+    const gemini = await timed(host.trace, "gemini", () => askGemini({
+      key: key!, model, env, system: SYSTEM, history,
+      userText: composeContext({ rides, candidates, chunks, question }),
+      trace: host.trace,
+      limit,
+    }));
+    if (isFail(gemini)) return reply(gemini);
+    data = gemini.data;
+    usage = readUsage(data);
+  }
+  if (host.trace) host.trace.candidates = candidates.length;
   const { raw, finishReason, candidates: hadCandidates } = readAnswer(data);
 
   // 🔴 **The enforcement layer.** The instructions ask Tim not to reveal links and keys;
@@ -150,7 +183,6 @@ export async function handle(
     }, 502);
   }
 
-  const usage = readUsage(data);
 
   // ⚠️ retrieval is always returned. Without it, "Tim doesn't know" and "retrieval
   // failed" look the same on screen — and the first is an answer, the second a fault.
