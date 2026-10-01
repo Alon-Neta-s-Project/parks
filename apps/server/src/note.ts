@@ -8,7 +8,7 @@ import { corsFor, jsonResponder } from "./tim/http";
  * "too long" against a random id, with no way to tell which answer it meant.
  *
  * ⚠️ **No tester key and no rate limit — kept simple on purpose (Alon, 01.10).** The one guard
- * is the table's cap of 500 notes (db/tester-note.ts): a script posting here could push the real
+ * is the table's cap of 500 notes (apps/server/src/db/tester-note.ts): a script posting here could push the real
  * notes out. Known, and accepted for a test site.
  *
  * ⚠️ The log line says a note was saved — never the note, the question or the answer (log.ts).
