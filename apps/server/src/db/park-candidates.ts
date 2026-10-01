@@ -1,5 +1,5 @@
 import type { ParkCandidate } from "../tim/lookup";
-import type { Sql } from "./client";
+import { withSignal, type Sql } from "./client";
 
 /**
  * `park_candidates`, run from the server — the rides Tim chooses from on a recommendation
@@ -16,8 +16,8 @@ import type { Sql } from "./client";
  * model can choose in both directions, calm and strong, so the ranking is within each
  * intensity separately.
  */
-export async function parkCandidates(sql: Sql, p: { perPark: number | null }): Promise<ParkCandidate[]> {
-  const rows = await sql`
+export async function parkCandidates(sql: Sql, p: { perPark: number | null }, signal?: AbortSignal): Promise<ParkCandidate[]> {
+  const rows = await withSignal(sql`
     with ranked as (
       select
         p.name as park_name,
@@ -52,6 +52,6 @@ export async function parkCandidates(sql: Sql, p: { perPark: number | null }): P
       from ranked
      where rn <= greatest(coalesce(${p.perPark}::int, 4), 1)
      order by park_name, intensity, name
-  `;
+  `, signal);
   return rows as unknown as ParkCandidate[];
 }

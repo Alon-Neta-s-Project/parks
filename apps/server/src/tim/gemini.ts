@@ -1,4 +1,5 @@
 import { thinkingConfig } from "./config";
+import { isTimeout, noteTimeout, signalFor, type Limit } from "./deadline";
 import { failWith, type Fail } from "./http";
 import type { Trace } from "./log";
 import type { Turn } from "./understand";
@@ -60,6 +61,8 @@ const transient = (code: number) => code === 503 || code === 429 || code >= 500;
 export async function askGemini(p: {
   key: string; model: string; env: Record<string, string | undefined>; system: string; history: Turn[]; userText: string;
   trace?: Trace;
+  /** The request's deadline (deadline.ts). Without it, uncapped as before 01.10. */
+  limit?: Limit;
 }): Promise<Fail | { data: any }> {
   const thinking = thinkingConfig(p.env);
   const endpoint =
@@ -68,6 +71,8 @@ export async function askGemini(p: {
   const call = () =>
     fetch(endpoint, {
       method: "POST",
+      // A fresh signal per attempt: the second one gets only what the first left.
+      signal: signalFor(p.limit, "geminiMs"),
       headers: { "Content-Type": "application/json", "x-goog-api-key": p.key },
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: p.system }] },
@@ -106,11 +111,22 @@ export async function askGemini(p: {
     if (tr) tr.attempts = 1;
     if (transient(res.status)) {
       if (tr) tr.first_status = res.status;
-      await new Promise((r) => setTimeout(r, 700));
-      res = await call();
-      if (tr) tr.attempts = 2;
+      // ⚠️ A retry only with time for it (deadline.ts `retryMinLeftMs`). One that will be cut
+      // anyway spends the family's wait and returns the same failure, later.
+      const dl = p.limit?.deadline;
+      if (!dl || dl.left() >= dl.limits.retryMinLeftMs) {
+        await new Promise((r) => setTimeout(r, 700));
+        res = await call();
+        if (tr) tr.attempts = 2;
+      }
     }
-  } catch {
+  } catch (e) {
+    // 🔴 Our own time limit is not "unreachable": Google answered nothing in time. It is said
+    // as itself, and the log line names the stage (timed_out: ["gemini"]).
+    if (isTimeout(e)) {
+      noteTimeout(p.limit, "gemini", e);
+      return failWith(504, { error: "upstream_timeout", model: p.model });
+    }
     if (tr) tr.unreachable = true;
     return failWith(502, { error: "upstream_unreachable" });
   }

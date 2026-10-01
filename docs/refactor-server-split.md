@@ -221,7 +221,15 @@ Starting point → end: vitest 287 → 299 (+12 guards and self-checks, none rem
    - Seen for real through the Netlify bundle: `{"level":"info",…,"ms":4555,"stages_ms":{"rate_limit":41,"retrieval":553,"gemini":3955},"gemini":{"attempts":1,"in":5304,"out":22,"thinking":697,…}}` — Gemini is ~90% of the time.
    - 15 tests + 1 on Netlify, all seen failing first. `DEPLOY_STAMP` → `08bc44059032`.
    - ⚠️ **For Guy (O2):** the log is a new place data leaves the system. Retention is the host's (Netlify 24h–7 days); nothing in it identifies a person.
-3. `AbortSignal.timeout` on every outgoing call, so the whole request stays under ~50s. Changes the stamp.
+3. ✅ **Timeouts (01.10).** `apps/server/src/tim/deadline.ts`: **one deadline per request, 45s** (15s below Netlify's 60 to send Tim's own JSON and write the log line), and a cap per call — each gets `min(its cap, the time left)`, so a slow stage leaves less for the next:
+   | Call | Cap | On timeout |
+   |---|---|---|
+   | `check_rate_limit` | 3s | fails closed, as on any failure: `rate_limit_unavailable` |
+   | rides / candidates / knowledge (database) | 5s | soft, as before: no rows, `retrieval: "failed"` |
+   | the embedding | 5s | soft: `retrieval: "failed"` |
+   | one Gemini answer | 20s | **`upstream_timeout`, 504** — Tim's JSON, not Netlify's page |
+   | the retry after 429/503 | only with ≥10s left | the first attempt's error |
+   The log line gains `timed_out: [stage…]` — before this, a hang wrote **no line at all** (Netlify killed the function first). Direct queries are cancelled **in Postgres** (`apps/server/src/db/client.ts` `withSignal` → `query.cancel()`), not only abandoned; `statement_timeout` is a session setting the transaction pooler does not keep. The web app shows its existing generic message for `upstream_timeout` — no new wording (Paula can add one). 🔴 **Found by the tests:** `AbortSignal.timeout` throws a `RangeError` on a fractional delay, and the time left always is one — so exactly when the deadline mattered (less time left than the cap), the call would have failed as `upstream_unreachable`. Tests: 8 through `handle()` (7 seen hanging first), 3 on `withSignal` and 1 on the log line (seen failing without).
 4. `[functions]` in `netlify.toml`. ⚠️ **Last, and only after O11:** without it Netlify deploys no function, so steps 1–3 are safe to merge; with it `/api/tim` is public.
 5. The web app: `VITE_TIM_URL=/api/tim`, and the silent fallback to the Edge Function removed.
 

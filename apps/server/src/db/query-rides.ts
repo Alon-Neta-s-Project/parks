@@ -1,6 +1,6 @@
 import { classify, type RideFacts, type SearchFilters } from "../../../../packages/shared/src/filters";
 import { withFit, type ExperienceRow } from "../tim/lookup";
-import type { Sql } from "./client";
+import { withSignal, type Sql } from "./client";
 
 /**
  * `query_rides` — the agent's tool for set questions ("no water, up to 110 cm, intensity ≤ 3"),
@@ -62,10 +62,10 @@ export const rowFacts = (r: Row): RideFacts => ({
 });
 
 /** Every match and every held-back count, before the caps — what the parity check compares. */
-export async function selectRides(sql: Sql, input: Omit<QueryRidesInput, "perPark" | "limit">) {
+export async function selectRides(sql: Sql, input: Omit<QueryRidesInput, "perPark" | "limit">, signal?: AbortSignal) {
   const { park = null, land = null, ...filters } = input;
   // The same columns find_experiences returns, so formatExperiences says every state of them.
-  const rows = (await sql`
+  const rows = (await withSignal(sql`
     select
       e.id, e.name, e.name_i18n->>'he' as name_he, p.name as park, l.name as land,
       e.category, e.kind, e.status, e.status_note, e.intensity,
@@ -80,7 +80,7 @@ export async function selectRides(sql: Sql, input: Omit<QueryRidesInput, "perPar
     where (${park}::text is null or p.id = ${park}::text or p.name ilike '%' || ${park}::text || '%')
       and (${land}::text is null or l.name ilike '%' || ${land}::text || '%')
     order by p.name, e.intensity desc nulls last, e.name
-  `) as unknown as Row[];
+  `, signal)) as unknown as Row[];
 
   const heldBack = { unrated: 0, sensitivityUnchecked: 0, heightUnknown: 0 };
   const matches: Row[] = [];
@@ -92,9 +92,9 @@ export async function selectRides(sql: Sql, input: Omit<QueryRidesInput, "perPar
   return { matches, heldBack };
 }
 
-export async function queryRides(sql: Sql, input: QueryRidesInput): Promise<QueryRidesResult> {
+export async function queryRides(sql: Sql, input: QueryRidesInput, signal?: AbortSignal): Promise<QueryRidesResult> {
   const { perPark = null, limit = null, ...rest } = input;
-  const { matches, heldBack } = await selectRides(sql, rest);
+  const { matches, heldBack } = await selectRides(sql, rest, signal);
 
   const per = perPark && perPark > 0 ? perPark : Infinity;
   const seen = new Map<string, number>();

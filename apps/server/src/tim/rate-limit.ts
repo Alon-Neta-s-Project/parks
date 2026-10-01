@@ -1,4 +1,5 @@
 import { RETRY_AFTER_MINUTES } from "./config";
+import { noteTimeout, signalFor, type Limit } from "./deadline";
 import { failWith, type Fail } from "./http";
 /** A stable ID for the rate-limit bucket, without storing an IP address. */
 export async function bucketKey(ip: string, salt: string): Promise<string> {
@@ -36,7 +37,7 @@ export function dbAccess(env: Record<string, string | undefined>): Db | Fail {
 }
 
 /** 'ok' → null (carry on). Anything else → the response that stops the request. */
-export async function checkRateLimit({ url, dbKey }: Db, ip: string, salt: string | undefined): Promise<Fail | null> {
+export async function checkRateLimit({ url, dbKey }: Db, ip: string, salt: string | undefined, limit?: Limit): Promise<Fail | null> {
   const bucket = await bucketKey(ip, salt ?? dbKey.slice(0, 16));
   const auth = {
     apikey: dbKey,
@@ -48,11 +49,14 @@ export async function checkRateLimit({ url, dbKey }: Db, ip: string, salt: strin
   try {
     res = await fetch(`${url}/rest/v1/rpc/check_rate_limit`, {
       method: "POST",
+      signal: signalFor(limit, "rateLimitMs"),
       headers: auth,
       // ⚠️ The bucket only. Any extra value here is a cap the caller picks for herself.
       body: JSON.stringify({ p_bucket: bucket }),
     });
-  } catch {
+  } catch (e) {
+    // ⚠️ A timeout here fails closed, like any failure of the limit: without it the endpoint is open.
+    noteTimeout(limit, "rate_limit", e);
     return failWith(500, { error: "rate_limit_unavailable", detail: "המסד לא נענה" });
   }
 

@@ -182,3 +182,15 @@ test("כתיבה ליומן שזרקה — אותה שורה, עם שם השגי
   assertEquals(failed?.error, "TypeError");
   assertEquals(raw.join("\n").includes(MARKER), false);
 });
+
+// 🔴 A hang used to leave no line at all: Netlify killed the function before it wrote one.
+test("Gemini שנתקע — שורת error עם upstream_timeout, ו-timed_out אומר איפה", async () => {
+  const hang = (init?: RequestInit) => new Promise<Response>((_, reject) =>
+    init?.signal?.addEventListener("abort", () => reject(init.signal!.reason), { once: true }));
+  const s = stub(((url: string, init?: RequestInit) => (url.includes("generateContent") ? hang(init) : world(geminiOk)(url))) as unknown as (u: string) => Response);
+  const limits = { totalMs: 300, geminiMs: 50 };
+  await logged(request({ question: "היי" }), { platform: "test", route: "/tim" }, (req, host) => handle(req, FULL, { ...host, limits }));
+  s.restore();
+  const l = lines[0]!;
+  assertEquals([l.level, l.status, l.outcome, l.timed_out], ["error", 504, "upstream_timeout", ["gemini"]]);
+});

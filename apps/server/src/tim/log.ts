@@ -29,6 +29,11 @@ export interface Trace {
   gemini: { attempts?: number; first_status?: number; unreachable?: boolean };
   candidates?: number;
   answered?: boolean;
+  /**
+   * The stages whose call hit its time limit (deadline.ts) — "rate_limit", "rides",
+   * "candidates", "embed", "knowledge", "gemini". A name, never what was being asked.
+   */
+  timed_out?: string[];
 }
 
 export const newTrace = (): Trace => ({ stages_ms: {}, gemini: {} });
@@ -200,6 +205,7 @@ export async function logged(
     chunks: num(b.chunks),
     candidates: trace.candidates,
     answered: trace.answered,
+    timed_out: trace.timed_out?.length ? trace.timed_out : undefined,
     // The names of the categories caught ("url"), not what was caught.
     scrubbed: Array.isArray(b.scrubbed) && b.scrubbed.length ? b.scrubbed : undefined,
     error,

@@ -1,5 +1,5 @@
 import type { ExperienceRow } from "../tim/lookup";
-import type { Sql } from "./client";
+import { withSignal, type Sql } from "./client";
 
 /**
  * `find_experiences`, run from the server — the database function's search (the word split,
@@ -21,8 +21,9 @@ import type { Sql } from "./client";
 export async function findExperiences(
   sql: Sql,
   p: { name: string | null; park: string | null; limit: number },
+  signal?: AbortSignal,
 ): Promise<ExperienceRow[]> {
-  const rows = await sql`
+  const rows = await withSignal(sql`
     with tok as (
       select distinct btrim(t, ',.;:!?()"''[]{}<>/-') as t
       from regexp_split_to_table(coalesce(${p.name}::text, ''), '[[:space:]]+') t
@@ -73,6 +74,6 @@ export async function findExperiences(
       case when ${p.name}::text is not null and s.name ilike ${p.name}::text || '%' then 0 else 1 end,
       s.name
     limit least(coalesce(${p.limit}::int, 8), 25)
-  `;
+  `, signal);
   return rows as unknown as ExperienceRow[];
 }

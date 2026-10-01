@@ -1,5 +1,5 @@
 import type { KnowledgeChunk } from "../tim/lookup";
-import type { Sql } from "./client";
+import { withSignal, type Sql } from "./client";
 
 /**
  * `match_knowledge`, run from the server — the semantic search over the knowledge chunks.
@@ -24,8 +24,9 @@ import type { Sql } from "./client";
 export async function matchKnowledge(
   sql: Sql,
   p: { embedding: string; limit: number | null; resort: string | null },
+  signal?: AbortSignal,
 ): Promise<KnowledgeChunk[]> {
-  const rows = await sql`
+  const rows = await withSignal(sql`
     select
       c.id as chunk_id,
       d.id as doc_id,
@@ -45,6 +46,6 @@ export async function matchKnowledge(
       and (${p.resort}::text is null or d.scope_resort = ${p.resort}::text)
     order by c.embedding operator(extensions.<=>) ${p.embedding}::text::extensions.vector
     limit least(coalesce(${p.limit}::int, 5), 20)
-  `;
+  `, signal);
   return rows as unknown as KnowledgeChunk[];
 }

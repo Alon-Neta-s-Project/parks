@@ -15,9 +15,9 @@ export function directQueries(url: string | undefined): DirectQueries | undefine
   if (!url?.trim()) return undefined;
   const sql = connect(url);
   return {
-    findExperiences: (p) => findExperiences(sql, p),
-    matchKnowledge: (p) => matchKnowledge(sql, p),
-    parkCandidates: (p) => parkCandidates(sql, p),
-    queryRides: (p) => queryRides(sql, p),
+    findExperiences: (p, signal) => findExperiences(sql, p, signal),
+    matchKnowledge: (p, signal) => matchKnowledge(sql, p, signal),
+    parkCandidates: (p, signal) => parkCandidates(sql, p, signal),
+    queryRides: (p, signal) => queryRides(sql, p, signal),
   };
 }

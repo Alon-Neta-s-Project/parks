@@ -1,4 +1,5 @@
 import { DEFAULT_MODEL, MAX_QUESTION_CHARS, keyProblem } from "./config";
+import { startDeadline, type Limits } from "./deadline";
 import { composeContext } from "./context";
 import { diagnose, listModels } from "./diagnose";
 import { askGemini, readAnswer, readUsage } from "./gemini";
@@ -30,6 +31,8 @@ export interface Host {
   report?: (e: TimEvent) => void;
   /** Queries the server runs itself (apps/server/src/db). Absent: the database functions. */
   direct?: DirectQueries;
+  /** Overrides for the time limits (deadline.ts) — for tests. The host leaves it unset. */
+  limits?: Partial<Limits>;
 }
 
 export async function handle(
@@ -72,11 +75,14 @@ export async function handle(
   }
   const history = readHistory(body.history);
 
+  // ── The deadline — one per request, every outgoing call capped (deadline.ts) ──
+  const limit = { deadline: startDeadline(host.limits), trace: host.trace };
+
   // ── Rate limit — fails closed (rate-limit.ts) ─────────────────────────
   const db = dbAccess(env);
   if (isFail(db)) return reply(db);
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-  const limited = await timed(host.trace, "rate_limit", () => checkRateLimit(db, ip, env.RATE_LIMIT_SALT));
+  const limited = await timed(host.trace, "rate_limit", () => checkRateLimit(db, ip, env.RATE_LIMIT_SALT, limit));
   if (limited) return reply(limited);
 
   // ⚠️ **The two sources below fail soft, on purpose, unlike the rate limit.** A limit
@@ -109,9 +115,9 @@ export async function handle(
    */
   const [rides, candidates, { chunks, retrieval }] =
     await timed(host.trace, "retrieval", () => Promise.all([
-      findRides(db, asked, question, host.direct),
-      findCandidates(db, asked, question, host.direct),
-      retrieveKnowledge(db, key!, question, host.direct),
+      findRides(db, asked, question, host.direct, limit),
+      findCandidates(db, asked, question, host.direct, limit),
+      retrieveKnowledge(db, key!, question, host.direct, limit),
     ]));
   if (host.trace) host.trace.candidates = candidates.length;
 
@@ -121,6 +127,7 @@ export async function handle(
     key: key!, model, env, system: SYSTEM, history,
     userText: composeContext({ rides, candidates, chunks, question }),
     trace: host.trace,
+    limit,
   }));
   if (isFail(gemini)) return reply(gemini);
   const { data } = gemini;

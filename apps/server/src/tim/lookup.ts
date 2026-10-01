@@ -1,5 +1,6 @@
 import { heightFit, heightFitsAsBoolean, type HeightFit } from "../../../../packages/shared/src/fit";
 import type { QueryRidesInput, QueryRidesResult } from "../db/query-rides";
+import { noteTimeout, signalFor, type Limit } from "./deadline";
 import type { Db } from "./rate-limit";
 import { extractHeight, wantsRecommendation } from "./understand";
 /** A ride as it comes back from find_experiences. */
@@ -121,20 +122,22 @@ export interface KnowledgeChunk {
  * there is a test that forbids exactly that.
  */
 export async function findCandidates(
-  { url, dbKey }: Db, asked: string | null, question: string, direct?: DirectQueries,
+  { url, dbKey }: Db, asked: string | null, question: string, direct?: DirectQueries, limit?: Limit,
 ): Promise<ParkCandidate[]> {
   if (asked || !wantsRecommendation(question)) return [];
   // ⚠️ Like findRides: a direct query that fails is a soft failure — never a fallback to the RPC.
   if (direct) {
     try {
-      return await direct.parkCandidates({ perPark: 3 });
-    } catch {
+      return await direct.parkCandidates({ perPark: 3 }, signalFor(limit, "dbMs"));
+    } catch (e) {
+      noteTimeout(limit, "candidates", e);
       return [];
     }
   }
   try {
     const res = await fetch(`${url}/rest/v1/rpc/park_candidates`, {
       method: "POST",
+      signal: signalFor(limit, "dbMs"),
       headers: {
         apikey: dbKey,
         Authorization: `Bearer ${dbKey}`,
@@ -144,30 +147,31 @@ export async function findCandidates(
     });
     const rows = res.ok ? await res.json() : null;
     return Array.isArray(rows) ? rows : [];
-  } catch { /* soft failure, like the rest */ }
+  } catch (e) { noteTimeout(limit, "candidates", e); /* soft failure, like the rest */ }
   return [];
 }
 
 /**
  * Queries the host can run directly against the database instead of the database function.
  * Injected like `waitUntil` — `tim/` never imports a driver, so the Supabase bundle stays free
- * of one. Implemented in `apps/server/src/db/`.
+ * of one. Implemented in `apps/server/src/db/`. The `signal` cancels the query in Postgres
+ * when the deadline passes (apps/server/src/db/client.ts `withSignal`).
  */
 export interface DirectQueries {
   /** Rows without a fit — Tim applies the shared rule (`withFit`). */
-  findExperiences(p: { name: string | null; park: string | null; limit: number }): Promise<ExperienceRow[]>;
+  findExperiences(p: { name: string | null; park: string | null; limit: number }, signal?: AbortSignal): Promise<ExperienceRow[]>;
   /** `embedding` is the vector as a JSON array string — what the RPC's `p_embedding` gets. */
-  matchKnowledge(p: { embedding: string; limit: number | null; resort: string | null }): Promise<KnowledgeChunk[]>;
-  parkCandidates(p: { perPark: number | null }): Promise<ParkCandidate[]>;
+  matchKnowledge(p: { embedding: string; limit: number | null; resort: string | null }, signal?: AbortSignal): Promise<KnowledgeChunk[]>;
+  parkCandidates(p: { perPark: number | null }, signal?: AbortSignal): Promise<ParkCandidate[]>;
   /**
    * The agent's set-question tool (O13) — server only, no database function behind it, so no
    * RPC path either. Optional: today's Tim does not call it; the agent will.
    */
-  queryRides?(p: QueryRidesInput): Promise<QueryRidesResult>;
+  queryRides?(p: QueryRidesInput, signal?: AbortSignal): Promise<QueryRidesResult>;
 }
 
 export async function findRides(
-  { url, dbKey }: Db, asked: string | null, question: string, direct?: DirectQueries,
+  { url, dbKey }: Db, asked: string | null, question: string, direct?: DirectQueries, limit?: Limit,
 ): Promise<ExperienceRow[]> {
   if (!asked) return [];
   const heightCm = extractHeight(question);
@@ -175,14 +179,16 @@ export async function findRides(
   // fallback to the RPC: two sources answering the same question would hide which one broke.
   if (direct) {
     try {
-      return withFit(await direct.findExperiences({ name: asked, park: null, limit: 6 }), heightCm);
-    } catch {
+      return withFit(await direct.findExperiences({ name: asked, park: null, limit: 6 }, signalFor(limit, "dbMs")), heightCm);
+    } catch (e) {
+      noteTimeout(limit, "rides", e);
       return [];
     }
   }
   try {
     const res = await fetch(`${url}/rest/v1/rpc/find_experiences`, {
       method: "POST",
+      signal: signalFor(limit, "dbMs"),
       headers: {
         apikey: dbKey,
         Authorization: `Bearer ${dbKey}`,
@@ -196,17 +202,21 @@ export async function findRides(
     });
     const rows = res.ok ? await res.json() : null;
     return Array.isArray(rows) ? withFit(rows, heightCm) : [];
-  } catch { /* soft failure, like retrieval */ }
+  } catch (e) { noteTimeout(limit, "rides", e); /* soft failure, like retrieval */ }
   return [];
 }
 
 // ── Retrieval ────────────────────────────────────────────────────────
-export async function retrieveKnowledge({ url, dbKey }: Db, key: string, question: string, direct?: DirectQueries): Promise<{
+export async function retrieveKnowledge(
+  { url, dbKey }: Db, key: string, question: string, direct?: DirectQueries, limit?: Limit,
+): Promise<{
   chunks: KnowledgeChunk[];
   retrieval: "ok" | "empty" | "failed";
 }> {
   let chunks: KnowledgeChunk[] = [];
   let retrieval: "ok" | "empty" | "failed" = "empty";
+  // Which call a timeout hit — the embedding (Google) or the search (the database).
+  let stage = "embed";
   try {
     // ⚠️ The question is embedded as RETRIEVAL_QUERY, not RETRIEVAL_DOCUMENT. The
     // two roles are not symmetric, and embedding in the wrong role **works** and
@@ -215,6 +225,7 @@ export async function retrieveKnowledge({ url, dbKey }: Db, key: string, questio
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent",
       {
         method: "POST",
+        signal: signalFor(limit, "embedMs"),
         headers: { "Content-Type": "application/json", "x-goog-api-key": key },
         body: JSON.stringify({
           model: "models/gemini-embedding-001",
@@ -225,13 +236,15 @@ export async function retrieveKnowledge({ url, dbKey }: Db, key: string, questio
       },
     );
     const vector = emb.ok ? (await emb.json())?.embedding?.values : null;
+    stage = "knowledge";
     if (Array.isArray(vector) && vector.length === 1536 && direct) {
       // ⚠️ Like findRides: a direct query that fails is "failed" — never a fallback to the RPC.
-      chunks = await direct.matchKnowledge({ embedding: JSON.stringify(vector), limit: 5, resort: null });
+      chunks = await direct.matchKnowledge({ embedding: JSON.stringify(vector), limit: 5, resort: null }, signalFor(limit, "dbMs"));
       retrieval = chunks.length > 0 ? "ok" : "empty";
     } else if (Array.isArray(vector) && vector.length === 1536) {
       const res = await fetch(`${url}/rest/v1/rpc/match_knowledge`, {
         method: "POST",
+        signal: signalFor(limit, "dbMs"),
         headers: {
           apikey: dbKey,
           Authorization: `Bearer ${dbKey}`,
@@ -245,7 +258,8 @@ export async function retrieveKnowledge({ url, dbKey }: Db, key: string, questio
     } else {
       retrieval = "failed";
     }
-  } catch {
+  } catch (e) {
+    noteTimeout(limit, stage, e);
     retrieval = "failed";
   }
   return { chunks, retrieval };
