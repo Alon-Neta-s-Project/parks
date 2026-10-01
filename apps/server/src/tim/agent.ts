@@ -35,6 +35,14 @@ export const AGENT = {
   maxCallsPerRound: 4,
   /** Below this much time left, the next call goes out without tools. */
   minLeftForToolsMs: 20_000,
+  /**
+   * 🔴 **Set, not left to the model (01.10).** Unset, Gemini thought ~1,965 of its 2,048 output
+   * tokens and the answer was cut after ~80 — mid-list, on every set question, live on staging.
+   * Measured on the same question (three runs each): unset 11–13s, cut · "low" 6–7s, whole ·
+   * "minimal" 4–5s, whole. "low" until the golden set says "minimal" answers as well.
+   * `GEMINI_THINKING_*` in the env still wins.
+   */
+  thinkingLevel: "low",
 };
 
 /** One tool call, as the log line holds it (log.ts) — what was asked, never the family's words. */
@@ -121,6 +129,7 @@ export async function runAgent(p: {
       key: p.key, model: p.model, env: p.env, system: AGENT_SYSTEM, contents,
       tools: TOOLS, toolMode: tools ? "AUTO" : "NONE",
       trace: p.trace, limit: p.limit,
+      thinkingDefault: { thinkingLevel: AGENT.thinkingLevel },
     });
     at.model_calls++;
     if (isFail(res)) {
@@ -155,6 +164,7 @@ export async function runAgent(p: {
           },
         ],
         trace: p.trace, limit: p.limit,
+        thinkingDefault: { thinkingLevel: AGENT.thinkingLevel },
       });
       at.model_calls++;
       if (isFail(plain)) {

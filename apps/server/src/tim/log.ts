@@ -181,10 +181,11 @@ export async function logged(
   const usage = (b.usage && typeof b.usage === "object" ? b.usage : {}) as Record<string, unknown>;
   const outcome = error ? "unhandled"
     : str(b.error) ?? trace.outcome
+    ?? (b.truncated === true ? "truncated" : undefined)
     ?? (typeof b.answer === "string" ? (trace.answered === false ? "not_answered" : "answered")
       : request.method === "OPTIONS" ? "preflight" : "ok");
   const level: Level = error || res.status >= 500 ? "error"
-    : res.status >= 400 || b.retrieval === "failed" ? "warn"
+    : res.status >= 400 || b.retrieval === "failed" || b.truncated === true ? "warn"
     : "info";
 
   emit({

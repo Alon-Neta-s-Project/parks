@@ -166,3 +166,33 @@ describe("the loop", () => {
     expect([body.usage.input, body.usage.output]).toEqual([400, 40]);
   });
 });
+
+// 🔴 Measured 01.10 on staging: with no thinking setting, Gemini thought ~1,965 of its 2,048
+// output tokens and the answer was cut after ~80 — mid-list, every time, on set questions.
+describe("thinking", () => {
+  it("asks for low thinking on every agent call by default", async () => {
+    const bodies = gemini([calls(call("find_ride", { names: ["A"] })), text("x")]);
+    await run("q");
+    expect(bodies.map((b) => b.generationConfig.thinkingConfig)).toEqual([{ thinkingLevel: "low" }, { thinkingLevel: "low" }]);
+  });
+
+  it("an operator's setting in the env still wins", async () => {
+    const bodies = gemini([text("x")]);
+    const trace = newTrace();
+    await handle(ask({ question: "q" }), { ...FULL, GEMINI_THINKING_LEVEL: "minimal" }, { direct: direct(), trace });
+    expect(bodies[0].generationConfig.thinkingConfig).toEqual({ thinkingLevel: "minimal" });
+  });
+});
+
+// A cut answer is never sent as if it were whole — it is marked, and the log line says so.
+it("marks an answer Gemini cut off (MAX_TOKENS) as truncated", async () => {
+  gemini([{ candidates: [{ content: { role: "model", parts: [{ text: "מתקנים קלאסיים ללא מגבל" }] }, finishReason: "MAX_TOKENS" }] }]);
+  const { res, body } = await run("q");
+  expect([res.status, body.answer, body.truncated]).toEqual([200, "מתקנים קלאסיים ללא מגבל", true]);
+});
+
+it("does not mark a whole answer", async () => {
+  gemini([text("שלום")]);
+  const { body } = await run("q");
+  expect(body.truncated).toBeUndefined();
+});

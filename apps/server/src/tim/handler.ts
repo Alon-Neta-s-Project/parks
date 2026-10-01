@@ -207,8 +207,14 @@ export async function handle(
     usage,
   }, host);
 
+  // 🔴 **A cut answer is not sent as if it were whole.** MAX_TOKENS with text means Gemini ran
+  // out of its output budget mid-answer — thinking counts toward it (agent.ts `thinkingLevel`).
+  // Marked, so the screen, the tests and the log line can tell; never in silence.
+  const truncated = finishReason === "MAX_TOKENS";
+
   return json({
     answer, model, usage, retrieval,
+    ...(truncated ? { truncated: true } : {}),
     chunks: chunks.length, rides: rides.length, tiers,
     // 🔴 **The signal of an attempt that worked.** Almost always empty. Non-empty means
     // the model produced something that must not go out, and the filter caught it —

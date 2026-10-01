@@ -101,8 +101,14 @@ export async function generate(p: {
   toolMode?: "AUTO" | "NONE";
   trace?: Trace;
   limit?: Limit;
+  /**
+   * The thinking setting when the env sets none (`GEMINI_THINKING_*` — an operator's setting
+   * always wins). The agent passes one (agent.ts); the classic call does not.
+   */
+  thinkingDefault?: Record<string, unknown>;
 }): Promise<Fail | { data: any }> {
-  const thinking = thinkingConfig(p.env);
+  const fromEnv = thinkingConfig(p.env);
+  const thinking = Object.keys(fromEnv).length || !p.thinkingDefault ? fromEnv : { thinkingConfig: p.thinkingDefault };
   const endpoint =
     `https://generativelanguage.googleapis.com/v1beta/models/${p.model}:generateContent`;
   let res: Response;

@@ -220,3 +220,12 @@ test("סוכן — השורה מחזיקה את הסבבים והקריאות, �
   // The height is checked above as "‹given›" — not as a number in the whole line, which a duration could match.
   assertEquals(raw[0]!.includes(MARKER), false);
 });
+
+test("תשובה שנחתכה (MAX_TOKENS) — warn, ו-outcome: truncated", async () => {
+  const s = stub(world(() => new Response(JSON.stringify({
+    candidates: [{ content: { parts: [{ text: "התחלה של רשימה" }] }, finishReason: "MAX_TOKENS" }],
+  }), { status: 200 })));
+  await run({ question: "היי" });
+  s.restore();
+  assertEquals([lines[0]!.level, lines[0]!.status, lines[0]!.outcome], ["warn", 200, "truncated"]);
+});
