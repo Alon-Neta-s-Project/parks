@@ -63,7 +63,9 @@ export function FeedbackNote({
             setOpen(false);
           }}
         >
-          שמירה
+          {/* "Send", not "save" (Alon, 01.10: "no send button") — it saves in the browser and
+              sends to the server in one click; the screen counts notes as sent or not sent. */}
+          שליחה
         </button>
         <button type="button" onClick={() => setOpen(false)}>
           ביטול
