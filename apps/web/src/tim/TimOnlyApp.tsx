@@ -62,7 +62,11 @@ export interface TimOnlyAppProps {
    * הציבורית — מהמבנה, לא מחוכמת ה-bundler.
    */
   feedback?: {
-    renderNote: (turnId: string) => React.ReactNode;
+    /**
+     * The note box under an answer — given the question and the answer, so a note is saved with
+     * what it is about (POST /note, Alon 01.10). `answer` is null when Tim did not answer.
+     */
+    renderNote: (turnId: string, context: { question: string; answer: string | null }) => React.ReactNode;
     /** מוצג בסוף השיחה — ייצוא כל ההערות. */
     footer: React.ReactNode;
   };
@@ -238,7 +242,12 @@ export default function TimOnlyApp({ feedback }: TimOnlyAppProps = {}) {
                 )}
               </div>
               {/* ⚠️ רק כשיש reply. אין טעם להעיר על תשובה שעוד בדרך. */}
-              {feedback && turn.reply !== null ? feedback.renderNote(turn.id) : null}
+              {feedback && turn.reply !== null
+                ? feedback.renderNote(turn.id, {
+                  question: turn.question,
+                  answer: typeof turn.reply === "object" && turn.reply.status === "ok" ? turn.reply.answer : null,
+                })
+                : null}
             </div>
           </div>
         ))}

@@ -2,12 +2,14 @@ import { serve } from "@hono/node-server";
 import { getConnInfo } from "@hono/node-server/conninfo";
 import { createApp } from "./app";
 import { directQueries } from "./db/index";
+import { noteStore } from "./db/tester-note";
 import { emit } from "./tim/index";
 
 const app = createApp({
   env: process.env,
   // ⚠️ Off unless DATABASE_URL is set: then find_experiences runs here, not in the database.
   direct: directQueries(process.env.DATABASE_URL),
+  notes: noteStore(process.env.DATABASE_URL),
   remoteAddress: (c) => getConnInfo(c).remote.address,
 });
 

@@ -15,6 +15,13 @@ export type SaveState = "saved" | "local-only" | "sending";
 const URL_BASE = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const ANON = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
 
+/**
+ * The server's note endpoint (POST /note, apps/server/src/note.ts) — set on staging (`/api/note`).
+ * With it, a note goes to the server with its question and answer, and no key is needed (Alon,
+ * 01.10). Without it, the old path below — the production test page still runs on the old server.
+ */
+export const noteUrl = (): string | undefined => (import.meta.env.VITE_NOTE_URL as string | undefined)?.trim() || undefined;
+
 /** המפתח שנטע מדביקה פעם אחת במסך. יושב בדפדפן שלה. */
 export const KEY_STORAGE = "tim-test-key-v1";
 
@@ -37,6 +44,23 @@ export async function saveNote(input: {
   question?: string;
   answer?: string;
 }): Promise<SaveState> {
+  const server = noteUrl();
+  if (server) {
+    try {
+      const res = await fetch(server, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          turnRef: input.turnRef, sessionRef: input.sessionRef, note: input.note,
+          question: input.question ?? null, answer: input.answer ?? null,
+        }),
+      });
+      return res.ok ? "saved" : "local-only";
+    } catch {
+      return "local-only";
+    }
+  }
+
   const key = testerKey();
   if (!URL_BASE || !ANON || !key) return "local-only";
 

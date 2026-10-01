@@ -2,7 +2,7 @@ import { StrictMode, useCallback, useState } from "react";
 import { createRoot } from "react-dom/client";
 import TimOnlyApp from "./TimOnlyApp";
 import { FeedbackNote } from "./FeedbackNote";
-import { KEY_STORAGE, saveNote, testerKey, type SaveState } from "./save-note";
+import { KEY_STORAGE, noteUrl, saveNote, testerKey, type SaveState } from "./save-note";
 import "../i18n";
 import "../styles/global.css";
 import "./test-feedback.css";
@@ -49,12 +49,15 @@ function TestHarness() {
   const [sent, setSent] = useState<Record<string, SaveState>>({});
   const [key, setKey] = useState(testerKey);
 
-  const onSave = useCallback((turnId: string, note: string) => {
+  const onSave = useCallback((turnId: string, note: string, context?: { question: string; answer: string | null }) => {
     // 🔴 **המסד אחרי הדפדפן, לא במקומו.** אם השליחה נכשלת ההערה כבר
     // שמורה מקומית — והמסך יראה שהיא לא הגיעה.
     if (note !== "") {
       setSent((s) => ({ ...s, [turnId]: "sending" }));
-      void saveNote({ turnRef: turnId, sessionRef: SESSION, note }).then((state) =>
+      void saveNote({
+        turnRef: turnId, sessionRef: SESSION, note,
+        question: context?.question, answer: context?.answer ?? undefined,
+      }).then((state) =>
         setSent((s) => ({ ...s, [turnId]: state })),
       );
     }
@@ -87,10 +90,11 @@ function TestHarness() {
   return (
     <>
       <div className="testbar">
-        {key
+        {key || noteUrl()
           ? "גרסת בדיקה — ההערות נשמרות בדפדפן וגם נשלחות לקודי"
           : "גרסת בדיקה — ⚠️ בלי מפתח, ההערות נשמרות בדפדפן בלבד"}
-        {key ? null : (
+        {/* With the server's endpoint no key is needed (save-note.ts noteUrl). */}
+        {key || noteUrl() ? null : (
           <input
             className="testbar__key"
             type="password"
@@ -110,8 +114,8 @@ function TestHarness() {
       </div>
       <TimOnlyApp
         feedback={{
-          renderNote: (id) => (
-            <FeedbackNote turnId={id} note={notes[id] ?? ""} onSave={onSave} />
+          renderNote: (id, context) => (
+            <FeedbackNote turnId={id} note={notes[id] ?? ""} onSave={(t, n) => onSave(t, n, context)} />
           ),
           footer:
             entries.length === 0 ? null : (

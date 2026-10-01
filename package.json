@@ -35,6 +35,7 @@
     "import": "tsx scripts/import-content.ts",
     "artifact": "npm run build && python3 scripts/build-artifact.py",
     "build:tim": "python3 scripts/build-tim-prompt.py --check && tsc -b && vite build --config apps/web/vite.tim.config.ts && tsx scripts/verify-tim-build.ts",
+    "build:tim-site": "node scripts/build-tim-site.mjs",
     "qa": "bash scripts/qa-gate.sh",
     "build:tim-test": "tsc -b && vite build --config apps/web/vite.tim-test.config.ts"
   },

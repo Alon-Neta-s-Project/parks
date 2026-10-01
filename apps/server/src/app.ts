@@ -1,4 +1,5 @@
 import { Hono, type Context } from "hono";
+import { handleNote, type NoteStore } from "./note";
 // ⚠️ Until the cut-over (docs/refactor-server-split.md, stage 4) the server and the
 // Edge Function run the *same file*. A copy here would be a second Tim that drifts
 // from the one that is live, and the file is stamped (DEPLOY_STAMP), so it is not
@@ -19,6 +20,8 @@ export interface AppOptions {
   requestId?: (c: Context) => string | undefined;
   /** Queries run directly against Postgres (apps/server/src/db) — only when the host has DATABASE_URL. */
   direct?: DirectQueries;
+  /** Where testers' notes are saved (POST /note) — only with DATABASE_URL. */
+  notes?: NoteStore;
 }
 
 /**
@@ -50,7 +53,7 @@ async function withClientIp(req: Request, ip: string): Promise<Request> {
   });
 }
 
-export function createApp({ env, remoteAddress, waitUntil, platform = "node", requestId, direct }: AppOptions): Hono {
+export function createApp({ env, remoteAddress, waitUntil, platform = "node", requestId, direct, notes }: AppOptions): Hono {
   const app = new Hono();
 
   // ⚠️ Not logged: Docker's health check calls it every 30s, and a line per call
@@ -64,6 +67,14 @@ export function createApp({ env, remoteAddress, waitUntil, platform = "node", re
     const req = await withClientIp(c.req.raw, clientIp(c.req.raw, env, remoteAddress?.(c)));
     return logged(req, { platform, route: "/tim", req: requestId?.(c), waitUntil: waitUntil?.(c) },
       (r, host) => tim(r, env, { ...host, direct }));
+  });
+
+  // A tester's note on an answer, with the question and the answer (note.ts). One log line,
+  // without the note's content.
+  app.all("/note", async (c) => {
+    const req = await withClientIp(c.req.raw, clientIp(c.req.raw, env, remoteAddress?.(c)));
+    return logged(req, { platform, route: "/note", req: requestId?.(c), waitUntil: waitUntil?.(c) },
+      (r) => handleNote(r, env, notes));
   });
 
 
