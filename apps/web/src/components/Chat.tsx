@@ -24,6 +24,7 @@ import { refinements } from "../lib/refine";
 import { Orb } from "./Orb";
 import { PathLine } from "./PathLine";
 import { Recommendation } from "./Recommendation";
+import { TimAnswer } from "./TimAnswer";
 
 interface Turn {
   id: string;
@@ -672,7 +673,8 @@ function TimBubble({ question, state }: { question: string; state?: TimReply | "
     );
   }
   if (state?.status === "ok") {
-    return <div className="bubble bubble--tim">{state.answer}</div>;
+    // Formatted — the agent writes Markdown. Links and HTML never render (TimAnswer.tsx).
+    return <div className="bubble bubble--tim"><TimAnswer text={state.answer} /></div>;
   }
   if (state?.status === "failed") {
     return (

@@ -961,6 +961,13 @@ button {
 }
 /* טים מחזיר טקסט עם שורות. `pre-line` שומר עליהן בלי לפרש HTML. */
 .bubble__body { white-space: pre-line; }
+/* Tim's answer as Markdown (TimAnswer.tsx) — paragraphs and lists, spaced like the bubble's text.
+   Logical properties only: the list's indent follows the reading direction. */
+.bubble__md > * + * { margin-block-start: var(--pw-s2); }
+.bubble__md ul,
+.bubble__md ol { padding-inline-start: var(--pw-s5); }
+.bubble__md li + li { margin-block-start: var(--pw-s1); }
+.bubble__md strong { font-weight: 600; }
 .bubble__typing { color: var(--pw-ink-3); }
 .bubble__error { color: var(--pw-ink-2); }
 /* ⚠️ הסיבה הטכנית יורדת לשורה משלה. `.bubble__note` נכתב עבור div, ובתוך
