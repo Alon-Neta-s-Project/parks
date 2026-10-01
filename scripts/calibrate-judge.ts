@@ -37,6 +37,9 @@ const FIXTURES: Fixture[] = [
   // Two children — the trap.
   { name: "two kids · right: only Hippogriff, Hagrid's for the older", question: KIDS_Q, ...KIDS, expect: true,
     answer: "יש רכבת הרים אחת ששניהם יכולים לעלות עליה: **Flight of the Hippogriff** (גובה מינימום 91 ס\"מ). Hagrid's Magical Creatures Motorbike Adventure דורשת 122 ס\"מ, אז היא מתאימה רק לילד בגובה 125." },
+  // 🔴 The one the first calibration missed: right, and the trap's ride is not mentioned at all.
+  { name: "two kids · right, Hagrid's not mentioned", question: KIDS_Q, ...KIDS, expect: true,
+    answer: "ב-Islands of Adventure יש רק רכבת הרים אחת שמתאימה לשני הילדים: **Flight of the Hippogriff** — גובה המינימום הוא 91 ס\"מ, כך ששניהם יכולים לעלות וליהנות ממנה יחד. שאר רכבות ההרים בפארק דורשות גובה גבוה יותר." },
   { name: "two kids · wrong: Hagrid's for both", question: KIDS_Q, ...KIDS, expect: false,
     answer: "שניהם יכולים לעלות על Flight of the Hippogriff ועל Hagrid's Magical Creatures Motorbike Adventure — שתיהן מתאימות לגבהים שלהם." },
   // A number — a wrong one must not pass on the "meaning".

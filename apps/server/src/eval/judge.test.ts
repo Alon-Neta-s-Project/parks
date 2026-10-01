@@ -64,7 +64,7 @@ describe("the judge", () => {
   it("fails closed — an error, a skipped claim, an answer that is not JSON", async () => {
     expect((await run(reply(null, false))).error).toMatch(/judge HTTP 429/);
     const skipped = await run(reply([{ index: 1, conveyed: true, quote: "אין הבטחה", reason: "" }]));
-    expect([skipped.pass, skipped.error]).toEqual([false, "the judge skipped a claim"]);
+    expect([skipped.pass, skipped.error]).toEqual([false, "the judge skipped a claim (asked 1–2, got 1)"]);
     vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: "yes" }] } }] }), { status: 200 })));
     expect((await judge({ key: "k", question: "q", answer: ANSWER, mustConvey: ["x"] })).error).toMatch(/not JSON/);
   });
@@ -92,6 +92,9 @@ describe("the judge", () => {
     const body = JSON.parse(String((f.mock.calls[0] as unknown as [string, RequestInit])[1].body));
     expect([body.generationConfig.temperature, body.generationConfig.responseMimeType]).toEqual([0, "application/json"]);
     expect(body.contents[0].parts[0].text).toContain("1. a refund is not guaranteed\n2. Guest Services decides case by case");
+    // Exactly one verdict per claim — the judge cannot leave one out.
+    const items = body.generationConfig.responseSchema.properties.verdicts;
+    expect([items.minItems, items.maxItems]).toEqual([2, 2]);
   });
 });
 

@@ -88,13 +88,21 @@ Rules:
 - Meaning, not wording: a claim stated directly counts in any words, in any language — "אין הבטחה להחזר" and "לא מובטח החזר" both state that a refund is not guaranteed.
 - A claim conveyed only partly, or hedged into its opposite, is not conveyed.
 - For every claim you mark as conveyed, copy the shortest exact span of the answer that conveys it — verbatim, character for character, contiguous. If you cannot point to such a span, the claim is not conveyed.
-- Answer every claim, in order.`;
+- Answer every claim, in order — one verdict per claim, numbered as given. A claim about something the answer does not mention at all is answered, with conveyed: false; it is never left out.`;
 
-const SCHEMA = {
+/**
+ * The verdicts' shape — with exactly as many as there are claims.
+ * 🔴 Found 01.10: asked about a trap the answer never mentions ("Hagrid's suits both" against an
+ * answer naming only the Hippogriff), the judge sometimes returned one verdict instead of two.
+ * The case failed closed — right, but on the judge, not on the answer.
+ */
+const schema = (n: number) => ({
   type: "object",
   properties: {
     verdicts: {
       type: "array",
+      minItems: n,
+      maxItems: n,
       items: {
         type: "object",
         properties: {
@@ -108,7 +116,7 @@ const SCHEMA = {
     },
   },
   required: ["verdicts"],
-};
+});
 
 /**
  * Asks the judge about a list of claims. Never throws: a network failure or a transient error
@@ -140,7 +148,7 @@ async function ask(p: { key: string; model: string; thinkingLevel: string; quest
         temperature: 0,
         maxOutputTokens: 8192,
         responseMimeType: "application/json",
-        responseSchema: SCHEMA,
+        responseSchema: schema(p.claims.length),
         thinkingConfig: { thinkingLevel: p.thinkingLevel },
       },
     }),
@@ -206,7 +214,11 @@ export async function judge(p: {
       verified: conveyed && quoteIsIn(p.answer, quote),
     };
   });
-  if (verdicts.some((v) => v.reason === "the judge skipped this claim")) return { ...fail("the judge skipped a claim"), usage: r.usage };
+  if (verdicts.some((v) => v.reason === "the judge skipped this claim")) {
+    // Which numbers came back — so a skipped claim is diagnosable from the output alone.
+    const got = r.verdicts!.map((x) => JSON.stringify(x.index)).join(",") || "none";
+    return { ...fail(`the judge skipped a claim (asked 1–${all.length}, got ${got})`), usage: r.usage };
+  }
 
   const mustConvey = verdicts.slice(0, yes.length);
   const mustNotConvey = verdicts.slice(yes.length);

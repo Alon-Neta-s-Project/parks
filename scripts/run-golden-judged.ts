@@ -4,7 +4,7 @@
  *
  *   npx tsx --env-file=.env.local scripts/run-golden-judged.ts --server http://localhost:8787 --label agent-low
  *   npx tsx --env-file=.env.local scripts/run-golden-judged.ts --answers agent-low      # re-judge, no new questions
- *   options: --only <id-prefix> · JUDGE_MODEL=<model> (default: judge.ts DEFAULT_JUDGE_MODEL)
+ *   options: --only <id-prefix>[,<id-prefix>…] · JUDGE_MODEL=<model> (default: judge.ts DEFAULT_JUDGE_MODEL)
  *
  * ⚠️ **Next to `run-golden.ts`, not instead of it (Alon, 01.10: "in other files, then we
  * compare").** Nothing here changes how the golden set is judged today; it shows, case by case,
@@ -41,7 +41,7 @@ if (!KEY) {
 
 type Judged = { replaces?: string[]; must_convey?: string[]; must_not_convey?: string[] };
 const cases = (parse(readFileSync(join(ROOT, "evals", "golden.yaml"), "utf8")) as { cases: Case[] }).cases
-  .filter((c) => !ONLY || c.id.startsWith(ONLY));
+  .filter((c) => !ONLY || ONLY.split(",").some((p) => c.id.startsWith(p.trim())));
 const judged = (parse(readFileSync(join(ROOT, "evals", "judged.yaml"), "utf8")) as { cases: Record<string, Judged> }).cases;
 
 const OUT = join(ROOT, "reports", "golden-judged");
