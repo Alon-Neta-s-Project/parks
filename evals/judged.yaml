@@ -1,0 +1,194 @@
+# evals/judged.yaml — the golden set's checks, by meaning (a model as judge)
+#
+# ⚠️ **A proposal next to golden.yaml, not a change to it (Alon, 01.10: "in other files, then we
+# compare").** golden.yaml and its vocabulary are Paula's. This file says, for some of its cases,
+# what an answer must **convey** — so "אין הבטחה להחזר" counts like "לא מובטח". Moving a case to
+# judgement is Paula's call, case by case.
+#
+# How a case is judged (scripts/run-golden-judged.ts):
+#   replaces         the literal checks of golden.yaml that the claims below replace. Every other
+#                    check of the case still runs as code: must_not_contain, must_not_match,
+#                    max_words, tiers, rides, chunks, must_ask_clarifying — the hard rules.
+#   must_convey      claims the answer must convey — each one with a quote from the answer that
+#                    the code finds in it (apps/server/src/eval/judge.ts).
+#   must_not_convey  traps — claims that fail the case if conveyed (with a verified quote).
+#
+# ⚠️ **Each claim translates what the case already required** — Paula's phrases ("must_have" in
+# her round 2, 07.09) and the ride checks. Nothing new is demanded. A trap is written only where
+# the case's own note describes it.
+# ⚠️ **The ride checks move here on purpose:** `ride` / `height_cm` / `fits` were checked with the
+# runner's own regex lookup, not with what Tim found — so with the agent they could not pass
+# whatever it answered (measured 01.10). A claim checks the answer itself.
+#
+# Not here, and why:
+#   ride.none.weather · ride.none.greeting · kosher-strictness-clarify · length.short-question-short-answer
+#       — their checks are already structural (rides 0, a clarifying question, a word count).
+#   single-rider-universal-negative — 🔴 the intent of "לא" + "דיסני" is not clear, and the
+#       knowledge holds nothing on single rider. Left literal, and asked of Paula; not guessed.
+
+version: 1
+cases:
+
+  # ── Rides — the regex-lookup checks, by what the answer says ─────────
+
+  ride.everest.height:
+    replaces: [ride, height_cm, fits]
+    must_convey:
+      - "Expedition Everest's minimum height is 112 cm"
+      - "A child who is 112 cm tall can ride Expedition Everest"
+
+  ride.space-mountain.exact:
+    replaces: [ride]
+    must_convey:
+      - "The answer is about the ride Space Mountain"
+
+  ride.space-mountain.short-spelling:
+    replaces: [ride]
+    must_convey:
+      - "The answer is about the ride Space Mountain"
+
+  ride.everest.descriptive-hebrew:
+    replaces: [ride]
+    must_convey:
+      - "It identifies the ride as Expedition Everest"
+      - "Expedition Everest's minimum height is 112 cm"
+
+  ride.velocicoaster.spelling:
+    replaces: [ride]
+    must_convey:
+      - "It identifies the ride as Jurassic World VelociCoaster"
+
+  # ⚠️ The brand name in English is the requirement itself — must_contain stays literal.
+  persona.brand-names-stay-english:
+    replaces: [ride, height_cm]
+    must_convey:
+      - "Expedition Everest's minimum height is 112 cm"
+
+  ride.moana-meet.hebrew-name:
+    replaces: [ride, must_contain]
+    must_convey:
+      - "Moana can be met at Character Landing"
+
+  status.not-open-is-not-closed:
+    replaces: [ride]
+    must_convey:
+      - "Moana can be met at Disney's Animal Kingdom"
+    must_not_convey:
+      - "The Moana meet is closed, or not open"
+
+  # ── Knowledge — Paula's phrases, by their meaning ──────────────────
+
+  child-swap-disney-vs-universal:
+    replaces: [must_contain]
+    must_convey:
+      - "At Disney (Rider Switch), the adult who waited does not have to queue again — their place is kept"
+      - "At Universal (Child Swap), the waiting adult and child wait in a dedicated area or room"
+
+  ll-tier-attraction-not-included:
+    replaces: [must_contain]
+    must_convey:
+      - "TRON is not included in Lightning Lane Multi Pass"
+      - "TRON's skip-the-line access is bought separately (Single Pass)"
+
+  severe-weather-closure-refund:
+    replaces: [must_contain]
+    must_convey:
+      - "A refund is not guaranteed"
+    must_not_convey:
+      - "A refund is guaranteed"
+
+  roaming-characters-expectation:
+    replaces: [must_contain]
+    must_convey:
+      - "Meeting characters usually involves a queue"
+      - "Characters are usually met at a fixed location rather than roaming freely"
+
+  epic-universe-early-entry-once:
+    replaces: [must_contain]
+    must_convey:
+      - "Early entry to Epic Universe can be used only once during the whole stay, not every day"
+
+  third-party-hotel-booking-warning:
+    replaces: [must_contain]
+    must_convey:
+      - "A reservation made through a third party may need to be linked to the guest's account"
+      - "It recommends checking the reservation in the official app"
+
+  gentle-ride-motion-sickness-flag:
+    replaces: [must_contain]
+    must_convey:
+      - "It names at least one ride that looks gentle but carries a motion-sickness warning"
+      - "It explains that the cause is the ride's motion"
+
+  parade-showtime-guided-non-answer:
+    replaces: [must_contain]
+    must_convey:
+      - "It directs the family to check the time in the official app or website"
+
+  park-before-hotel-order-advisory:
+    replaces: [must_contain]
+    must_convey:
+      - "It recommends choosing the park first, and the hotel after"
+
+  ride-breakdown-frequency-expectation:
+    replaces: [must_contain]
+    must_convey:
+      - "Rides can break down or close unexpectedly"
+
+  uber-eats-kosher-filter-unreliable:
+    replaces: [must_contain]
+    must_convey:
+      - "The kosher filter in Uber Eats is not reliable"
+
+  waterpark-toddler-family-split:
+    replaces: [must_contain]
+    must_convey:
+      - "It suggests the family may split up, one adult staying with the toddler"
+
+  single-rider-family-tradeoff:
+    replaces: [must_contain]
+    must_convey:
+      - "With single rider, the family members ride separately — the group splits"
+
+  ll-booking-window-hotel-guest:
+    replaces: [must_contain]
+    must_convey:
+      - "Disney hotel guests can book up to 7 days before arrival"
+      - "The booking covers the whole stay, up to 14 days"
+
+  ll-booking-window-both-rules:
+    replaces: [must_contain]
+    must_convey:
+      - "Disney hotel guests can book 7 days ahead"
+      - "Other guests can book 3 days ahead"
+
+  # ── Agent-only cases — the traps their notes describe ──────────────
+
+  set.mk-multi-constraint:
+    replaces: [must_contain_any]
+    must_convey:
+      - "Dumbo is suitable for her"
+      - "The Barnstormer is suitable for her"
+      - "Jungle Cruise is suitable for her"
+      - "Tomorrowland Speedway is suitable for her"
+    must_not_convey:
+      - "Haunted Mansion is recommended as suitable for her"
+      - "Peter Pan's Flight is recommended as suitable for her"
+
+  set.two-children-coasters:
+    replaces: [must_contain_any]
+    must_convey:
+      - "Flight of the Hippogriff is suitable for both children"
+    must_not_convey:
+      - "Hagrid's Magical Creatures Motorbike Adventure is suitable for both children"
+
+  followup.narrow-motion-sickness:
+    replaces: [must_contain_any]
+    must_convey:
+      - "E.T. Adventure is among the rides without a motion-sickness warning"
+      - "MEN IN BLACK Alien Attack is among the rides without a motion-sickness warning"
+      - "Trolls Trollercoaster is among the rides without a motion-sickness warning"
+    must_not_convey:
+      - "The Simpsons Ride is presented as having no motion-sickness warning"
+      - "TRANSFORMERS: The Ride-3D is presented as having no motion-sickness warning"
+      - "Despicable Me Minion Mayhem is presented as having no motion-sickness warning"
