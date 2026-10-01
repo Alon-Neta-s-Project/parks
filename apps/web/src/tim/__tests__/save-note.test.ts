@@ -32,8 +32,20 @@ describe("saveNote", () => {
     expect(await saveNote(NOTE)).toBe("local-only");
   });
 
-  it("without VITE_NOTE_URL: never calls the server's endpoint", async () => {
+  // One variable fewer (Alon, 01.10: "why do we need environment variables"): a page that asks Tim on
+  // its own server (/api/tim) sends notes next to it.
+  it("without VITE_NOTE_URL, but Tim on our own server (/api/tim): notes go to /api/note", async () => {
     vi.stubEnv("VITE_NOTE_URL", "");
+    vi.stubEnv("VITE_TIM_URL", "/api/tim");
+    const f = vi.fn(async () => new Response(JSON.stringify({ saved: true }), { status: 200 }));
+    vi.stubGlobal("fetch", f);
+    expect(await saveNote(NOTE)).toBe("saved");
+    expect((f.mock.calls[0] as unknown as [string])[0]).toBe("/api/note");
+  });
+
+  it("without VITE_NOTE_URL, and Tim elsewhere (production's Supabase): never calls /api/note", async () => {
+    vi.stubEnv("VITE_NOTE_URL", "");
+    vi.stubEnv("VITE_TIM_URL", "https://example.supabase.co/functions/v1/tim");
     const f = vi.fn(async () => new Response("{}", { status: 200 }));
     vi.stubGlobal("fetch", f);
     await saveNote(NOTE);

@@ -16,11 +16,20 @@ const URL_BASE = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const ANON = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
 
 /**
- * The server's note endpoint (POST /note, apps/server/src/note.ts) — set on staging (`/api/note`).
- * With it, a note goes to the server with its question and answer, and no key is needed (Alon,
- * 01.10). Without it, the old path below — the production test page still runs on the old server.
+ * The server's note endpoint (POST /note, apps/server/src/note.ts). With it, a note goes to the
+ * server with its question and answer, and no key is needed (Alon, 01.10).
+ *
+ * ⚠️ **Worked out, not configured (Alon: "why do we need environment variables").** A page that
+ * asks Tim on its own server — a relative `VITE_TIM_URL` ending in `/tim`, as staging's `/api/tim`
+ * — sends notes next to it (`/api/note`). A page that asks Tim elsewhere (production's Supabase,
+ * an absolute address) keeps the old path below. `VITE_NOTE_URL` still wins when set.
  */
-export const noteUrl = (): string | undefined => (import.meta.env.VITE_NOTE_URL as string | undefined)?.trim() || undefined;
+export const noteUrl = (): string | undefined => {
+  const set = (import.meta.env.VITE_NOTE_URL as string | undefined)?.trim();
+  if (set) return set;
+  const tim = (import.meta.env.VITE_TIM_URL as string | undefined)?.trim() ?? "";
+  return tim.startsWith("/") && tim.endsWith("/tim") ? `${tim.slice(0, -"/tim".length)}/note` : undefined;
+};
 
 /** המפתח שנטע מדביקה פעם אחת במסך. יושב בדפדפן שלה. */
 export const KEY_STORAGE = "tim-test-key-v1";
