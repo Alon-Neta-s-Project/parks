@@ -40,7 +40,9 @@ export function FeedbackNote({
         // כתבת, וההערה השנייה דורסת את הראשונה בלי שתראי.
         aria-label={note ? "יש הערה — לעריכה" : "כתיבת הערה"}
       >
-        {note ? "⚑ הערה" : "⚐ הערה"}
+        {/* Said in words, at full strength (Alon, 01.10: "no send button" — the faint "⚐ הערה"
+            pill was missed, and the box with its buttons opens only from it). */}
+        {note ? "✎ עריכת ההערה" : "✎ הוספת הערה"}
       </button>
     );
   }

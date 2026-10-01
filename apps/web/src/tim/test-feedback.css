@@ -13,20 +13,20 @@
   text-align: center;
 }
 
+/* ⚠️ Visible, not faint (Alon, 01.10): the note's box and its "שליחה" button open only from here. */
 .feedback__flag {
-  margin-block-start: 0.3rem;
+  margin-block-start: 0.4rem;
   margin-inline-start: 2.6rem;
-  padding-block: 0.15rem;
-  padding-inline: 0.5rem;
-  font-size: 0.75rem;
+  padding-block: 0.3rem;
+  padding-inline: 0.8rem;
+  font-size: 0.85rem;
   border: 1px solid currentColor;
   border-radius: 999px;
   background: transparent;
   cursor: pointer;
-  opacity: 0.65;
 }
 
-.feedback__flag:hover { opacity: 1; }
+.feedback__flag:hover { background: rgba(0, 0, 0, 0.05); }
 
 .feedback {
   margin-block-start: 0.4rem;
