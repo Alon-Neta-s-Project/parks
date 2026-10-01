@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Orb } from "../components/Orb";
 import { Thinking } from "../components/Thinking";
+import { TimAnswer } from "../components/TimAnswer";
 import { shouldAskUpFront } from "../lib/ask-intent";
 import { askTim, type TimReply, type TimTurn } from "../lib/tim";
 
@@ -208,11 +209,13 @@ export default function TimOnlyApp({ feedback }: TimOnlyAppProps = {}) {
                 ) : turn.reply === null ? (
                   <Thinking className="bubble__typing" />
                 ) : turn.reply.status === "ok" ? (
-                  /* ⚠️ טקסט ולא HTML. התשובה מגיעה ממודל, כלומר היא קלט
-                     חיצוני — ו-React מסמן אותה מעצמו כל עוד היא נשארת
-                     ילד־טקסט. `white-space: pre-line` ב-CSS שומר על
-                     השורות בלי dangerouslySetInnerHTML. */
-                  <span className="bubble__body">{turn.reply.answer}</span>
+                  /* ⚠️ Markdown, and still never HTML (Alon, 01.10 — the agent writes
+                     bold names and lists, and they showed as `**` and `*`). The answer
+                     comes from a model, i.e. it is external input: TimAnswer renders only
+                     paragraphs, emphasis and lists as React elements — no HTML from the
+                     answer, no links (no sources in the interface), no
+                     dangerouslySetInnerHTML. */
+                  <TimAnswer text={turn.reply.answer} />
                 ) : (
                   /* ⚠️ הטקסט נבחר לפי הסיבה, ומהמפתחות שכבר קיימים.
                      "שאלתם הרבה בזמן קצר" ו"לא הצלחתי להגיע לשרת" מובילים
