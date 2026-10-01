@@ -43,6 +43,11 @@ const presets: SearchFilters[] = [
   { heightCm: 95 }, { heightCm: 110 }, { heightCm: 125 }, { heightCm: 140 },
   { heightCm: 100, intensityMax: 2, avoidSensitivities: ["dark"] },
   { heightCm: 120, kinds: ["attraction"], hasMotionSicknessWarning: false, excludeSinglePass: true },
+  // The group (01.10) — fit.ts `fitFor`, the screen's rule, on both sides.
+  { group: [{ id: "a", age: 7, heightCm: 100 }, { id: "b", age: 10, heightCm: 125 }] },
+  { group: [{ id: "a", age: 7, heightCm: 100 }, { id: "b", age: 10, heightCm: 125 }], groupFit: "anyone" },
+  { group: [{ id: "p", age: 38, heightCm: null }, { id: "c", age: 4, heightCm: 100 }], groupFit: "anyone", avoidSensitivities: ["dark"] },
+  { group: [{ id: "c", age: 6, heightCm: null }, { id: "d", age: 9, heightCm: 130 }], groupFit: "anyone" },
 ];
 
 let same = 0;

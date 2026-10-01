@@ -57,6 +57,13 @@ const run = async (question: string, d: DirectQueries = direct(), extra: Record<
   return { res, body: await res.json(), trace };
 };
 
+// Measured 01.10: with the agent's rules in English, an answer came out in English.
+it("tells the model to answer in Hebrew — in the rules every call carries", async () => {
+  const bodies = gemini([text("שלום")]);
+  await run("hi");
+  expect(bodies[0].systemInstruction.parts[0].text).toContain("Always answer the family in Hebrew");
+});
+
 describe("the loop", () => {
   it("answers in one call when no tool is needed — the tools offered, none run", async () => {
     const bodies = gemini([text("שלום!")]);
@@ -104,17 +111,28 @@ describe("the loop", () => {
     expect(trace.agent).toMatchObject({ rounds: AGENT.maxToolRounds, model_calls: 3, stop: "max_rounds" });
   });
 
-  it("does not run a tool call made after the tools were turned off", async () => {
+  // 🔴 Measured 01.10 against the real API: told `mode: NONE`, Gemini asked for a tool anyway,
+  // and the family got an empty answer. Now: an explicit "answer now", and if it still calls —
+  // one more call with **no tools at all**, the results as plain text, nothing left to call.
+  it("when Gemini calls a tool after they were turned off — one call with no tools, the results as text", async () => {
     let ran = 0;
-    gemini([
+    const bodies = gemini([
       calls(call("find_ride", { name: "A" }, "1")),
       calls(call("find_ride", { name: "B" }, "2")),
       calls(call("find_ride", { name: "C" }, "3")),
+      text("final answer"),
     ]);
-    const { res, body } = await run("q", direct({ findExperiences: async () => { ran++; return [RIDE]; } }));
-    expect(ran).toBe(2);
-    // No text came back — an empty answer, with its reason, not a silent one.
-    expect([res.status, body.error]).toEqual([502, "empty_answer"]);
+    const { res, body, trace } = await run("q", direct({ findExperiences: async () => { ran++; return [RIDE]; } }));
+    expect(ran).toBe(2); // the call made after the tools were off was not run
+    expect([res.status, body.answer]).toEqual([200, "final answer"]);
+    // The NONE call carried the explicit instruction.
+    expect(JSON.stringify(bodies[2].contents.at(-1))).toContain("Answer now, in Hebrew");
+    // The last one: no tools declared, no tool turns, the results inside the text.
+    const last = bodies[3];
+    expect([last.tools, last.toolConfig]).toEqual([undefined, undefined]);
+    expect(JSON.stringify(last.contents)).not.toContain("functionCall");
+    expect(JSON.stringify(last.contents)).toContain("112");
+    expect(trace.agent).toMatchObject({ model_calls: 4, stop: "max_rounds", fallback: true });
   });
 
   it("answers 'not run' to calls over the per-round cap — every call gets a response", async () => {

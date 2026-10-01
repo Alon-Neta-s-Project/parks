@@ -4,7 +4,7 @@ import { startDeadline } from "./deadline";
 import { newTrace } from "./log";
 import type { DirectQueries, ExperienceRow } from "./lookup";
 import { stub } from "./test-helpers";
-import { argsForLog, runTool, TOOLS } from "./tools";
+import { argsForLog, groupLine, readGroup, runTool, TOOLS } from "./tools";
 
 /**
  * The agent's tools, one by one — what each passes to the database, what it says back to the
@@ -63,7 +63,7 @@ describe("find_ride", () => {
 
   it("says when there is no such ride, and refuses a call with no name", async () => {
     const none = await runTool("find_ride", { name: "Nope" }, { key: KEY, direct: direct({ findExperiences: async () => [] }) });
-    expect([none.ok, none.text]).toEqual([true, "No ride by that name in our data."]);
+    expect([none.ok, none.text]).toEqual([true, 'No ride named "Nope" in our data.']);
     expect((await runTool("find_ride", {}, { key: KEY, direct: direct() })).ok).toBe(false);
   });
 
@@ -168,4 +168,84 @@ describe("argsForLog", () => {
     expect(logged).toEqual({ name: "‹14 chars›", query: "‹16 chars›", height_cm: "‹given›", park: "mk", avoid: ["dark"], intensity_max: 2 });
     expect(JSON.stringify(logged)).not.toContain("Space");
   });
+});
+
+/**
+ * Lists (01.10) — a family's question is about a group, and often about several rides or parks.
+ * One call instead of one per child: measured, the two-children question took three rounds and
+ * ended with no answer.
+ */
+describe("lists", () => {
+  it("find_ride: several names in one call, each looked up", async () => {
+    const asked: string[] = [];
+    const r = await runTool("find_ride", { names: ["TRON", "Space Mountain"] }, {
+      key: KEY, direct: direct({ findExperiences: async (p) => { asked.push(p.name!); return [{ ...RIDE, name: p.name! }]; } }),
+    });
+    expect(asked.sort()).toEqual(["Space Mountain", "TRON"]);
+    expect(r.rides.length).toBe(2);
+  });
+
+  it("query_rides: passes the parks, the categories and the group", async () => {
+    const asked: QueryRidesInput[] = [];
+    await runTool("query_rides", {
+      parks: ["ioa", "us"], categories: ["coaster", "monorail"], group_fit: "anyone",
+      group: [{ age: 7, height_cm: 100 }, { age: 10, height_cm: 125 }],
+    }, { key: KEY, direct: direct({ queryRides: async (p) => { asked.push(p); return { rides: [], matched: 0, heldBack: { unrated: 0, sensitivityUnchecked: 0, heightUnknown: 0 } }; } }) });
+    expect(asked[0]).toMatchObject({
+      parks: ["ioa", "us"], categories: ["coaster"], groupFit: "anyone",
+      group: [{ id: "#1", age: 7, heightCm: 100 }, { id: "#2", age: 10, heightCm: 125 }],
+    });
+  });
+
+  it("query_rides: under each ride, who in the group can ride it", async () => {
+    const hagrid = { ...RIDE, name: "Hagrid's", height_cm: 122 } as ExperienceRow;
+    const r = await runTool("query_rides", { group: [{ age: 7, height_cm: 100 }, { age: 10, height_cm: 125 }], group_fit: "anyone" }, {
+      key: KEY, direct: direct({ queryRides: async () => ({ rides: [hagrid], matched: 1, heldBack: { unrated: 0, sensitivityUnchecked: 0, heightUnknown: 0 } }) }),
+    });
+    expect(r.text).toContain("Group: can ride: #2 (age 10, 125 cm) · cannot ride: #1 (age 7, 100 cm) — below the 122 cm minimum.");
+  });
+
+  it("park_candidates: with a group, only rides one of them can ride — and the unknowns counted", async () => {
+    const c = (name: string, height_cm: number | null, max_height_cm: number | null = null) =>
+      ({ park: "P", name, name_he: null, land: null, category: null, intensity: 2, height_cm, max_height_cm, gets_wet: null });
+    const r = await runTool("park_candidates", { group: [{ age: 4, height_cm: 100 }] }, {
+      key: KEY, direct: direct({ parkCandidates: async () => [c("low", 0), c("tall", 122), c("unknown", null)] }),
+    });
+    expect(r.candidates.map((x) => x.name)).toEqual(["low"]);
+    expect(r.text).toContain("1 where it is unknown whether the height fits");
+  });
+});
+
+describe("the group's line — the screen's rule, in words", () => {
+  const adult = { age: 38 };
+  it("says everyone, plainly", () => {
+    expect(groupLine({ height_cm: 0 }, readGroup([adult, { age: 6, height_cm: 115 }])!)).toBe("Group: everyone can ride.");
+  });
+
+  // Decision 1b: an adult is above any ceiling.
+  it("counts an adult out of a toddler area, and says why", () => {
+    expect(groupLine({ height_cm: 0, max_height_cm: 122 }, readGroup([adult, { age: 4, height_cm: 100 }])!))
+      .toBe("Group: can ride: #2 (age 4, 100 cm) · cannot ride: #1 (age 38) — above the 122 cm maximum.");
+  });
+
+  // Decision 2, C: below the ceiling is said; "can ride" is not.
+  it("a ceiling with an unchecked floor — 'not too tall', never 'can ride'", () => {
+    const line = groupLine({ height_cm: null, max_height_cm: 122 }, readGroup([{ age: 4, height_cm: 100 }])!);
+    expect(line).toBe("Group: not too tall (up to 122 cm), but whether there is a minimum is unknown: #1 (age 4, 100 cm).");
+  });
+
+  it("names a child whose height nobody gave", () => {
+    expect(groupLine({ height_cm: 102 }, readGroup([{ age: 7 }])!)).toBe("Group: height not given: #1 (age 7).");
+  });
+
+  // ⚠️ Read as an adult, a member with no age would be cleared past every minimum unmeasured.
+  it("reads a member with no age as a child", () => {
+    expect(readGroup([{ height_cm: 100 }, {}])).toEqual([{ id: "#1", age: 10, heightCm: 100 }, { id: "#2", age: 10, heightCm: null }]);
+  });
+});
+
+it("argsForLog: the group's size and what was given — never the heights; names by length", () => {
+  const logged = argsForLog({ names: ["TRON", "Space Mountain"], group: [{ age: 7, height_cm: 100 }, { age: 38 }] });
+  expect(logged).toEqual({ names: ["‹4 chars›", "‹14 chars›"], group: "‹2 members · 2 ages · 1 heights›" });
+  expect(JSON.stringify(logged)).not.toContain("100");
 });

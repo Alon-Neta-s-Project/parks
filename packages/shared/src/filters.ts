@@ -18,7 +18,7 @@
  * ⚠️ Park and land are not here: they are lookups, and each side matches its own names
  * (the web app by its display name, the server by id or name in SQL).
  */
-import { heightFit } from "./fit";
+import { fitFor, heightFit, type Member } from "./fit";
 
 /** The four-state flag columns: "na" is "does not apply", null is "not checked". */
 export type QuadState = "true" | "false" | "na" | null;
@@ -134,6 +134,16 @@ export interface SearchFilters {
    * an unchecked floor, and a ceiling with an unchecked floor are out — never a match.
    */
   heightCm?: number | null;
+  /**
+   * The group (01.10) — two children, parents and a toddler. The fit is `fitFor` (fit.ts), the
+   * same rule the screen's chip uses. Supersedes `heightCm` when both are given.
+   */
+  group?: Member[];
+  /**
+   * "everyone" (default) — rides the whole group can ride. "anyone" — rides at least one of them
+   * can ride (the tool says who). Unknown is never a match in either: it is counted.
+   */
+  groupFit?: "everyone" | "anyone";
 }
 
 /**
@@ -147,7 +157,7 @@ export function classify(r: RideFacts, f: SearchFilters): Verdict {
   const {
     kinds, intensityMin = null, intensityMax = null, includeUnrated = false, includeClosed = false,
     excludeSinglePass = false, hasMotionSicknessWarning, avoidSensitivities,
-    includeUncheckedSensitivity = false, heightCm = null,
+    includeUncheckedSensitivity = false, heightCm = null, group, groupFit = "everyone",
   } = f;
 
   if (kinds?.length && !kinds.includes(r.kind)) return "no";
@@ -172,7 +182,21 @@ export function classify(r: RideFacts, f: SearchFilters): Verdict {
   }
 
   let height: Verdict | null = null;
-  if (heightCm !== null) {
+  if (group?.length) {
+    const g = fitFor({ minCm: r.minCm, maxCm: r.maxCm }, group);
+    if (groupFit === "anyone") {
+      // Someone can ride it — a match. Nobody is known to, but someone might — unknown.
+      if (!g.canRide.length) {
+        const someoneMight = g.unmeasured.length || g.underCeiling.length || (r.minCm === null && r.maxCm === null);
+        if (!someoneMight) return "no";
+        height = "heightUnknown";
+      }
+    } else if (g.fit !== "everyone") {
+      // One member known not to fit is a "no" for the whole group, whatever else is unknown.
+      if (g.cannotRide.length) return "no";
+      height = "heightUnknown";
+    }
+  } else if (heightCm !== null) {
     const fit = heightFit({ minCm: r.minCm, maxCm: r.maxCm }, heightCm);
     if (fit === "too_short" || fit === "too_tall") return "no";
     if (fit !== "fits") height = "heightUnknown";

@@ -7,7 +7,8 @@ import { withSignal, type Sql } from "./client";
  * O13. **Server code, not a database function** (Alon, 26.09).
  *
  * The split:
- *   - **Lookups in SQL:** the park (id or name, like find_experiences) and the land (name).
+ *   - **Lookups in SQL:** the parks (id or name, like find_experiences), the land (name), and the
+ *     ride's form (`category`).
  *   - **The rules in TypeScript, shared with the web app** (packages/shared/src/filters.ts):
  *     intensity, sensitivities, motion sickness, closed, Single Pass, and the height (fit.ts).
  *     A third copy of those rules is what this avoids.
@@ -20,7 +21,11 @@ import { withSignal, type Sql } from "./client";
  */
 export interface QueryRidesInput extends SearchFilters {
   park?: string | null;
+  /** Several parks, for "what's at Magic Kingdom and EPCOT…" — each by id or name, like `park`. */
+  parks?: string[] | null;
   land?: string | null;
+  /** The ride's form — coaster, dark_ride, water_ride… (the closed vocabulary of `experience.category`). */
+  categories?: string[] | null;
   /** At most this many per park, before the overall limit. */
   perPark?: number | null;
   /** Default 20, at most 40. */
@@ -63,7 +68,13 @@ export const rowFacts = (r: Row): RideFacts => ({
 
 /** Every match and every held-back count, before the caps — what the parity check compares. */
 export async function selectRides(sql: Sql, input: Omit<QueryRidesInput, "perPark" | "limit">, signal?: AbortSignal) {
-  const { park = null, land = null, ...filters } = input;
+  const { park = null, parks = null, land = null, categories = null, ...filters } = input;
+  const parkList = [...(park ? [park] : []), ...(parks ?? [])];
+  // ⚠️ As JSON, not `sql.array`: with `prepare: false` (the transaction pooler) the driver sends an
+  // array as plain text, and Postgres rejects it. Sent as text and cast in SQL — typed as jsonb,
+  // the driver encodes the string a second time. One bound parameter either way — never spliced.
+  const parksParam = parkList.length ? JSON.stringify(parkList) : null;
+  const categoriesParam = categories?.length ? JSON.stringify(categories) : null;
   // The same columns find_experiences returns, so formatExperiences says every state of them.
   const rows = (await withSignal(sql`
     select
@@ -77,8 +88,12 @@ export async function selectRides(sql: Sql, input: Omit<QueryRidesInput, "perPar
     from experience e
     join park p on p.id = e.park_id
     left join land l on l.id = e.land_id
-    where (${park}::text is null or p.id = ${park}::text or p.name ilike '%' || ${park}::text || '%')
+    where ((${parksParam}::text)::jsonb is null
+           or exists (select 1 from jsonb_array_elements_text((${parksParam}::text)::jsonb) x
+                      where p.id = x or p.name ilike '%' || x || '%'))
       and (${land}::text is null or l.name ilike '%' || ${land}::text || '%')
+      and ((${categoriesParam}::text)::jsonb is null
+           or e.category in (select jsonb_array_elements_text((${categoriesParam}::text)::jsonb)))
     order by p.name, e.intensity desc nulls last, e.name
   `, signal)) as unknown as Row[];
 

@@ -93,3 +93,44 @@ describe("height", () => {
     expect(classify(ride({ minCm: null, maxCm: 122 }), { heightCm: 100 })).toBe("heightUnknown");
   });
 });
+
+/**
+ * The group (01.10) — the shape of a family's question: two children, parents with a toddler.
+ * The fit is fit.ts `fitFor`, the same rule the screen's chip uses, so Tim says what it shows.
+ */
+describe("a group", () => {
+  const kid = (age: number, heightCm: number | null) => ({ id: `k${age}`, age, heightCm });
+  const adult = { id: "a", age: 38, heightCm: null };
+
+  it("'everyone': only rides the whole group can ride", () => {
+    const g = { group: [kid(7, 100), kid(10, 125)] };
+    expect(classify(ride({ minCm: 91 }), g)).toBe("match");
+    expect(classify(ride({ minCm: 122 }), g)).toBe("no"); // the 100 cm child is known to be too short
+  });
+
+  it("'anyone': rides at least one of them can ride", () => {
+    const g = { group: [kid(7, 100), kid(10, 125)], groupFit: "anyone" as const };
+    expect(classify(ride({ minCm: 122 }), g)).toBe("match");
+    expect(classify(ride({ minCm: 137 }), g)).toBe("no");
+  });
+
+  it("counts an adult out on a ride with a ceiling (decision 1b)", () => {
+    expect(classify(ride({ minCm: 0, maxCm: 122 }), { group: [adult, kid(4, 100)] })).toBe("no");
+    expect(classify(ride({ minCm: 0, maxCm: 122 }), { group: [adult, kid(4, 100)], groupFit: "anyone" })).toBe("match");
+  });
+
+  // Decision 2, C, and the unchecked floor: never a match, counted as unknown.
+  it("never turns an unchecked floor into a match — for the group either", () => {
+    expect(classify(ride({ minCm: null }), { group: [kid(7, 100)] })).toBe("heightUnknown");
+    expect(classify(ride({ minCm: null, maxCm: 122 }), { group: [kid(4, 100)], groupFit: "anyone" })).toBe("heightUnknown");
+  });
+
+  it("holds back, as unknown, a child whose height nobody gave", () => {
+    expect(classify(ride({ minCm: 102 }), { group: [kid(7, null)] })).toBe("heightUnknown");
+    expect(classify(ride({ minCm: 102 }), { group: [kid(7, null), kid(10, 125)], groupFit: "anyone" })).toBe("match");
+  });
+
+  it("a known 'no' for one member is still a 'no' under 'everyone', whatever else is unknown", () => {
+    expect(classify(ride({ minCm: 122 }), { group: [kid(5, 100), kid(7, null)] })).toBe("no");
+  });
+});

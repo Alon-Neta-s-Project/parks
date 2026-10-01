@@ -1,7 +1,7 @@
 import { AGENT_SYSTEM } from "./agent-prompt";
 import { composeContext } from "./context";
 import type { Limit } from "./deadline";
-import { generate, readUsage, type Content } from "./gemini";
+import { generate, readAnswer, readUsage, type Content } from "./gemini";
 import { isFail, type Fail } from "./http";
 import type { Trace } from "./log";
 import type { DirectQueries, ExperienceRow, KnowledgeChunk, ParkCandidate } from "./lookup";
@@ -57,7 +57,17 @@ export interface AgentTrace {
   /** Why the loop ended. */
   stop: "answered" | "max_rounds" | "deadline" | "error";
   calls: AgentCall[];
+  /**
+   * Gemini asked for a tool after the tools were turned off, and one more call went out with no
+   * tools at all (the results as text). A signal worth watching: the model ignoring `NONE`.
+   */
+  fallback?: true;
 }
+
+/** The last word to the model when the tools are off. */
+// ⚠️ "In Hebrew" said here too: measured 01.10, an answer written after English-only tool turns
+// and this line came out in English.
+const ANSWER_NOW = "Answer now, in Hebrew, with the information above. Do not call any tool.";
 
 type Usage = { input: number; output: number; thinking: number; cached_input: number };
 
@@ -89,6 +99,8 @@ export async function runAgent(p: {
     { role: "user", parts: [{ text: composeContext({ rides: [], candidates: [], chunks: p.chunks, question: p.question }) }] },
   ];
   const found = { rides: [] as ExperienceRow[], candidates: [] as ParkCandidate[], chunks: [] as KnowledgeChunk[] };
+  /** What the tools said, as text — for the fallback call, which carries no tool turns. */
+  const toolTexts: string[] = [];
   let usage: Usage | null = null;
   const ctx = { direct: p.direct, key: p.key, limit: p.limit };
 
@@ -97,7 +109,13 @@ export async function runAgent(p: {
     const roundsLeft = round < AGENT.maxToolRounds;
     const timeLeft = !dl || dl.left() >= AGENT.minLeftForToolsMs;
     const tools = roundsLeft && timeLeft;
-    if (!tools) at.stop = roundsLeft ? "deadline" : "max_rounds";
+    if (!tools) {
+      at.stop = roundsLeft ? "deadline" : "max_rounds";
+      // 🔴 `mode: NONE` alone was ignored (measured 01.10, the real API): said in words too.
+      const last = contents.at(-1)!;
+      if (last.role === "user") last.parts.push({ text: ANSWER_NOW });
+      else contents.push({ role: "user", parts: [{ text: ANSWER_NOW }] });
+    }
 
     const res = await generate({
       key: p.key, model: p.model, env: p.env, system: AGENT_SYSTEM, contents,
@@ -114,9 +132,37 @@ export async function runAgent(p: {
     const content = res.data?.candidates?.[0]?.content;
     const parts: any[] = Array.isArray(content?.parts) ? content.parts : [];
     const calls = parts.filter((part) => part?.functionCall).map((part) => part.functionCall);
-    // ⚠️ A call the model makes after the tools were turned off is not run: the answer is what
-    // it wrote. An empty one becomes `empty_answer` in the handler, with its finish reason.
-    if (!calls.length || !tools) return { data: res.data, ...found, usage };
+    if (!calls.length) return { data: res.data, ...found, usage };
+    if (!tools) {
+      // ⚠️ A call made after the tools were turned off is not run. If it came with text, that is
+      // the answer. If not — one more call with **no tools declared and no tool turns**: the
+      // results as plain text, so there is nothing left to call. Never an empty answer for this.
+      if (readAnswer(res.data).raw) return { data: res.data, ...found, usage };
+      at.fallback = true;
+      const plain = await generate({
+        key: p.key, model: p.model, env: p.env, system: AGENT_SYSTEM,
+        contents: [
+          ...p.history.map((t) => ({ role: t.role, parts: [{ text: t.text }] })),
+          {
+            role: "user",
+            parts: [{
+              text: [
+                composeContext({ rides: [], candidates: [], chunks: p.chunks, question: p.question }),
+                toolTexts.length ? `Data from the tools:\n\n${toolTexts.join("\n\n")}` : null,
+                ANSWER_NOW,
+              ].filter(Boolean).join("\n\n---\n\n"),
+            }],
+          },
+        ],
+        trace: p.trace, limit: p.limit,
+      });
+      at.model_calls++;
+      if (isFail(plain)) {
+        at.stop = "error";
+        return plain;
+      }
+      return { data: plain.data, ...found, usage: addUsage(usage, readUsage(plain.data)) };
+    }
 
     at.rounds++;
     contents.push({ role: "model", parts }); // verbatim — the thought signatures with it
@@ -136,6 +182,7 @@ export async function runAgent(p: {
       found.rides.push(...r.rides);
       found.candidates.push(...r.candidates);
       found.chunks.push(...r.chunks);
+      toolTexts.push(`[${String(call.name ?? "")}]\n${r.text}`);
       return r;
     }));
     // Every call gets a response, or Gemini rejects the turn — the ones over the cap say so.
