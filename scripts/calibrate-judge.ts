@@ -8,10 +8,11 @@
  * golden runs of 01.10, agent and classic) with answers that are wrong on purpose — a wrong
  * number, the opposite claim, a vague answer, a trap.
  */
-import { addUsage, costLine, DEFAULT_JUDGE_MODEL, DEFAULT_JUDGE_THINKING, judge, type JudgeUsage } from "../apps/server/src/eval/judge";
+import { addUsage, costLine, DEFAULT_JUDGE_BACKEND, DEFAULT_JUDGE_MODEL, DEFAULT_JUDGE_THINKING, type JudgeBackend, judge, type JudgeUsage } from "../apps/server/src/eval/judge";
 
-const KEY = process.env.GEMINI_API_KEY!;
-const MODEL = process.env.JUDGE_MODEL?.trim() || DEFAULT_JUDGE_MODEL;
+const KEY = process.env.GEMINI_API_KEY ?? ""; // only for JUDGE_BACKEND=gemini
+const BACKEND = (process.env.JUDGE_BACKEND?.trim() || DEFAULT_JUDGE_BACKEND) as JudgeBackend;
+const MODEL = process.env.JUDGE_MODEL?.trim() || DEFAULT_JUDGE_MODEL[BACKEND];
 const THINKING = process.env.JUDGE_THINKING?.trim() || DEFAULT_JUDGE_THINKING;
 let spent: JudgeUsage = { input: 0, output: 0, thinking: 0 };
 const RUNS = Number(process.argv[process.argv.indexOf("--runs") + 1]) || 3;
@@ -58,13 +59,13 @@ const FIXTURES: Fixture[] = [
     answer: "כן, כאורחי מלון אתם זכאים לכניסה מוקדמת ל-Epic Universe בכל יום של השהות." },
 ];
 
-console.log(`judge: ${MODEL}, thinking ${THINKING} · ${FIXTURES.length} fixtures × ${RUNS} runs\n`);
+console.log(`judge: ${BACKEND}/${MODEL} · ${FIXTURES.length} fixtures × ${RUNS} runs\n`);
 let agree = 0, total = 0;
 const unstable: string[] = [];
 for (const f of FIXTURES) {
   const got: boolean[] = [];
   for (let i = 0; i < RUNS; i++) {
-    const j = await judge({ key: KEY, model: MODEL, thinkingLevel: THINKING, question: f.question, answer: f.answer, mustConvey: f.mustConvey, mustNotConvey: f.mustNotConvey });
+    const j = await judge({ key: KEY, backend: BACKEND, model: MODEL, thinkingLevel: THINKING, question: f.question, answer: f.answer, mustConvey: f.mustConvey, mustNotConvey: f.mustNotConvey });
     spent = addUsage(spent, j.usage);
     got.push(j.pass);
     total++;

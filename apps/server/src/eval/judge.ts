@@ -14,14 +14,40 @@
  * names in English, the length cap — the product's hard rules (checks.ts). A judge might let one
  * slide; a regex does not.
  *
- * ⚠️ A different, stronger model than the one under test (`JUDGE_MODEL`, default a Pro model),
- * temperature 0, JSON out. Calibrated before it is trusted: scripts/calibrate-judge.ts.
+ * ⚠️ A different, stronger model than the one under test — by default Claude Sonnet through the local
+ * CLI (`JUDGE_BACKEND`, `JUDGE_MODEL`); Gemini Pro on request. Structured JSON out. Calibrated before it is trusted: scripts/calibrate-judge.ts.
  * 🔴 **Found by the calibration (01.10):** told "not what it implies", the judge still passed
  * "זה תלוי במצב" ("it depends") as "a refund is not guaranteed" — three runs of three, quoting
  * it. Deduction is not statement; the instructions now say so, with that example.
  */
 
-export const DEFAULT_JUDGE_MODEL = "gemini-3.1-pro-preview";
+/**
+ * Where the judge runs. **`claude` by default (Alon, 01.10): the local Claude Code CLI (`claude -p`),
+ * on the developer's own subscription** — the judge runs only in local evals, never on the
+ * server, so it needs no API key and spends no Gemini credit. `gemini` only when asked
+ * (`JUDGE_BACKEND=gemini`).
+ */
+export type JudgeBackend = "claude" | "gemini";
+export const DEFAULT_JUDGE_BACKEND: JudgeBackend = "claude";
+export const DEFAULT_JUDGE_MODEL: Record<JudgeBackend, string> = { claude: "sonnet", gemini: "gemini-3.1-pro-preview" };
+
+/** Runs `claude` with these arguments, the given text on stdin; resolves to its stdout. Injected in tests. */
+export type CliRunner = (args: string[], stdin: string) => Promise<string>;
+
+/** The real runner: the `claude` on PATH, 2 minutes at most. */
+export const runClaude: CliRunner = async (args, stdin) => {
+  const { spawn } = await import("node:child_process");
+  return new Promise((resolve, reject) => {
+    const child = spawn("claude", args, { stdio: ["pipe", "pipe", "pipe"], timeout: 120_000 });
+    let out = "";
+    let err = "";
+    child.stdout.on("data", (d) => { out += d; });
+    child.stderr.on("data", (d) => { err += d; });
+    child.on("error", reject);
+    child.on("close", (code) => (code === 0 ? resolve(out) : reject(new Error(`claude exited ${code}: ${err.slice(0, 200)}`))));
+    child.stdin.end(stdin);
+  });
+};
 
 export interface ClaimVerdict {
   claim: string;
@@ -96,7 +122,7 @@ Rules:
  * answer naming only the Hippogriff), the judge sometimes returned one verdict instead of two.
  * The case failed closed — right, but on the judge, not on the answer.
  */
-const schema = (n: number) => ({
+const schema = (n: number, backend: JudgeBackend = "gemini") => ({
   type: "object",
   properties: {
     verdicts: {
@@ -108,7 +134,7 @@ const schema = (n: number) => ({
         properties: {
           index: { type: "integer" },
           conveyed: { type: "boolean" },
-          quote: { type: "string", nullable: true },
+          quote: backend === "gemini" ? { type: "string", nullable: true } : { type: ["string", "null"] },
           reason: { type: "string" },
         },
         required: ["index", "conveyed", "reason"],
@@ -174,6 +200,61 @@ async function ask(p: { key: string; model: string; thinkingLevel: string; quest
   }
 }
 
+type Asked =
+  | { error: string; verdicts?: undefined; usage?: JudgeUsage }
+  | { verdicts: { index: number; conveyed: boolean; quote?: string | null; reason?: string }[]; error?: undefined; usage?: JudgeUsage };
+
+/**
+ * Asks the local Claude Code CLI. Strict like the Gemini call: no tools, no MCP, no user or
+ * project settings, no session saved to the developer's history; the instructions as the system
+ * prompt, and the schema enforced (exactly one verdict per claim). The question, the answer and
+ * the claims go on stdin — never on the command line. One retry, then an error; never throws.
+ */
+async function askClaude(
+  p: { model: string; question: string; answer: string; claims: string[]; run: CliRunner }, attempt = 1,
+): Promise<Asked> {
+  const args = [
+    "-p", "--output-format", "json",
+    "--model", p.model,
+    "--no-session-persistence",
+    "--setting-sources", "",
+    "--strict-mcp-config",
+    "--tools", "",
+    "--system-prompt", INSTRUCTIONS,
+    "--json-schema", JSON.stringify(schema(p.claims.length, "claude")),
+  ];
+  const claims = p.claims.map((c, i) => `${i + 1}. ${c}`).join("\n");
+  const stdin = `QUESTION:\n${p.question}\n\nANSWER:\n${p.answer}\n\nCLAIMS:\n${claims}`;
+  const retry = async (why: string): Promise<Asked> => {
+    if (attempt >= 2) return { error: why };
+    return askClaude(p, attempt + 1);
+  };
+  let raw: string;
+  try {
+    raw = await p.run(args, stdin);
+  } catch (e) {
+    return retry(`claude unreachable: ${e instanceof Error ? e.message.slice(0, 120) : "?"}`);
+  }
+  let body: any;
+  try {
+    body = JSON.parse(raw);
+  } catch {
+    return retry("claude answered something that is not JSON");
+  }
+  const u = body?.usage;
+  const usage: JudgeUsage | undefined = u
+    ? {
+      input: (u.input_tokens ?? 0) + (u.cache_read_input_tokens ?? 0) + (u.cache_creation_input_tokens ?? 0),
+      output: u.output_tokens ?? 0,
+      thinking: u.output_tokens_details?.thinking_tokens ?? 0,
+    }
+    : undefined;
+  if (body?.is_error) return { error: `claude: ${body.subtype ?? "error"}`, usage };
+  const verdicts = body?.structured_output?.verdicts;
+  if (!Array.isArray(verdicts)) return { error: "claude answered without verdicts", usage };
+  return { verdicts, usage };
+}
+
 /**
  * Judges one answer: every `mustConvey` claim conveyed, no `mustNotConvey` claim conveyed.
  *
@@ -188,6 +269,10 @@ export async function judge(p: {
   mustConvey?: string[];
   mustNotConvey?: string[];
   thinkingLevel?: string;
+  /** `claude` (the default) or `gemini`. */
+  backend?: JudgeBackend;
+  /** The CLI runner — injected in tests; the real `claude` otherwise. */
+  run?: CliRunner;
 }): Promise<Judgement> {
   const yes = p.mustConvey ?? [];
   const no = p.mustNotConvey ?? [];
@@ -196,10 +281,14 @@ export async function judge(p: {
   const fail = (error: string): Judgement => ({ pass: false, mustConvey: [], mustNotConvey: [], error });
   if (!p.answer.trim()) return fail("no answer to judge");
 
-  const r = await ask({
-    key: p.key, model: p.model ?? DEFAULT_JUDGE_MODEL, thinkingLevel: p.thinkingLevel ?? DEFAULT_JUDGE_THINKING,
-    question: p.question, answer: p.answer, claims: all,
-  });
+  const backend = p.backend ?? DEFAULT_JUDGE_BACKEND;
+  const model = p.model ?? DEFAULT_JUDGE_MODEL[backend];
+  const r: Asked = backend === "claude"
+    ? await askClaude({ model, question: p.question, answer: p.answer, claims: all, run: p.run ?? runClaude })
+    : await ask({
+      key: p.key, model, thinkingLevel: p.thinkingLevel ?? DEFAULT_JUDGE_THINKING,
+      question: p.question, answer: p.answer, claims: all,
+    });
   if (r.error !== undefined) return { ...fail(r.error), usage: r.usage };
 
   const verdicts: ClaimVerdict[] = all.map((claim, i) => {
